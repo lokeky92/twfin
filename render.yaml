@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: twfin-intelligence-center
+    runtime: python
+    plan: free
+    buildCommand: python backend/run_pipeline.py && python backend/export_standalone.py
+    startCommand: python backend/server.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: HOST
+        value: 0.0.0.0

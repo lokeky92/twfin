@@ -1,0 +1,2 @@
+# Pure Python 3.11 Standard Library (sqlite3, http.server, urllib, json)
+# No third-party pip packages required.
