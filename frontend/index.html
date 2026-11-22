@@ -1250,6 +1250,95 @@
         padding: 7px 12px;
         font-size: 12px;
       }
+
+      /* 第三層 01. 與 ETF 比較維度/指標：手機改為直向卡片與手風琴展開，免橫向滑動 */
+      .weight-input-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      .weight-action-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+      #industryRotationTableWrap,
+      #etfComparisonTableWrap {
+        display: none !important;
+      }
+      .mobile-cards-only {
+        display: flex !important;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .pro-rot-mob-card,
+      .etf-cmp-mob-card {
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid #283a5e;
+        border-radius: 10px;
+        padding: 12px;
+      }
+      .pro-rot-mob-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .pro-rot-mob-kpis {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dashed #24324d;
+        font-size: 12px;
+      }
+      .pro-rot-mob-details {
+        margin-top: 8px;
+        border-top: 1px solid #1e293b;
+        padding-top: 8px;
+      }
+      .pro-rot-mob-details summary {
+        cursor: pointer;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #38bdf8;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .pro-rot-mob-details summary::-webkit-details-marker { display: none; }
+      .pro-rot-mob-details[open] summary { margin-bottom: 8px; }
+      .etf-cmp-mob-title {
+        font-size: 14px;
+        font-weight: 800;
+        color: #38bdf8;
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #24324d;
+      }
+      .etf-cmp-mob-row {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding: 7px 0;
+        border-bottom: 1px dashed #1e293b;
+        font-size: 13px;
+      }
+      .etf-cmp-mob-row:last-child { border-bottom: none; padding-bottom: 0; }
+      .etf-cmp-mob-etf {
+        font-size: 12px;
+        font-weight: 800;
+        color: #fbbf24;
+      }
+      .etf-cmp-mob-val {
+        color: #e2e8f0;
+        line-height: 1.5;
+        word-break: break-word;
+      }
+    }
+    @media (min-width: 769px) {
+      .mobile-cards-only {
+        display: none !important;
+      }
     }
   </style>
 </head>
@@ -1540,14 +1629,14 @@
         <div class="grid-2">
           <div class="card">
             <div class="card-title" style="margin-bottom: 10px;">PART 4：產業研究評分模型權重設定（動態重算並保存SQLite版本）</div>
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 10px;">
+            <div class="weight-input-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 10px;">
               <div><label style="font-size:12px;color:var(--text-secondary);">資金流向 (%)</label><input type="number" id="w_cap" value="25" min="0" max="100" style="width:100%;" /></div>
               <div><label style="font-size:12px;color:var(--text-secondary);">產業基本面 (%)</label><input type="number" id="w_fun" value="25" min="0" max="100" style="width:100%;" /></div>
               <div><label style="font-size:12px;color:var(--text-secondary);">未來成長性 (%)</label><input type="number" id="w_gro" value="20" min="0" max="100" style="width:100%;" /></div>
               <div><label style="font-size:12px;color:var(--text-secondary);">法人布局 (%)</label><input type="number" id="w_ins" value="15" min="0" max="100" style="width:100%;" /></div>
               <div><label style="font-size:12px;color:var(--text-secondary);">估值合理性 (%)</label><input type="number" id="w_val" value="15" min="0" max="100" style="width:100%;" /></div>
             </div>
-            <div style="display:flex; gap:10px; align-items:center;">
+            <div class="weight-action-row" style="display:flex; gap:10px; align-items:center;">
               <input type="text" id="w_reason" placeholder="輸入權重調整理由（將寫入模型版本歷史紀錄）..." style="flex:1;" />
               <button class="btn" onclick="submitNewWeights()">套用權重並重算排名</button>
             </div>
@@ -1578,7 +1667,7 @@
             </p>
           </div>
         </div>
-        <div class="card" style="overflow-x:auto;">
+        <div id="industryRotationTableWrap" class="card" style="overflow-x:auto;">
           <table>
             <thead>
               <tr>
@@ -1595,6 +1684,7 @@
             <tbody id="industryRotationBody"></tbody>
           </table>
         </div>
+        <div id="industryRotationMobileCards" class="mobile-cards-only"></div>
       </section>
 
       <!-- PRO TAB 2: 個股研究中心 (四類名單 + 1,989家檢索) -->
@@ -2036,12 +2126,13 @@
           <div id="etfCompareCheckboxBar" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid #2a3b5c;"></div>
           <div id="etfChart6OverlapMatrixBox" style="margin-bottom:16px;"></div>
           <div id="etfOverlapAlertBox" style="margin-bottom:16px;"></div>
-          <div style="overflow-x:auto;">
+          <div id="etfComparisonTableWrap" style="overflow-x:auto;">
             <table id="etfComparisonTable" style="font-size:14.5px;">
               <thead id="etfComparisonHead"></thead>
               <tbody id="etfComparisonBody"></tbody>
             </table>
           </div>
+          <div id="etfComparisonMobileCards" class="mobile-cards-only"></div>
         </div>
 
         <!-- 個人 ETF 投資組合穿透診斷器 (未輸入持倉前絕不假設持倉) -->
@@ -3863,6 +3954,76 @@
           </tr>
         `;
       }).join('');
+
+      const mobContainer = document.getElementById('industryRotationMobileCards');
+      if (mobContainer) {
+        let mobRank = 1;
+        mobContainer.innerHTML = list.map(ind => {
+          const isUnratable = ind.total_weighted_score === null || ind.rotation_state === 'INSUFFICIENT_DATA';
+          const rankDisplay = isUnratable
+            ? '<span class="badge badge-unratable">不列入排名</span>'
+            : `<strong style="font-size:15px; color:var(--accent-blue);">#${mobRank++}</strong>`;
+          const stateColor = {
+            'A': 'badge-lvl4', 'B': 'badge-lvl3', 'C': 'badge-grade-C',
+            'D': 'badge-lvlR', 'E': 'badge-lvlR', 'INSUFFICIENT_DATA': 'badge-unratable'
+          }[ind.rotation_state] || 'badge-grade-C';
+          const companiesHtml = ind.representative_companies.map(c =>
+            `<span class="badge" style="background:#1e293b; color:#e2e8f0; margin:2px 4px 2px 0;">${c.ticker} ${c.name}</span>`
+          ).join('');
+          return `
+            <div class="pro-rot-mob-card">
+              <div class="pro-rot-mob-head">
+                <div>
+                  <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">
+                    ${rankDisplay}
+                    <span class="badge" style="background:#1e293b; color:#cbd5e1;">${ind.major_category}</span>
+                    <span class="badge ${stateColor}">狀態 ${ind.rotation_state}</span>
+                  </div>
+                  <div style="font-weight:800; font-size:15px; color:#fff;">${ind.industry_name}</div>
+                  <div style="font-size:12px; color:#fde68a; margin-top:2px;">轉折：${ind.transition_tag} ｜ ${ind.cycle_stage}</div>
+                </div>
+                <div style="text-align:right; flex-shrink:0;">
+                  ${isUnratable
+                    ? `<span class="badge badge-unratable">不可評分</span>`
+                    : `<div style="font-size:21px; font-weight:800; color:var(--accent-emerald); line-height:1.1;">${ind.total_weighted_score.toFixed(2)}</div>`
+                  }
+                  <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">信心 ${ind.confidence_level}</div>
+                  <div style="font-size:11px; color:${ind.missing_data_pct > 20 ? '#fb7185' : '#94a3b8'};">缺失 ${ind.missing_data_pct}%</div>
+                </div>
+              </div>
+              <div class="pro-rot-mob-kpis">
+                <div>20日強弱：<span class="${ind.rel_strength_20d >= 0 ? 'pos' : 'neg'}"><strong>${ind.rel_strength_20d >= 0 ? '+' : ''}${ind.rel_strength_20d}%</strong></span></div>
+                <div>60日強弱：<span class="${ind.rel_strength_60d >= 0 ? 'pos' : 'neg'}"><strong>${ind.rel_strength_60d >= 0 ? '+' : ''}${ind.rel_strength_60d}%</strong></span></div>
+                <div>10月YoY：<span class="${ind.rev_yoy_pct >= 0 ? 'pos' : 'neg'}"><strong>${ind.rev_yoy_pct >= 0 ? '+' : ''}${ind.rev_yoy_pct}%</strong></span></div>
+              </div>
+              <details class="pro-rot-mob-details">
+                <summary><span>展開五維明細、代表廠與研究證據</span><span>▾</span></summary>
+                <div style="font-size:12.5px; color:#cbd5e1; line-height:1.6;">
+                  <div style="margin-bottom:6px;">${companiesHtml}</div>
+                  ${isUnratable ? '<div style="margin-bottom:6px;">資料異質/缺失超標，依規不予補分</div>' : `
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 8px; padding:8px; background:rgba(9,14,26,0.65); border-radius:8px; margin-bottom:8px;">
+                      <div>資金流向：<strong>${ind.score_capital_flow}</strong></div>
+                      <div>基本面：<strong>${ind.score_fundamentals}</strong></div>
+                      <div>未來成長：<strong>${ind.score_future_growth}</strong></div>
+                      <div>法人布局：<strong>${ind.score_institutional}</strong></div>
+                      <div>估值合理：<strong>${ind.score_valuation}</strong></div>
+                      <div>短/中/長：<strong>${ind.short_term_momentum_score}/${ind.mid_term_fundamental_score}/${ind.long_term_structural_score}</strong></div>
+                    </div>
+                  `}
+                  ${ind.live_agg && ind.live_agg.company_count ? `
+                    <div style="padding:6px 8px; border-radius:6px; background:rgba(56,189,248,0.08); border:1px dashed #334155; color:#38bdf8; margin-bottom:8px; font-size:12px;">
+                      <strong>[MOPS全市場${ind.live_agg.company_count}家匯總]</strong> 10月總營收 ${ind.live_agg.ind_rev_billion.toLocaleString()}億 (${ind.live_agg.agg_yoy_pct >= 0 ? '+' : ''}${ind.live_agg.agg_yoy_pct}%) ｜ P/E ${ind.live_agg.avg_pe || '-'}x ｜ P/B ${ind.live_agg.avg_pb || '-'}x
+                    </div>
+                  ` : ''}
+                  <div class="evidence-box" style="margin-bottom:6px;"><strong>支持證據：</strong>${ind.supporting_evidence}</div>
+                  <div class="evidence-box counter" style="margin-bottom:6px;"><strong>反方證據：</strong>${ind.counter_evidence}</div>
+                  <div class="evidence-box invalid"><strong>失效條件：</strong>${ind.invalidation_conditions}<br/><strong>資料限制：</strong>${ind.data_limitations}</div>
+                </div>
+              </details>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     async function submitNewWeights() {
@@ -5408,6 +5569,8 @@
         document.getElementById('etfOverlapAlertBox').innerHTML = '<div class="evidence-box">請至少勾選 2 檔 ETF 進行並排比較與持股重疊度熱力圖分析。</div>';
         document.getElementById('etfComparisonHead').innerHTML = '';
         document.getElementById('etfComparisonBody').innerHTML = '';
+        const etfMobEmpty = document.getElementById('etfComparisonMobileCards');
+        if (etfMobEmpty) etfMobEmpty.innerHTML = '';
         return;
       }
 
@@ -5507,6 +5670,21 @@
           ${picked.map(e => `<td>${r[1](e)}</td>`).join('')}
         </tr>
       `).join('');
+
+      const etfMobBox = document.getElementById('etfComparisonMobileCards');
+      if (etfMobBox) {
+        etfMobBox.innerHTML = rows.map(r => `
+          <div class="etf-cmp-mob-card">
+            <div class="etf-cmp-mob-title">${r[0]}</div>
+            ${picked.map(e => `
+              <div class="etf-cmp-mob-row">
+                <div class="etf-cmp-mob-etf">[${e.listing_market}] ${e.etf_code} ${e.etf_name}</div>
+                <div class="etf-cmp-mob-val">${r[1](e)}</div>
+              </div>
+            `).join('')}
+          </div>
+        `).join('');
+      }
     }
 
     /* =========================================================================
