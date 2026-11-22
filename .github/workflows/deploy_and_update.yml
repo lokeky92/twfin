@@ -1,20 +1,16 @@
 name: Daily Taiwan Capital Flow & ETF OpenAPI Sync & Deploy
 
 on:
-  push:
-    branches: [ main, master ]
   workflow_dispatch:
   schedule:
-    # 每個交易日台灣時間 16:30 (UTC 08:30) 自動抓取 TWSE / TPEx / MOPS 最新數據並更新網站
+    # 每個交易日台灣時間 16:30 (UTC 08:30) 自動在雲端抓取 TWSE / TPEx / MOPS 最新數據並更新資料庫與網站
     - cron: '30 8 * * 1-5'
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
-  sync-and-deploy:
+  sync-and-update-db:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -25,24 +21,14 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run TWSE / TPEx / MOPS Live Pipeline & Export Dashboard
+      - name: Run TWSE / TPEx / MOPS Live Pipeline & Update SQLite + HTML
         run: |
           python backend/run_pipeline.py
           python backend/export_standalone.py
 
-      - name: Commit updated SQLite & Static Site if scheduled
+      - name: Commit and Push updated SQLite Database & Website
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/twfin_intelligence.db frontend/twfin_dashboard_standalone.html docs/index.html
-          git diff --staged --quiet || git commit -m "chore(data): auto-sync TWSE/TPEx/MOPS live data & ETF scores"
-          git push || true
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./docs
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          git diff --staged --quiet || (git commit -m "chore(data): auto-sync TWSE/TPEx/MOPS live data & ETF scores" && git push)
