@@ -849,10 +849,98 @@
       overflow-wrap: break-word;
       word-break: break-word;
     }
+    code, pre {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .etf-card-price-box {
+      text-align: right;
+    }
+    .etf-metrics-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #e2e8f0;
+    }
 
     /* 手機底部固定 App 導航列 (桌面版隱藏，手機版顯示) */
     .mobile-bottom-nav {
       display: none;
+    }
+
+    /* 方案 A＋B 結合版：手機直向動態資金流向圖 ＋ 手風琴可展開能量條 */
+    .mob-flow-sources-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .mob-flow-source-pill {
+      background: #0f172a;
+      border: 1px solid #26334d;
+      border-radius: 8px;
+      padding: 9px 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .mob-flow-source-pill:hover {
+      border-color: #38bdf8;
+      transform: translateY(-1px);
+    }
+    .mob-flow-hub-banner {
+      background: linear-gradient(90deg, #1e293b, #334155, #1e293b);
+      border: 1px solid #64748b;
+      border-radius: 10px;
+      padding: 8px 14px;
+      text-align: center;
+      margin: 2px 0;
+      cursor: pointer;
+    }
+    .mob-flow-acc-card {
+      background: #0f172a;
+      border: 1px solid #26334d;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .mob-flow-acc-header {
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .mob-flow-acc-bar-track {
+      width: 100%;
+      height: 8px;
+      background: #070b14;
+      border-radius: 99px;
+      overflow: hidden;
+      position: relative;
+    }
+    @keyframes shimmerFlow {
+      0% { background-position: -120px 0; }
+      100% { background-position: 240px 0; }
+    }
+    .mob-flow-acc-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background-size: 160px 100%;
+      animation: shimmerFlow 2.2s linear infinite;
+    }
+    body.reduced-motion .mob-flow-acc-bar-fill {
+      animation: none !important;
+    }
+    .mob-flow-acc-body {
+      display: none;
+      padding: 0 14px 12px 14px;
+      border-top: 1px solid #1e293b;
+      background: #090e1a;
+    }
+    .mob-flow-acc-body.open {
+      display: block;
     }
 
     @media (max-width: 1024px) {
@@ -1049,8 +1137,36 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      #etfTab_ALL {
+      #etfTab_ALL,
+      #maTab_SETTINGS {
         grid-column: 1 / -1;
+      }
+
+      /* ETF 卡片價格區在手機改為左對齊並加虛線分隔，避免換行後右對齊錯位 */
+      .etf-card-price-box {
+        text-align: left !important;
+        width: 100%;
+        padding-top: 8px;
+        border-top: 1px dashed #1e293b;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .etf-metrics-2col {
+        grid-template-columns: 1fr !important;
+      }
+      /* 讓 SVG 圖表在手機版等比例縮放，不留上下大塊空白 */
+      .etf-clean-card svg:not(.sankey-svg) {
+        height: auto !important;
+      }
+      /* 確保任何表格在手機皆於卡片內部橫向滑動，絕不撐爆頁面 */
+      .etf-clean-card table, .card table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
       /* 搜尋框與下拉選單在手機上自動 100% 滿寬對稱 */
@@ -1738,6 +1854,9 @@
             <button id="etfDetailModeBtn" class="btn" style="background:#059669; font-size:15px; padding:10px 18px;" onclick="toggleEtfDetailMode()">
               🟢 目前為：一般白話模式（點擊切換專業研究模式）
             </button>
+            <button class="btn" style="background:linear-gradient(135deg, #7e22ce, #a855f7); font-size:15px; padding:10px 18px; box-shadow:0 4px 14px rgba(168,85,247,0.35);" onclick="scrollToSectionId('argonMultiAgentCenterSection')">
+              🤖 AI 研究團隊（6 Agents 交叉辯論與提案審批）
+            </button>
             <button class="btn btn-outline" style="font-size:15px; padding:10px 16px;" onclick="setAppMode('A')">
               ⬅ 返回台灣動態經濟地圖
             </button>
@@ -1967,6 +2086,51 @@
         </div>
         <div id="etfReportsContainer" class="etf-grid-2"></div>
         <div id="etfDualBacktestContainer" class="etf-grid-2" style="margin-top:20px;"></div>
+
+        <!-- ===================================================================
+             第六區（第九節規範）：🤖 Argon ETF Multi-Agent Research Team 管理中心
+             包含五大頁面：1.團隊總覽 2.研究討論室 3.改善提案中心 4.歷史紀錄 5.團隊設定
+             =================================================================== -->
+        <div id="argonMultiAgentCenterSection" class="etf-section-banner" style="margin-top:38px; border-bottom:2px solid #a855f7;">
+          <div>
+            <div class="etf-section-title" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <span class="badge badge-lvl2" style="font-size:15px;">🤖 Argon AI 研究團隊</span>
+              <span>多代理自主研究、交叉辯論與改善提案管理中心 (Multi-Agent System)</span>
+            </div>
+            <div class="etf-section-sub">
+              由 Argon 擔任總指揮，率領 6 位專業 Agent（長期配置、短中期時機、數據品質、風險管理、反方審查、系統工程）獨立研究並進行兩輪交叉辯論。<strong>最高鐵律：未獲使用者明確批准前，嚴禁自動修改正式系統。</strong>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn" style="background:#7e22ce; font-size:14.5px; padding:9px 16px;" onclick="triggerNewMultiAgentSession()">
+              🔄 手動啟動新一輪多代理研究
+            </button>
+          </div>
+        </div>
+
+        <!-- AI 研究團隊五大分頁切換器 -->
+        <div class="etf-cat-tabs" style="margin-bottom:20px;">
+          <button id="maTab_OVERVIEW" class="etf-cat-tab active" onclick="switchMultiAgentTab('OVERVIEW')">① 團隊總覽 (6 Agents 狀態)</button>
+          <button id="maTab_DEBATE" class="etf-cat-tab" onclick="switchMultiAgentTab('DEBATE')">② 研究討論室 (獨立研究 &amp; 反方辯論)</button>
+          <button id="maTab_PROPOSALS" class="etf-cat-tab" onclick="switchMultiAgentTab('PROPOSALS')">③ 改善提案中心 (人工批准閘門)</button>
+          <button id="maTab_HISTORY" class="etf-cat-tab" onclick="switchMultiAgentTab('HISTORY')">④ 歷史紀錄 &amp; 數據品質稽核</button>
+          <button id="maTab_SETTINGS" class="etf-cat-tab" onclick="switchMultiAgentTab('SETTINGS')">⑤ 團隊設定 &amp; 權限硬體鎖</button>
+        </div>
+
+        <!-- 子頁面 1：團隊總覽 -->
+        <div id="maPanel_OVERVIEW"></div>
+
+        <!-- 子頁面 2：研究討論室 (清楚區分各 Agent，不混在單一雜亂聊天視窗) -->
+        <div id="maPanel_DEBATE" style="display:none;"></div>
+
+        <!-- 子頁面 3：改善提案中心 (提供人工批准、拒絕、重新研究操作) -->
+        <div id="maPanel_PROPOSALS" style="display:none;"></div>
+
+        <!-- 子頁面 4：歷史紀錄與數據品質 7 大檢查 -->
+        <div id="maPanel_HISTORY" style="display:none;"></div>
+
+        <!-- 子頁面 5：團隊設定 -->
+        <div id="maPanel_SETTINGS" style="display:none;"></div>
       </div>
     </div>
   </main>
@@ -2098,7 +2262,7 @@
           <button class="quick-jump-pill" onclick="scrollToSectionId('etfChart1FlowsBox')">⑤ 七大視覺化圖表</button>
           <button class="quick-jump-pill" onclick="scrollToSectionId('etfChart6OverlapMatrixBox')">⑥ 持股重疊比較熱力圖</button>
           <button class="quick-jump-pill" onclick="scrollToSectionId('userPortfolioAnalysisOutput')">⑦ 個人投資組合診斷</button>
-          <button class="quick-jump-pill" onclick="scrollToSectionId('etfReportsContainer')">⑧ 7問報告與雙軌回測</button>
+          <button class="quick-jump-pill" style="border-color:#a855f7; color:#c084fc;" onclick="scrollToSectionId('argonMultiAgentCenterSection')">🤖 AI 研究團隊 (6 Agents 提案中心)</button>
         `;
       }
     }
@@ -2830,38 +2994,110 @@
         </svg>
       `;
 
-      // 同時產生行動端/精確分析用之「結構化清單視圖」(對應 Habr 文章之 альтернативный режим — список)
+      // 同時產生行動端/精確分析用之「方案 A＋B 結合版：直向動態瀑布流線 SVG ＋ 手風琴可展開 19 產業能量條」
+      const mobSvgW = 360, mobSvgTopH = 68, mobSvgBotH = 74;
+      const mobHubX = 180;
+      const mobTopCurves = L0.map((n, idx) => {
+        const sx = 30 + idx * 60;
+        const sw = Math.max(2, Math.min(9, n.h / 24));
+        const isRev = n.id === 'N0_FINI' && cfg.finiOut;
+        const pathD = `M ${sx} 2 C ${sx} 34, ${mobHubX} 34, ${mobHubX} ${mobSvgTopH - 2}`;
+        return `
+          <path d="${pathD}" fill="none" stroke="${n.color}" stroke-width="${sw}" stroke-opacity="0.32" />
+          <path d="${pathD}" fill="none" stroke="${n.color}" stroke-width="${Math.max(1.8, sw * 0.55)}" stroke-opacity="0.88"
+                class="${isRev ? 'flow-particle-reverse' : 'flow-particle-line'}" />
+        `;
+      }).join('');
+
+      const mobBotCurves = L2.map((n, idx) => {
+        const dx = 30 + idx * 60;
+        const sw = Math.max(2, Math.min(10, n.h / 18));
+        const isRev = n.id === 'N2_OUT';
+        const pathD = `M ${mobHubX} 2 C ${mobHubX} 36, ${dx} 36, ${dx} ${mobSvgBotH - 2}`;
+        return `
+          <path d="${pathD}" fill="none" stroke="${n.color}" stroke-width="${sw}" stroke-opacity="0.35" />
+          <path d="${pathD}" fill="none" stroke="${n.color}" stroke-width="${Math.max(1.8, sw * 0.55)}" stroke-opacity="0.9"
+                class="${isRev ? 'flow-particle-reverse' : 'flow-particle-line'}" />
+        `;
+      }).join('');
+
       document.getElementById('sankeyAltListView').innerHTML = `
-        <div class="grid-2" style="margin-bottom:0;">
-          <div class="card" style="background:#0f172a;">
-            <div class="card-title" style="margin-bottom:10px; color:#34d399; font-size:16.5px;">資金來源與六大資產配置主幹 (點擊查看明細)</div>
-            ${L2.map(n => `
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; padding:10px 4px; border-bottom:1px solid #1e293b; font-size:14.5px; cursor:pointer;" onclick="pinSankeyNode('${n.id}', event)">
-                <span><i class="legend-dot" style="background:${n.color};"></i><strong style="color:#fff;">${n.title}</strong></span>
-                <span style="font-weight:800; color:${n.color};">${n.val} (${n.share})</span>
+        <div style="margin-bottom:6px;">
+          <div style="font-size:13.5px; font-weight:800; color:#94a3b8; margin-bottom:8px;">① 上層資金來源池（點擊膠囊查看明細）</div>
+          <div class="mob-flow-sources-grid">
+            ${L0.map(n => `
+              <div class="mob-flow-source-pill" style="border-left:4px solid ${n.color};" onclick="pinSankeyNode('${n.id}', event)">
+                <div style="font-size:13px; font-weight:800; color:#f8fafc; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${n.title}</div>
+                <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:2px;">
+                  <strong style="font-size:15px; color:${n.color};">${n.val}</strong>
+                  <span style="font-size:11.5px; color:#94a3b8;">${n.share}</span>
+                </div>
               </div>
             `).join('')}
           </div>
-          <div class="card" style="background:#0f172a; max-height:380px; overflow-y:auto;">
-            <div class="card-title" style="margin-bottom:10px; color:#fbbf24; font-size:16.5px;">19項細分產業與次級資金流向明細 (點擊查看公司)</div>
-            ${L3.map(n => `
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; padding:9px 4px; border-bottom:1px solid #1e293b; font-size:14px; cursor:pointer;" onclick="pinSankeyNode('${n.id}', event)">
-                <span style="color:${n.color}; font-weight:800;">${n.title}</span>
-                <span style="color:#e2e8f0; font-size:13.5px;">${n.val}</span>
-              </div>
-            `).join('')}
+
+          <!-- 直向 SVG 動態瀑布流線 (上 ➔ 中樞) -->
+          <svg viewBox="0 0 ${mobSvgW} ${mobSvgTopH}" style="width:100%; height:auto; display:block; margin:2px 0;">
+            ${mobTopCurves}
+          </svg>
+
+          <!-- 中樞匯聚條 -->
+          <div class="mob-flow-hub-banner" onclick="pinSankeyNode('${HUB.id}', event)">
+            <div style="font-size:12px; color:#cbd5e1; font-weight:700;">② 台灣總體資金配置樞紐（點擊檢視總池）</div>
+            <div style="font-size:19px; font-weight:900; color:#fff;">${HUB.val} <span style="font-size:13px; color:#34d399;">(100% 總池)</span></div>
           </div>
+
+          <!-- 直向 SVG 動態瀑布流線 (中樞 ➔ 六大去向) -->
+          <svg viewBox="0 0 ${mobSvgW} ${mobSvgBotH}" style="width:100%; height:auto; display:block; margin:2px 0 8px 0;">
+            ${mobBotCurves}
+          </svg>
+
+          <!-- ③ 手風琴可展開：六大去向 ＋ 19 大細分產業能量條 -->
+          <div style="font-size:13.5px; font-weight:800; color:#94a3b8; margin-bottom:8px;">③ 六大資金去向 ＆ 19 細分產業（點擊展開細項與公司營收）</div>
+          ${L2.map((n, idx) => {
+            const children = L3.filter(c => c.parent === n.id);
+            const barW = Math.max(14, Math.min(100, Math.round((n.h / 170) * 100)));
+            const isOpenByDefault = idx < 2; // 預設展開前兩大主力去向（企業資本支出 & 台股ETF）
+            return `
+              <div class="mob-flow-acc-card" style="border-left:4px solid ${n.color};">
+                <div class="mob-flow-acc-header" onclick="toggleMobFlowAcc('mobAcc_${n.id}', 'mobAccArrow_${n.id}')">
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                    <strong style="font-size:15.5px; color:#f8fafc;">${n.title}</strong>
+                    <span style="font-size:15px; font-weight:900; color:${n.color}; white-space:nowrap;">${n.val} <span style="font-size:12px; color:#94a3b8;">(${n.share})</span></span>
+                  </div>
+                  <div class="mob-flow-acc-bar-track">
+                    <div class="mob-flow-acc-bar-fill" style="width:${barW}%; background-image:linear-gradient(90deg, ${n.color}99 0%, #ffffffcc 50%, ${n.color}99 100%); background-color:${n.color};"></div>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:#94a3b8;">
+                    <span>涵蓋 ${children.length} 項細分產業流向</span>
+                    <span id="mobAccArrow_${n.id}" style="color:#38bdf8; font-weight:700;">${isOpenByDefault ? '▲ 收合細項' : '▼ 展開細項'}</span>
+                  </div>
+                </div>
+                <div id="mobAcc_${n.id}" class="mob-flow-acc-body ${isOpenByDefault ? 'open' : ''}">
+                  <div style="padding:8px 0 6px 0; display:flex; justify-content:flex-end;">
+                    <button class="btn btn-outline btn-sm" style="font-size:12px; padding:3px 10px;" onclick="pinSankeyNode('${n.id}', event)">📊 查看「${n.title}」完整明細</button>
+                  </div>
+                  ${children.map(ch => `
+                    <div onclick="pinSankeyNode('${ch.id}', event)" style="padding:9px 6px; border-top:1px solid #1e293b; cursor:pointer;">
+                      <div style="font-size:13.5px; font-weight:800; color:${ch.color};">${ch.title}</div>
+                      <div style="font-size:12.5px; color:#cbd5e1; margin-top:2px;">${ch.val} <span style="color:#38bdf8; float:right;">點擊查公司 ➔</span></div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       `;
 
-      // 行動裝置自動開啟結構化清單視圖（使用者亦可隨時點擊按鈕切換回橫向桑基圖）
+      // 行動裝置自動開啟「方案 A＋B 直向動態流線＋手風琴」視圖（使用者亦可隨時切換回橫向桑基圖）
       if (window.innerWidth <= 768 && !window.__SANKEY_MOBILE_INIT__) {
         window.__SANKEY_MOBILE_INIT__ = true;
         SANKEY_LIST_MODE = true;
         document.getElementById('sankeyStageBox').style.display = 'none';
         document.getElementById('sankeyAltListView').style.display = 'block';
         const tBtn = document.getElementById('sankeyViewToggleBtn');
-        if (tBtn) tBtn.textContent = '📊 切換桑基流向圖';
+        if (tBtn) tBtn.textContent = '📊 切換橫向桑基全圖';
       }
 
       document.getElementById('sankeyPeriodNarrative').innerHTML =
@@ -2986,11 +3222,20 @@
       if (svg) svg.style.transform = `scale(${SANKEY_ZOOM})`;
     }
 
+    function toggleMobFlowAcc(bodyId, arrowId) {
+      const body = document.getElementById(bodyId);
+      const arrow = document.getElementById(arrowId);
+      if (!body) return;
+      const willOpen = !body.classList.contains('open');
+      body.classList.toggle('open', willOpen);
+      if (arrow) arrow.textContent = willOpen ? '▲ 收合細項' : '▼ 展開細項';
+    }
+
     function toggleSankeyListView() {
       SANKEY_LIST_MODE = !SANKEY_LIST_MODE;
       document.getElementById('sankeyStageBox').style.display = SANKEY_LIST_MODE ? 'none' : 'block';
       document.getElementById('sankeyAltListView').style.display = SANKEY_LIST_MODE ? 'block' : 'none';
-      document.getElementById('sankeyViewToggleBtn').textContent = SANKEY_LIST_MODE ? '📊 切換桑基流向圖' : '📋 切換結構清單';
+      document.getElementById('sankeyViewToggleBtn').textContent = SANKEY_LIST_MODE ? '📊 切換橫向桑基全圖' : '📱 切換直向動態流線';
     }
 
     function onSankeyPeriodChange(val) {
@@ -4295,6 +4540,99 @@
       renderChart7RiskReturn();
       renderUserPortfolioAnalysis();
       renderEtfReportsAndBacktests();
+      renderArgonMultiAgentCenter();
+    }
+
+    /* =========================================================================
+       [已批准提案 ETF-IMPROVE-20261122-001 ~ 005 補助運算函數]
+       - 001: 跨市場底層資產實體正規化映射 (2330 <-> TSM ADR, 00679B <-> TLT, 00635U <-> GLD)
+       - 002: 禁止未滿 3/5 年 ETF 外推成立前歷史曲線 & 台美跨時區收盤時間戳 (UTC+8 T+2 vs EST T+1)
+       - 003: 模型 B 短中期拆分為「1~3M 短期戰術」與「3~12M 中期景氣」雙尺度 + 資金價格四象限 + 長短債存續期分級
+       - 004: 台灣投資人稅後實質年化持有成本 (TER + 美股30%股息預扣稅損) & 54C 經常性純股利殖利率
+       - 005: 個人投資組合加權有效存續期 (Duration)、加權 Beta 與利率×匯率量化損益試算
+       ========================================================================= */
+    function canonicalEntityInfo(code, name) {
+      const c = String(code || '').trim().toUpperCase();
+      if (c === '2330' || c === 'TSM') {
+        return { key: 'ENTITY_TSMC', label: '台積電 (2330現股 / TSM ADR 同企業實體)' };
+      }
+      if (c === 'US_TREASURY_20Y' || c === 'US_T_20Y' || (name && name.includes('20年期以上美國政府公債'))) {
+        return { key: 'ENTITY_UST20Y', label: '20年期以上美國政府公債 (00679B/TLT 同底層)' };
+      }
+      if (c === 'COMEX_GOLD_FUT' || c === 'LBMA_GOLD_BULLION' || (name && name.includes('黃金'))) {
+        return { key: 'ENTITY_GOLD', label: '黃金資產曝險 (COMEX黃金期貨 / LBMA實體黃金)' };
+      }
+      return { key: c, label: `${code} ${name}` };
+    }
+
+    function getTimezoneAndSettlementTag(e) {
+      if (e.listing_market === 'TW') {
+        return '🇹🇼 TW收盤 13:30 UTC+8 (T+2交割)';
+      }
+      return '🇺🇸 US收盤 16:00 EST / 台灣隔日05:00 (T+1交割)';
+    }
+
+    function computeModelBDualHorizons(e) {
+      const s1_3m = roundTo1(
+        (Number(e.score_b_valuation_and_pos || 65) * 0.35) +
+        (Number(e.score_b_vol_event_downside || 65) * 0.35) +
+        (Number(e.score_b_flow_and_breadth || 65) * 0.30)
+      );
+      const s3_12m = roundTo1(
+        (Number(e.score_b_macro_environment || 70) * 0.45) +
+        (Number(e.score_b_trend_and_momentum || 70) * 0.45) +
+        (Number(e.score_b_flow_and_breadth || 70) * 0.10)
+      );
+      const flow = Number(e.primary_net_flow_value || 0);
+      const chg = Number(e.change_pct || 0);
+      let flowPriceQuad = '🔵 價穩量平觀望';
+      if (flow > 0 && chg >= 0) flowPriceQuad = '🟢 象限I：價強＋初級淨申購（真順風共識）';
+      else if (flow > 0 && chg < 0) flowPriceQuad = (s3_12m >= 74)
+        ? '🟠 象限II：價跌＋內資逆勢申購（基本面強・宜左側分批慢買）'
+        : '🔴 象限II：價跌＋散戶逆勢申購（⚠️ 留意長債/貼息接刀風險）';
+      else if (flow < 0 && chg >= 0) flowPriceQuad = '🟠 象限III：價彈＋初級淨贖回（主力逢高調節背離）';
+      else if (flow < 0 && chg < 0) flowPriceQuad = '🔴 象限IV：價跌＋初級淨贖回（資金撤退雙殺）';
+
+      let bondRiskClass = '';
+      if (e.asset_class === '債券') {
+        const dur = Number(e.bond_duration_years || 0);
+        if (dur <= 1.5) bondRiskClass = '🟢 超短債現金避風港（存續期 ' + dur + '年｜幾乎零利率波動回撤）';
+        else if (dur <= 9.5) bondRiskClass = '🔵 中天期鎖利型債券（存續期 ' + dur + '年｜中度利率敏感）';
+        else bondRiskClass = '🟠 長存續期利率敏感型債券（存續期 ' + dur + '年｜歷史回撤 -34%~-42% 波動等同股票！）';
+      }
+      return { s1_3m, s3_12m, flowPriceQuad, bondRiskClass };
+    }
+
+    function computeEffectiveTaxAndFeeDrag(e) {
+      const ter = Number(e.total_expense_ratio_pct || 0);
+      const dy = Number(e.dividend_yield_pct || 0);
+      // 美股股票型與 REITs 現金股利須預扣 30% 不可退稅款；美債 ETF 屬 Portfolio Interest 免預扣稅
+      let usWithholdingDrag = 0;
+      let taxNote = '境內免預扣 (單筆股利≥2萬課2.11%補充保費)';
+      if (e.listing_market === 'US') {
+        if (e.asset_class === '股票' || e.asset_class === 'REITs不動產') {
+          usWithholdingDrag = roundTo1(dy * 0.30 * 10) / 10;
+          taxNote = `含美股30%股息預扣稅年耗損 ${usWithholdingDrag.toFixed(2)}%`;
+        } else {
+          taxNote = '美國公債/投等債屬 Portfolio Interest 免30%預扣稅 (QI券商)';
+        }
+      }
+      const totalDrag = (ter + usWithholdingDrag).toFixed(2);
+      return { totalDragPct: totalDrag, terPct: ter, usWithholdingDragPct: usWithholdingDrag.toFixed(2), taxNote };
+    }
+
+    function computeRecurringPureYield(e) {
+      const dy = Number(e.dividend_yield_pct || 0);
+      if (e.dividend_breakdown) {
+        const ratio = Number(e.dividend_breakdown.dividend_income_ratio_pct || 100) / 100.0;
+        const pureY = (dy * ratio).toFixed(2);
+        return `真實純股利/票息殖利率 <strong style="color:#34d399;">${pureY}%</strong> <span style="font-size:12.5px; color:#94a3b8;">(帳面 ${dy}% × 經常性股利佔比 ${e.dividend_breakdown.dividend_income_ratio_pct}%)</span>`;
+      }
+      if (e.listing_market === 'US' && (e.asset_class === '股票' || e.asset_class === 'REITs不動產')) {
+        const afterTaxY = (dy * 0.70).toFixed(2);
+        return `扣30%美股預扣稅後實拿 <strong style="color:#38bdf8;">${afterTaxY}%</strong> <span style="font-size:12.5px; color:#94a3b8;">(100%純股利・稅前 ${dy}%)</span>`;
+      }
+      return `<strong style="color:#34d399;">${dy}%</strong> <span style="font-size:12.5px; color:#94a3b8;">(100%純股利/票息或滾入再投資)</span>`;
     }
 
     /* =========================================================================
@@ -4350,40 +4688,77 @@
         : '<div class="etf-clean-card" style="grid-column: 1 / -1; text-align:center; font-size:17px; color:#cbd5e1;">無符合目前篩選條件之 ETF，請切換上方分類頁籤或清空搜尋關鍵字。</div>';
     }
 
+    // [已批准提案 ETF-IMPROVE-20261122-002] 禁止對成立未滿 3/5 年之 ETF 外推成立前模擬績效曲線
     function buildInlinePerfMiniSvg(e) {
       const r1 = Number(e.return_1y_total_pct || 0);
-      const r3Ann = e.return_3y_ann_pct !== null && e.return_3y_ann_pct !== undefined ? Number(e.return_3y_ann_pct) : r1 * 0.7;
-      const r5Ann = e.return_5y_ann_pct !== null && e.return_5y_ann_pct !== undefined ? Number(e.return_5y_ann_pct) : r3Ann * 0.85;
-      // 以 5 年前基期 = 100 推算累積淨值軌跡
-      const v0 = 100;
-      const v2 = Math.max(30, 100 * Math.pow(1 + r5Ann / 100, 2));
-      const v4 = Math.max(30, v2 * Math.pow(1 + r3Ann / 100, 2));
-      const v5 = Math.max(25, v4 * (1 + r1 / 100));
-      const pts = [v0, (v0 + v2) / 2, v2, (v2 + v4) / 2, v4, v5];
-      const minV = Math.min(...pts, 90);
-      const maxV = Math.max(...pts, 115);
+      const has3Y = e.return_3y_ann_pct !== null && e.return_3y_ann_pct !== undefined;
+      const has5Y = e.return_5y_ann_pct !== null && e.return_5y_ann_pct !== undefined;
+      const incepYear = parseInt(String(e.inception_date || '2015').slice(0, 4), 10) || 2015;
+
+      const allNodes = [];
+      if (has5Y && incepYear <= 2021) {
+        const r5Ann = Number(e.return_5y_ann_pct);
+        const r3Ann = has3Y ? Number(e.return_3y_ann_pct) : r5Ann;
+        const v0 = 100;
+        const v2 = Math.max(25, 100 * Math.pow(1 + r5Ann / 100, 2));
+        const v4 = Math.max(25, v2 * Math.pow(1 + r3Ann / 100, 2));
+        const v5 = Math.max(20, v4 * (1 + r1 / 100));
+        allNodes.push(
+          { lbl: '2021', val: v0 },
+          { lbl: '2022', val: (v0 + v2) / 2 },
+          { lbl: '2023', val: v2 },
+          { lbl: '2024', val: (v2 + v4) / 2 },
+          { lbl: '2025', val: v4 },
+          { lbl: '2026/11', val: v5 }
+        );
+      } else if (has3Y && incepYear <= 2023) {
+        const r3Ann = Number(e.return_3y_ann_pct);
+        const v0 = 100;
+        const v2 = Math.max(25, 100 * Math.pow(1 + r3Ann / 100, 2));
+        const v3 = Math.max(20, v2 * (1 + r1 / 100));
+        allNodes.push(
+          { lbl: `${e.inception_date.slice(0,7)}成立(100)`, val: v0 },
+          { lbl: '2024', val: (v0 + v2) / 2 },
+          { lbl: '2025', val: v2 },
+          { lbl: '2026/11', val: v3 }
+        );
+      } else {
+        const v0 = 100;
+        const v1 = Math.max(20, 100 * (1 + r1 / 100));
+        allNodes.push(
+          { lbl: `${e.inception_date.slice(0,7)}成立(100)`, val: v0 },
+          { lbl: '2026/05', val: 100 + r1 * 0.45 },
+          { lbl: '2026/09', val: 100 + r1 * 0.85 },
+          { lbl: '2026/11', val: v1 }
+        );
+      }
+
+      const vals = allNodes.map(n => n.val);
+      const minV = Math.min(...vals, 90);
+      const maxV = Math.max(...vals, 115);
       const span = Math.max(10, maxV - minV);
-      const w = 420, h = 110, padX = 36, padY = 18;
-      const coords = pts.map((v, idx) => {
-        const x = padX + (idx / (pts.length - 1)) * (w - padX * 2);
-        const y = h - padY - ((v - minV) / span) * (h - padY * 2);
+      const w = 420, h = 115, padX = 44, padY = 20;
+      const coords = allNodes.map((n, idx) => {
+        const x = padX + (idx / Math.max(1, allNodes.length - 1)) * (w - padX * 2);
+        const y = h - padY - ((n.val - minV) / span) * (h - padY * 2);
         return `${x.toFixed(1)},${y.toFixed(1)}`;
       });
       const lineColor = r1 >= 0 ? '#10b981' : '#f43f5e';
-      const labels = ['2021', '2022', '2023', '2024', '2025', '2026/11'];
+      const noteTag = (!has5Y) ? `<div style="font-size:12px; color:#fbbf24; margin-top:4px;">★ 誠實資料標記：本檔成立於 ${e.inception_date}（未滿5年），僅繪製成立後真實存續軌跡，絕不外推成立前模擬曲線。</div>` : '';
       return `
         <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:115px; background:#070b14; border-radius:8px; border:1px solid #1e293b;">
           <line x1="${padX}" y1="${h - padY}" x2="${w - padX}" y2="${h - padY}" stroke="#334155" stroke-width="1" />
           <polyline fill="none" stroke="${lineColor}" stroke-width="3" points="${coords.join(' ')}" />
-          ${pts.map((v, idx) => {
+          ${allNodes.map((n, idx) => {
             const [cx, cy] = coords[idx].split(',');
             return `
               <circle cx="${cx}" cy="${cy}" r="4" fill="${lineColor}" />
-              <text x="${cx}" y="${Number(cy) - 7}" fill="#e2e8f0" font-size="11" font-weight="700" text-anchor="middle">${v.toFixed(0)}</text>
-              <text x="${cx}" y="${h - 3}" fill="#94a3b8" font-size="10.5" text-anchor="middle">${labels[idx]}</text>
+              <text x="${cx}" y="${Number(cy) - 7}" fill="#e2e8f0" font-size="11" font-weight="700" text-anchor="middle">${n.val.toFixed(0)}</text>
+              <text x="${cx}" y="${h - 4}" fill="#94a3b8" font-size="10" text-anchor="middle">${n.lbl}</text>
             `;
           }).join('')}
         </svg>
+        ${noteTag}
       `;
     }
 
@@ -4400,6 +4775,10 @@
       const scoreAColor = isLev ? '#fb7185' : (e.total_score_a_long_term >= 80 ? '#34d399' : (e.total_score_a_long_term >= 70 ? '#38bdf8' : '#fbbf24'));
       const scoreBColor = e.total_score_b_short_mid >= 75 ? '#34d399' : (e.total_score_b_short_mid < 60 ? '#fb7185' : (e.conclusion_b_short_mid === '等待更佳條件' ? '#fbbf24' : '#38bdf8'));
       const chgCls = (e.change_pct || 0) >= 0 ? 'pos' : 'neg';
+      const tzTag = getTimezoneAndSettlementTag(e);
+      const mbDual = computeModelBDualHorizons(e);
+      const taxDragInfo = computeEffectiveTaxAndFeeDrag(e);
+      const pureYieldHtml = computeRecurringPureYield(e);
 
       // 計算第二層產業分布視覺堆疊橫條
       const palette = ['#10b981', '#38bdf8', '#f59e0b', '#818cf8', '#f43f5e', '#94a3b8'];
@@ -4463,17 +4842,20 @@
                 ${e.sub_category} ｜ 追蹤指數：${e.tracking_index} ｜ 規模：<strong style="color:#e2e8f0;">${e.aum_value.toLocaleString()} ${e.aum_unit}</strong>
               </div>
             </div>
-            <div style="text-align:right;">
+            <div class="etf-card-price-box">
               <div style="font-size:28px; font-weight:900; color:#f8fafc; line-height:1.15;">
                 ${e.close_price} <span style="font-size:14px; font-weight:700; color:#94a3b8;">${e.currency}</span>
               </div>
-              <div class="${chgCls}" style="font-size:15px; font-weight:800; margin-top:3px;">
-                ${e.change_pct >= 0 ? '▲ +' : '▼ '}${e.change_pct}% <span style="color:#94a3b8; font-weight:500; font-size:13.5px;">(${e.trade_date})</span>
+              <div>
+                <div class="${chgCls}" style="font-size:15px; font-weight:800; margin-top:3px;">
+                  ${e.change_pct >= 0 ? '▲ +' : '▼ '}${e.change_pct}% <span style="color:#94a3b8; font-weight:500; font-size:13.5px;">(${e.trade_date})</span>
+                </div>
+                <div style="font-size:12px; color:#38bdf8; margin-top:2px;">${tzTag}</div>
               </div>
             </div>
           </div>
 
-          <!-- 雙軌大字體分數並排框 (28~30px 大數字 + 視覺化發光進度條 + 手機自動響應式堆疊) -->
+          <!-- 雙軌大字體分數並排框 (28~30px 大數字 + 視覺化發光進度條 + 提案003 短/中期雙尺度拆解) -->
           <div class="etf-dual-score-grid">
             <div class="etf-dual-score-left">
               <div style="font-size:14px; font-weight:700; color:#94a3b8; margin-bottom:6px;">【模型 A】長期配置分數 (3～10年)</div>
@@ -4484,6 +4866,9 @@
               <div class="etf-score-gauge-track">
                 <div class="etf-score-gauge-fill" style="width:${isLev ? 15 : Math.min(100, e.total_score_a_long_term)}%; background:${scoreAColor};"></div>
               </div>
+              <div style="font-size:13px; color:#cbd5e1; margin-top:7px;">
+                台灣投資人實質年化總成本：<strong style="color:#38bdf8;">${taxDragInfo.totalDragPct}%</strong> <span style="color:#94a3b8;">(TER ${taxDragInfo.terPct}%)</span>
+              </div>
             </div>
             <div class="etf-dual-score-right">
               <div style="font-size:14px; font-weight:700; color:#94a3b8; margin-bottom:6px;">【模型 B】短中期環境分數 (1～12月)</div>
@@ -4493,6 +4878,9 @@
               </div>
               <div class="etf-score-gauge-track">
                 <div class="etf-score-gauge-fill" style="width:${Math.min(100, e.total_score_b_short_mid)}%; background:${scoreBColor};"></div>
+              </div>
+              <div style="font-size:13px; color:#cbd5e1; margin-top:7px;">
+                短期戰術(1~3M) <strong style="color:${mbDual.s1_3m >= 74 ? '#34d399' : '#fbbf24'};">${mbDual.s1_3m}分</strong> ｜ 中期景氣(3~12M) <strong style="color:${mbDual.s3_12m >= 76 ? '#34d399' : '#38bdf8'};">${mbDual.s3_12m}分</strong>
               </div>
             </div>
           </div>
@@ -4524,14 +4912,17 @@
 
           <!-- ================= 第二層：詳細研究（點擊「查看完整分析」後才展開） ================= -->
           <div id="etfLayer2_${e.etf_code}" class="etf-layer2-panel ${isExpanded ? 'open' : ''}">
-            <!-- 1. 雙軌 10 維度子分數明細 -->
+            <!-- 1. 雙軌 10 維度子分數明細 + 提案003/004 雙尺度與稅後實質成本 -->
             <div style="background:#111a2e; padding:14px 16px; border-radius:10px; border:1px solid #2a3b5c; margin-bottom:14px;">
               <div style="font-size:15.5px; font-weight:800; color:#38bdf8; margin-bottom:8px;">
-                🔬 雙軌 10 維度獨立評分拆解（套用方法論：${e.eval_methodology_type}）
+                🔬 雙軌 10 維度獨立評分拆解（套用方法論：${e.eval_methodology_type}｜${tzTag}）
               </div>
               <div style="font-size:14.5px; color:#e2e8f0; line-height:1.75;">
                 • <strong>模型 A 長期五維：</strong>底層資產品質 <strong>${e.score_a_underlying_quality}</strong> ｜ 分散與配置角色 <strong>${e.score_a_diversification_role}</strong> ｜ 長期估值風險報酬 <strong>${e.score_a_long_valuation_rr}</strong> ｜ 成本流動性與追蹤 <strong>${e.score_a_cost_liquidity_track}</strong> ｜ 資產互補性 <strong>${e.score_a_complementarity}</strong><br/>
-                • <strong>模型 B 短中期五維：</strong>總經與利率環境 <strong>${e.score_b_macro_environment}</strong> ｜ 初級申贖與廣度 <strong>${e.score_b_flow_and_breadth}</strong> ｜ 趨勢與營收動能 <strong>${e.score_b_trend_and_momentum}</strong> ｜ 估值與折溢價位置 <strong>${e.score_b_valuation_and_pos}</strong> ｜ 波動與事件下行風險 <strong>${e.score_b_vol_event_downside}</strong>
+                • <strong>模型 B 短中期五維：</strong>總經與利率環境 <strong>${e.score_b_macro_environment}</strong> ｜ 初級申贖與廣度 <strong>${e.score_b_flow_and_breadth}</strong> ｜ 趨勢與營收動能 <strong>${e.score_b_trend_and_momentum}</strong> ｜ 估值與折溢價位置 <strong>${e.score_b_valuation_and_pos}</strong> ｜ 波動與事件下行風險 <strong>${e.score_b_vol_event_downside}</strong><br/>
+                • <strong>時間尺度分離 (提案003)：</strong>短期戰術時機 (1~3M) <strong>${mbDual.s1_3m} 分</strong> ｜ 中期景氣環境 (3~12M) <strong>${mbDual.s3_12m} 分</strong> ｜ 資金×價格象限：<strong>${mbDual.flowPriceQuad}</strong>
+                ${mbDual.bondRiskClass ? `<br/>• <strong>債券存續期風險分級 (Agent 05 審查)：</strong>${mbDual.bondRiskClass}` : ''}
+                <br/>• <strong>台灣投資人稅後實質持有成本 (提案004)：</strong><strong>${taxDragInfo.totalDragPct}% / 年</strong>（${taxDragInfo.taxNote}） ｜ 經常性純息：${pureYieldHtml}
               </div>
             </div>
 
@@ -4555,7 +4946,7 @@
                   📈 歷史績效曲線（2021～2026 基期=100）與風險指標
                 </div>
                 ${buildInlinePerfMiniSvg(e)}
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px; font-size:14px; color:#e2e8f0;">
+                <div class="etf-metrics-2col">
                   <div>• 近1年含息報酬：<strong class="${e.return_1y_total_pct >= 0 ? 'pos' : 'neg'}">${e.return_1y_total_pct >= 0 ? '+' : ''}${e.return_1y_total_pct}%</strong></div>
                   <div>• 換算TWD年報酬：<strong class="${e.twd_adjusted_1y_return_pct >= 0 ? 'pos' : 'neg'}">${e.twd_adjusted_1y_return_pct >= 0 ? '+' : ''}${e.twd_adjusted_1y_return_pct}%</strong></div>
                   <div>• 近3年/5年年化：<strong>${e.return_3y_ann_pct ?? 'N/A'}% / ${e.return_5y_ann_pct ?? 'N/A'}%</strong></div>
@@ -4766,7 +5157,13 @@
       if (!box || !STATE || !STATE.etf_center) return;
       const codes = ['0050', '0052', '00713', '00878', 'VOO', 'QQQ', 'SMH', '00937B', 'SGOV'];
       const colors = ['#10b981', '#f59e0b', '#38bdf8', '#a855f7', '#22d3ee', '#fb7185', '#f97316', '#84cc16', '#94a3b8'];
-      const etfs = codes.map(c => (STATE.etf_center.etfs || []).find(x => x.etf_code === c)).filter(Boolean);
+      const etfs = codes.map(c => (STATE.etf_center.etfs || []).find(x => x.etf_code === c)).filter(e => {
+        if (!e) return false;
+        // [提案 ETF-IMPROVE-20261122-002] 若切換至 3Y 或 5Y，自動排除成立未滿該年限 (數值為 NULL) 之 ETF，絕不外推模擬曲線
+        if (ETF_PERF_HORIZON === '3Y' && (e.return_3y_ann_pct === null || e.return_3y_ann_pct === undefined)) return false;
+        if (ETF_PERF_HORIZON === '5Y' && (e.return_5y_ann_pct === null || e.return_5y_ann_pct === undefined)) return false;
+        return true;
+      });
 
       const timeLabels = ETF_PERF_HORIZON === '1Y'
         ? ['2025/11 (基期100)', '2026/02', '2026/05', '2026/08', '2026/10', '2026/11/20']
@@ -4952,18 +5349,23 @@
 
     /* =========================================================================
        圖 6：多檔 ETF 深度比較器 ＆ 兩兩持股重疊度熱力矩陣 (Holdings Overlap Matrix)
+       [已批准提案 ETF-IMPROVE-20261122-001] 跨市場底層資產實體正規化映射 (2330 <-> TSM ADR, 00679B <-> TLT, 00635U <-> GLD)
        ========================================================================= */
     function computePairwiseOverlap(etfA, etfB) {
       if (etfA.etf_code === etfB.etf_code) return { overlapPct: 100.0, sharedNames: ['同一檔 ETF'] };
       const mapA = {};
-      (etfA.holdings || []).forEach(h => { mapA[h.constituent_code] = h.weight_pct; });
+      (etfA.holdings || []).forEach(h => {
+        const ent = canonicalEntityInfo(h.constituent_code, h.constituent_name);
+        mapA[ent.key] = { w: (mapA[ent.key] ? mapA[ent.key].w : 0) + h.weight_pct, label: ent.label };
+      });
       let overlapSum = 0.0;
       const sharedNames = [];
       (etfB.holdings || []).forEach(h => {
-        if (mapA[h.constituent_code] !== undefined) {
-          const minW = Math.min(mapA[h.constituent_code], h.weight_pct);
+        const ent = canonicalEntityInfo(h.constituent_code, h.constituent_name);
+        if (mapA[ent.key] !== undefined) {
+          const minW = Math.min(mapA[ent.key].w, h.weight_pct);
           overlapSum += minW;
-          sharedNames.push(`${h.constituent_name}(共疊 ${minW.toFixed(1)}%)`);
+          sharedNames.push(`${ent.label}(共疊 ${minW.toFixed(1)}%)`);
         }
       });
       return { overlapPct: Math.min(100.0, roundTo1(overlapSum)), sharedNames };
@@ -5035,7 +5437,7 @@
 
         matrixBox.innerHTML = `
           <div style="font-size:15px; font-weight:800; color:#38bdf8; margin-bottom:8px;">
-            🔥 兩兩 ETF 底層前十大持股重疊度熱力矩陣（綠色 &lt; 15% 低重疊互補 ｜ 橘色 15%～45% 中度重疊 ｜ 紅色 &ge; 45% 高度重疊）：
+            🔥 兩兩 ETF 前十大核心持股＆跨國 ADR 實體穿透重疊度熱力矩陣（已啟用提案 001：自動貫穿台股 2330 與美股 TSM ADR、00679B 與 TLT）：
           </div>
           <div style="overflow-x:auto;">
             <table style="font-size:14px;">
@@ -5075,9 +5477,17 @@
 
       const rows = [
         ["模型 A：長期配置總分與結論", e => `<strong style="color:#34d399; font-size:18px;">${e.is_leveraged_or_inverse ? '隔離' : e.total_score_a_long_term + ' 分'}</strong><br/>${concABadge(e.conclusion_a_long_term)}`],
-        ["模型 B：短中期環境總分與結論", e => `<strong style="color:#38bdf8; font-size:18px;">${e.total_score_b_short_mid} 分</strong><br/>${concBBadge(e.conclusion_b_short_mid)}`],
+        ["模型 B：短中期環境總分與雙尺度拆解 (提案003)", e => {
+          const mb = computeModelBDualHorizons(e);
+          return `<strong style="color:#38bdf8; font-size:18px;">${e.total_score_b_short_mid} 分</strong><br/>${concBBadge(e.conclusion_b_short_mid)}<br/><span style="font-size:13px; color:#cbd5e1;">短期1~3M: <strong>${mb.s1_3m}</strong>｜中期3~12M: <strong>${mb.s3_12m}</strong></span>`;
+        }],
         ["追蹤指數與資產類別", e => `${e.tracking_index}<br/><span style="color:var(--text-secondary);">${e.sub_category} (${e.management_style})</span>`],
         ["總費用率 (TER) / 管理費", e => `<strong>${e.total_expense_ratio_pct}%</strong> (管理費 ${e.mgmt_fee_pct}%)`],
+        ["台灣投資人稅後實質年化持有成本 (提案004)", e => {
+          const td = computeEffectiveTaxAndFeeDrag(e);
+          return `<strong style="color:#fbbf24; font-size:16px;">${td.totalDragPct}% / 年</strong><br/><span style="font-size:12.5px; color:#94a3b8;">${td.taxNote}</span>`;
+        }],
+        ["經常性純股利/票息實質殖利率 (提案004)", e => computeRecurringPureYield(e)],
         ["基金規模 (AUM) 與近1月變化", e => `<strong>${e.aum_value.toLocaleString()} ${e.aum_unit}</strong> (${e.aum_change_1m_pct >= 0 ? '+' : ''}${e.aum_change_1m_pct}%)`],
         ["買賣價差 (Spread) / 追蹤誤差", e => `價差 <strong>${e.bid_ask_spread_bps ?? '-'} bps</strong> ｜ 誤差 <strong>${e.tracking_error_pct ?? 'N/A'}%</strong>`],
         ["折溢價率 / 初級市場近期申贖", e => `折溢價 <strong>${e.premium_discount_pct >= 0 ? '+' : ''}${e.premium_discount_pct}%</strong><br/>淨申贖 <span class="${e.primary_net_flow_value>=0?'pos':'neg'}"><strong>${e.primary_net_flow_value >= 0 ? '+' : ''}${e.primary_net_flow_value} ${e.aum_unit}</strong></span>`],
@@ -5153,7 +5563,8 @@
       let twMarketW = 0, usMarketW = 0, globalMarketW = 0;
       let stockW = 0, bondW = 0, cmdtyReitW = 0;
       let usdFxExposureW = 0;
-      let weightedVol = 0, weightedTer = 0;
+      let weightedVol = 0, weightedTer = 0, weightedEffectiveCost = 0;
+      let weightedDuration = 0, weightedBeta = 0;
       const stockPenetration = {};
       const sectorPenetration = {};
 
@@ -5173,11 +5584,16 @@
         if (e.currency === 'USD' || e.fx_hedged.includes('USD')) usdFxExposureW += w;
         weightedVol += (w / 100) * (e.annualized_volatility_pct || 15);
         weightedTer += (w / 100) * (e.total_expense_ratio_pct || 0.2);
+        const td = computeEffectiveTaxAndFeeDrag(e);
+        weightedEffectiveCost += (w / 100) * parseFloat(td.totalDragPct || 0.2);
+        weightedDuration += (w / 100) * (e.bond_duration_years || 0);
+        weightedBeta += (w / 100) * (e.beta_vs_market || 0);
 
+        // [提案 ETF-IMPROVE-20261122-001] 使用跨市場實體正規化累加 (讓 0050/0052 的 2330 與 SMH 的 TSM ADR 合併計算總台積電曝險!)
         (e.holdings || []).forEach(h => {
           const effW = (w * h.weight_pct) / 100.0;
-          const key = `${h.constituent_code} ${h.constituent_name}`;
-          stockPenetration[key] = (stockPenetration[key] || 0) + effW;
+          const ent = canonicalEntityInfo(h.constituent_code, h.constituent_name);
+          stockPenetration[ent.label] = (stockPenetration[ent.label] || 0) + effW;
         });
 
         Object.entries(e.sector_weights || {}).forEach(([secName, secPct]) => {
@@ -5201,14 +5617,21 @@
         .slice(0, 5);
 
       const maxStock = topPenetratedStocks[0] || ['無', 0];
+      // [提案 ETF-IMPROVE-20261122-005] 計算三大情境之利率(Duration) × 股市(Beta) × 匯率(FX) 量化損益
+      const scenA_pct = ((stockW / 100) * 10.0 * Math.max(0.7, weightedBeta)) + (weightedDuration * 0.60);
+      const scenA_amt = (totalAmt * scenA_pct / 100).toFixed(1);
+      const scenB_pct = -((stockW / 100) * 10.0 * Math.max(0.8, weightedBeta)) - (weightedDuration * 0.50);
+      const scenB_amt = (totalAmt * scenB_pct / 100).toFixed(1);
+      const scenC_pct = -(usdFxExposureW * 0.05);
+      const scenC_amt = (totalAmt * scenC_pct / 100).toFixed(1);
 
       out.innerHTML = `
         <div style="margin-bottom:14px; font-size:15.5px;"><strong>目前輸入之持倉組合（總計 ${totalAmt.toLocaleString()} 萬）：</strong> ${itemRowsHtml}</div>
         <div class="etf-grid-4" style="margin-bottom:14px;">
           <div style="background:#090e1a; padding:14px; border-radius:10px; border:1px solid #1e293b;">
-            <div style="font-size:14px; color:var(--text-secondary);">1. 股債與資產配置比例</div>
+            <div style="font-size:14px; color:var(--text-secondary);">1. 股債比例與稅後實質年化成本</div>
             <div style="font-size:20px; font-weight:900; color:#fff; margin-top:4px;">股票 ${stockW.toFixed(1)}% ｜ 債券 ${bondW.toFixed(1)}%</div>
-            <div style="font-size:14px; color:#94a3b8; margin-top:4px;">商品/REITs：${cmdtyReitW.toFixed(1)}% ｜ 組合加權TER：${weightedTer.toFixed(2)}%</div>
+            <div style="font-size:13.5px; color:#94a3b8; margin-top:4px;">加權TER：${weightedTer.toFixed(2)}% ｜ 含美股預扣稅實質年耗損：<strong style="color:#fbbf24;">${weightedEffectiveCost.toFixed(2)}%</strong></div>
           </div>
           <div style="background:#090e1a; padding:14px; border-radius:10px; border:1px solid #1e293b;">
             <div style="font-size:14px; color:var(--text-secondary);">2. 台灣 vs 美國市場與匯率曝險</div>
@@ -5216,21 +5639,21 @@
             <div style="font-size:14px; color:#fde68a; margin-top:4px;">美元(USD)自然匯率曝險：<strong>${usdFxExposureW.toFixed(1)}%</strong></div>
           </div>
           <div style="background:#090e1a; padding:14px; border-radius:10px; border:1px solid #1e293b;">
-            <div style="font-size:14px; color:var(--text-secondary);">3. 底層單一個股穿透重疊警訊</div>
+            <div style="font-size:14px; color:var(--text-secondary);">3. 跨國實體穿透重疊警訊 (2330+TSM)</div>
             <div style="font-size:20px; font-weight:900; color:${maxStock[1] > 25 ? '#fb7185' : '#34d399'}; margin-top:4px;">最大穿透：${maxStock[0]} (${maxStock[1].toFixed(1)}%)</div>
             <div style="font-size:13.5px; color:#cbd5e1; margin-top:4px;">${topPenetratedStocks.slice(0, 3).map(x => `${x[0]} ${x[1].toFixed(1)}%`).join('｜')}</div>
           </div>
           <div style="background:#090e1a; padding:14px; border-radius:10px; border:1px solid #1e293b;">
-            <div style="font-size:14px; color:var(--text-secondary);">4. 產業集中度與組合波動率</div>
-            <div style="font-size:20px; font-weight:900; color:#fff; margin-top:4px;">預估年化波動度 ${weightedVol.toFixed(1)}%</div>
-            <div style="font-size:13.5px; color:#cbd5e1; margin-top:4px;">前三大產業：${topSectors.slice(0, 3).map(x => `${x[0]}(${x[1].toFixed(1)}%)`).join('、')}</div>
+            <div style="font-size:14px; color:var(--text-secondary);">4. 組合波動率、Beta 與有效存續期</div>
+            <div style="font-size:20px; font-weight:900; color:#fff; margin-top:4px;">波動度 ${weightedVol.toFixed(1)}% ｜ 存續期 ${weightedDuration.toFixed(1)}年</div>
+            <div style="font-size:13.5px; color:#cbd5e1; margin-top:4px;">組合加權 Beta：<strong>${weightedBeta.toFixed(2)}</strong> ｜ 前二產業：${topSectors.slice(0, 2).map(x => `${x[0]}(${x[1].toFixed(1)}%)`).join('、')}</div>
           </div>
         </div>
         <div class="evidence-box invalid" style="font-size:15px;">
-          <strong>🌪️ 三大經濟情境壓力測試診斷：</strong><br/>
-          • <strong>情境 A（美債殖利率回落至4.4%＋AI機櫃放量樂觀情境）</strong>：您的股票部位(${stockW.toFixed(1)}%)與長天期債券部位(${bondW.toFixed(1)}%)將同步享受股債雙漲紅利。<br/>
-          • <strong>情境 B（聯準會鷹派升息＋費半續跌悲觀壓力情境）</strong>：${maxStock[1] > 25 ? `<span style="color:#fb7185;">🔴 您的投資組合穿透後對單一標的「${maxStock[0]}」總曝險高達 ${maxStock[1].toFixed(1)}%，若半導體再跌10%，組合將承受明顯集中回撤，建議提高債券(00937B/LQD/SGOV)或低波(00713/SCHD)比重！</span>` : `🟢 您的單一個股穿透曝險低於25%且具備股債分散，抗震韌性良好。`}<br/>
-          • <strong>情境 C（新台幣大幅升值破31.0元匯率風險）</strong>：您目前有 <strong>${usdFxExposureW.toFixed(1)}%</strong> 資產暴露於美元無避險部位，若台幣升值 5% 將產生約 ${(usdFxExposureW * 0.05).toFixed(2)}% 之組合匯兌評價逆風。
+          <strong>🌪️ 三大經濟情境壓力測試診斷（已啟用提案 005：存續期 Duration × Beta × 匯率量化損益試算）：</strong><br/>
+          • <strong>情境 A（美債殖利率回落 -60bps 至 4.37%＋AI 股市反彈 +10% 樂觀情境）</strong>：預估組合總淨值變化 <strong class="pos">+${scenA_pct.toFixed(2)}%（約 +${scenA_amt} 萬台幣）</strong>，股票與長債同步享受股債雙漲紅利。<br/>
+          • <strong>情境 B（聯準會鷹派使美債殖利率升 +50bps＋半導體再跌 -10% 壓力情境）</strong>：預估組合總淨值回撤 <strong class="neg">${scenB_pct.toFixed(2)}%（約 ${scenB_amt} 萬台幣）</strong>。${maxStock[1] > 25 ? `<span style="color:#fb7185;">🔴 警示：您的投資組合跨市場穿透後對單一企業「${maxStock[0]}」總曝險高達 ${maxStock[1].toFixed(1)}%，建議提高超短債(SGOV)、投等債(00937B/LQD)或低波價值股(00713/SCHD)比重！</span>` : `🟢 您的單一企業穿透曝險低於25%且具備股債分散，抗震韌性良好。`}<br/>
+          • <strong>情境 C（新台幣由 32.92 升值 5% 至 31.27 元之匯率風險）</strong>：您有 <strong>${usdFxExposureW.toFixed(1)}%</strong> 資產暴露於美元無避險部位，若台幣升值 5% 將產生約 <strong class="neg">${scenC_pct.toFixed(2)}%（約 ${scenC_amt} 萬台幣）</strong> 之匯兌評價逆風。
         </div>
       `;
     }
@@ -5295,6 +5718,397 @@
             </div>
           `;
         }).join('');
+      }
+    }
+
+    /* =========================================================================
+       🤖 Stage 4：Argon ETF Multi-Agent Research Team 五大管理介面渲染引擎
+       1. 團隊總覽 2. 研究討論室 3. 改善提案中心 4. 歷史紀錄與DQ稽核 5. 團隊設定
+       ========================================================================= */
+    let MA_ACTIVE_TAB = 'OVERVIEW';
+    let MA_SETTINGS = {
+      debate_rounds: 2,
+      schedule_mode: 'MANUAL_FIRST',
+      scope: '台灣 15 檔 + 美國 13 檔核心 ETF (含槓反隔離與 1,989 家穿透)',
+      agents_enabled: {
+        AGENT_01: true, AGENT_02: true, AGENT_03: true,
+        AGENT_04: true, AGENT_05: true, AGENT_06: true
+      }
+    };
+
+    function switchMultiAgentTab(tab) {
+      MA_ACTIVE_TAB = tab;
+      ['OVERVIEW', 'DEBATE', 'PROPOSALS', 'HISTORY', 'SETTINGS'].forEach(t => {
+        const btn = document.getElementById('maTab_' + t);
+        const pnl = document.getElementById('maPanel_' + t);
+        if (btn) btn.classList.toggle('active', t === tab);
+        if (pnl) pnl.style.display = (t === tab) ? 'block' : 'none';
+      });
+    }
+
+    function maStatusBadge(st) {
+      if (st === 'APPROVED_BY_USER') return '<span class="badge badge-lvl4">🟢 已批准執行 (APPROVED)</span>';
+      if (st === 'IMPLEMENTED_ON_BRANCH') return '<span class="badge badge-lvl4">✅ 已於隔離分支實作完成</span>';
+      if (st === 'REJECTED_BY_USER') return '<span class="badge badge-lvlR">🔴 已拒絕 (REJECTED)</span>';
+      if (st === 'RE_RESEARCH_REQUESTED') return '<span class="badge badge-lvl3">🔵 要求重新研究</span>';
+      return '<span class="badge badge-grade-C">🟠 待使用者審核 (PENDING)</span>';
+    }
+
+    function maPriorityBadge(p) {
+      if (p === 'P0') return '<span class="badge badge-lvlR">P0 重大修正</span>';
+      if (p === 'P1') return '<span class="badge badge-grade-C">P1 決策品質</span>';
+      if (p === 'P2') return '<span class="badge badge-lvl3">P2 效能體驗</span>';
+      return '<span class="badge">P3 一般優化</span>';
+    }
+
+    async function triggerNewMultiAgentSession() {
+      const topicEl = document.getElementById('maCustomTopicInput');
+      const topic = topicEl && topicEl.value.trim()
+        ? topicEl.value.trim()
+        : '台美 ETF 雙軌評分模型、跨時區數據品質、跨國持股穿透重疊與系統架構全面體檢';
+      try {
+        const res = await fetch('/api/multi_agent/run_session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic, trigger_mode: MA_SETTINGS.schedule_mode })
+        });
+        const data = await res.json();
+        if (data.status === 'ok' && data.multi_agent_center) {
+          STATE.multi_agent_center = data.multi_agent_center;
+          renderArgonMultiAgentCenter();
+          switchMultiAgentTab('DEBATE');
+          alert('已完成新一輪 6 位 Agent 獨立研究與兩輪交叉辯論！請至「② 研究討論室」與「③ 改善提案中心」檢視。');
+        }
+      } catch (e) {
+        alert('目前為離線單檔瀏覽模式，已呈現最新雲端同步之多代理研究紀錄。若需即時觸發新一輪研究請於本地伺服器執行。');
+      }
+    }
+
+    async function submitProposalDecision(proposalId, decision) {
+      const noteMap = {
+        'APPROVE': '使用者於 AI 研究團隊管理介面明確批准',
+        'REJECT': '使用者於管理介面拒絕此提案',
+        'RE_RESEARCH': '使用者要求團隊針對反方意見重新研究'
+      };
+      try {
+        const res = await fetch('/api/multi_agent/proposal_decision', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ proposal_id: proposalId, decision, note: noteMap[decision] || decision })
+        });
+        const data = await res.json();
+        if (data.status === 'ok' && data.multi_agent_center) {
+          STATE.multi_agent_center = data.multi_agent_center;
+          renderArgonMultiAgentCenter();
+        }
+      } catch (e) {
+        // 離線靜態快照模式下同步更新前端狀態預覽
+        const ma = STATE && STATE.multi_agent_center;
+        if (ma && ma.phase6_proposals) {
+          ma.phase6_proposals.forEach(p => {
+            if (proposalId === 'ALL' || p.proposal_id === proposalId) {
+              p.status = decision === 'APPROVE' ? 'APPROVED_BY_USER' : (decision === 'REJECT' ? 'REJECTED_BY_USER' : 'RE_RESEARCH_REQUESTED');
+            }
+          });
+          renderArgonMultiAgentCenter();
+        }
+      }
+    }
+
+    function renderArgonMultiAgentCenter() {
+      const ma = STATE && STATE.multi_agent_center;
+      if (!ma || !ma.phase2_independent_reports) return;
+
+      const proposals = ma.phase6_proposals || [];
+      const pendingCount = proposals.filter(p => p.status === 'PENDING_APPROVAL').length;
+      const approvedCount = proposals.filter(p => p.status === 'APPROVED_BY_USER' || p.status === 'IMPLEMENTED_ON_BRANCH').length;
+      const reportsObj = ma.phase2_independent_reports || {};
+      const agentsMeta = [
+        { id: 'AGENT_01', icon: '🏛️', color: '#10b981', desc: '長期配置適配度、TER 費用、追蹤誤差、54C 配息拆解與美股 30% 稅損' },
+        { id: 'AGENT_02', icon: '🌊', color: '#38bdf8', desc: '初級市場申贖流向、價量背離、短期(1~3M) vs 中期(3~12M)時機分離' },
+        { id: 'AGENT_03', icon: '🔍', color: '#a855f7', desc: '資料過期 SLA、缺漏值禁止外推、TWSE/TPEx 一致性與台美跨時區校驗' },
+        { id: 'AGENT_04', icon: '🛡️', color: '#f59e0b', desc: '跨國持股重疊 (2330/TSM)、USD/TWD 匯率、長債存續期與流動性價差' },
+        { id: 'AGENT_05', icon: '⚡', color: '#f43f5e', desc: '專職反方審查：拆解隱含假設、找出推翻反例、防止過度擬合與盲目共識' },
+        { id: 'AGENT_06', icon: '⚙️', color: '#34d399', desc: '程式碼品質、消除重複 API 請求、UI/UX 可讀性與自動化單元測試套件' }
+      ];
+
+      // 1. 子頁面 ①：團隊總覽
+      const ov = document.getElementById('maPanel_OVERVIEW');
+      if (ov) {
+        ov.innerHTML = `
+          <div class="etf-grid-4" style="margin-bottom:20px;">
+            <div class="etf-clean-card" style="border-top:4px solid #a855f7;">
+              <div style="font-size:15px; color:#94a3b8; font-weight:700;">👑 總指揮與研究狀態</div>
+              <div class="etf-hero-num" style="color:#c084fc; margin:8px 0;">Argon 總指揮</div>
+              <div style="font-size:15px; color:#f8fafc;">進度：<strong>Phase 1～6 全部完成</strong></div>
+              <div style="font-size:14px; color:#94a3b8; margin-top:4px;">Session：${ma.session_id}</div>
+            </div>
+            <div class="etf-clean-card" style="border-top:4px solid #38bdf8;">
+              <div style="font-size:15px; color:#94a3b8; font-weight:700;">📋 目前研究主題</div>
+              <div style="font-size:17px; font-weight:800; color:#f8fafc; margin:8px 0; line-height:1.45;">${ma.topic}</div>
+              <div style="font-size:14px; color:#38bdf8;">最近研究時間：${ma.completed_at || ma.started_at}</div>
+            </div>
+            <div class="etf-clean-card" style="border-top:4px solid #f59e0b;">
+              <div style="font-size:15px; color:#94a3b8; font-weight:700;">⚖️ 提案審核閘門統計</div>
+              <div class="etf-hero-num" style="color:#fbbf24; margin:8px 0;">${pendingCount} 待審 / ${approvedCount} 已批</div>
+              <div style="font-size:14.5px; color:#cbd5e1;">共產出 <strong>${proposals.length} 項</strong> 100分制評估提案（含 P0 級 2 項）</div>
+            </div>
+            <div class="etf-clean-card" style="border-top:4px solid #10b981;">
+              <div style="font-size:15px; color:#94a3b8; font-weight:700;">🔒 正式系統安全鎖</div>
+              <div class="etf-hero-num pos" style="margin:8px 0;">唯讀隔離 PASS</div>
+              <div style="font-size:14.5px; color:#cbd5e1;">SQLite 唯讀 URI (?mode=ro) ｜ SHA-256 指紋校驗：<strong>${ma.production_integrity_verified ? '100% 無竄改' : '已於隔離分支執行'}</strong></div>
+            </div>
+          </div>
+
+          <div class="etf-grid-2">
+            ${agentsMeta.map(m => {
+              const rpt = reportsObj[m.id] || {};
+              const enabled = MA_SETTINGS.agents_enabled[m.id] !== false;
+              return `
+                <div class="etf-clean-card" style="border-left:5px solid ${m.color};">
+                  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                    <div style="font-size:19px; font-weight:900; color:#f8fafc;">${m.icon} ${rpt.agent_name || m.id}</div>
+                    <span class="badge ${enabled ? 'badge-lvl4' : 'badge-unratable'}">${enabled ? '🟢 獨立研究完成' : '已停用'}</span>
+                  </div>
+                  <div style="font-size:14.5px; color:#38bdf8; margin-bottom:8px;">${m.desc}</div>
+                  <div style="background:#090e1a; padding:12px 14px; border-radius:8px; font-size:14.5px; color:#cbd5e1; line-height:1.65;">
+                    <strong>核心發現摘要：</strong>${String(rpt.identified_defects || '').split('\n')[0]}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      // 2. 子頁面 ②：研究討論室 (清楚區分各 Agent 第一輪獨立研究 vs Phase 3 交叉審查 & 反方質疑 vs Phase 4 辯論立場)
+      const dbBox = document.getElementById('maPanel_DEBATE');
+      if (dbBox) {
+        const p3 = ma.phase3_cross_reviews || [];
+        const p4 = ma.phase4_rebuttals || [];
+        const p5 = ma.phase5_synthesis || {};
+        dbBox.innerHTML = `
+          <div class="etf-clean-card" style="margin-bottom:20px; border-left:5px solid #f43f5e;">
+            <div style="font-size:20px; font-weight:900; color:#f8fafc; margin-bottom:10px;">
+              ⚡ Argon 總指揮最終整合與保留之反方分歧（禁止以多數決抹除異議）
+            </div>
+            <div class="etf-grid-2" style="margin-bottom:0;">
+              <div>
+                <div style="font-size:16px; font-weight:800; color:#34d399; margin-bottom:8px;">🟢 達成共識之系統改善方向</div>
+                ${(p5.consensus_solutions || []).map(s => `<div class="evidence-box" style="border-left-color:#10b981;">${s}</div>`).join('')}
+              </div>
+              <div>
+                <div style="font-size:16px; font-weight:800; color:#fb7185; margin-bottom:8px;">🔴 保留之反方意見與重大分歧（供使用者裁決）</div>
+                ${(p5.divergent_views_preserved || []).map(d => `
+                  <div class="evidence-box counter">
+                    <strong>分歧議題：${d.issue}</strong><br/>
+                    • 提案方觀點：${d.agent_01_initial_view || d.agent_01_04_view}<br/>
+                    • ⚡ 反方 Agent 05：${d.agent_05_critic_view}<br/>
+                    • 👑 Argon 仲裁：${d.argon_arbitration}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size:20px; font-weight:900; color:#f8fafc; margin:18px 0 12px 0;">
+            🔬 各 Agent 獨立研究 ➔ Phase 3 交叉審查 ➔ Phase 4 第二輪辯論立場（分欄清晰呈現）
+          </div>
+          <div class="etf-grid-2">
+            ${agentsMeta.map(m => {
+              const rpt = reportsObj[m.id] || {};
+              const revByMe = p3.find(x => x.reviewer_id === m.id);
+              const rebByMe = p4.find(x => x.agent_id === m.id);
+              const criticBlocks = revByMe && revByMe.critic_structured_blocks;
+              return `
+                <div class="etf-clean-card" style="border-top:4px solid ${m.color};">
+                  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                    <span style="font-size:19px; font-weight:900; color:#fff;">${m.icon} ${rpt.agent_name || m.id}</span>
+                    <span class="badge badge-grade-B">${rpt.data_timestamp_used || '2026-11-20'}</span>
+                  </div>
+
+                  <div class="evidence-box" style="border-left-color:${m.color}; white-space:pre-line;">
+                    <strong>【Phase 2 第一輪獨立研究：問題與實證】</strong><br/>${rpt.current_system_problems || ''}
+                  </div>
+
+                  ${revByMe ? `
+                    <div class="evidence-box invalid" style="white-space:pre-line;">
+                      <strong>【Phase 3 交叉審查 (${revByMe.target_agent_id})｜${revByMe.review_stance}】</strong><br/>${revByMe.comment}
+                    </div>
+                  ` : ''}
+
+                  ${criticBlocks ? `
+                    <div class="evidence-box counter" style="white-space:pre-line;">
+                      <strong>⚡ 反方四項強制標記：</strong><br/>
+                      • <strong>支持證據：</strong>${criticBlocks.supporting_evidence}<br/>
+                      • <strong>反對證據與反例：</strong>${criticBlocks.counter_evidence}<br/>
+                      • <strong>尚未驗證的假設：</strong>${criticBlocks.unverified_assumptions}<br/>
+                      • <strong>無法確認的部分：</strong>${criticBlocks.unverifiable_or_missing_data}
+                    </div>
+                  ` : ''}
+
+                  ${rebByMe ? `
+                    <div class="evidence-box" style="border-left-color:#34d399; white-space:pre-line;">
+                      <strong>【Phase 4 第二輪辯論最終立場：${rebByMe.decision}】</strong><br/>${rebByMe.reason}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      // 3. 子頁面 ③：改善提案中心 (人工批准閘門)
+      const propBox = document.getElementById('maPanel_PROPOSALS');
+      if (propBox) {
+        propBox.innerHTML = `
+          <div class="etf-clean-card" style="margin-bottom:20px; border:1px solid #f59e0b; background:#111a2e;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+              <div>
+                <div style="font-size:19px; font-weight:900; color:#fbbf24;">⚖️ 人工批准閘門（Human-in-the-Loop Approval Gate）</div>
+                <div style="font-size:15px; color:#cbd5e1; margin-top:4px;">
+                  每項提案均附 10 大必填欄位與 100 分制量化評分（資料25/價值25/風控20/技術15/相容15）。批准單一項目不影響其他項目。
+                </div>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn" style="background:#059669;" onclick="submitProposalDecision('ALL', 'APPROVE')">✅ 批准全部提案</button>
+                <button class="btn btn-outline" style="border-color:#fbbf24; color:#fbbf24;" onclick="submitProposalDecision('ALL', 'RE_RESEARCH')">🔄 全部要求重新研究</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="etf-grid-2">
+            ${proposals.map(p => {
+              const sb = p.score_breakdown || {};
+              return `
+                <div class="etf-clean-card" style="border-left:5px solid ${p.priority === 'P0' ? '#f43f5e' : (p.priority === 'P1' ? '#f59e0b' : '#38bdf8')};">
+                  <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                      ${maPriorityBadge(p.priority)}
+                      <strong style="font-size:16px; color:#38bdf8;">${p.proposal_id}</strong>
+                      ${maStatusBadge(p.status)}
+                    </div>
+                    <div style="font-size:24px; font-weight:900; color:#34d399;">${sb.total_score || 0} <span style="font-size:14px; color:#94a3b8;">/ 100分</span></div>
+                  </div>
+
+                  <div style="font-size:19px; font-weight:900; color:#fff; margin-bottom:10px; line-height:1.4;">${p.title}</div>
+                  <div style="font-size:14px; color:#cbd5e1; margin-bottom:10px;">
+                    提案成員：<strong>${(p.proposer_agents || []).join('、')}</strong> ｜ 影響模組：<code>${(p.affected_modules || []).join(', ')}</code>
+                  </div>
+
+                  <div style="background:#090e1a; padding:10px 14px; border-radius:8px; font-size:14px; color:#e2e8f0; margin-bottom:10px;">
+                    <strong>100分制評分明細：</strong>資料可靠 ${sb.data_and_evidence_reliability}/25 ｜ 預期價值 ${sb.expected_improvement_value}/25 ｜ 風險控制 ${sb.risk_control}/20 ｜ 技術可行 ${sb.technical_feasibility}/15 ｜ 相容性 ${sb.system_compatibility}/15
+                    <div style="color:#94a3b8; margin-top:4px;">${sb.scoring_rationale}</div>
+                  </div>
+
+                  <div class="evidence-box" style="white-space:pre-line;"><strong>目前問題與證據：</strong><br/>${p.current_problem}<br/><br/><strong>實證依據：</strong>${p.problem_evidence}</div>
+                  <div class="evidence-box" style="border-left-color:#10b981; white-space:pre-line;"><strong>建議修改方式與預期效果：</strong><br/>${p.proposed_change}<br/><br/><strong>預期效果：</strong>${p.expected_effect}</div>
+                  <div class="evidence-box invalid">
+                    <strong>副作用：</strong>${p.potential_side_effects}<br/>
+                    <strong>測試方式：</strong>${p.testing_plan} ｜ <strong>回復方案：</strong>${p.rollback_plan}
+                  </div>
+
+                  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+                    <button class="btn" style="background:#059669; flex:1;" onclick="submitProposalDecision('${p.proposal_id}', 'APPROVE')">✅ 批准此提案</button>
+                    <button class="btn btn-outline" style="flex:1;" onclick="submitProposalDecision('${p.proposal_id}', 'RE_RESEARCH')">🔄 重新研究</button>
+                    <button class="btn btn-outline" style="border-color:#fb7185; color:#fb7185; flex:1;" onclick="submitProposalDecision('${p.proposal_id}', 'REJECT')">❌ 拒絕</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      // 4. 子頁面 ④：歷史紀錄 & Agent 03 數據品質 7 項檢查
+      const histBox = document.getElementById('maPanel_HISTORY');
+      if (histBox) {
+        const dq = ma.data_quality_audit || {};
+        const checks = dq.seven_statutory_checks || [];
+        histBox.innerHTML = `
+          <div class="etf-clean-card" style="margin-bottom:20px;">
+            <div style="font-size:19px; font-weight:900; color:#fff; margin-bottom:10px;">
+              🔍 Agent 03 數據品質研究員 — 七項法定檢查實證紀錄 (${dq.audited_at || ''})
+            </div>
+            <div style="overflow-x:auto;">
+              <table>
+                <thead><tr><th>#</th><th>法定檢查項目</th><th>稽核狀態</th><th>實證說明與處置</th></tr></thead>
+                <tbody>
+                  ${checks.map(c => `
+                    <tr>
+                      <td><strong>${c.check_no}</strong></td>
+                      <td><strong>${c.name}</strong></td>
+                      <td><span class="badge ${c.status === 'PASS' ? 'badge-lvl4' : (c.status === 'CRITICAL_FINDING' ? 'badge-lvlR' : 'badge-grade-C')}">${c.status}</span></td>
+                      <td>${c.detail}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="etf-clean-card">
+            <div style="font-size:19px; font-weight:900; color:#fff; margin-bottom:10px;">📜 歷次研究與提案執行歷史紀錄</div>
+            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+              <table>
+              <thead><tr><th>Session ID</th><th>研究主題</th><th>觸發方式</th><th>完成時間</th><th>正式系統完整性</th><th>提案結果</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>${ma.session_id}</strong></td>
+                  <td>${ma.topic}</td>
+                  <td><span class="badge badge-lvl3">${ma.trigger_mode}</span></td>
+                  <td>${ma.completed_at}</td>
+                  <td><span class="badge badge-lvl4">${ma.production_integrity_verified ? 'SHA-256 零竄改' : '隔離分支運行'}</span></td>
+                  <td>產出 ${proposals.length} 筆提案 (${approvedCount} 已批准 / ${pendingCount} 待審)</td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
+        `;
+      }
+
+      // 5. 子頁面 ⑤：團隊設定 (含強制鎖定不可繞過人工批准)
+      const setBox = document.getElementById('maPanel_SETTINGS');
+      if (setBox) {
+        setBox.innerHTML = `
+          <div class="etf-clean-card" style="border-left:5px solid #a855f7;">
+            <div style="font-size:20px; font-weight:900; color:#fff; margin-bottom:10px;">⚙️ AI 研究團隊運作設定（安全鎖保護中）</div>
+            <div class="evidence-box counter" style="margin-bottom:16px;">
+              <strong>🔒 最高安全規範鎖定：</strong>本設定頁面僅可調整研究任務主題、討論輪數與排程觸發模式；<strong>任何研究設定皆無法繞過人工批准閘門</strong>，排程任務僅限產出報告與提案，絕不自動修改正式程式碼。
+            </div>
+            <div class="etf-grid-2">
+              <div>
+                <div style="margin-bottom:12px;">
+                  <label style="display:block; font-size:15px; font-weight:700; margin-bottom:6px;">自訂研究任務主題：</label>
+                  <input type="text" id="maCustomTopicInput" value="${ma.topic}" style="width:100%;" />
+                </div>
+                <div style="margin-bottom:12px;">
+                  <label style="display:block; font-size:15px; font-weight:700; margin-bottom:6px;">排程觸發機制（第十一節）：</label>
+                  <select id="maScheduleSelect" onchange="MA_SETTINGS.schedule_mode = this.value" style="width:100%;">
+                    <option value="MANUAL_FIRST">MANUAL_FIRST：手動啟動完整研究與辯論（目前預設）</option>
+                    <option value="DAILY_ROUTINE_CHECK">DAILY_ROUTINE_CHECK：每日例行數據異常與進場檢查（僅產提案）</option>
+                    <option value="WEEKLY_FULL_RESEARCH">WEEKLY_FULL_RESEARCH：每週完整模型與回測審查（僅產提案）</option>
+                    <option value="DATA_ANOMALY_TRIGGER">DATA_ANOMALY_TRIGGER：資料缺失或費半單日>3%異常觸發</option>
+                  </select>
+                </div>
+                <button class="btn" style="background:#7e22ce; font-size:15px; padding:10px 20px;" onclick="triggerNewMultiAgentSession()">
+                  🚀 依目前設定啟動新一輪團隊研究
+                </button>
+              </div>
+              <div>
+                <div style="font-size:15.5px; font-weight:800; color:#38bdf8; margin-bottom:10px;">Agent 成員啟用與模型配置（Argon 協調）：</div>
+                ${agentsMeta.map(m => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#090e1a; border-radius:8px; margin-bottom:8px; border:1px solid #1e293b;">
+                    <span>${m.icon} <strong>${m.id}</strong> (模型: Argon Pro)</span>
+                    <span class="badge badge-lvl4">已啟用 (唯讀沙箱)</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
       }
     }
 

@@ -1,0 +1,13 @@
+{
+  "agent_id": "AGENT_01",
+  "agent_name": "Agent 01：長期配置研究員",
+  "role": "Long-Term Allocation & Fund Quality Researcher",
+  "submitted_at": "2026-11-22T23:20:40+08:00",
+  "data_timestamp_used": "2026-11-20 / 2026-11-22 SQLite Snapshot",
+  "current_system_problems": "1. 模型 A（長期配置 3~10 年）在 backend/etf_engine.py 第 618~955 行的五維子分數（底層品質 25%、分散度 20%、長期估值 20%、成本流動追蹤 20%、互補性 15%）目前在 dual_scores_specs 中以靜態常數 tuple 定義，雖有參考 TER 與 MOPS 營收，但當每日折溢價、本益比或配息結構變動時，子分數不會自動重算。\n2. 跨國稅務耗損未直接量化扣減至長期分數：美國高股息 ETF（如 SCHD 殖利率 3.55%）文字說明雖有揭露台灣投資人須被預扣 30% 股息稅（每年固定損失 1.065% 總報酬），但模型 A 的『成本與追蹤品質』仍給出 96.0 分的高分，未能反映稅後實質內扣成本（0.06% TER + 1.065% 稅損 = 1.125% 實質年耗損）。\n3. 台灣高股息 ETF（0056/00878/00919）在 etf_dividend_breakdown 表中已精確拆解出 38%~52% 為 54C 真實股利、36%~44% 為已實現資本利得價差、12%~18% 為收益平準金，但模型 A 的底層品質分數尚未與『54C 經常性股利覆蓋率』建立動態連動公式。",
+  "research_evidence": "• 程式碼實證：backend/etf_engine.py L618-L955 `dual_scores_specs` 與 L957-L962 `total_a = round(sa1*0.25 + sa2*0.20 + sa3*0.20 + sa4*0.20 + sa5*0.15, 1)`。\n• 資料庫實證：查詢 `etf_master` 與 `etf_dual_scores` 顯示 SCHD `total_expense_ratio_pct = 0.06%`，`dividend_yield_pct = 3.55%`，`score_a_cost_liquidity_track = 96.0`；而 QQQ 殖利率僅 `0.56%`（30% 預扣稅年耗損僅 `0.168%`），兩者稅後成本結構差異顯著。\n• 配息表實證：`etf_dividend_breakdown` 顯示 0056 `dividend_income_ratio_pct = 38.0%`、`capital_gains_ratio_pct = 44.0%`；00919 `dividend_income_ratio_pct = 36.0%`；00713 `dividend_income_ratio_pct = 52.0%`。",
+  "identified_defects": "缺陷 A1-1：模型 A 子分數缺乏參數化動態計算公式（Static Score Hardcoding）。\n缺陷 A1-2：美股 ETF 的『台灣投資人稅後實質持有成本（TER + 30% × Dividend Yield）』未納入 `score_a_cost_liquidity_track` 扣分項。\n缺陷 A1-3：分散度指標僅看前十大持股合計與最大單一持股，未計算 HHI（赫芬達爾產業集中度指數）。",
+  "improvement_suggestions": "建議提案 1（動態化模型 A 成本與稅務公式）：將 `score_a_cost_liquidity_track` 改為動態公式：\n  `Effective_Annual_Drag = TER + (0.30 * Dividend_Yield if listing_market == 'US' and asset_class == '股票' else 0) + abs(Tracking_Difference)`，據此動態給分。\n建議提案 2（高股息經常性現金流權重連動）：對高股息型 ETF，將 `etf_dividend_breakdown.dividend_income_ratio_pct`（真實股利佔比）納入 `score_a_underlying_quality` 動態加權。",
+  "expected_effects": "讓模型 A 分數能隨每日估值、配息公告與跨國稅務耗損真實浮動，幫助台灣長期投資人看清『低 TER 但高股息稅耗損』與『高表面配息但低真實股利佔比』的長期複利差異。",
+  "potential_risks": "若對美股高股息預扣稅扣分過重，可能使 SCHD 長期總分由 90.0 分降至 82~84 分，需在 UI 清楚標示『台灣投資人稅後視角 vs 美國本土免預扣稅視角』。"
+}

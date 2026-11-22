@@ -351,6 +351,7 @@ def run_live_ingestion():
 
     conn.commit()
     conn.close()
+    summary["shared_insti_map"] = insti_map
     return summary
 
 if __name__ == "__main__":

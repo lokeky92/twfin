@@ -10,13 +10,23 @@ import json
 import os
 import urllib.request
 import urllib.error
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 from db import get_connection, init_database
 from seed_and_engine import seed_and_compute_all
 from live_api_connector import run_live_ingestion
 from etf_engine import build_and_compute_etf_center
+import sys
+
+BASE_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if BASE_ROOT_DIR not in sys.path:
+    sys.path.insert(0, BASE_ROOT_DIR)
+from argon_multi_agent.engine.multi_agent_orchestrator import (
+    get_multi_agent_state,
+    run_full_multi_agent_session,
+    update_proposal_approval_status
+)
 
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
 
@@ -306,7 +316,8 @@ def get_dashboard_payload():
         "live_summary": live_summary,
         "live_top_companies": live_top_companies,
         "live_indices": live_indices,
-        "etf_center": etf_center
+        "etf_center": etf_center,
+        "multi_agent_center": get_multi_agent_state()
     }
 
 def update_weights_and_rescore(payload):
@@ -561,9 +572,33 @@ class TWFinRequestHandler(SimpleHTTPRequestHandler):
                 self._send_json({"status": "error", "message": str(e)}, status=400)
         elif parsed.path == "/api/probe_sources":
             live_res = run_live_ingestion()
-            build_and_compute_etf_center()
+            shared_map = live_res.pop("shared_insti_map", None) if isinstance(live_res, dict) else None
+            build_and_compute_etf_center(shared_insti_map=shared_map)
             res = probe_live_sources()
             self._send_json({"status": "ok", "probe_results": res, "live_ingestion": live_res, "dashboard": get_dashboard_payload()})
+        elif parsed.path == "/api/multi_agent/proposal_decision":
+            try:
+                pid = str(payload.get("proposal_id", "")).strip()
+                decision = str(payload.get("decision", "APPROVE")).strip()
+                note = str(payload.get("note", "")).strip()
+                if pid == "ALL":
+                    st = get_multi_agent_state()
+                    for p in st.get("phase6_proposals", []):
+                        update_proposal_approval_status(p["proposal_id"], decision, note)
+                    res_obj = {"batch": "ALL", "decision": decision}
+                else:
+                    res_obj = update_proposal_approval_status(pid, decision, note)
+                self._send_json({"status": "ok", "proposal": res_obj, "multi_agent_center": get_multi_agent_state()})
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)}, status=400)
+        elif parsed.path == "/api/multi_agent/run_session":
+            try:
+                topic = str(payload.get("topic", "台美 ETF 雙軌評分模型、跨時區數據品質、跨國持股穿透重疊與系統架構全面體檢")).strip()
+                mode = str(payload.get("trigger_mode", "MANUAL_START")).strip()
+                bundle = run_full_multi_agent_session(topic=topic, trigger_mode=mode)
+                self._send_json({"status": "ok", "multi_agent_center": bundle})
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)}, status=400)
         else:
             self._send_json({"status": "error", "message": "Unknown endpoint"}, status=404)
 
@@ -574,7 +609,7 @@ def run_server(port=None):
     if not os.path.exists(os.path.join(os.path.dirname(FRONTEND_DIR), "data", "twfin_intelligence.db")):
         seed_and_compute_all()
         build_and_compute_etf_center()
-    server = HTTPServer((host, port), TWFinRequestHandler)
+    server = ThreadingHTTPServer((host, port), TWFinRequestHandler)
     print(f"TWFin Intelligence Server running at http://127.0.0.1:{port} (bound to {host}:{port})")
     server.serve_forever()
 

@@ -1,0 +1,49 @@
+{
+  "session_id": "SESSION-20261122-001",
+  "auditor": "AGENT_03 (數據品質研究員)",
+  "audited_at": "2026-11-22T23:20:40+08:00",
+  "seven_statutory_checks": [
+    {
+      "check_no": 1,
+      "name": "資料是否過期 (Freshness SLA)",
+      "status": "WARNING",
+      "detail": "台灣 TWSE 掛牌 ETF 每次透過 MI_INDEX(0099P) 即時更新；但美國 13 檔 ETF 與 TPEx 債券 ETF 基準日為 2026-11-20 快照，需標示更新頻率差異。"
+    },
+    {
+      "check_no": 2,
+      "name": "是否有缺漏值 (Missing Value Policy)",
+      "status": "CRITICAL_FINDING",
+      "detail": "DB 層正確保留 NULL（未滿5年無5Y報酬共 3 檔: 00919, 00937B, 00400A），但前端 SVG 圖表 L3988 誤用 r1*0.7 外推曲線，已開立 P0 提案 ETF-IMPROVE-20261122-002 修正。"
+    },
+    {
+      "check_no": 3,
+      "name": "是否有重複資料 (Duplicate Records)",
+      "status": "PASS",
+      "detail": "檢查 etf_master (28筆)、etf_daily_metrics (28筆)、etf_dual_scores (28筆) 主鍵唯一無重複。"
+    },
+    {
+      "check_no": 4,
+      "name": "不同來源是否互相矛盾 (Cross-Source Consistency)",
+      "status": "WARNING",
+      "detail": "0055 (元大MSCI金融) 由 MOPS 單月營收穿透算出之 weighted_rev_yoy_pct 為 -5.4%（受壽險去年同期處分基期影響），與國銀放款年增 +9.79% 呈現統計口徑差異，已開立 ETF-IMPROVE-20261122-003 標註釐清。"
+    },
+    {
+      "check_no": 5,
+      "name": "資料更新時間是否一致 (Timestamp Alignment)",
+      "status": "WARNING",
+      "detail": "TWSE 收盤為 13:30 UTC+8，美股收盤為 16:00 EST (台灣隔日 05:00)，兩者存在 15.5 小時時差。"
+    },
+    {
+      "check_no": 6,
+      "name": "計算結果是否正確 (Formula Verification)",
+      "status": "CRITICAL_FINDING",
+      "detail": "模型 A 與模型 B 加權總分公式驗算 100% 準確；但跨市場持股重疊度因 2330 vs TSM 代號不同導致 0050+SMH 重疊度算為 0%，已開立 P0 提案 ETF-IMPROVE-20261122-001 修正。"
+    },
+    {
+      "check_no": 7,
+      "name": "台美時區及交易日曆 (Timezone & Settlement Calendar)",
+      "status": "ACTION_REQUIRED",
+      "detail": "已規劃於卡片顯著標示 TW: UTC+8 (T+2交割) vs US: EST/EDT (T+1交割)。"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{"timestamp": "2026-11-22T23:05:28+08:00", "event_code": "BLOCKED_UNAUTHORIZED_PRODUCTION_WRITE", "target_path": "c:\\users\\user\\twfin\\backend\\etf_engine.py", "action": "REJECTED_BY_PERMISSION_GUARD"}
+{"timestamp": "2026-11-22T23:05:28+08:00", "event_code": "BLOCKED_UNAUTHORIZED_PRODUCTION_WRITE", "target_path": "c:\\users\\user\\twfin\\frontend\\index.html", "action": "REJECTED_BY_PERMISSION_GUARD"}
+{"timestamp": "2026-11-22T23:05:28+08:00", "event_code": "BLOCKED_UNAUTHORIZED_PRODUCTION_WRITE", "target_path": "c:\\users\\user\\twfin\\data\\twfin_intelligence.db", "action": "REJECTED_BY_PERMISSION_GUARD"}
+{"timestamp": "2026-11-22T23:15:00+08:00", "event_code": "BLOCKED_UNAUTHORIZED_PRODUCTION_WRITE", "target_path": "c:\\users\\user\\twfin\\backend\\etf_engine.py", "action": "REJECTED_BY_PERMISSION_GUARD"}
+{"timestamp": "2026-11-22T23:15:00+08:00", "event_code": "BLOCKED_UNAUTHORIZED_PRODUCTION_WRITE", "target_path": "c:\\users\\user\\twfin\\frontend\\index.html", "action": "REJECTED_BY_PERMISSION_GUARD"}
+{"timestamp": "2026-11-22T23:15:00+08:00", "event_code": "BLOCKED_UNAUTHORIZED_PRODUCTION_WRITE", "target_path": "c:\\users\\user\\twfin\\data\\twfin_intelligence.db", "action": "REJECTED_BY_PERMISSION_GUARD"}

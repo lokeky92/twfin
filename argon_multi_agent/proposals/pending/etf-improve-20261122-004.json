@@ -1,0 +1,34 @@
+{
+  "proposal_id": "ETF-IMPROVE-20261122-004",
+  "session_id": "SESSION-20261122-001",
+  "created_at": "2026-11-22T23:20:40+08:00",
+  "proposer_agents": [
+    "AGENT_01",
+    "AGENT_03",
+    "AGENT_05"
+  ],
+  "priority": "P1",
+  "status": "PENDING_APPROVAL",
+  "title": "新增「台灣投資人稅後實質年化持有成本（TER＋美股30%股息預扣稅損）」與「高股息 54C 經常性股利覆蓋率」量化對照指標",
+  "current_problem": "台灣投資人比較台灣 ETF 與美國 ETF 時，常只看表面總費用率（例如看到 `SCHD` TER 僅 `0.06%` 就以為持有成本極低，卻忽略美股現金股利須被美國 IRS 預扣 30% 不可退稅款，以 3.55% 殖利率計算，每年實質被扣走 `1.065%` 總報酬，實質年持有耗損達 `1.125%`）；反之，買台灣高股息 ETF（`0056`/`00878`/`00919`）常只看 8.8%~9.6% 表面年化配息率，卻忽略其中 36%~44% 來自過去已實現資本利得價差。",
+  "problem_evidence": "• SQLite `etf_master` & `etf_daily_metrics`：`SCHD` TER=0.06%, Yield=3.55% (30%稅損=1.065%)；`VOO` TER=0.03%, Yield=1.22% (30%稅損=0.366%)；`QQQ` TER=0.20%, Yield=0.56% (30%稅損=0.168%)。\n• `etf_dividend_breakdown`：`0056` 真實股利佔比 38%（實質純股息殖利率僅 `8.85% × 38% = 3.36%`）。",
+  "proposed_change": "採納 Agent 01 與 Agent 05 辯論後折衷共識：不粗暴扣減模型 A 總分，而在卡片第二層與多檔 ETF 比較器中新增兩項精確量化指標：\n1. **台灣投資人稅後實質年化總成本 (Effective Annual Cost & Withholding Tax Drag %)**：自動區分美股股票/REITs（TER + 30%×股利率）、美股公債/投等債（Portfolio Interest 免預扣稅，僅計 TER）與台股 ETF（TER）。\n2. **真實股利/票息淨殖利率 (Recurring 54C/Coupon Net Yield %)** = `帳面配息率 × 經常性股利/票息佔比`，一眼看穿扣掉價差與平準金後的真實息收底氣。",
+  "diff_preview": "--- a/frontend/index.html\n+++ b/frontend/index.html\n@@ -4695,3 +4695,5 @@\n+  [\"台灣投資人實質年化持有成本 (TER+美股30%預扣稅損)\", e => computeEffectiveTaxAndFeeDrag(e)],\n+  [\"經常性純股利/票息實質殖利率 (扣除價差與平準金)\", e => computeRecurringPureYield(e)],\n",
+  "expected_effect": "讓台灣投資人在比較 `0050 vs VOO`、`0056/00713 vs SCHD`、`00679B vs TLT` 時，擁有機構級的稅後真實成本與純股息對照數據。",
+  "affected_modules": [
+    "frontend/index.html (ETF Card Layer 2 & ETF Comparator Table)"
+  ],
+  "potential_side_effects": "需在說明文字備註『台灣境內 ETF 若單次配息 >= 2萬台幣另課 2.11% 二代健保補充保費及併入綜所稅 54C』。",
+  "implementation_difficulty": "低",
+  "testing_plan": "驗算 VOO (0.40%)、SCHD (1.13%)、TLT (0.15% 免預扣)、0056 (純股利殖利率 3.36%) 計算結果。",
+  "rollback_plan": "移除比較器新增之兩列即可。",
+  "score_breakdown": {
+    "data_and_evidence_reliability": 25,
+    "expected_improvement_value": 24,
+    "risk_control": 19,
+    "technical_feasibility": 15,
+    "system_compatibility": 15,
+    "total_score": 98,
+    "scoring_rationale": "經 Agent 01、03、05 三方交叉辯論修正後的最佳方案，兼顧稅務真實性與資產互補價值。"
+  }
+}

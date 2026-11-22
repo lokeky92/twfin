@@ -1,0 +1,46 @@
+# Argon ETF Multi-Agent Research Team — 權限與人工批准安全鎖設定檔 (permissions.yaml)
+security_policy_version: "1.0.0"
+highest_priority_rule: "HUMAN_APPROVAL_REQUIRED_BEFORE_ANY_PRODUCTION_MODIFICATION"
+
+# 在沒有使用者明確批准之前，嚴格禁止以下操作：
+prohibited_without_user_approval:
+  - "modify_production_code (修改 backend/*.py 或正式業務邏輯)"
+  - "modify_production_etf_weights (修改正式 ETF 模型A/模型B評分權重)"
+  - "modify_production_decision_rules (修改正式投資決策規則)"
+  - "modify_database_schema (修改 data/twfin_intelligence.db 既有 23 張表結構)"
+  - "delete_existing_data (刪除既有資料庫紀錄)"
+  - "replace_production_data_sources (更換正式資料來源)"
+  - "auto_git_commit_or_push_main (自動提交或推送正式 main 分支)"
+  - "auto_deploy (自動部署)"
+
+# 允許 Agent 在研究階段自主執行的操作：
+allowed_autonomous_actions:
+  - "read_codebase (唯讀檢視 backend/*.py 與 frontend/*.html)"
+  - "read_sqlite_readonly_uri (以 file:...?mode=ro 唯讀模式查詢 SQLite 23 張表)"
+  - "run_non_mutating_tests (執行不修改正式資料的診斷與單元測試)"
+  - "write_research_reports (於 argon_multi_agent/research/ 建立研究報告)"
+  - "write_debate_records (於 argon_multi_agent/discussions/ 建立交叉辯論紀錄)"
+  - "write_improvement_proposals (於 argon_multi_agent/proposals/pending/ 建立提案與程式碼差異預覽)"
+
+write_whitelist_paths:
+  - "argon_multi_agent/research/"
+  - "argon_multi_agent/discussions/"
+  - "argon_multi_agent/proposals/"
+  - "argon_multi_agent/evaluations/"
+  - "argon_multi_agent/logs/"
+  - "argon_multi_agent/config/"
+
+protected_production_paths:
+  - "backend/db.py"
+  - "backend/seed_and_engine.py"
+  - "backend/phase2_to_6_engine.py"
+  - "backend/live_api_connector.py"
+  - "backend/etf_engine.py"
+  - "data/twfin_intelligence.db"
+
+approval_execution_protocol:
+  single_item_isolation: true # 批准一個項目，不代表批准其他項目
+  require_git_branch_or_sandbox: true
+  branch_naming_pattern: "proposal/{proposal_id}"
+  require_pre_and_post_test_diff: true
+  forbid_auto_merge_to_main: true

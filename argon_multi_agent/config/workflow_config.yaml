@@ -1,0 +1,90 @@
+# Argon ETF Multi-Agent Research Team — 自動研究與辯論流程設定檔 (workflow_config.yaml)
+workflow_version: "1.0.0"
+
+research_schedule:
+  mode: "MANUAL_FIRST" # 初期完成手動啟動與完整研究流程，穩定後開放排程
+  supported_triggers:
+    - "MANUAL_START (手動啟動研究)"
+    - "DAILY_ROUTINE_CHECK (每日例行檢查 - 僅產出報告與提案)"
+    - "WEEKLY_FULL_RESEARCH (每週完整研究)"
+    - "DATA_ANOMALY_TRIGGER (資料異常觸發研究)"
+    - "USER_CUSTOM_TOPIC (使用者指定主題研究)"
+  debate_rounds: 2
+  allow_schedule_to_modify_production: false # 排程研究絕對禁止自動修改正式程式碼
+
+phases:
+  - phase_id: "PHASE_1"
+    name: "任務啟動 (Task Initialization)"
+    owner: "ARGON_ORCHESTRATOR"
+    rules:
+      - "設定研究主題、研究範圍與資料基準時間戳"
+      - "開啟 SQLite 唯讀快照連線 (?mode=ro)"
+
+  - phase_id: "PHASE_2"
+    name: "獨立研究 (Independent Research)"
+    participants: ["AGENT_01", "AGENT_02", "AGENT_03", "AGENT_04", "AGENT_05", "AGENT_06"]
+    isolation_enforced: true
+    required_output_fields:
+      - "current_system_problems (目前系統問題)"
+      - "research_evidence (研究依據與SQLite/程式碼實證)"
+      - "identified_defects (發現的缺陷)"
+      - "improvement_suggestions (改善建議)"
+      - "expected_effects (預期改善效果)"
+      - "potential_risks (可能風險)"
+
+  - phase_id: "PHASE_3"
+    name: "交叉討論與反方強制質疑 (Cross-Review & Critic Challenge)"
+    participants: ["AGENT_01", "AGENT_02", "AGENT_03", "AGENT_04", "AGENT_05", "AGENT_06"]
+    rules:
+      - "每位 Agent 必須閱讀其他人第一輪結果，並針對至少一項其他 Agent 的觀點進行審查"
+      - "Agent 05 (反方審查研究員) 必須對所有主要方案提出質疑與至少一項推翻反例"
+      - "Agent 05 必須明確標記：支持證據 / 反對證據 / 尚未驗證的假設 / 無法確認的部分"
+
+  - phase_id: "PHASE_4"
+    name: "第二輪辯論與立場更新 (Round 2 Rebuttal & Position Revision)"
+    participants: ["AGENT_01", "AGENT_02", "AGENT_03", "AGENT_04", "AGENT_05", "AGENT_06"]
+    allowed_actions:
+      - "MAINTAIN (維持原方案並提出反駁證據)"
+      - "MODIFY (接納反方/同儕意見修正原方案)"
+      - "WITHDRAW (撤回原方案)"
+      - "ALTERNATIVE (提出折衷或替代方案)"
+    require_reason_logging: true
+
+  - phase_id: "PHASE_5"
+    name: "最終整合 (Final Synthesis by Argon)"
+    owner: "ARGON_ORCHESTRATOR"
+    synthesis_sections:
+      - "consensus_solutions (已達成共識的方案)"
+      - "divergent_views (存在分歧的方案與各自理由 — 嚴禁以多數決強行抹平)"
+      - "critic_risk_warnings (反方提出的關鍵風險)"
+      - "insufficient_evidence_areas (尚未取得足夠證據的部分)"
+      - "prioritized_roadmap (建議優先改善項目排序)"
+
+  - phase_id: "PHASE_6"
+    name: "產生改善提案 (Proposal Generation)"
+    owner: "ARGON_ORCHESTRATOR"
+    proposal_id_format: "ETF-IMPROVE-YYYYMMDD-NNN"
+    required_10_fields:
+      1: "title (改善項目名稱)"
+      2: "current_problem (目前問題)"
+      3: "problem_evidence (問題證據)"
+      4: "proposed_change (建議修改方式與程式碼Diff預覽)"
+      5: "expected_effect (預期效果)"
+      6: "affected_modules (影響模組)"
+      7: "potential_side_effects (可能副作用)"
+      8: "implementation_difficulty (實作難度)"
+      9: "testing_plan (測試方式)"
+      10: "rollback_plan (回復方案)"
+
+scoring_rubric_100:
+  data_and_evidence_reliability: 25 # 資料及證據可靠性 (25分)
+  expected_improvement_value: 25    # 預期改善價值 (25分)
+  risk_control: 20                  # 風險控制 (20分)
+  technical_feasibility: 15         # 技術可行性 (15分)
+  system_compatibility: 15          # 系統相容性 (15分)
+
+priority_levels:
+  P0: "重大錯誤或資料安全/跨時區誤導問題"
+  P1: "重要功能及決策品質改善"
+  P2: "效能及操作體驗改善"
+  P3: "一般優化及非必要改善"

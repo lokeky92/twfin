@@ -1,0 +1,104 @@
+# Argon ETF Multi-Agent Research Team — 團隊配置設定檔 (team_config.yaml)
+team_name: "Argon ETF Multi-Agent Research Team (多代理自主研究、交叉辯論與改善提案系統)"
+version: "1.0.0"
+created_at: "2026-11-22T22:55:00+08:00"
+target_system: "ETF 投資決策中心 (台灣 ETF ＋ 美國 ETF)"
+
+orchestrator:
+  id: "ARGON_ORCHESTRATOR"
+  name: "Argon 總指揮"
+  role: "Research Director & Multi-Agent Orchestrator"
+  model: "inherit (Argon Pro)"
+  enabled: true
+  spec_file: "agents/orchestrator.md"
+  responsibilities:
+    - "分派研究任務並設定研究主題與範圍"
+    - "確保 Phase 2 各 Agent 真正獨立分析（第一輪提交前互不可見）"
+    - "收集各 Agent 研究報告並安排 Phase 3 交叉審查與 Phase 4 第二輪辯論"
+    - "強制納入 Agent 05 反方審查意見，禁止以多數決抹除專業分歧"
+    - "要求缺乏證據的 Agent 補充官方資料與時間戳"
+    - "依 100 分制（25/25/20/15/15）與 P0~P3 排定改善提案優先順序"
+    - "嚴格執行人工批准閘門：未獲使用者明確批准前，禁止修改任何正式程式碼或模型"
+
+agents:
+  - id: "AGENT_01"
+    code: "long_term_analyst"
+    name: "Agent 01：長期配置研究員"
+    role: "Long-Term Allocation & Fund Quality Researcher"
+    model: "inherit (Argon Pro)"
+    enabled: true
+    spec_file: "agents/long_term_analyst.md"
+    domains:
+      - "ETF 長期投資適配度 (3~10年模型A)"
+      - "底層資產品質與成分股結構"
+      - "產業分散程度與單一個股集中度"
+      - "總費用率 (TER)、追蹤誤差與追蹤差異"
+      - "配息來源永續性 (54C股利 vs 資本利得價差 vs 平準金)"
+      - "台美跨國稅務耗損 (美股30%預扣稅 vs 台灣二代健保與54C)"
+
+  - id: "AGENT_02"
+    code: "market_timing_analyst"
+    name: "Agent 02：短中期市場時機研究員"
+    role: "Short/Mid-Term Market Timing & Flow Momentum Researcher"
+    model: "inherit (Argon Pro)"
+    enabled: true
+    spec_file: "agents/market_timing_analyst.md"
+    domains:
+      - "ETF 初級市場申贖資金流向 vs 次級市場成交量區分"
+      - "價格趨勢、折溢價陷阱與資金背離"
+      - "台灣14大產業輪動與市場廣度傳導"
+      - "短期 (1~3個月) vs 中期 (3~12個月) vs 長期訊號嚴格分離"
+      - "不同市場環境 (高利率/急跌去槓桿/箱型震盪) 下之進場條件"
+
+  - id: "AGENT_03"
+    code: "data_quality_analyst"
+    name: "Agent 03：數據品質研究員"
+    role: "Data Quality, SLA, Cross-Source Consistency & Timezone Auditor"
+    model: "inherit (Argon Pro)"
+    enabled: true
+    spec_file: "agents/data_quality_analyst.md"
+    domains:
+      - "資料過期檢測 (Freshness SLA) 與更新頻率"
+      - "缺漏值 (Missing Values) 與重複資料稽核（禁止將缺漏當成0或捏造）"
+      - "跨來源數據矛盾偵測與計算公式驗算"
+      - "台灣 (UTC+8, T+2) 與美國 (EST/EDT, T+1) 時區及交易日曆對齊"
+
+  - id: "AGENT_04"
+    code: "risk_analyst"
+    name: "Agent 04：風險管理研究員"
+    role: "Portfolio Risk, Overlap Penetration, FX/Rate & Liquidity Researcher"
+    model: "inherit (Argon Pro)"
+    enabled: true
+    spec_file: "agents/risk_analyst.md"
+    domains:
+      - "年化波動率、最大回撤 (Max Drawdown) 與下行尾端風險"
+      - "跨 ETF 底層成分股穿透重疊 (如 0050 + 0052 + SMH 之台積電現股與ADR疊加)"
+      - "USD/TWD 匯率未避險曝險與美債存續期 (Duration) 利率風險"
+      - "買賣價差 (Spread bps) 流動性風險與槓反 ETF 波動耗損 (Volatility Decay)"
+
+  - id: "AGENT_05"
+    code: "critic_analyst"
+    name: "Agent 05：反方審查研究員"
+    role: "Devil's Advocate, Assumption Challenger & Counter-Example Auditor"
+    model: "inherit (Argon Pro)"
+    enabled: true
+    spec_file: "agents/critic_analyst.md"
+    domains:
+      - "專門尋找 Agent 01~04 與 06 之隱含假設與推論漏洞"
+      - "尋找相反的市場證據與可能造成誤判的因素"
+      - "檢查回測過度擬合 (Overfitting)、存活者偏差與前視偏差 (Look-ahead Bias)"
+      - "每次研究強制提出至少一項可能推翻原方案的具體反例"
+      - "強制四項標記：支持證據 / 反對證據 / 尚未驗證的假設 / 無法確認的部分"
+
+  - id: "AGENT_06"
+    code: "system_engineer"
+    name: "Agent 06：系統架構與測試工程師"
+    role: "Software Architecture, UI/UX Readability & Automated Testing Engineer"
+    model: "inherit (Argon Pro)"
+    enabled: true
+    spec_file: "agents/system_engineer.md"
+    domains:
+      - "ETF 投資決策中心程式碼品質、重複邏輯與模組依賴檢查"
+      - "SQLite 查詢效能、API 錯誤處理與離線降級保護"
+      - "UI/UX 可讀性、字體層級 (15px+內文)、資訊密度與響應式相容性"
+      - "關鍵功能自動化單元測試套件設計與向後相容性維護"

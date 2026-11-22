@@ -1,0 +1,35 @@
+{
+  "proposal_id": "ETF-IMPROVE-20261122-005",
+  "session_id": "SESSION-20261122-001",
+  "created_at": "2026-11-22T23:14:59+08:00",
+  "proposer_agents": [
+    "AGENT_04",
+    "AGENT_05"
+  ],
+  "priority": "P1",
+  "status": "APPROVED_BY_USER",
+  "title": "個人 ETF 投資組合穿透診斷器新增「美債利率變動 (Δy) × 新台幣匯率變動 (ΔFX)」雙維度互動壓力測試",
+  "current_problem": "目前個人 ETF 投資組合穿透診斷器（第九節）雖已計算美元自然匯率曝險百分比，但針對『美債殖利率波動 × 新台幣匯率升貶』僅提供固定文字描述（例如固定假設台幣升值 5%），無法根據各檔債券 ETF 的『有效存續期間 (`bond_duration_years`，如 00679B 為 16.5 年、LQD 為 8.4 年、SGOV 為 0.1 年)』與股票 ETF 的『Beta 係數』進行量化組合損益壓力試算。",
+  "problem_evidence": "• SQLite `etf_daily_metrics` 已具備完整的 `bond_duration_years`（0.1 ~ 16.5 年）與 `beta_vs_market`（0.02 ~ 3.15），但前端 `renderUserPortfolioAnalysis()` (L4752) 尚未將 `bond_duration_years` 納入加權存續期與利率敏感度計算！",
+  "proposed_change": "在 `renderUserPortfolioAnalysis()` 中利用既有 SQLite `bond_duration_years` 與 `beta_vs_market` 欄位，自動計算組合加權有效存續期（Portfolio Effective Duration）與組合加權 Beta，並直接輸出三大情境量化預估損益百分比（% 與萬元）：\n• 情境 A（美債殖利率 -60bps 降息＋台美股市 +10%）\n• 情境 B（美債殖利率 +50bps 鷹派反彈＋半導體股市 -10%）\n• 情境 C（新台幣由 32.92 升值 5% 至 31.27 元之匯兌衝擊）",
+  "diff_preview": "--- a/frontend/index.html\n+++ b/frontend/index.html\n@@ -4765,4 +4765,6 @@\n+  weightedDuration += (w / 100) * (e.bond_duration_years || 0);\n+  weightedBeta += (w / 100) * (e.beta_vs_market || 0);\n",
+  "expected_effect": "讓持有債券 ETF（00937B/00679B/TLT/SGOV）與股票 ETF 的使用者能精準看到組合的加權存續期（年）與三大情境下的量化預估淨值波動金額。",
+  "affected_modules": [
+    "frontend/index.html (renderUserPortfolioAnalysis)"
+  ],
+  "potential_side_effects": "線性存續期近似公式（`-Duration × Δy`）在極端利率變動下未計入凸性（Convexity），需註明為一階存續期近似推估。",
+  "implementation_difficulty": "低",
+  "testing_plan": "載入範例持倉（0050+0052+SMH+00878+00937B）驗證加權存續期與情境損益計算正確性。",
+  "rollback_plan": "還原 `renderUserPortfolioAnalysis()`。",
+  "score_breakdown": {
+    "data_and_evidence_reliability": 24,
+    "expected_improvement_value": 23,
+    "risk_control": 20,
+    "technical_feasibility": 15,
+    "system_compatibility": 15,
+    "total_score": 97,
+    "scoring_rationale": "直接活化資料庫既有的 `bond_duration_years` 與 `beta_vs_market` 欄位，大幅提升風險管理的量化深度。"
+  },
+  "user_decision_at": "2026-11-22T23:15:00+08:00",
+  "user_decision_note": "使用者明確批准全部提案，於隔離分支 proposal/ETF-IMPROVE-20261122-all 實作"
+}

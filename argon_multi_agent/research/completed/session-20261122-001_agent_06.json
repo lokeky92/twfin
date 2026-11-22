@@ -1,0 +1,13 @@
+{
+  "agent_id": "AGENT_06",
+  "agent_name": "Agent 06：系統架構與測試工程師",
+  "role": "Software Architecture, UI/UX Readability & Automated Testing Engineer",
+  "submitted_at": "2026-11-22T23:20:40+08:00",
+  "data_timestamp_used": "Codebase Static Analysis (1125 lines in etf_engine.py, 5927 lines in index.html)",
+  "current_system_problems": "經對專案程式碼進行靜態架構與工程品質掃描，發現以下 5 項具體工程問題：\n1. 【重複程式碼與重複網路請求（Duplicate Network I/O & Helpers）】：\n   `backend/etf_engine.py`（L18-L40, L95-L118）與 `backend/live_api_connector.py`（L24-L46, L128-L160）完全重複定義了 `_fetch_json`、`_to_float`、`_to_int`，而且在 `run_pipeline.py` 執行時，`live_api_connector.py` 先抓了一次證交所 `T86`（約 1,000+ 筆 JSON）與櫃買中心 `tpex_3insti_daily_trading`，緊接著 `etf_engine.py` 又重複發起 HTTP 請求抓了一模一樣的 `T86` 與 `tpex_3insti_daily_trading`！這造成 `/api/probe_sources` 同步等待時間加倍（約 8~15 秒）。\n2. 【吞沒例外錯誤處理（Silent Exception Swallowing）】：\n   `backend/etf_engine.py` L106 與 L118 使用了 `except Exception: pass`，若證交所 T86 API 改版或連線超時，系統不會寫入 `ingestion_audit_logs`，導致靜默降級而難以追查。\n3. 【前端單一檔案膨脹與資料耦合】：\n   `frontend/index.html` 已達 5927 行，其中部分總經摘要數字（如第一區全球市場環境的 4 張大字卡）在 JS 中為模板字串，尚未完全綁定 `STATE.macro_latest` 與 `STATE.etf_center` 的動態計算值。\n4. 【缺少自動化迴歸測試套件（Zero Unit Tests for ETF & Multi-Agent）】：\n   目前專案沒有 `tests/` 自動化測試腳本，無法自動驗證『模型 A/B 分數區間 0~100』、『槓反 ETF 強制隔離』、『跨市場持股重疊矩陣對稱性』以及『多代理唯讀權限鎖』。",
+  "research_evidence": "• 程式碼實證 1：`backend/live_api_connector.py` L132 與 `backend/etf_engine.py` L97 皆呼叫 `https://www.twse.com.tw/rwd/zh/fund/T86`。\n• 程式碼實證 2：`backend/etf_engine.py` L106 `except Exception: pass` 及 L118 `except Exception: pass`。\n• 檔案規模實證：`frontend/index.html` 共 5927 行；`backend/etf_engine.py` 共 1125 行。",
+  "identified_defects": "缺陷 A6-1：`etf_engine.py` 與 `live_api_connector.py` 重複請求 `T86` 與 `tpex_3insti_daily_trading`，浪費 50% 網路 I/O 時間且可能觸發證交所頻率限制（Rate Limit）。\n缺陷 A6-2：`etf_engine.py` 存在 `except Exception: pass` 靜默吞錯。\n缺陷 A6-3：缺乏自動化測試套件（`unittest`）。",
+  "improvement_suggestions": "建議提案 1（消除重複網路請求並改由 SQLite 已入庫資料或共享快取讀取）：在 `etf_engine.py` 中優先讀取 `live_api_connector` 剛寫入的法人快取或記錄錯誤至 `ingestion_audit_logs`，將 `/api/probe_sources` 延遲縮短 40% 以上。\n建議提案 2（建立完整自動化測試套件 `argon_multi_agent/tests/test_multi_agent_governance.py`）：在不修改正式程式碼的前提下，先建立涵蓋 8 大治理與資料一致性檢驗的自動化測試。",
+  "expected_effects": "大幅降低證交所 API 同步耗時與被封鎖風險，並透過自動化測試確保每次修改皆有回歸驗證保護。",
+  "potential_risks": "重構共用模組時若改變匯入路徑，可能影響 `run_pipeline.py` 與 `export_standalone.py`，故必須保持現有函式簽章 100% 向後相容。"
+}

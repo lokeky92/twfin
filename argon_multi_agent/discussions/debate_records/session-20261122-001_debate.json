@@ -1,0 +1,125 @@
+{
+  "session_id": "SESSION-20261122-001",
+  "topic": "台美 ETF 雙軌評分模型、跨時區數據品質、跨國持股穿透重疊與系統架構全面體檢",
+  "created_at": "2026-11-22T23:20:40+08:00",
+  "phase3_cross_reviews": [
+    {
+      "reviewer_id": "AGENT_01",
+      "reviewer_name": "Agent 01：長期配置研究員",
+      "target_agent_id": "AGENT_04",
+      "target_topic": "審查 Agent 04 提出的『跨市場台積電 (2330 vs TSM ADR) 實體正規化重疊計算』",
+      "review_stance": "STRONG_SUPPORT_WITH_REFINEMENT (強烈支持並補充長期配置視角)",
+      "comment": "我高度認同 Agent 04 發現的『0050 + SMH 台積電重疊度顯示 0%』漏洞。從長期配置（模型 A）角度補充：不僅 `2330` 與 `TSM` 需要映射為同一實體 `ENTITY_TSMC`，台灣掛牌的 `00679B (元大美債20年)` 與美國掛牌的 `TLT (iShares 20+ Year Treasury)` 底層皆為 `US_TREASURY_20Y`，建議在正規化映射表中一併納入常見的跨國雙胞胎資產（如 `2330 <-> TSM`、`00679B <-> TLT`、`00635U <-> GLD` 黃金曝險），讓模型 A 的『資產互補性（15%權重）』能自動根據真實底層實體重疊度扣分。"
+    },
+    {
+      "reviewer_id": "AGENT_02",
+      "reviewer_name": "Agent 02：短中期市場時機研究員",
+      "target_agent_id": "AGENT_03",
+      "target_topic": "審查 Agent 03 提出的『台美跨時區 15.5 小時收盤時間差與 T+2/T+1 日曆問題』",
+      "review_stance": "SUPPORT_AND_EXTEND (支持並延伸至短線動能訊號修正)",
+      "comment": "Agent 03 點出了關鍵痛點！在 2026-11-20 當天，台股 13:30 收盤時費城半導體還沒開盤；11/20 深夜美股費半暴跌 -10.67%（SMH 跌 -9.8%、SOXL 跌 -31.2%）。如果使用者在 11/21 早上台股開盤前看系統，會誤以為『為什麼美股 SMH 跌了 9.8%，台股 0052 只跌 2.15% 好像很抗跌？』。因此在模型 B（短中期進場時機）中，當美股隔夜費半或 Nasdaq 出現單日超過 ±3% 的劇烈波動，且台股尚未開盤反映時，台股科技 ETF（0050/0052/00891/00631L）必須自動亮起『⚡ 美股隔夜跳空預警（Overnight Gap Warning）』！"
+    },
+    {
+      "reviewer_id": "AGENT_03",
+      "reviewer_name": "Agent 03：數據品質研究員",
+      "target_agent_id": "AGENT_01",
+      "target_topic": "審查 Agent 01 提出的『動態計算美股 30% 股息預扣稅與高股息 54C 覆蓋率』",
+      "review_stance": "CONDITIONAL_SUPPORT_DATA_WARNING (有條件支持，但提醒資料頻率限制)",
+      "comment": "Agent 01 的稅後實質成本公式非常合理，但從數據品質角度必須提醒兩項例外：\n1. 美股債券 ETF（如 `TLT`, `SGOV`, `LQD`）的配息屬於美國稅法上的『投資組合利息（Portfolio Interest）』而非股利（Dividend），本質免徵 30% 預扣稅（透過具備 QI 資格券商自動免扣或隔年退稅），因此 Agent 01 的公式必須嚴格限定 `if listing_market == 'US' and asset_class in ('股票', 'REITs不動產')` 才計入 30% 不可退預扣稅，不可誤扣美債 ETF！\n2. 台灣高股息 ETF 的配息組成（54C 股利 vs 資本利得 vs 平準金）是每季/每月除息前夕由投信公告，並非每日變動，因此必須標註其更新頻率為『每季/每次除息公告更新』。"
+    },
+    {
+      "reviewer_id": "AGENT_04",
+      "reviewer_name": "Agent 04：風險管理研究員",
+      "target_agent_id": "AGENT_02",
+      "target_topic": "審查 Agent 02 提出的『將模型 B 拆分為 1~3M 短期戰術與 3~12M 中期景氣雙尺度』",
+      "review_stance": "SUPPORT_WITH_RISK_CAP (支持，但要求加入下行風險一票否決上限)",
+      "comment": "我支持 Agent 02 將短期（1~3M）與中期（3~12M）訊號分開，但從風險管理角度，如果只用加權平均，當中期基本面極好（90分）而短期風險極高（30分）時，平均出來仍有 60 分。我要求加入『尾部風險上限鎖（Tail-Risk Cap）』：當單一 ETF 的折溢價超過 +1.5%（嚴重溢價追高風險）或為槓桿反向產品，短期進場分數上限不得超過 55 分。"
+    },
+    {
+      "reviewer_id": "AGENT_06",
+      "reviewer_name": "Agent 06：系統架構與測試工程師",
+      "target_agent_id": "AGENT_03",
+      "target_topic": "審查 Agent 03 提出的『禁止對未滿 3/5 年 ETF 使用 r1*0.7 外推歷史績效曲線』",
+      "review_stance": "STRONG_SUPPORT_FAST_FIX (完全同意，且技術實作乾淨無副作用)",
+      "comment": "我完全同意 Agent 03 的發現！在 `frontend/index.html` L3988-L3989 中，當時為了畫出 6 個時間點的 SVG 折線圖，對 `return_3y_ann_pct === null` 的 ETF 用了 fallback 乘數。從工程角度，我們只需要檢查 `e.inception_date`，若成立年分晚於該時間節點（例如 00937B 成立於 2023-12、00400A 成立於 2025-08），在 SVG 上只繪製成立後的真實節點，並在圖上標示『★ 成立起點』，既誠實又不會造成 SVG 報錯。"
+    },
+    {
+      "reviewer_id": "AGENT_05",
+      "reviewer_name": "Agent 05：反方審查研究員 (強制全局質疑)",
+      "target_agent_id": "ALL_AGENTS (AGENT_01, AGENT_02, AGENT_03, AGENT_04, AGENT_06)",
+      "target_topic": "對 Agent 01~04 與 06 所有主要提案進行反方壓力審查與反例挑戰",
+      "review_stance": "CHALLENGE_AND_COUNTER_EXAMPLE (提出三大反方質疑與具體推翻反例)",
+      "critic_structured_blocks": {
+        "supporting_evidence": "1. 認可 Agent 03 抓出『未滿 3/5 年 ETF (00937B/00400A) 前端 SVG 圖表使用 r1*0.7 外推歷史淨值』是確鑿的程式碼缺陷（L3988），必須修正。\n2. 認可 Agent 04 抓出『2330 與 TSM ADR 因代號不同導致 0050 + SMH 重疊度算成 0%』是確鑿的實體映射缺陷（L4636），必須修正。\n3. 認可 Agent 06 抓出『etf_engine.py 與 live_api_connector.py 重複抓取 T86 API 且 except pass 靜默吞錯』是確鑿的工程缺陷。",
+        "counter_evidence": "1. 【反對 Agent 01 對美股 30% 股息預扣稅做一刀切線性扣分】：\n   • 反例證據：在 2022 年與 2026 年 11 月那斯達克/費半高估值崩跌期，`SCHD` 雖然每年被扣 1.06% 美股股息稅，但因本益比僅 16.8 倍且零科技股泡沫，在 11/20 費半暴跌 -10.67% 當天逆勢上漲 +0.42%，最大回撤僅 -8.9%（遠優於 QQQ 的 -16.5% 與 SMH 的 -24.8%）。若因為 1% 預扣稅就把 SCHD 的長期配置分數大幅砍低，會讓台灣投資人錯失唯一能與台股半導體高度互補（相關性低、零台積電重疊）的美國價值龍頭 ETF！\n2. 【反對 Agent 02 將『價跌＋散戶大買』一律視為盲目接刀或一律視為底部支撐】：\n   • 反例證據 A（接刀反例）：`00679B (元大美債20年)` 在 2023~2026 年一路下跌過程中，台灣散戶初級市場淨申購超過 2,000 億元，結果越買越跌，最大回撤達 -34.8%。\n   • 反例證據 B（成功承接反例）：`0050 (元大台灣50)` 在過往台股回檔時散戶大舉申購，隨後受惠台積電獲利創高而屢創新高。\n   • 結論：單看『初級市場淨申購金額』根本無法區分是 0050 還是 00679B！關鍵在於『底層資產獲利趨勢（EPS/殖利率曲線方向）』是否與資金流向一致。",
+        "unverified_assumptions": "1. Agent 01 假設『過去配息中 54C 股利佔比高，未來配息就一定穩定』——尚未驗證當景氣循環股（如航運或成熟製程晶圓代工）獲利下修時，54C 股利本身也會腰斬。\n2. Agent 02 假設『拆分 1~3M 與 3~12M 分數能提高進場勝率』——尚未在 2018、2020、2022 空頭樣本外回測中驗證其訊號換手率與交易摩擦成本。",
+        "unverifiable_or_missing_data": "1. 目前免費公開 API 無法取得 28 檔 ETF 每日完整的『全部成分股（例如 VTI 3,600 檔、LQD 2,500 檔債券）』，資料庫 `etf_holdings` 僅存前十大核心持股（涵蓋率 30.6% ~ 100%），因此任何跨 ETF 重疊度計算都必須誠實標註為『前十大核心持股重疊度（Top-10 Core Holdings Overlap）』，不得宣稱為 100% 全持倉重疊度！"
+      },
+      "comment": "總結反方審查立場：我批准 Agent 03（禁止未滿期 ETF 曲線外推）、Agent 04（跨市場 2330/TSM 實體正規化重疊，但必須標註為『前十大核心持股重疊度』）與 Agent 06（消除重複 T86 API 請求與補齊測試）；但我強烈要求 Agent 01 修改稅務扣分方案（應改為並列顯示『稅前總報酬 vs 台灣投資人稅後淨殖利率』，而非粗暴砍低 SCHD 總分），並要求 Agent 02 在短中期模型中必須將『資金流向』與『底層基本面方向』交叉驗證！"
+    }
+  ],
+  "phase4_rebuttals": [
+    {
+      "agent_id": "AGENT_01",
+      "agent_name": "Agent 01：長期配置研究員",
+      "responding_to": [
+        "AGENT_03",
+        "AGENT_05"
+      ],
+      "decision": "MODIFY (接納反方 Agent 05 與數據研究員 Agent 03 意見，修正原方案)",
+      "reason": "1. 接納 Agent 03 提醒：美國債券 ETF（TLT/SGOV/LQD）配息屬 Portfolio Interest 免 30% 股息稅，稅務耗損公式嚴格限制於美股股票型與 REITs。\n2. 接納 Agent 05 反例：SCHD 對台灣重倉科技股的投資人具有極高互補價值（互補性 90 分）。因此我修正方案：不在模型 A 總分中粗暴大幅扣減 SCHD 分數，而是新增一個明確的量化指標『台灣投資人稅後實質年化總成本（Effective Tax & Fee Drag % = TER + 預扣稅損）』並於卡片第二層與比較器中並列顯示，同時保留高股息 ETF 的『54C 真實股利覆蓋率警語』。"
+    },
+    {
+      "agent_id": "AGENT_02",
+      "agent_name": "Agent 02：短中期市場時機研究員",
+      "responding_to": [
+        "AGENT_04",
+        "AGENT_05"
+      ],
+      "decision": "MODIFY (接納 Agent 04 風險上限鎖與 Agent 05 00679B 散戶接刀反例)",
+      "reason": "Agent 05 提出的『00679B 散戶越跌越買卻套牢 3 年 vs 0050 越跌越買創高』反例非常精闢！單純的初級市場淨申購確實不能直接給高分。因此我修正提案：將模型 B 拆分為『短期戰術訊號 (1~3M)』與『中期基本面環境 (3~12M)』雙指標，且規定唯有當『初級市場淨流入 > 0』且『底層基本面/利率趨勢分數 >= 70』同時成立時，資金流入才視為有效支撐；並加入 Agent 04 要求的『溢價 > 1.0% 或隔夜美股費半重挫 > 3% 時自動觸發短線警示標籤』。"
+    },
+    {
+      "agent_id": "AGENT_03",
+      "agent_name": "Agent 03：數據品質研究員",
+      "responding_to": [
+        "AGENT_05",
+        "AGENT_06"
+      ],
+      "decision": "MAINTAIN_AND_ENHANCE (維持 P0 數據真實性修正方案，並納入 Agent 05 前十大涵蓋率揭露)",
+      "reason": "所有 Agent 均無異議支持消除『成立未滿 3/5 年 ETF 之歷史績效曲線外推』與『標註台美跨時區收盤時間戳 (UTC+8 T+2 vs EST T+1)』。同時我將 Agent 05 提出的『前十大核心持股涵蓋率 (30.6%~100%) 誠實標註』一併納入數據品質改善提案。"
+    },
+    {
+      "agent_id": "AGENT_04",
+      "agent_name": "Agent 04：風險管理研究員",
+      "responding_to": [
+        "AGENT_01",
+        "AGENT_05"
+      ],
+      "decision": "MODIFY (擴充跨市場實體映射表並採納 Agent 05 之『前十大核心持股重疊度』精確命名)",
+      "reason": "採納 Agent 01 與 Agent 05 的建議：建立 `CANONICAL_ENTITY_MAP` 將 `2330` 與 `TSM` 統一映射為 `TSMC (台積電 2330/TSM ADR)`，將 `00679B` 與 `TLT` 底層統一映射為 `US_TREASURY_20Y`，將 `00635U` 與 `GLD` 統一映射為 `GOLD_BULLION`；且在 UI 上明確標示為『前十大核心底層資產重疊度（含跨國 ADR 穿透）』，既解決 0050+SMH 漏算問題，又符合資料覆蓋率事實。"
+    },
+    {
+      "agent_id": "AGENT_05",
+      "agent_name": "Agent 05：反方審查研究員",
+      "responding_to": [
+        "AGENT_01",
+        "AGENT_02",
+        "AGENT_03",
+        "AGENT_04",
+        "AGENT_06"
+      ],
+      "decision": "MAINTAIN (確認 Agent 01/02/04 已修正過度簡化假設，但保留『長天期美債防禦分類分歧』與『回測樣本期間限制聲明』)",
+      "reason": "Agent 01、02、04 已針對我的反例做出合理修正。但我仍堅持保留一項獨立反方意見：『存續期超過 15 年的長天期債券 ETF (00679B/TLT/00937B) 年化波動度達 14%~16%，絕對不能與存續期 0.1 年的超短債 (SGOV，波動度 0.4%) 混在同一個【防禦型債券】概念下而不加區分』，此點必須作為獨立改善提案提交使用者裁決。"
+    },
+    {
+      "agent_id": "AGENT_06",
+      "agent_name": "Agent 06：系統架構與測試工程師",
+      "responding_to": [
+        "AGENT_05"
+      ],
+      "decision": "MAINTAIN (維持消除重複 T86 請求、補齊異常日誌與建立 8 項治理自動化測試提案)",
+      "reason": "工程改善方案不涉及主觀投資假設，且能確保多代理系統的唯讀權限鎖與業務邏輯受自動化單元測試保護。"
+    }
+  ]
+}

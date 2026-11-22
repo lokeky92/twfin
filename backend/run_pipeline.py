@@ -51,8 +51,9 @@ def main():
         seed_and_compute_all()
         populate_phase2_to_phase6()
         live_res = run_live_ingestion()
+        shared_map = live_res.pop("shared_insti_map", None) if isinstance(live_res, dict) else None
         print("Live OpenAPI Ingestion:", live_res)
-        build_and_compute_etf_center()
+        build_and_compute_etf_center(shared_insti_map=shared_map)
         export_standalone()
         print_health_summary()
     elif args.probe:

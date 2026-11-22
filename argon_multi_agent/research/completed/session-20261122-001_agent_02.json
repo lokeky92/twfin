@@ -1,0 +1,13 @@
+{
+  "agent_id": "AGENT_02",
+  "agent_name": "Agent 02：短中期市場時機研究員",
+  "role": "Short/Mid-Term Market Timing & Flow Momentum Researcher",
+  "submitted_at": "2026-11-22T23:20:40+08:00",
+  "data_timestamp_used": "2026-11-20 TWSE 0099P / T86 / Macro Snapshot",
+  "current_system_problems": "1. 短期（1~3 個月）與中期（3~12 個月）訊號在模型 B 中被混為單一分數 `total_score_b_short_mid`！例如 0050 與 0052 在『中期（3~12M）』受惠台灣 10 月外銷訂單 +78.3%、MOPS 成分股營收年增 +55.4%~+58.2% 極度強勁；但在『短期（1~4 週）』卻面臨 11/20 費半單日崩跌 -10.67%、外資台指期淨空單 -98,650 口與融資餘額 8,343 億歷史新高的去槓桿風險。目前模型 B 把五項指標簡單平均（20/20/20/20/20），導致 0050 短中期總分仍達 82.8 分（條件相對有利），掩蓋了極短線技術面與外資期貨空單的劇烈震盪風險。\n2. 初級市場資金流入（`primary_net_flow_value`）被單向視為正面動能：在 `etf_engine.py` 中，0050 單月淨申購 +2,200 億使 `score_b_flow_and_breadth` 高達 96.0 分；然而台灣散戶在 00878 (+185 億)、00919 (+142 億) 貼息下跌時同樣持續逢低申購，若不區分『資金流入伴隨價格抗跌（機構/內資有效承接）』與『資金流入但價格破線且折溢價異常（散戶盲目接刀）』，會高估弱勢 ETF 的進場分數。",
+  "research_evidence": "• 資料庫實證：`etf_dual_scores` 中 0050 `score_b_flow_and_breadth = 96.0`、`score_b_vol_event_downside = 68.0`，簡單平均後 `total_score_b_short_mid = 82.8`（結論：條件相對有利）；同時 `institutional_flows` 表記錄外資 11 月現貨賣超 -5,494.6 億元、台指期未平倉空單 -98,650 口。\n• 價量背離實證：`etf_daily_metrics` 中 00919 `primary_net_flow_value = +142.0 億`（正流入），但 `change_pct = -0.88%` 且處於除息後貼息整理；SMH `change_pct = -9.8%`、`primary_net_flow_value = -14.5 億美元`。",
+  "identified_defects": "缺陷 A2-1：違反第二節『必須區分短期、中期及長期訊號，不可將不同時間尺度混為一談』——模型 B 未能將『短期戰術時機（1~3M Tactical）』與『中期景氣環境（3~12M Cyclical）』拆開呈現。\n缺陷 A2-2：缺乏『資金流向 vs 價格趨勢背離偵測器（Flow-Price Divergence Detector）』與『折溢價過熱攔截器（Premium > +1.0% 禁止追高）』。",
+  "improvement_suggestions": "建議提案 1（模型 B 短中期雙尺度拆解）：在保留 `total_score_b_short_mid` 相容性的同時，拆分為 `subscore_b1_tactical_1_3m`（權重聚焦：折溢價、買賣價差、外資期貨空單、20日波動與費半事件衝擊）與 `subscore_b2_cyclical_3_12m`（權重聚焦：MOPS 營收 YoY 穿透、國銀放款利率、景氣燈號與 ERP 股權風險溢酬）。\n建議提案 2（資金與價格背離矩陣）：將資金流向與價格趨勢分為四象限：(I) 價強＋淨申購（真順風）、(II) 價跌＋大額淨申購（內資左側逆勢承接，需標示左側分批而非右側追價）、(III) 價漲＋淨贖回（主力逢高調節背離）、(IV) 價跌＋淨贖回（如 00400A -48億，雙殺撤退）。",
+  "expected_effects": "讓使用者一眼看懂『中期(3~12M)基本面極佳、但短期(1~3M)因外資空單與費半重挫宜左側分批慢買』，徹底消除時間尺度混淆。",
+  "potential_risks": "若新增子指標過多，可能增加前端卡片視覺負擔，必須將細分拆解放在卡片第二層或專業模式。"
+}

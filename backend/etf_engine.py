@@ -38,10 +38,11 @@ def _to_int(val):
     f = _to_float(val)
     return int(f) if f is not None else None
 
-def build_and_compute_etf_center():
+def build_and_compute_etf_center(shared_insti_map=None):
     init_database()
     conn = get_connection()
     cur = conn.cursor()
+    run_ts = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
 
     # =========================================================================
     # 1. 即時從證交所 MI_INDEX(type=0099P) 與 ETFRank 拉取台灣掛牌 ETF 真實收盤行情與定期定額戶數
@@ -80,6 +81,10 @@ def build_and_compute_etf_center():
                     }
     except Exception as e:
         print("TWSE 0099P Live Fetch Note:", e)
+        cur.execute("""
+            INSERT INTO ingestion_audit_logs (run_timestamp, task_name, source_id, status, records_affected, message)
+            VALUES (?, 'ETF_MI_INDEX_0099P', 'SRC_TWSE', 'FALLBACK_USED', 0, ?)
+        """, (run_ts, f"TWSE 0099P 連線降級備援 ({type(e).__name__}): {e}"))
 
     try:
         er = _fetch_json("https://openapi.twse.com.tw/v1/exchangeReport/ETFRank")
@@ -90,32 +95,46 @@ def build_and_compute_etf_center():
                 etf_rank_map[ecode] = accts
     except Exception as e:
         print("TWSE ETFRank Live Fetch Note:", e)
+        cur.execute("""
+            INSERT INTO ingestion_audit_logs (run_timestamp, task_name, source_id, status, records_affected, message)
+            VALUES (?, 'ETF_RANK_REGULAR_SAVING', 'SRC_TWSE', 'FALLBACK_USED', 0, ?)
+        """, (run_ts, f"TWSE ETFRank 連線降級備援 ({type(e).__name__}): {e}"))
 
-    # 讀取 T86 與 TPEx 3Insti 已入庫或即時的三大法人 ETF 買賣超
+    # 讀取 T86 與 TPEx 3Insti 已入庫或共享快取的三大法人 ETF 買賣超 (提案 ETF-IMPROVE-20261122-006：消除重複網路請求與靜默吞錯)
     insti_etf_map = {}
-    try:
-        t86 = _fetch_json("https://www.twse.com.tw/rwd/zh/fund/T86?selectType=ALL&response=json")
-        for row in t86.get("data", []):
-            if len(row) >= 19:
-                code = str(row[0]).strip()
-                f_sh = (_to_int(row[4]) or 0) + (_to_int(row[7]) or 0)
-                i_sh = _to_int(row[10]) or 0
-                d_sh = _to_int(row[11]) or 0
-                insti_etf_map[code] = {"f": f_sh, "i": i_sh, "d": d_sh}
-    except Exception:
-        pass
+    if shared_insti_map and isinstance(shared_insti_map, dict):
+        for code, info in shared_insti_map.items():
+            insti_etf_map[code] = {"f": info.get("f", 0), "i": info.get("i", 0), "d": info.get("d", 0)}
+    else:
+        try:
+            t86 = _fetch_json("https://www.twse.com.tw/rwd/zh/fund/T86?selectType=ALL&response=json")
+            for row in t86.get("data", []):
+                if len(row) >= 19:
+                    code = str(row[0]).strip()
+                    f_sh = (_to_int(row[4]) or 0) + (_to_int(row[7]) or 0)
+                    i_sh = _to_int(row[10]) or 0
+                    d_sh = _to_int(row[11]) or 0
+                    insti_etf_map[code] = {"f": f_sh, "i": i_sh, "d": d_sh}
+        except Exception as e:
+            cur.execute("""
+                INSERT INTO ingestion_audit_logs (run_timestamp, task_name, source_id, status, records_affected, message)
+                VALUES (?, 'ETF_T86_INSTI_FLOW', 'SRC_TWSE', 'FALLBACK_USED', 0, ?)
+            """, (run_ts, f"TWSE T86 ETF 法人籌碼連線降級備援 ({type(e).__name__}): {e}"))
 
-    try:
-        tpex_3i = _fetch_json("https://www.tpex.org.tw/openapi/v1/tpex_3insti_daily_trading")
-        for r in tpex_3i:
-            code = str(r.get("SecuritiesCompanyCode", "")).strip()
-            if code:
-                f_sh = _to_int(r.get("ForeignInvestorsInclude MainlandAreaInvestors-Difference") or r.get("Foreign Investors include Mainland Area Investors (Foreign Dealers excluded)-Difference")) or 0
-                i_sh = _to_int(r.get("SecuritiesInvestmentTrustCompanies-Difference")) or 0
-                d_sh = _to_int(r.get("Dealers-Difference")) or 0
-                insti_etf_map[code] = {"f": f_sh, "i": i_sh, "d": d_sh}
-    except Exception:
-        pass
+        try:
+            tpex_3i = _fetch_json("https://www.tpex.org.tw/openapi/v1/tpex_3insti_daily_trading")
+            for r in tpex_3i:
+                code = str(r.get("SecuritiesCompanyCode", "")).strip()
+                if code:
+                    f_sh = _to_int(r.get("ForeignInvestorsInclude MainlandAreaInvestors-Difference") or r.get("Foreign Investors include Mainland Area Investors (Foreign Dealers excluded)-Difference")) or 0
+                    i_sh = _to_int(r.get("SecuritiesInvestmentTrustCompanies-Difference")) or 0
+                    d_sh = _to_int(r.get("Dealers-Difference")) or 0
+                    insti_etf_map[code] = {"f": f_sh, "i": i_sh, "d": d_sh}
+        except Exception as e:
+            cur.execute("""
+                INSERT INTO ingestion_audit_logs (run_timestamp, task_name, source_id, status, records_affected, message)
+                VALUES (?, 'ETF_TPEX_3INSTI_FLOW', 'SRC_TPEX', 'FALLBACK_USED', 0, ?)
+            """, (run_ts, f"TPEx 上櫃 ETF 法人籌碼連線降級備援 ({type(e).__name__}): {e}"))
 
     # =========================================================================
     # 2. 建立台美 ETF 完整主檔 (etf_master) — 涵蓋台灣 17 子類與美國 23 子類核心標的 + 槓反隔離
