@@ -839,13 +839,26 @@
     }
 
     /* =====================================================================
-       📱 全面響應式設計 (Responsive Tablet & Mobile Overhaul)
-       徹底解決手機版橫向破版、導覽列擠壓、卡片超出螢幕與桑基圖過小問題
+       📱 全面響應式設計 (Responsive Tablet & Mobile Overhaul v2)
+       1. 徹底解決「右邊明顯不對稱 / 橫向撐爆問題」：消除所有 grid/flex 子項目 min-width:auto 溢出與大字長字串擠壓
+       2. 徹底解決「頂部導覽 nav 蓋過畫面一半問題」：手機版改為超緊湊單頂欄 + 底部固定 App 4大模式導航列 (Bottom Tab Bar)
        ===================================================================== */
+    .etf-clean-card, .card, .vital-card, .lb-card, .story-card, .sankey-wrapper, .pulse-hero, .pulse-pill {
+      min-width: 0;
+      max-width: 100%;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    /* 手機底部固定 App 導航列 (桌面版隱藏，手機版顯示) */
+    .mobile-bottom-nav {
+      display: none;
+    }
+
     @media (max-width: 1024px) {
-      main { width: 100%; padding: 16px 16px 70px 16px; }
+      main { width: 100%; max-width: 100%; padding: 14px 14px 80px 14px; margin: 0; }
       .etf-grid-2, .etf-grid-4, .grid-2, .grid-4, .grid-8cards, .stories-grid, .leaderboards-grid {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       }
       .etf-layer2-split {
         grid-template-columns: 1fr;
@@ -853,62 +866,124 @@
     }
 
     @media (max-width: 768px) {
-      body { font-size: 15px; line-height: 1.65; }
-      header {
-        padding: 10px 12px;
-        gap: 8px;
-        position: relative; /* 手機上不強制佔用半個螢幕高度 */
-      }
-      .brand-title { font-size: 16.5px; flex-wrap: wrap; gap: 6px; }
-      .brand-sub { font-size: 12px; line-height: 1.4; }
-
-      /* 頂部四大模式切換器在手機上改為 2x2 整齊大按鈕網格 */
-      .mode-switcher {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+      html, body {
         width: 100%;
-        gap: 6px;
-        padding: 5px;
+        max-width: 100%;
+        overflow-x: hidden;
+        font-size: 14.5px;
+        line-height: 1.6;
       }
-      .mode-btn {
-        padding: 9px 8px;
-        font-size: 13px;
-        text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+
+      /* 1. 頂部 Header 極簡化：只留一行品牌標題與同步按鈕，高度僅約 46px，絕不蓋住畫面！ */
+      header {
+        position: relative !important;
+        padding: 8px 12px !important;
+        gap: 6px !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+      }
+      .brand-title {
+        font-size: 15px !important;
+        font-weight: 800;
+        gap: 6px;
+      }
+      .brand-title .badge {
+        display: none !important; /* 手機頂欄隱藏次要 badge 保持單行清爽 */
+      }
+      .brand-sub {
+        display: none !important; /* 手機頂欄隱藏英文副標，避免頂部太高 */
+      }
+      /* 頂部原本佔空間的 4 大顆模式按鈕與次要控制項移到底部固定 App 導航列 */
+      header .mode-switcher {
+        display: none !important;
+      }
+      .header-controls #motionToggleBtn,
+      .header-controls #activeModelBadge {
+        display: none !important;
       }
       .header-controls {
-        width: 100%;
-        justify-content: space-between;
-        gap: 6px;
+        width: auto !important;
+        margin: 0 !important;
+      }
+      .header-controls .btn {
+        padding: 5px 10px !important;
+        font-size: 12px !important;
       }
 
-      /* 快速定位次導覽列在手機改為單行橫向滑動膠囊列 (不佔垂直高度) */
-      .quick-jump-bar {
-        position: sticky;
-        top: 0;
-        z-index: 195;
-        padding: 8px 12px;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        gap: 8px;
+      /* 2. 手機專用底部固定 App 導航列 (高度 58px，大拇指一鍵切換四大中心) */
+      .mobile-bottom-nav {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr);
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 60px;
+        background: rgba(9, 14, 26, 0.97);
+        backdrop-filter: blur(14px);
+        border-top: 1px solid #283a5e;
+        z-index: 480;
+        padding: 4px 6px;
+        gap: 4px;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
       }
-      .quick-jump-bar span, .quick-jump-pill {
+      .mob-nav-btn {
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        color: #94a3b8;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 11.5px;
+        font-weight: 800;
+        cursor: pointer;
+        padding: 4px 2px;
+        line-height: 1.25;
+      }
+      .mob-nav-btn .mob-icon {
+        font-size: 17px;
+        margin-bottom: 2px;
+      }
+      .mob-nav-btn.active-A { background: rgba(16, 185, 129, 0.22); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.5); }
+      .mob-nav-btn.active-B { background: rgba(56, 189, 248, 0.22); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.5); }
+      .mob-nav-btn.active-C { background: rgba(168, 85, 247, 0.22); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.5); }
+      .mob-nav-btn.active-ETF { background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.6); }
+
+      /* 3. 快速定位次導覽列：手機改為不固定 (relative) 或極薄單行橫滑，完全不遮擋閱讀畫面 */
+      .quick-jump-bar {
+        position: relative !important;
+        padding: 7px 12px !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        gap: 6px !important;
+      }
+      .quick-jump-bar span {
+        font-size: 12.5px !important;
         white-space: nowrap;
         flex-shrink: 0;
-        font-size: 13px;
+      }
+      .quick-jump-pill {
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-size: 12.5px !important;
+        padding: 4px 10px !important;
       }
 
+      /* 4. 修正左右絕對對稱！消除 96vw 造成的偏右與溢出，改用 100% 滿寬 + 左右各 12px 對稱內距 */
       main {
-        width: 100%;
-        max-width: 100vw;
-        padding: 12px 10px 80px 10px;
-        overflow-x: hidden;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 12px 12px 86px 12px !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
       }
 
-      /* 所有 Grid 強制在手機上變為 100% 單欄，消滅 580px/380px 橫向破版 */
+      /* 5. 所有網格強制 minmax(0, 1fr)，徹底防止任何內部長表格或 SVG 把右邊撐寬導致不對稱 */
       .etf-grid-2,
       .etf-grid-4,
       .grid-2,
@@ -917,71 +992,86 @@
       .stories-grid,
       .leaderboards-grid,
       .pulse-grid {
-        grid-template-columns: 1fr !important;
-        gap: 14px;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 12px !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
       }
       .heatmap-grid {
-        grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)) !important;
-        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        width: 100% !important;
       }
       .heat-tile {
-        min-height: 142px;
-        padding: 12px 14px;
+        min-height: 136px;
+        padding: 12px !important;
       }
 
       .etf-clean-card, .card, .vital-card, .lb-card, .story-card, .sankey-wrapper, .pulse-hero {
-        padding: 15px 14px;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 14px 14px !important;
         border-radius: 10px;
-        max-width: 100%;
+        box-sizing: border-box !important;
       }
 
       .etf-section-banner, .section-head {
-        margin: 20px 0 12px 0;
+        margin: 18px 0 10px 0;
       }
       .etf-section-title, .section-title {
-        font-size: 18.5px;
+        font-size: 17.5px !important;
         line-height: 1.35;
       }
       .etf-section-sub, .section-desc {
-        font-size: 13.5px;
+        font-size: 13px !important;
       }
       .etf-hero-num, .vital-number {
-        font-size: 24px;
+        font-size: 22px !important;
       }
 
-      /* ETF 分類頁籤在手機改為可橫向滑動或雙欄 */
+      /* 6. ETF 分類頁籤在手機改為 2 欄緊湊網格，左右完全對稱不超出邊界 */
       .etf-cat-tabs {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        width: 100%;
-        padding-bottom: 6px;
-        gap: 8px;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        width: 100% !important;
+        gap: 6px !important;
+        margin-bottom: 10px !important;
       }
       .etf-cat-tab {
-        flex-shrink: 0;
-        padding: 9px 14px;
-        font-size: 14px;
+        width: 100% !important;
+        padding: 8px 8px !important;
+        font-size: 12.5px !important;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #etfTab_ALL {
+        grid-column: 1 / -1;
       }
 
-      /* 搜尋框與下拉選單在手機上自動 100% 滿寬 */
-      #etfSearchInput, #etfConclusionFilter, #liveCompanySearch, select, input[type="text"] {
+      /* 搜尋框與下拉選單在手機上自動 100% 滿寬對稱 */
+      #etfSearchInput, #etfConclusionFilter, #liveCompanySearch, select, input[type="text"], input[type="number"] {
         width: 100% !important;
         max-width: 100% !important;
+        box-sizing: border-box !important;
+        font-size: 14px !important;
       }
 
-      /* ETF 卡片雙軌分數框在手機改為上下堆疊或緊湊並排 */
+      /* ETF 卡片雙軌分數框在手機改為上下堆疊 */
       .etf-dual-score-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        padding: 13px 14px;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 10px;
+        padding: 12px !important;
       }
       .etf-dual-score-left {
         border-right: none;
         border-bottom: 1px solid #1e293b;
         padding-right: 0;
-        padding-bottom: 12px;
+        padding-bottom: 10px;
       }
       .etf-dual-score-right {
         padding-left: 0;
@@ -990,14 +1080,27 @@
         flex-direction: column;
       }
       .etf-layer2-split {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr) !important;
       }
 
-      /* 圖 1、圖 2、圖 3、圖 5 橫條圖在手機上縮減左側文字欄寬度，防止擠出畫面 */
+      /* 圖 1、圖 2、圖 3、圖 5 橫條圖在手機上縮減左側文字欄寬度，防止擠出右邊界 */
       .etf-chart-bar-row {
-        grid-template-columns: 125px 1fr 82px;
-        gap: 6px;
-        font-size: 13px;
+        grid-template-columns: 112px minmax(0, 1fr) 74px !important;
+        gap: 6px !important;
+        font-size: 12.5px !important;
+      }
+
+      /* 桑基圖時間軸步驟文字在手機隱藏中間細項，只留頭尾防止擠爆右側 */
+      .timeline-steps {
+        font-size: 11px !important;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .timeline-steps span:nth-child(2),
+      .timeline-steps span:nth-child(3),
+      .timeline-steps span:nth-child(4),
+      .timeline-steps span:nth-child(5) {
+        display: none;
       }
 
       /* 桑基圖浮動卡片在手機上改為底部全寬卡片 */
@@ -1005,28 +1108,31 @@
         position: fixed;
         left: 10px !important;
         right: 10px !important;
-        bottom: 14px !important;
+        bottom: 68px !important;
         top: auto !important;
         width: auto !important;
-        max-height: 70vh;
+        max-height: 65vh;
         overflow-y: auto;
-        z-index: 450;
+        z-index: 490;
       }
 
       /* 右側滑出式抽屜在手機上 100% 滿版寬度 */
       .drawer-panel {
-        width: 100vw;
-        max-width: 100vw;
-        right: -105vw;
-        padding: 18px 14px;
+        width: 100% !important;
+        max-width: 100% !important;
+        right: -105% !important;
+        padding: 16px 14px 80px 14px !important;
+      }
+      .drawer-panel.open {
+        right: 0 !important;
       }
 
-      /* 回到頂部按鈕在手機縮小避免遮擋內容 */
+      /* 回到頂部按鈕移至底部導航列上方 */
       .back-to-top-fab {
-        right: 14px;
-        bottom: 14px;
-        padding: 9px 14px;
-        font-size: 13px;
+        right: 12px;
+        bottom: 70px;
+        padding: 7px 12px;
+        font-size: 12px;
       }
     }
   </style>
@@ -1061,7 +1167,27 @@
   <div id="globalQuickJumpBar" class="quick-jump-bar"></div>
 
   <!-- 右下角懸浮回到頂部按鈕 -->
-  <button class="back-to-top-fab" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="快速回到頁面頂部">⬆ 回到頂部</button>
+  <button class="back-to-top-fab" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="快速回到頁面頂部">⬆ 頂部</button>
+
+  <!-- 手機專用底部固定 App 導航列 (僅於 <=768px 顯示，完全釋放頂部畫面空間) -->
+  <nav class="mobile-bottom-nav" aria-label="手機底部導覽列">
+    <button id="mobBtnModeA" class="mob-nav-btn active-A" onclick="setAppMode('A')">
+      <span class="mob-icon">🗺️</span>
+      <span>動態地圖</span>
+    </button>
+    <button id="mobBtnModeB" class="mob-nav-btn" onclick="setAppMode('B')">
+      <span class="mob-icon">🔍</span>
+      <span>研究分析</span>
+    </button>
+    <button id="mobBtnModeC" class="mob-nav-btn" onclick="setAppMode('C')">
+      <span class="mob-icon">🗄️</span>
+      <span>專業數據</span>
+    </button>
+    <button id="mobBtnModeETF" class="mob-nav-btn" onclick="setAppMode('ETF')">
+      <span class="mob-icon">🎯</span>
+      <span>ETF決策</span>
+    </button>
+  </nav>
 
   <main>
     <!-- =====================================================================
@@ -1984,6 +2110,16 @@
       document.getElementById('btnModeC').className = 'mode-btn' + (mode === 'C' ? ' active-C' : '');
       const btnEtf = document.getElementById('btnModeETF');
       if (btnEtf) btnEtf.className = 'mode-btn' + (mode === 'ETF' ? ' active-ETF' : '');
+
+      // 同步更新手機底部 App 導覽列高亮狀態
+      const mobA = document.getElementById('mobBtnModeA');
+      const mobB = document.getElementById('mobBtnModeB');
+      const mobC = document.getElementById('mobBtnModeC');
+      const mobE = document.getElementById('mobBtnModeETF');
+      if (mobA) mobA.className = 'mob-nav-btn' + (mode === 'A' ? ' active-A' : '');
+      if (mobB) mobB.className = 'mob-nav-btn' + (mode === 'B' ? ' active-B' : '');
+      if (mobC) mobC.className = 'mob-nav-btn' + (mode === 'C' ? ' active-C' : '');
+      if (mobE) mobE.className = 'mob-nav-btn' + (mode === 'ETF' ? ' active-ETF' : '');
 
       const layer1 = document.getElementById('layer1MapSection');
       const layer2 = document.getElementById('layer2AnalysisSection');
