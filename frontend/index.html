@@ -798,10 +798,236 @@
     .pro-panel { display: none; }
     .pro-panel.active { display: block; }
 
+    /* ETF 卡片與圖表專用響應式結構類別 */
+    .etf-dual-score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      background: #090e1a;
+      padding: 16px 18px;
+      border-radius: 10px;
+      border: 1px solid #1e293b;
+      margin-bottom: 14px;
+    }
+    .etf-dual-score-left {
+      border-right: 1px solid #1e293b;
+      padding-right: 14px;
+    }
+    .etf-dual-score-right {
+      padding-left: 4px;
+    }
+    .etf-layer2-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .etf-chart-bar-row {
+      display: grid;
+      grid-template-columns: 195px 1fr 125px;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 4px;
+      border-bottom: 1px solid #1e293b;
+      cursor: pointer;
+      font-size: 14.5px;
+    }
+    .etf-action-btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    /* =====================================================================
+       📱 全面響應式設計 (Responsive Tablet & Mobile Overhaul)
+       徹底解決手機版橫向破版、導覽列擠壓、卡片超出螢幕與桑基圖過小問題
+       ===================================================================== */
+    @media (max-width: 1024px) {
+      main { width: 100%; padding: 16px 16px 70px 16px; }
+      .etf-grid-2, .etf-grid-4, .grid-2, .grid-4, .grid-8cards, .stories-grid, .leaderboards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+      .etf-layer2-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 768px) {
-      header { padding: 10px 14px; }
-      main { padding: 12px 14px; }
-      .grid-2, .stories-grid { grid-template-columns: 1fr; }
+      body { font-size: 15px; line-height: 1.65; }
+      header {
+        padding: 10px 12px;
+        gap: 8px;
+        position: relative; /* 手機上不強制佔用半個螢幕高度 */
+      }
+      .brand-title { font-size: 16.5px; flex-wrap: wrap; gap: 6px; }
+      .brand-sub { font-size: 12px; line-height: 1.4; }
+
+      /* 頂部四大模式切換器在手機上改為 2x2 整齊大按鈕網格 */
+      .mode-switcher {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+        gap: 6px;
+        padding: 5px;
+      }
+      .mode-btn {
+        padding: 9px 8px;
+        font-size: 13px;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .header-controls {
+        width: 100%;
+        justify-content: space-between;
+        gap: 6px;
+      }
+
+      /* 快速定位次導覽列在手機改為單行橫向滑動膠囊列 (不佔垂直高度) */
+      .quick-jump-bar {
+        position: sticky;
+        top: 0;
+        z-index: 195;
+        padding: 8px 12px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 8px;
+      }
+      .quick-jump-bar span, .quick-jump-pill {
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-size: 13px;
+      }
+
+      main {
+        width: 100%;
+        max-width: 100vw;
+        padding: 12px 10px 80px 10px;
+        overflow-x: hidden;
+      }
+
+      /* 所有 Grid 強制在手機上變為 100% 單欄，消滅 580px/380px 橫向破版 */
+      .etf-grid-2,
+      .etf-grid-4,
+      .grid-2,
+      .grid-4,
+      .grid-8cards,
+      .stories-grid,
+      .leaderboards-grid,
+      .pulse-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px;
+      }
+      .heatmap-grid {
+        grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)) !important;
+        gap: 10px;
+      }
+      .heat-tile {
+        min-height: 142px;
+        padding: 12px 14px;
+      }
+
+      .etf-clean-card, .card, .vital-card, .lb-card, .story-card, .sankey-wrapper, .pulse-hero {
+        padding: 15px 14px;
+        border-radius: 10px;
+        max-width: 100%;
+      }
+
+      .etf-section-banner, .section-head {
+        margin: 20px 0 12px 0;
+      }
+      .etf-section-title, .section-title {
+        font-size: 18.5px;
+        line-height: 1.35;
+      }
+      .etf-section-sub, .section-desc {
+        font-size: 13.5px;
+      }
+      .etf-hero-num, .vital-number {
+        font-size: 24px;
+      }
+
+      /* ETF 分類頁籤在手機改為可橫向滑動或雙欄 */
+      .etf-cat-tabs {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        padding-bottom: 6px;
+        gap: 8px;
+      }
+      .etf-cat-tab {
+        flex-shrink: 0;
+        padding: 9px 14px;
+        font-size: 14px;
+      }
+
+      /* 搜尋框與下拉選單在手機上自動 100% 滿寬 */
+      #etfSearchInput, #etfConclusionFilter, #liveCompanySearch, select, input[type="text"] {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      /* ETF 卡片雙軌分數框在手機改為上下堆疊或緊湊並排 */
+      .etf-dual-score-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 13px 14px;
+      }
+      .etf-dual-score-left {
+        border-right: none;
+        border-bottom: 1px solid #1e293b;
+        padding-right: 0;
+        padding-bottom: 12px;
+      }
+      .etf-dual-score-right {
+        padding-left: 0;
+      }
+      .etf-action-btn-row {
+        flex-direction: column;
+      }
+      .etf-layer2-split {
+        grid-template-columns: 1fr;
+      }
+
+      /* 圖 1、圖 2、圖 3、圖 5 橫條圖在手機上縮減左側文字欄寬度，防止擠出畫面 */
+      .etf-chart-bar-row {
+        grid-template-columns: 125px 1fr 82px;
+        gap: 6px;
+        font-size: 13px;
+      }
+
+      /* 桑基圖浮動卡片在手機上改為底部全寬卡片 */
+      .sankey-float-card {
+        position: fixed;
+        left: 10px !important;
+        right: 10px !important;
+        bottom: 14px !important;
+        top: auto !important;
+        width: auto !important;
+        max-height: 70vh;
+        overflow-y: auto;
+        z-index: 450;
+      }
+
+      /* 右側滑出式抽屜在手機上 100% 滿版寬度 */
+      .drawer-panel {
+        width: 100vw;
+        max-width: 100vw;
+        right: -105vw;
+        padding: 18px 14px;
+      }
+
+      /* 回到頂部按鈕在手機縮小避免遮擋內容 */
+      .back-to-top-fab {
+        right: 14px;
+        bottom: 14px;
+        padding: 9px 14px;
+        font-size: 13px;
+      }
     }
   </style>
 </head>
@@ -2472,25 +2698,35 @@
       document.getElementById('sankeyAltListView').innerHTML = `
         <div class="grid-2" style="margin-bottom:0;">
           <div class="card" style="background:#0f172a;">
-            <div class="card-title" style="margin-bottom:8px; color:#34d399;">資金來源與資產配置主幹 (L0 ➔ L1 ➔ L2)</div>
+            <div class="card-title" style="margin-bottom:10px; color:#34d399; font-size:16.5px;">資金來源與六大資產配置主幹 (點擊查看明細)</div>
             ${L2.map(n => `
-              <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #1e293b; font-size:12.5px; cursor:pointer;" onclick="pinSankeyNode('${n.id}', event)">
-                <span><i class="legend-dot" style="background:${n.color};"></i><strong>${n.title}</strong> (${n.obs})</span>
-                <span style="font-family:Consolas,monospace; color:#fff;">${n.val} (${n.share})</span>
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; padding:10px 4px; border-bottom:1px solid #1e293b; font-size:14.5px; cursor:pointer;" onclick="pinSankeyNode('${n.id}', event)">
+                <span><i class="legend-dot" style="background:${n.color};"></i><strong style="color:#fff;">${n.title}</strong></span>
+                <span style="font-weight:800; color:${n.color};">${n.val} (${n.share})</span>
               </div>
             `).join('')}
           </div>
-          <div class="card" style="background:#0f172a; max-height:310px; overflow-y:auto;">
-            <div class="card-title" style="margin-bottom:8px; color:#fbbf24;">19項細分產業與次級資金流向明細 (L2 ➔ L3)</div>
+          <div class="card" style="background:#0f172a; max-height:380px; overflow-y:auto;">
+            <div class="card-title" style="margin-bottom:10px; color:#fbbf24; font-size:16.5px;">19項細分產業與次級資金流向明細 (點擊查看公司)</div>
             ${L3.map(n => `
-              <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #1e293b; font-size:12px; cursor:pointer;" onclick="pinSankeyNode('${n.id}', event)">
-                <span style="color:${n.color}; font-weight:700;">${n.title}</span>
-                <span style="font-family:Consolas,monospace; color:#cbd5e1;">${n.val}</span>
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; padding:9px 4px; border-bottom:1px solid #1e293b; font-size:14px; cursor:pointer;" onclick="pinSankeyNode('${n.id}', event)">
+                <span style="color:${n.color}; font-weight:800;">${n.title}</span>
+                <span style="color:#e2e8f0; font-size:13.5px;">${n.val}</span>
               </div>
             `).join('')}
           </div>
         </div>
       `;
+
+      // 行動裝置自動開啟結構化清單視圖（使用者亦可隨時點擊按鈕切換回橫向桑基圖）
+      if (window.innerWidth <= 768 && !window.__SANKEY_MOBILE_INIT__) {
+        window.__SANKEY_MOBILE_INIT__ = true;
+        SANKEY_LIST_MODE = true;
+        document.getElementById('sankeyStageBox').style.display = 'none';
+        document.getElementById('sankeyAltListView').style.display = 'block';
+        const tBtn = document.getElementById('sankeyViewToggleBtn');
+        if (tBtn) tBtn.textContent = '📊 切換桑基流向圖';
+      }
 
       document.getElementById('sankeyPeriodNarrative').innerHTML =
         `<strong>當前時間切片診斷：</strong>${cfg.title} <span style="color:var(--accent-blue); margin-left:8px;">（互動提示：將滑鼠移至任一色帶可啟動「聚光燈高亮」；點擊任一節點或流帶可釘選「Habr 風格浮動交易/營收明細卡」）</span>`;
@@ -4101,9 +4337,9 @@
             </div>
           </div>
 
-          <!-- 雙軌大字體分數並排框 (28~30px 大數字 + 視覺化發光進度條) -->
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; background:#090e1a; padding:16px 18px; border-radius:10px; border:1px solid #1e293b; margin-bottom:14px;">
-            <div style="border-right:1px solid #1e293b; padding-right:14px;">
+          <!-- 雙軌大字體分數並排框 (28~30px 大數字 + 視覺化發光進度條 + 手機自動響應式堆疊) -->
+          <div class="etf-dual-score-grid">
+            <div class="etf-dual-score-left">
               <div style="font-size:14px; font-weight:700; color:#94a3b8; margin-bottom:6px;">【模型 A】長期配置分數 (3～10年)</div>
               <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px;">
                 <span class="etf-hero-num" style="color:${scoreAColor};">${isLev ? '隔離不評比' : e.total_score_a_long_term.toFixed(1) + ' <span style="font-size:15px;">/ 100</span>'}</span>
@@ -4113,7 +4349,7 @@
                 <div class="etf-score-gauge-fill" style="width:${isLev ? 15 : Math.min(100, e.total_score_a_long_term)}%; background:${scoreAColor};"></div>
               </div>
             </div>
-            <div style="padding-left:4px;">
+            <div class="etf-dual-score-right">
               <div style="font-size:14px; font-weight:700; color:#94a3b8; margin-bottom:6px;">【模型 B】短中期環境分數 (1～12月)</div>
               <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px;">
                 <span class="etf-hero-num" style="color:${scoreBColor};">${e.total_score_b_short_mid.toFixed(1)} <span style="font-size:15px;">/ 100</span></span>
@@ -4141,7 +4377,7 @@
           </div>
 
           <!-- 展開 / 收合第二層詳細研究按鈕 -->
-          <div style="display:flex; gap:10px; margin-top:16px;">
+          <div class="etf-action-btn-row">
             <button id="etfExpandBtn_${e.etf_code}" class="etf-expand-btn" style="margin-top:0; flex:1;" onclick="toggleSingleEtfCard('${e.etf_code}', event)">
               ${isExpanded ? '▲ 收合完整分析（返回第一層快速閱讀）' : '▼ 查看完整分析（展開第二層：成分股、產業配置、估值、配息分析、歷史績效、費用率與完整報告）'}
             </button>
@@ -4164,7 +4400,7 @@
             </div>
 
             <!-- 2. 產業配置與前十大成分股穿透 -->
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:14px;">
+            <div class="etf-layer2-split">
               <div style="background:#111a2e; padding:14px 16px; border-radius:10px; border:1px solid #2a3b5c;">
                 <div style="font-size:15.5px; font-weight:800; color:#f8fafc; margin-bottom:6px;">
                   🏢 產業配置與集中度（前十大佔比 ${e.top10_concentration_pct}%）
@@ -4321,7 +4557,7 @@
         const pctW = Math.min(100, Math.max(4, (Math.abs(v) / maxAbs) * 100));
         const col = v >= 0 ? '#10b981' : '#f43f5e';
         return `
-          <div onclick="jumpToEtfCard('${e.etf_code}')" style="display:grid; grid-template-columns: 185px 1fr 125px; align-items:center; gap:10px; padding:6px 4px; border-bottom:1px solid #1e293b; cursor:pointer; font-size:14.5px;">
+          <div class="etf-chart-bar-row" onclick="jumpToEtfCard('${e.etf_code}')">
             <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
               <strong style="color:#f8fafc;">[${e.listing_market}] ${e.etf_code}</strong> <span style="color:#cbd5e1;">${e.etf_name}</span>
             </div>
@@ -4329,7 +4565,7 @@
               <div style="width:${pctW.toFixed(1)}%; height:100%; background:${col}; border-radius:4px;"></div>
             </div>
             <div style="text-align:right; font-weight:800; color:${col};">
-              ${v >= 0 ? '+' : ''}${v} <span style="font-size:12.5px; color:#94a3b8;">${e.aum_unit}</span>
+              ${v >= 0 ? '+' : ''}${v} <span style="font-size:12px; color:#94a3b8;">${e.aum_unit}</span>
             </div>
           </div>
         `;
@@ -4350,7 +4586,7 @@
         const s = Number(e.total_score_a_long_term || 0);
         const col = e.conclusion_a_long_term === '需注意集中風險' ? '#f59e0b' : (s >= 80 ? '#10b981' : '#38bdf8');
         return `
-          <div onclick="jumpToEtfCard('${e.etf_code}')" style="display:grid; grid-template-columns: 210px 1fr 90px; align-items:center; gap:10px; padding:7px 4px; border-bottom:1px solid #1e293b; cursor:pointer; font-size:14.5px;">
+          <div class="etf-chart-bar-row" onclick="jumpToEtfCard('${e.etf_code}')">
             <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
               <strong style="color:${col};">#${i + 1}</strong> <strong style="color:#f8fafc;">${e.etf_code}</strong> <span style="color:#cbd5e1;">${e.etf_name}</span>
             </div>
@@ -4366,7 +4602,7 @@
         const s = Number(e.total_score_b_short_mid || 0);
         const col = e.conclusion_b_short_mid === '條件相對有利' ? '#10b981' : (e.conclusion_b_short_mid === '等待更佳條件' ? '#f59e0b' : (e.conclusion_b_short_mid === '風險偏高' ? '#f43f5e' : '#38bdf8'));
         return `
-          <div onclick="jumpToEtfCard('${e.etf_code}')" style="display:grid; grid-template-columns: 210px 1fr 90px; align-items:center; gap:10px; padding:7px 4px; border-bottom:1px solid #1e293b; cursor:pointer; font-size:14.5px;">
+          <div class="etf-chart-bar-row" onclick="jumpToEtfCard('${e.etf_code}')">
             <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
               <strong style="color:${col};">#${i + 1}</strong> <strong style="color:#f8fafc;">${e.etf_code}</strong> <span style="color:#cbd5e1;">${e.etf_name}</span>
             </div>
@@ -4494,16 +4730,16 @@
         const w = Math.min(100, Number(h.weight_pct || 0));
         const col = w >= 40 ? '#f59e0b' : '#38bdf8';
         return `
-          <div style="display:grid; grid-template-columns: 185px 1fr 155px; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid #1e293b; font-size:14.5px;">
+          <div class="etf-chart-bar-row">
             <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
               <strong style="color:#f8fafc;">${h.constituent_code} ${h.constituent_name}</strong>
             </div>
             <div style="background:#090e1a; height:16px; border-radius:4px; overflow:hidden;">
               <div style="width:${w}%; height:100%; background:${col};"></div>
             </div>
-            <div style="text-align:right; font-size:14px;">
+            <div style="text-align:right; font-size:13.5px;">
               <strong style="color:#f8fafc;">${h.weight_pct}%</strong>
-              ${h.live_rev_yoy !== null && h.live_rev_yoy !== undefined ? `<span style="color:#34d399; margin-left:6px;">營收+${h.live_rev_yoy.toFixed(0)}%</span>` : ''}
+              ${h.live_rev_yoy !== null && h.live_rev_yoy !== undefined ? `<span style="color:#34d399; margin-left:4px;">+${h.live_rev_yoy.toFixed(0)}%</span>` : ''}
             </div>
           </div>
         `;
