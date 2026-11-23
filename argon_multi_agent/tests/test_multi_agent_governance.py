@@ -30,6 +30,23 @@ os.environ["TWFIN_MA_ROOT"] = os.path.join(_TMP, "argon_multi_agent")
 shutil.copytree(_MA_SRC, os.environ["TWFIN_MA_ROOT"])
 atexit.register(shutil.rmtree, _TMP, True)
 
+# 資料庫已不再提交進 git (CI 中不存在)，因此以種子資料建立一份暫存資料庫供唯讀查詢
+os.environ["TWFIN_DB_PATH"] = os.path.join(_TMP, "test.db")
+sys.path.insert(0, os.path.join(os.path.dirname(_MA_SRC), "backend"))
+from seed_and_engine import seed_and_compute_all  # noqa: E402
+from phase2_to_6_engine import populate_phase2_to_phase6  # noqa: E402
+import etf_engine  # noqa: E402
+
+
+def _offline_fetch(url, timeout=12):
+    raise ConnectionError("tests run offline")
+
+
+etf_engine._fetch_json = _offline_fetch  # 不連外網，使用引擎內建的備援數值
+seed_and_compute_all()
+populate_phase2_to_phase6()
+etf_engine.build_and_compute_etf_center()
+
 sys.path.insert(0, _MA_SRC)
 from engine.multi_agent_orchestrator import (
     MA_ROOT,
