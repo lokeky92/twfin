@@ -5982,24 +5982,18 @@
       const topInds = [...((STATE && STATE.industries) || [])].filter(i => i.total_weighted_score !== null).sort((a, b) => b.total_weighted_score - a.total_weighted_score).slice(0, 3);
 
       const reports = prev.phase2_independent_reports || {};
-      if (reports.AGENT_01) {
-        reports.AGENT_01.summary = `針對「${topic}」即時重算（${twStr}）：模型 A 長期前三大標的為 ${topLong.map(e => `${e.etf_code}(${e.total_score_a_long_term}分)`).join('、') || 'N/A'}，建議持續以低 TER 與純股利/票息為核心。`;
-      }
-      if (reports.AGENT_02) {
-        reports.AGENT_02.summary = `針對「${topic}」即時盤面追蹤：模型 B 短中期動能前三為 ${topShort.map(e => `${e.etf_code}(${e.total_score_b_short_mid}分)`).join('、') || 'N/A'}；強勢產業前三為 ${topInds.map(i => `${i.industry_name}(${Number(i.total_weighted_score).toFixed(1)})`).join('、') || 'N/A'}。`;
-      }
-      if (reports.AGENT_03) {
-        reports.AGENT_03.summary = `最新雲端快照時間：${(STATE && STATE.generated_at) || twStr}，涵蓋 ${liveSum.total_companies || 0} 家上市櫃公司（總營收年增 ${liveSum.total_yoy_pct ?? '-'}%），資料完整性與防外推規則正常運作。`;
-      }
-      if (reports.AGENT_04) {
-        reports.AGENT_04.summary = `風險即時稽核：目前價差最高 ETF 為 ${highSpread ? `${highSpread.etf_code}(${highSpread.bid_ask_spread_bps} bps)` : 'N/A'}，提醒關注台積電跨國 ADR/2330 疊加曝險與匯率波動。`;
-      }
-      if (reports.AGENT_05) {
-        reports.AGENT_05.summary = `反方審查（${twStr}）：提醒「${topic}」不可只看近 1 年含息報酬，須同步檢視最大回撤與配息中資本利得佔比，避免高息幻覺。`;
-      }
-      if (reports.AGENT_06) {
-        reports.AGENT_06.summary = `雲端架構檢核：已於 Cloudflare Private Worker 雲端模式完成本輪 6-Agent 即時分析，研究紀錄與審批狀態自動保存於本機安全瀏覽器儲存區。`;
-      }
+      const applyLiveRpt = (key, text) => {
+        if (!reports[key]) return;
+        reports[key].data_timestamp_used = twStr;
+        reports[key].current_system_problems = text;
+        reports[key].summary = text;
+      };
+      applyLiveRpt('AGENT_01', `【雲端即時重算｜${twStr}】針對「${topic}」：\n• 模型 A 長期配置前三強：${topLong.map(e => `${e.etf_code}(${e.total_score_a_long_term}分)`).join('、') || 'N/A'}\n• 建議持續以低 TER、低稅損與高純股利/票息為核心配置基準。`);
+      applyLiveRpt('AGENT_02', `【雲端即時重算｜${twStr}】針對「${topic}」：\n• 模型 B 短中期環境前三強：${topShort.map(e => `${e.etf_code}(${e.total_score_b_short_mid}分)`).join('、') || 'N/A'}\n• 強勢產業輪動前三名：${topInds.map(i => `${i.industry_name}(${Number(i.total_weighted_score).toFixed(1)}分)`).join('、') || 'N/A'}。`);
+      applyLiveRpt('AGENT_03', `【雲端即時稽核｜${twStr}】\n• 雲端快照基準：${(STATE && STATE.generated_at) || twStr}\n• 涵蓋 ${liveSum.total_companies || 0} 家上市櫃公司（總營收年增 ${liveSum.total_yoy_pct ?? '-'}%），防外推與缺漏標記正常運作。`);
+      applyLiveRpt('AGENT_04', `【雲端即時風控｜${twStr}】\n• 目前買賣價差最高 ETF：${highSpread ? `${highSpread.etf_code}(${highSpread.bid_ask_spread_bps} bps)` : 'N/A'}\n• 提醒持續監控台積電（2330/TSM）跨國持股重疊曝險與 USD/TWD 匯率波動。`);
+      applyLiveRpt('AGENT_05', `【雲端反方審查｜${twStr}】針對「${topic}」：\n• 反方提醒：切勿僅憑近 1 年含息報酬追高，須交叉檢視最大回撤與配息中資本利得佔比，避免高息幻覺。`);
+      applyLiveRpt('AGENT_06', `【雲端系統檢核｜${twStr}】\n• 已於 Cloudflare Private Worker 互動模式完成 6-Agent 即時重算，研究紀錄與人工審批狀態已持久化保存於瀏覽器安全儲存區。`);
 
       prev.session_id = sessId;
       prev.topic = topic;
@@ -6067,14 +6061,21 @@
         // 雲端/離線模式下同步更新前端狀態並持久化至瀏覽器 localStorage
         const ma = STATE && STATE.multi_agent_center;
         if (ma && ma.phase6_proposals) {
+          let touched = 0;
+          const newStatus = decision === 'APPROVE' ? 'APPROVED_BY_USER' : (decision === 'REJECT' ? 'REJECTED_BY_USER' : 'RE_RESEARCH_REQUESTED');
           ma.phase6_proposals.forEach(p => {
             if (proposalId === 'ALL' || p.proposal_id === proposalId) {
-              p.status = decision === 'APPROVE' ? 'APPROVED_BY_USER' : (decision === 'REJECT' ? 'REJECTED_BY_USER' : 'RE_RESEARCH_REQUESTED');
+              p.status = newStatus;
               p.user_decision_note = noteMap[decision] || decision;
+              touched++;
             }
           });
+          const actionLabel = decision === 'APPROVE' ? '已批准' : (decision === 'REJECT' ? '已拒絕' : '已要求重新研究');
+          const nowStr = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+          ma.last_decision_banner = `${actionLabel} ${proposalId === 'ALL' ? '全部提案' : proposalId}（${nowStr} 已儲存）`;
           saveMultiAgentLocalOverrides();
           renderArgonMultiAgentCenter();
+          alert(`✅ ${actionLabel}${proposalId === 'ALL' ? '全部提案' : ' ' + proposalId}！狀態已更新並儲存（重新整理頁面也不會遺失）。`);
         }
       }
     }
@@ -6083,7 +6084,15 @@
       const ma = STATE && STATE.multi_agent_center;
       if (!ma || !ma.phase2_independent_reports) return;
 
-      const proposals = ma.phase6_proposals || [];
+      const rawProposals = ma.phase6_proposals || [];
+      const propMap = new Map();
+      rawProposals.forEach(p => {
+        const existing = propMap.get(p.proposal_id);
+        if (!existing || (existing.status === 'PENDING_APPROVAL' && p.status !== 'PENDING_APPROVAL')) {
+          propMap.set(p.proposal_id, p);
+        }
+      });
+      const proposals = Array.from(propMap.values());
       const pendingCount = proposals.filter(p => p.status === 'PENDING_APPROVAL').length;
       const approvedCount = proposals.filter(p => p.status === 'APPROVED_BY_USER' || p.status === 'IMPLEMENTED_ON_BRANCH').length;
       const reportsObj = ma.phase2_independent_reports || {};
@@ -6233,6 +6242,11 @@
                 <div style="font-size:19px; font-weight:900; color:#fbbf24;">⚖️ 人工批准閘門（Human-in-the-Loop Approval Gate）</div>
                 <div style="font-size:15px; color:#cbd5e1; margin-top:4px;">
                   每項提案均附 10 大必填欄位與 100 分制量化評分（資料25/價值25/風控20/技術15/相容15）。批准單一項目不影響其他項目。
+                </div>
+                <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:13.5px;">
+                  <span class="badge badge-lvl4">已批准 / 已實作：${approvedCount} 件</span>
+                  <span class="badge badge-grade-C">待審核：${pendingCount} 件</span>
+                  ${ma.last_decision_banner ? `<span class="badge badge-lvl3">🔔 ${ma.last_decision_banner}</span>` : ''}
                 </div>
               </div>
               <div style="display:flex; gap:10px; flex-wrap:wrap;">
