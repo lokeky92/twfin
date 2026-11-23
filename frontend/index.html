@@ -6397,7 +6397,7 @@
             const marker = 'window.__INITIAL_SQLITE_SNAPSHOT__ = ';
             const idx = htmlText.indexOf(marker);
             if (idx !== -1) {
-              const endIdx = htmlText.indexOf(';\n    </script>', idx);
+              const endIdx = htmlText.indexOf(';\n    </scr' + 'ipt>', idx);
               if (endIdx !== -1) {
                 const parsed = JSON.parse(htmlText.slice(idx + marker.length, endIdx));
                 STATE = parsed;
