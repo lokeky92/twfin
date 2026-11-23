@@ -3,8 +3,9 @@ name: Daily Taiwan Capital Flow & ETF OpenAPI Sync & Deploy
 on:
   workflow_dispatch:
   schedule:
-    # 每個交易日台灣時間 16:30 (UTC 08:30) 自動在雲端抓取 TWSE / TPEx / MOPS 最新數據並更新資料庫與網站
+    # 每個交易日台灣時間 16:30 (UTC 08:30) 與 20:00 (UTC 12:00) 自動在雲端抓取 TWSE / TPEx / MOPS 最新數據並更新資料庫與網站
     - cron: '30 8 * * 1-5'
+    - cron: '0 12 * * 1-5'
 
 permissions:
   contents: write

@@ -223,10 +223,26 @@ export default {
     const token = getCookie(request, COOKIE_NAME);
     const authed = await verifySession(token, cookieSecret);
     if (!authed) {
+      if (url.pathname.startsWith("/api/")) {
+        return new Response(JSON.stringify({ status: "unauthorized", error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...SECURITY_HEADERS, "Content-Type": "application/json; charset=utf-8" },
+        });
+      }
       return new Response(renderLoginPage(), {
         status: 401,
         headers: { ...SECURITY_HEADERS, "Content-Type": "text/html; charset=utf-8" },
       });
+    }
+
+    if (url.pathname.startsWith("/api/")) {
+      return new Response(
+        JSON.stringify({ status: "cloud_static_mode", error: "Cloudflare Worker serves live-synced static snapshot" }),
+        {
+          status: 404,
+          headers: { ...SECURITY_HEADERS, "Content-Type": "application/json; charset=utf-8" },
+        }
+      );
     }
 
     return decodeHtmlResponse();

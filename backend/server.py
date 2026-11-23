@@ -12,7 +12,8 @@ import urllib.request
 import urllib.error
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+TW_TZ = timezone(timedelta(hours=8))
 from db import get_connection, init_database
 from seed_and_engine import seed_and_compute_all
 from live_api_connector import run_live_ingestion
@@ -295,7 +296,7 @@ def get_dashboard_payload():
 
     conn.close()
     return {
-        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "generated_at": datetime.now(TW_TZ).strftime("%Y-%m-%d %H:%M:%S (UTC+8)"),
         "active_model": active_model,
         "macro_latest": list(macro_latest.values()),
         "macro_series": macro_series,
