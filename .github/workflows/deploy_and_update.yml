@@ -89,6 +89,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/index.html
+          # 防護：pipeline 只應改動 docs/index.html。若意外改到其他已追蹤檔案，發出警告並還原，避免 git pull 失敗
+          others=$(git status --porcelain --untracked-files=no | grep -v ' docs/index.html$' || true)
+          if [ -n "$others" ]; then
+            echo "$others"
+            echo "::warning title=Pipeline modified unexpected tracked files::$(echo "$others" | head -10 | tr '\n' ' ')"
+            git restore --worktree -- .
+          fi
           if git diff --staged --quiet; then
             echo "No website changes."
             exit 0
