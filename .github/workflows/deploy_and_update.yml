@@ -2,34 +2,95 @@ name: Daily Taiwan Capital Flow & ETF OpenAPI Sync & Deploy
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['backend/**', 'frontend/**', 'tests/**', 'argon_multi_agent/engine/**', 'argon_multi_agent/tests/**']
   schedule:
-    # 每個交易日台灣時間 16:30 (UTC 08:30) 與 20:00 (UTC 12:00) 自動在雲端抓取 TWSE / TPEx / MOPS 最新數據並更新資料庫與網站
+    # 每個交易日台灣時間 16:30 (UTC 08:30) 與 20:00 (UTC 12:00) 自動在雲端抓取 TWSE / TPEx / MOPS 最新數據並更新網站
     - cron: '30 8 * * 1-5'
     - cron: '0 12 * * 1-5'
 
 permissions:
   contents: write
 
+# 避免兩次排程同時執行、互相覆蓋資料庫
+concurrency:
+  group: twfin-data-sync
+  cancel-in-progress: false
+
+env:
+  # SQLite 資料庫不再提交進 git，改存放於這個 Release 的附件 (每次執行覆蓋)
+  DB_RELEASE_TAG: data-latest
+  DB_FILE: data/twfin_intelligence.db
+
 jobs:
-  sync-and-update-db:
+  test:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit & API tests
+        run: |
+          python -m unittest discover -s tests -v
+          python -m unittest discover -s argon_multi_agent/tests -v
+
+  sync-and-update-db:
+    needs: test
+    # push 只跑測試；排程與手動觸發才抓資料、部署
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # 首次遷移時需要從 git 歷史還原資料庫 (見下一步)
+          fetch-depth: 50
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Run TWSE / TPEx / MOPS Live Pipeline & Update SQLite + HTML
+      - name: Restore SQLite database from release asset
         run: |
-          python backend/run_pipeline.py
-          python backend/export_standalone.py
+          mkdir -p data
+          if gh release download "$DB_RELEASE_TAG" --pattern "$(basename "$DB_FILE")" --dir data --clobber; then
+            echo "Restored database from release '$DB_RELEASE_TAG'."
+          else
+            # 首次執行：Release 尚不存在，從 git 歷史中最後一次提交的資料庫還原，保留模型版本與審計紀錄
+            sha=$(git log -1 --format=%H --diff-filter=AM -- "$DB_FILE" || true)
+            if [ -n "$sha" ] && git show "$sha:$DB_FILE" > "$DB_FILE"; then
+              echo "Bootstrapped database from git history ($sha)."
+            else
+              rm -f "$DB_FILE"
+              echo "No previous database found; pipeline will build a fresh one."
+            fi
+          fi
 
-      - name: Commit and Push updated SQLite Database & Website
+      - name: Run TWSE / TPEx / MOPS live pipeline & export dashboard
+        run: python backend/run_pipeline.py --all
+
+      - name: Upload SQLite database to release asset
+        run: |
+          if ! gh release view "$DB_RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$DB_RELEASE_TAG" --title "Data snapshot (auto-updated)" \
+              --notes "由排程自動更新的 SQLite 資料庫。請勿手動編輯此 Release。" --latest=false
+          fi
+          gh release upload "$DB_RELEASE_TAG" "$DB_FILE" --clobber
+
+      - name: Commit and push updated website
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/twfin_intelligence.db frontend/twfin_dashboard_standalone.html docs/index.html
-          git diff --staged --quiet || (git commit -m "chore(data): auto-sync TWSE/TPEx/MOPS live data & ETF scores" && git push)
+          git add docs/index.html
+          if git diff --staged --quiet; then
+            echo "No website changes."
+            exit 0
+          fi
+          git commit -m "chore(data): auto-sync TWSE/TPEx/MOPS live data & ETF scores"
+          git pull --rebase origin main
+          git push

@@ -6,15 +6,24 @@
 - 動態調整 PART 4 評分權重 (保留歷史版本與變更理由於 SQLite) 並即時重算所有產業分數
 - 執行真實外部 API 連線測試 (TWSE / TPEx / Gov OpenData)，並自動記錄審計日誌與離線降級保護
 """
+import hmac
 import json
 import os
+import re
+import threading
 import urllib.request
 import urllib.error
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
-from datetime import datetime, timezone, timedelta
-TW_TZ = timezone(timedelta(hours=8))
-from db import get_connection, init_database
+from urllib.parse import urlparse
+from common import logger, now_iso, now_tw
+from db import DB_PATH, get_connection
+from scoring import (
+    DEFAULT_THRESHOLDS,
+    classify_alert_level,
+    compute_weighted_total,
+    parse_weights,
+    validate_thresholds,
+)
 from seed_and_engine import seed_and_compute_all
 from live_api_connector import run_live_ingestion
 from etf_engine import build_and_compute_etf_center
@@ -31,7 +40,82 @@ from argon_multi_agent.engine.multi_agent_orchestrator import (
 
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
 
-def get_dashboard_payload():
+# 寫入型 API 的管理權杖。未設定時只允許本機 (127.0.0.1) 呼叫寫入端點。
+ADMIN_TOKEN = os.environ.get("TWFIN_ADMIN_TOKEN", "").strip()
+LOCAL_ADDRESSES = {"127.0.0.1", "::1", "::ffff:127.0.0.1"}
+MAX_BODY_BYTES = 64 * 1024
+
+# 每個模型版本都會複製一份產業分數；只保留最近 N 個版本的分數列以免資料表無限成長
+KEEP_SCORE_VERSIONS = 20
+
+# 各區塊資料來源分類 (顯示於前端「即時 / 種子」標示)
+LIVE_SECTIONS = ["上市櫃月營收與估值 (MOPS/TWSE/TPEx)", "三大法人個股買賣超", "大盤與類股指數", "ETF 每日行情"]
+SEED_SECTIONS = ["總體經濟指標", "資產配置流向矩陣", "產業輪動子分數", "趨勢預警訊號", "個股研究名單",
+                 "情境分析", "歷史回測結果", "固定研究報告", "ETF 持股／配息／回測", "AI 研究團隊 (規則式模擬)"]
+
+
+class AuthError(Exception):
+    def __init__(self, message, status):
+        super().__init__(message)
+        self.status = status
+
+
+_payload_cache = {"key": None, "data": None}
+_payload_lock = threading.Lock()
+
+
+def _db_signature():
+    try:
+        st = os.stat(DB_PATH)
+        return (st.st_mtime_ns, st.st_size)
+    except OSError:
+        return None
+
+
+def invalidate_dashboard_cache():
+    with _payload_lock:
+        _payload_cache["key"] = None
+        _payload_cache["data"] = None
+
+
+def get_dashboard_payload(use_cache=True):
+    """
+    回傳儀表板完整資料。資料庫部分依 SQLite 檔案的 (mtime, size) 快取，
+    只有資料庫實際變動 (排程擷取、權重調整…) 時才重新查詢；多 Agent 狀態每次即時讀取。
+    """
+    key = _db_signature()
+    with _payload_lock:
+        hit = use_cache and key is not None and _payload_cache["key"] == key
+        cached = _payload_cache["data"] if hit else None
+    if cached is None:
+        cached = _build_dashboard_base()
+        with _payload_lock:
+            _payload_cache["key"] = key
+            _payload_cache["data"] = cached
+    payload = dict(cached)
+    payload["multi_agent_center"] = get_multi_agent_state()
+    return payload
+
+
+def _data_provenance(cur):
+    cur.execute("SELECT COUNT(*) AS n FROM live_company_fundamentals")
+    live_rows = cur.fetchone()["n"]
+    cur.execute("""
+        SELECT MAX(run_timestamp) AS ts FROM ingestion_audit_logs
+        WHERE substr(task_name, 1, 5) = 'LIVE_' AND task_name != 'LIVE_CONNECTOR_CHECK' AND status = 'SUCCESS'
+    """)
+    last_live = cur.fetchone()["ts"]
+    return {
+        "live_data_available": bool(live_rows and last_live),
+        "last_live_ingestion": last_live,
+        "live_sections": LIVE_SECTIONS,
+        "seed_sections": SEED_SECTIONS,
+        "note": "「種子」區塊的數值為程式內建的參考資料 (seed_and_engine.py / phase2_to_6_engine.py / etf_engine.py)，"
+                "不會隨每日排程自動更新；只有「即時」區塊來自官方 OpenAPI。",
+    }
+
+
+def _build_dashboard_base():
     conn = get_connection()
     cur = conn.cursor()
 
@@ -292,11 +376,14 @@ def get_dashboard_payload():
             "reports": etf_rpts
         }
     except Exception as e:
+        logger.exception("ETF 決策中心資料讀取失敗")
         etf_center = {"error": str(e), "etfs": [], "backtests": [], "reports": []}
 
+    provenance = _data_provenance(cur)
     conn.close()
     return {
-        "generated_at": datetime.now(TW_TZ).strftime("%Y-%m-%d %H:%M:%S (UTC+8)"),
+        "generated_at": now_tw().strftime("%Y-%m-%d %H:%M:%S (UTC+8)"),
+        "data_provenance": provenance,
         "active_model": active_model,
         "macro_latest": list(macro_latest.values()),
         "macro_series": macro_series,
@@ -318,42 +405,42 @@ def get_dashboard_payload():
         "live_top_companies": live_top_companies,
         "live_indices": live_indices,
         "etf_center": etf_center,
-        "multi_agent_center": get_multi_agent_state()
     }
+
+def _next_model_version(cur):
+    """以既有最大序號 +1 產生版本號 (不用 COUNT，避免刪除或並行時重號)。"""
+    cur.execute("SELECT version_id FROM model_governance_configs")
+    seqs = []
+    for (vid,) in cur.fetchall():
+        m = re.match(r"v1\.(\d+)\.0", vid or "")
+        if m:
+            seqs.append(int(m.group(1)))
+    return f"v1.{max(seqs, default=0) + 1}.0 ({now_tw().strftime('%m%d-%H%M%S')})"
+
 
 def update_weights_and_rescore(payload):
     """動態調整產業評分權重，保存新版本並重算所有可評分產業之總分 (PART 4 & PART 9)"""
-    w_cap = float(payload.get("capital_flow", 0.25))
-    w_fun = float(payload.get("fundamentals", 0.25))
-    w_gro = float(payload.get("future_growth", 0.20))
-    w_ins = float(payload.get("institutional", 0.15))
-    w_val = float(payload.get("valuation", 0.15))
-    total_w = round(w_cap + w_fun + w_gro + w_ins + w_val, 4)
-    if abs(total_w - 1.0) > 0.01:
-        raise ValueError(f"權重總和必須為 100% (1.0)，目前為 {total_w*100:.1f}%")
+    weights_dict = parse_weights(payload)
+    w_cap = weights_dict["capital_flow"]
+    w_fun = weights_dict["fundamentals"]
+    w_gro = weights_dict["future_growth"]
+    w_ins = weights_dict["institutional"]
+    w_val = weights_dict["valuation"]
 
-    reason = payload.get("reason", "使用者自訂權重調整").strip() or "使用者自訂權重調整"
-    now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    reason = str(payload.get("reason") or "").strip()[:500] or "使用者自訂權重調整"
+    now_str = now_iso()
 
     conn = get_connection()
     cur = conn.cursor()
+    cur.execute("BEGIN IMMEDIATE")  # 先取得寫入鎖再產生版本號，避免兩個請求拿到同一個號碼
 
-    cur.execute("SELECT COUNT(*) AS cnt FROM model_governance_configs")
-    seq_num = cur.fetchone()["cnt"] + 1
-    new_version = f"v1.{seq_num}.0 ({datetime.now().strftime('%m%d-%H%M%S')})"
+    new_version = _next_model_version(cur)
 
     cur.execute("SELECT * FROM model_governance_configs WHERE active = 1 ORDER BY created_at DESC LIMIT 1")
     prev_cfg = dict(cur.fetchone())
     old_version = prev_cfg["version_id"]
 
     cur.execute("UPDATE model_governance_configs SET active = 0")
-    weights_dict = {
-        "capital_flow": w_cap,
-        "fundamentals": w_fun,
-        "future_growth": w_gro,
-        "institutional": w_ins,
-        "valuation": w_val
-    }
     cur.execute("""
         INSERT INTO model_governance_configs
         (version_id, created_at, weights_json, thresholds_json, change_reason, active)
@@ -364,16 +451,7 @@ def update_weights_and_rescore(payload):
     cur.execute("SELECT * FROM industry_rotation_scores WHERE model_version = ?", (old_version,))
     old_rows = [dict(r) for r in cur.fetchall()]
     for r in old_rows:
-        if r["score_capital_flow"] is not None and r["rotation_state"] != "INSUFFICIENT_DATA":
-            new_total = round(
-                r["score_capital_flow"] * w_cap +
-                r["score_fundamentals"] * w_fun +
-                r["score_future_growth"] * w_gro +
-                r["score_institutional"] * w_ins +
-                r["score_valuation"] * w_val, 2
-            )
-        else:
-            new_total = None
+        new_total = compute_weighted_total(r, weights_dict)
 
         cur.execute("""
             INSERT INTO industry_rotation_scores
@@ -407,23 +485,42 @@ def update_weights_and_rescore(payload):
         f"模型權重已更新為版本 {new_version} (資金{int(w_cap*100)}%/基本面{int(w_fun*100)}%/成長{int(w_gro*100)}%/法人{int(w_ins*100)}%/估值{int(w_val*100)}%)，理由：{reason}"
     ))
 
+    # 只保留最近 KEEP_SCORE_VERSIONS 個版本 (含目前啟用版本) 的產業分數列
+    cur.execute("""
+        DELETE FROM industry_rotation_scores
+        WHERE model_version != ?
+          AND model_version NOT IN (
+              SELECT version_id FROM model_governance_configs ORDER BY created_at DESC LIMIT ?
+          )
+    """, (new_version, KEEP_SCORE_VERSIONS))
+
     conn.commit()
     conn.close()
+    invalidate_dashboard_cache()
     return new_version
 
 def update_governance_settings(payload):
     """動態調整預警門檻 (LEVEL 2/3/4/R) 與產業分類歸屬 (補充執行指令第9點)"""
-    now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    try:
+        return _update_governance_settings(payload)
+    finally:
+        invalidate_dashboard_cache()
+
+
+def _update_governance_settings(payload):
+    now_str = now_iso()
     conn = get_connection()
     cur = conn.cursor()
 
     action_type = payload.get("action_type", "THRESHOLDS")
     if action_type == "THRESHOLDS":
-        lvl4_min = float(payload.get("lvl4_min", 80.0))
-        lvl3_min = float(payload.get("lvl3_min", 72.0))
-        lvl2_min = float(payload.get("lvl2_min", 62.0))
-        lvlR_cap_max = float(payload.get("lvlR_cap_max", 45.0))
-        reason = payload.get("reason", "使用者自訂預警門檻").strip() or "使用者自訂預警門檻"
+        try:
+            th = validate_thresholds({k: float(payload.get(k, v)) for k, v in DEFAULT_THRESHOLDS.items()})
+        except (TypeError, ValueError) as e:
+            conn.close()
+            raise ValueError(f"門檻設定無效：{e}")
+        lvl4_min, lvl3_min, lvl2_min, lvlR_cap_max = th["lvl4_min"], th["lvl3_min"], th["lvl2_min"], th["lvlR_cap_max"]
+        reason = str(payload.get("reason") or "").strip()[:500] or "使用者自訂預警門檻"
 
         cur.execute("SELECT * FROM model_governance_configs WHERE active = 1 ORDER BY created_at DESC LIMIT 1")
         active_cfg = dict(cur.fetchone())
@@ -446,20 +543,9 @@ def update_governance_settings(payload):
             FROM industry_rotation_scores WHERE model_version = ?
         """, (active_cfg["version_id"],))
         for r in cur.fetchall():
-            tot = r["total_weighted_score"]
-            cap = r["score_capital_flow"]
-            if tot is None:
+            new_lvl = classify_alert_level(r["total_weighted_score"], r["score_capital_flow"], th)
+            if new_lvl is None:
                 continue
-            if cap is not None and cap < lvlR_cap_max:
-                new_lvl = "LEVEL R"
-            elif tot >= lvl4_min:
-                new_lvl = "LEVEL 4"
-            elif tot >= lvl3_min:
-                new_lvl = "LEVEL 3"
-            elif tot >= lvl2_min:
-                new_lvl = "LEVEL 2"
-            else:
-                new_lvl = "LEVEL 1"
             cur.execute("UPDATE trend_early_warnings SET alert_level = ? WHERE industry_id = ?", (new_lvl, r["industry_id"]))
 
         cur.execute("""
@@ -474,6 +560,14 @@ def update_governance_settings(payload):
     elif action_type == "COMPANY_MAPPING":
         code = str(payload.get("company_code", "")).strip()
         new_ind_id = str(payload.get("mapped_industry_id", "")).strip()
+        cur.execute("SELECT 1 FROM industry_taxonomy WHERE industry_id = ?", (new_ind_id,))
+        if not cur.fetchone():
+            conn.close()
+            raise ValueError(f"未知的產業代碼：{new_ind_id}")
+        cur.execute("SELECT 1 FROM live_company_fundamentals WHERE company_code = ?", (code,))
+        if not cur.fetchone():
+            conn.close()
+            raise ValueError(f"找不到公司代號：{code}")
         cur.execute("UPDATE live_company_fundamentals SET mapped_industry_id = ? WHERE company_code = ?", (new_ind_id, code))
         cur.execute("UPDATE company_research_watchlist SET industry_id = ? WHERE ticker = ?", (new_ind_id, code))
         cur.execute("""
@@ -495,7 +589,7 @@ def probe_live_sources():
         ("SRC_TPEX", "https://www.tpex.org.tw/openapi/v1/tpex_3insti_daily_trading"),
         ("SRC_CBC", "https://www.cbc.gov.tw/tw/lp-640-1.html")
     ]
-    now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    now_str = now_iso()
     results = []
     conn = get_connection()
     cur = conn.cursor()
@@ -509,7 +603,8 @@ def probe_live_sources():
                 msg = f"成功連線官方端點 {url} (HTTP {code})"
         except Exception as e:
             status = "FALLBACK_USED"
-            msg = f"外部端點連線受限 ({type(e).__name__})：已自動啟用本地SQLite已驗證之2026年10~11月官方基準快照，確保歷史紀錄零遺失"
+            msg = (f"外部端點連線失敗 ({type(e).__name__})：本次未取得新資料，畫面沿用資料庫中上一次成功擷取的內容"
+                   f"（其中標示為「種子」的區塊本來就是內建參考資料）")
 
         cur.execute("""
             INSERT INTO ingestion_audit_logs
@@ -520,6 +615,7 @@ def probe_live_sources():
 
     conn.commit()
     conn.close()
+    invalidate_dashboard_cache()
     return results
 
 class TWFinRequestHandler(SimpleHTTPRequestHandler):
@@ -550,58 +646,98 @@ class TWFinRequestHandler(SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
-    def do_POST(self):
-        parsed = urlparse(self.path)
-        length = int(self.headers.get("Content-Length", 0))
+    def _authorize_write(self):
+        """寫入端點授權：有設定 TWFIN_ADMIN_TOKEN 時比對 X-Admin-Token；否則只允許本機。"""
+        if ADMIN_TOKEN:
+            provided = self.headers.get("X-Admin-Token", "")
+            if not hmac.compare_digest(provided.encode("utf-8"), ADMIN_TOKEN.encode("utf-8")):
+                raise AuthError("需要有效的管理權杖 (X-Admin-Token)", 401)
+            return
+        if self.client_address[0] not in LOCAL_ADDRESSES:
+            raise AuthError("伺服器未設定 TWFIN_ADMIN_TOKEN，寫入操作僅允許從本機執行", 403)
+
+    def _read_json_body(self):
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+        except ValueError:
+            raise ValueError("Content-Length 無效")
+        if length > MAX_BODY_BYTES:
+            raise ValueError("請求內容過大")
         raw_body = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
         try:
             payload = json.loads(raw_body)
-        except Exception:
-            payload = {}
+        except json.JSONDecodeError:
+            raise ValueError("請求內容不是有效的 JSON")
+        if not isinstance(payload, dict):
+            raise ValueError("請求內容必須是 JSON 物件")
+        return payload
 
-        if parsed.path == "/api/rescore":
-            try:
-                new_ver = update_weights_and_rescore(payload)
-                self._send_json({"status": "ok", "new_version": new_ver, "dashboard": get_dashboard_payload()})
-            except Exception as e:
-                self._send_json({"status": "error", "message": str(e)}, status=400)
-        elif parsed.path == "/api/update_governance":
-            try:
-                res = update_governance_settings(payload)
-                self._send_json({"status": "ok", "result": res, "dashboard": get_dashboard_payload()})
-            except Exception as e:
-                self._send_json({"status": "error", "message": str(e)}, status=400)
-        elif parsed.path == "/api/probe_sources":
-            live_res = run_live_ingestion()
-            shared_map = live_res.pop("shared_insti_map", None) if isinstance(live_res, dict) else None
-            build_and_compute_etf_center(shared_insti_map=shared_map)
-            res = probe_live_sources()
-            self._send_json({"status": "ok", "probe_results": res, "live_ingestion": live_res, "dashboard": get_dashboard_payload()})
-        elif parsed.path == "/api/multi_agent/proposal_decision":
-            try:
-                pid = str(payload.get("proposal_id", "")).strip()
-                decision = str(payload.get("decision", "APPROVE")).strip()
-                note = str(payload.get("note", "")).strip()
-                if pid == "ALL":
-                    st = get_multi_agent_state()
-                    for p in st.get("phase6_proposals", []):
-                        update_proposal_approval_status(p["proposal_id"], decision, note)
-                    res_obj = {"batch": "ALL", "decision": decision}
-                else:
-                    res_obj = update_proposal_approval_status(pid, decision, note)
-                self._send_json({"status": "ok", "proposal": res_obj, "multi_agent_center": get_multi_agent_state()})
-            except Exception as e:
-                self._send_json({"status": "error", "message": str(e)}, status=400)
-        elif parsed.path == "/api/multi_agent/run_session":
-            try:
-                topic = str(payload.get("topic", "台美 ETF 雙軌評分模型、跨時區數據品質、跨國持股穿透重疊與系統架構全面體檢")).strip()
-                mode = str(payload.get("trigger_mode", "MANUAL_START")).strip()
-                bundle = run_full_multi_agent_session(topic=topic, trigger_mode=mode)
-                self._send_json({"status": "ok", "multi_agent_center": bundle})
-            except Exception as e:
-                self._send_json({"status": "error", "message": str(e)}, status=400)
-        else:
+    def do_POST(self):
+        path = urlparse(self.path).path
+        handler = POST_ROUTES.get(path)
+        if handler is None:
             self._send_json({"status": "error", "message": "Unknown endpoint"}, status=404)
+            return
+        try:
+            self._authorize_write()
+            payload = self._read_json_body()
+            self._send_json(handler(payload))
+        except AuthError as e:
+            self._send_json({"status": "error", "message": str(e)}, status=e.status)
+        except (ValueError, KeyError, PermissionError) as e:
+            self._send_json({"status": "error", "message": str(e)}, status=400)
+        except Exception:
+            logger.exception("POST %s 發生未預期錯誤", path)
+            self._send_json({"status": "error", "message": "伺服器內部錯誤，請查看伺服器日誌"}, status=500)
+
+
+def _handle_rescore(payload):
+    new_ver = update_weights_and_rescore(payload)
+    return {"status": "ok", "new_version": new_ver, "dashboard": get_dashboard_payload()}
+
+
+def _handle_update_governance(payload):
+    res = update_governance_settings(payload)
+    return {"status": "ok", "result": res, "dashboard": get_dashboard_payload()}
+
+
+def _handle_probe_sources(payload):
+    live_res = run_live_ingestion()
+    shared_map = live_res.pop("shared_insti_map", None) if isinstance(live_res, dict) else None
+    build_and_compute_etf_center(shared_insti_map=shared_map)
+    res = probe_live_sources()
+    return {"status": "ok", "probe_results": res, "live_ingestion": live_res, "dashboard": get_dashboard_payload()}
+
+
+def _handle_proposal_decision(payload):
+    pid = str(payload.get("proposal_id", "")).strip()
+    decision = str(payload.get("decision", "APPROVE")).strip()
+    note = str(payload.get("note", "")).strip()[:500]
+    if pid == "ALL":
+        st = get_multi_agent_state()
+        for p in st.get("phase6_proposals", []):
+            update_proposal_approval_status(p["proposal_id"], decision, note)
+        res_obj = {"batch": "ALL", "decision": decision}
+    else:
+        res_obj = update_proposal_approval_status(pid, decision, note)
+    return {"status": "ok", "proposal": res_obj, "multi_agent_center": get_multi_agent_state()}
+
+
+def _handle_run_session(payload):
+    topic = str(payload.get("topic") or "台美 ETF 雙軌評分模型、跨時區數據品質、跨國持股穿透重疊與系統架構全面體檢").strip()[:200]
+    mode = str(payload.get("trigger_mode", "MANUAL_START")).strip()[:50]
+    bundle = run_full_multi_agent_session(topic=topic, trigger_mode=mode)
+    return {"status": "ok", "multi_agent_center": bundle}
+
+
+POST_ROUTES = {
+    "/api/rescore": _handle_rescore,
+    "/api/update_governance": _handle_update_governance,
+    "/api/probe_sources": _handle_probe_sources,
+    "/api/multi_agent/proposal_decision": _handle_proposal_decision,
+    "/api/multi_agent/run_session": _handle_run_session,
+}
+
 
 def run_server(port=None):
     if port is None:
@@ -612,6 +748,10 @@ def run_server(port=None):
         build_and_compute_etf_center()
     server = ThreadingHTTPServer((host, port), TWFinRequestHandler)
     print(f"TWFin Intelligence Server running at http://127.0.0.1:{port} (bound to {host}:{port})")
+    if ADMIN_TOKEN:
+        print("寫入型 API 已啟用管理權杖保護 (TWFIN_ADMIN_TOKEN)")
+    else:
+        print("未設定 TWFIN_ADMIN_TOKEN：寫入型 API 僅接受本機 127.0.0.1 的請求")
     server.serve_forever()
 
 if __name__ == "__main__":

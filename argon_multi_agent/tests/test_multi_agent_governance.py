@@ -19,7 +19,18 @@ import sqlite3
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import atexit
+import shutil
+import tempfile
+
+# 在暫存目錄的副本上執行，避免測試改寫 repo 內已提交的研究紀錄、提案與日誌
+_MA_SRC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_TMP = tempfile.mkdtemp(prefix="twfin_ma_test_")
+os.environ["TWFIN_MA_ROOT"] = os.path.join(_TMP, "argon_multi_agent")
+shutil.copytree(_MA_SRC, os.environ["TWFIN_MA_ROOT"])
+atexit.register(shutil.rmtree, _TMP, True)
+
+sys.path.insert(0, _MA_SRC)
 from engine.multi_agent_orchestrator import (
     MA_ROOT,
     BASE_DIR,

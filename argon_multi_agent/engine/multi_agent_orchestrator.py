@@ -20,11 +20,14 @@ import sys
 import json
 import sqlite3
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+
+TW_TZ = timezone(timedelta(hours=8))
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MA_ROOT = os.path.join(BASE_DIR, "argon_multi_agent")
-DB_PATH = os.path.join(BASE_DIR, "data", "twfin_intelligence.db")
+# 可用環境變數 TWFIN_MA_ROOT 指向其他目錄 (測試時使用暫存目錄，避免改寫 repo 內已提交的研究紀錄)
+MA_ROOT = os.environ.get("TWFIN_MA_ROOT") or os.path.join(BASE_DIR, "argon_multi_agent")
+DB_PATH = os.environ.get("TWFIN_DB_PATH") or os.path.join(BASE_DIR, "data", "twfin_intelligence.db")
 
 REQUIRED_DIRS = [
     "agents",
@@ -107,7 +110,7 @@ def log_security_violation(target_path, event_code):
     ensure_ma_directories()
     log_file = os.path.join(MA_ROOT, "logs", "execution_logs", "security_audit.jsonl")
     entry = {
-        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00"),
+        "timestamp": datetime.now(TW_TZ).strftime("%Y-%m-%dT%H:%M:%S+08:00"),
         "event_code": event_code,
         "target_path": target_path,
         "action": "REJECTED_BY_PERMISSION_GUARD"
@@ -120,7 +123,7 @@ def log_agent_activity(session_id, agent_id, phase, summary):
     ensure_ma_directories()
     log_file = os.path.join(MA_ROOT, "logs", "agent_logs", f"{session_id}.jsonl")
     entry = {
-        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00"),
+        "timestamp": datetime.now(TW_TZ).strftime("%Y-%m-%dT%H:%M:%S+08:00"),
         "session_id": session_id,
         "agent_id": agent_id,
         "phase": phase,
@@ -182,7 +185,7 @@ def extract_live_system_evidence():
     conn.close()
 
     return {
-        "audit_timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00"),
+        "audit_timestamp": datetime.now(TW_TZ).strftime("%Y-%m-%dT%H:%M:%S+08:00"),
         "total_etfs": len(etf_rows),
         "tw_etf_count": sum(1 for r in etf_rows if r["listing_market"] == "TW"),
         "us_etf_count": sum(1 for r in etf_rows if r["listing_market"] == "US"),
@@ -206,7 +209,7 @@ def run_full_multi_agent_session(topic="台美 ETF 雙軌評分模型、跨時�
     ensure_ma_directories()
     pre_checksums = compute_production_checksums()
     session_id = "SESSION-20261122-001"
-    now_iso = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    now_iso = datetime.now(TW_TZ).strftime("%Y-%m-%dT%H:%M:%S+08:00")
 
     log_agent_activity(session_id, "ARGON_ORCHESTRATOR", "PHASE_1", f"啟動多代理研究任務：{topic} (觸發模式: {trigger_mode})")
     ev = extract_live_system_evidence()
@@ -899,7 +902,7 @@ def run_full_multi_agent_session(topic="台美 ETF 雙軌評分模型、跨時�
         "topic": topic,
         "trigger_mode": trigger_mode,
         "started_at": now_iso,
-        "completed_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00"),
+        "completed_at": datetime.now(TW_TZ).strftime("%Y-%m-%dT%H:%M:%S+08:00"),
         "status": "COMPLETED_AWAITING_USER_APPROVAL",
         "production_integrity_verified": integrity_verified,
         "production_checksums": post_checksums,
@@ -980,7 +983,7 @@ def update_proposal_approval_status(proposal_id, decision, user_note=""):
         new_status = "RE_RESEARCH_REQUESTED"
 
     found_obj["status"] = new_status
-    found_obj["user_decision_at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    found_obj["user_decision_at"] = datetime.now(TW_TZ).strftime("%Y-%m-%dT%H:%M:%S+08:00")
     found_obj["user_decision_note"] = user_note or f"使用者執行操作：{decision}"
 
     new_json_path = os.path.join(MA_ROOT, "proposals", target_folder, f"{proposal_id}.json")

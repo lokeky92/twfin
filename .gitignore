@@ -7,3 +7,9 @@ venv/
 *.log
 .wrangler/
 cloudflare/worker.mjs
+
+# SQLite 資料庫改存於 GitHub Release (data-latest)，不再提交進 git
+data/*.db
+data/*.db-journal
+# 舊版建置產物 (已改為只輸出 docs/index.html)
+frontend/twfin_dashboard_standalone.html

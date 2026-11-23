@@ -18,16 +18,12 @@ import ssl
 import urllib.request
 from datetime import datetime
 from db import get_connection, init_database
+from common import fetch_json, now_iso
 
 SSL_CTX = ssl.create_default_context()
 
 def _fetch_json(url, timeout=15):
-    req = urllib.request.Request(url, headers={
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) TWFin-Research-Engine/1.0",
-        "Accept": "application/json"
-    })
-    with urllib.request.urlopen(req, timeout=timeout, context=SSL_CTX) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    return fetch_json(url, timeout=timeout)
 
 def _to_float(val):
     if val is None:
@@ -92,7 +88,7 @@ def run_live_ingestion():
     init_database()
     conn = get_connection()
     cur = conn.cursor()
-    now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    now_str = now_iso()
     summary = {}
 
     # 1. 抓取 TWSE 與 TPEx 估值表 (BWIBBU_ALL & tpex_mainboard_peratio_analysis)

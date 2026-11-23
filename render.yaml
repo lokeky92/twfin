@@ -3,10 +3,13 @@ services:
     name: twfin-intelligence-center
     runtime: python
     plan: free
-    buildCommand: python backend/run_pipeline.py && python backend/export_standalone.py
+    buildCommand: python backend/run_pipeline.py --all
     startCommand: python backend/server.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: HOST
         value: 0.0.0.0
+      # 寫入型 API (調整權重、門檻、觸發同步) 的管理權杖；請在 Render 後台填入，未設定時公開部署將無法寫入
+      - key: TWFIN_ADMIN_TOKEN
+        sync: false

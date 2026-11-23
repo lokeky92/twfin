@@ -8,7 +8,8 @@ import os
 import json
 from datetime import datetime
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "twfin_intelligence.db")
+# 可用環境變數 TWFIN_DB_PATH 指定其他資料庫 (測試時使用暫存檔)
+DB_PATH = os.environ.get("TWFIN_DB_PATH") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "twfin_intelligence.db")
 
 SCHEMA_SQL = """
 PRAGMA foreign_keys = ON;
@@ -544,11 +545,20 @@ CREATE TABLE IF NOT EXISTS etf_research_reports (
     primary_sources TEXT NOT NULL,
     version_tag TEXT NOT NULL
 );
+
+-- 查詢效能索引 (get_dashboard_payload 與權重重算的常用條件)
+CREATE INDEX IF NOT EXISTS idx_irs_model_version ON industry_rotation_scores(model_version);
+CREATE INDEX IF NOT EXISTS idx_tew_industry ON trend_early_warnings(industry_id);
+CREATE INDEX IF NOT EXISTS idx_mgc_active ON model_governance_configs(active, created_at);
+CREATE INDEX IF NOT EXISTS idx_lcf_industry ON live_company_fundamentals(mapped_industry_id);
+CREATE INDEX IF NOT EXISTS idx_lcf_rev ON live_company_fundamentals(rev_current_thousand);
+CREATE INDEX IF NOT EXISTS idx_etf_daily_code ON etf_daily_metrics(etf_code);
 """
 
 def get_connection():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    # timeout：伺服器多執行緒同時寫入時等待鎖釋放，而不是立即拋出 "database is locked"
+    conn = sqlite3.connect(DB_PATH, timeout=15)
     conn.row_factory = sqlite3.Row
     return conn
 
