@@ -94,5 +94,21 @@ jobs:
             exit 0
           fi
           git commit -m "chore(data): auto-sync TWSE/TPEx/MOPS live data & ETF scores"
-          git pull --rebase origin main
-          git push
+          # 失敗時把 git 的錯誤訊息輸出成 annotation，未登入也能在 Actions 摘要看到原因
+          run_git() {
+            if ! out=$("$@" 2>&1); then
+              echo "$out"
+              echo "::error title=git $2 failed::$(echo "$out" | tail -5 | tr '\n' ' ')"
+              exit 1
+            fi
+            echo "$out"
+          }
+          # main 在執行期間可能有新 commit (例如另一次排程)，推送失敗時重新 rebase 再試
+          for attempt in 1 2 3; do
+            run_git git pull --rebase origin main
+            if git push origin HEAD:main 2>push.err; then exit 0; fi
+            echo "::warning title=git push retry $attempt::$(tail -3 push.err | tr '\n' ' ')"
+            sleep 5
+          done
+          echo "::error title=git push failed::$(tail -5 push.err | tr '\n' ' ')"
+          exit 1
