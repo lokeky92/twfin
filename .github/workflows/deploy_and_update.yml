@@ -9,6 +9,8 @@ on:
     # 每個交易日台灣時間 16:30 (UTC 08:30) 與 20:00 (UTC 12:00) 自動在雲端抓取 TWSE / TPEx / MOPS 最新數據並更新網站
     - cron: '30 8 * * 1-5'
     - cron: '0 12 * * 1-5'
+    # TEMP: 排程觸發測試用，驗證完成後移除
+    - cron: '*/5 * * * *'
 
 permissions:
   contents: write
