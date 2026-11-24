@@ -7,29 +7,32 @@
   <link rel="stylesheet" href="assets/app.css" />
 </head>
 <body>
-  <!-- 頂部全域指揮中心導覽列 -->
+  <!-- 頂部導覽列：單列（品牌｜四大中心切換｜狀態與操作） -->
   <header>
-    <div>
-      <div class="brand-title">
-        <span>台灣資金流向互動式視覺研究中心</span>
-        <span class="badge badge-grade-A">LIVE OpenAPI 1,989家串接</span>
+    <div class="brand">
+      <div class="brand-logo">TW</div>
+      <div>
+        <div class="brand-title">
+          <span>台灣資金流向研究中心</span>
+          <span class="live-dot" title="LIVE OpenAPI：TWSE / TPEx / MOPS 1,989 家上市櫃">LIVE</span>
+        </div>
+        <div class="brand-sub">Taiwan Capital Flow Research Center</div>
       </div>
-      <div class="brand-sub">Taiwan Capital Flow Visual Command Center ｜ 保留100% SQLite 歷史資料庫與五維回測模型</div>
     </div>
 
-    <!-- 四大核心導航切換器 (Layer 1 動態經濟地圖 / Layer 2 研究分析 / Layer 3 專業數據 / 新增：ETF 投資決策中心) -->
+    <!-- 四大核心導覽 (Layer 1 動態經濟地圖 / Layer 2 研究分析 / Layer 3 專業數據 / ETF 投資決策中心) -->
     <div class="mode-switcher" role="tablist">
-      <button id="btnModeA" class="mode-btn active-A" onclick="setAppMode('A')">🗺️ 第一層(首頁)：動態經濟地圖</button>
-      <button id="btnModeB" class="mode-btn" onclick="setAppMode('B')">🔍 第二層：研究分析與趨勢故事</button>
-      <button id="btnModeC" class="mode-btn" onclick="setAppMode('C')">🗄️ 第三層：專業數據、回測與治理</button>
-      <button id="btnModeETF" class="mode-btn" onclick="setAppMode('ETF')">🎯 ETF 投資決策中心 (台灣+美國)</button>
+      <button id="btnModeA" class="mode-btn active-A" onclick="setAppMode('A')"><span class="mode-no">1</span>動態地圖</button>
+      <button id="btnModeB" class="mode-btn" onclick="setAppMode('B')"><span class="mode-no">2</span>研究分析</button>
+      <button id="btnModeC" class="mode-btn" onclick="setAppMode('C')"><span class="mode-no">3</span>專業數據</button>
+      <button id="btnModeETF" class="mode-btn" onclick="setAppMode('ETF')">ETF 決策中心</button>
     </div>
 
     <div class="header-controls">
-      <button id="motionToggleBtn" class="btn btn-outline btn-sm" onclick="toggleReducedMotion()">✨ 動態流線：開啟</button>
-      <span id="activeModelBadge" class="badge badge-grade-B">模型 v1.0.0</span>
       <span id="dataProvenanceBadge" class="badge badge-grade-C" style="cursor:help;" title="">資料來源判定中…</span>
-      <button class="btn btn-sm" onclick="probeLiveSources()">🔄 同步官方OpenAPI</button>
+      <span id="activeModelBadge" class="badge badge-grade-B">模型 v1.0.0</span>
+      <button id="motionToggleBtn" class="btn btn-outline btn-sm" onclick="toggleReducedMotion()" title="開關桑基圖資金流動畫">✨ 動畫</button>
+      <button class="btn btn-sm" onclick="probeLiveSources()">🔄 同步資料</button>
     </div>
   </header>
 
@@ -65,58 +68,72 @@
          純粹視覺化指揮中心：10秒狀態膠囊 + 四層全景桑基圖 + 時間軸連動19宮格五色熱度地圖
          ===================================================================== -->
     <div id="layer1MapSection">
-      <!-- 10秒全局結論快覽列 -->
-      <section class="pulse-hero" style="margin-bottom: 18px;">
+      <!-- 10 秒全局結論快覽 -->
+      <section class="pulse-hero">
         <div class="pulse-hero-header">
           <div>
-            <span class="badge badge-lvl4" style="margin-right:8px;">🗺️ 第一層：台灣動態經濟地圖</span>
-            <strong style="font-size:15px; color:#fff;">10秒直覺掌握全局（點擊下方任一狀態卡、桑基流帶或產業方塊，即可下鑽至第二層研究分析與第三層原始數據）</strong>
+            <div class="panel-title"><span class="badge badge-lvl4">第一層</span>10 秒看懂台灣資金現況</div>
+            <div class="panel-sub">點擊任一狀態卡、桑基流帶或產業方塊，即可下鑽至第二層研究分析與第三層原始數據</div>
           </div>
-          <div id="lastUpdatedText" style="font-size:12px; color:var(--accent-blue);">SQLite 資料庫同步中...</div>
+          <div id="lastUpdatedText" style="font-size:12.5px; color:var(--text-muted);">SQLite 資料庫同步中...</div>
         </div>
         <div class="pulse-grid" id="tenSecPulseGrid"></div>
       </section>
 
-      <!-- Habr 1016620 風格：四層全景桑基資金流向地圖 (首頁絕對視覺核心) -->
+      <!-- 四層全景桑基資金流向地圖 -->
       <div class="sankey-wrapper" id="sankeyWrapperBox">
         <div class="sankey-header-bar">
           <div>
-            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <div class="panel-title">
               <span class="badge badge-grade-A">即時資金動脈</span>
-              <span style="font-size:19px; font-weight:900; color:#fff; letter-spacing:0.3px;" id="sankeyMainTitle">
-                台灣總體資金流向與產業配置全景地圖（2026年10月 – 11月21日）
-              </span>
+              <span id="sankeyMainTitle">台灣總體資金流向全景圖</span>
             </div>
-            <div class="sankey-kpi-dots">
-              <span><i class="legend-dot" style="background:#34d399; border-radius:50%;"></i><strong style="color:#34d399;">國內資金總池：83.30 兆元</strong> (國銀存款68.54兆+外匯10.06兆+劃撥4.70兆)</span>
-              <span><i class="legend-dot" style="background:#fbbf24; border-radius:50%;"></i><strong style="color:#fbbf24;">實質擴產與股市配置：56.98 兆元</strong> (國銀放款49.68兆+0050/投信/債券ETF)</span>
-              <span><i class="legend-dot" style="background:#fb7185; border-radius:50%;"></i><strong style="color:#fb7185;">外資調節與房市降溫：-7,607 億元</strong> (外資匯出2,112億+11月賣超5,495億)</span>
-            </div>
+            <div class="panel-sub">2026 年 10 月 – 11 月 21 日｜流帶粗細＝資金規模，點擊流帶可釘選明細</div>
           </div>
-          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div class="panel-tools">
             <select id="sankeyPeriodSelect" onchange="onSankeyPeriodChange(this.value)">
-              <option value="0">2025-Q3（AI水冷與先進封裝擴產啟動期）</option>
-              <option value="1">2025-Q4（央行第七波信用管制、房市資金降溫期）</option>
-              <option value="2">2026-Q2（外銷訂單連紅、企業信貸加速期）</option>
-              <option value="3">2026-08~09（外匯存底破6,019億美元、劃撥存款4.7兆創高）</option>
-              <option value="4" selected>2026-10~11 最新（10月營收6.86兆創高、外資提款 vs 內資0050狂買2,200億）</option>
+              <option value="0">2025-Q3　AI 水冷與先進封裝擴產啟動</option>
+              <option value="1">2025-Q4　第七波信用管制、房市降溫</option>
+              <option value="2">2026-Q2　外銷訂單連紅、企業信貸加速</option>
+              <option value="3">2026-08~09　外匯存底破 6,019 億美元</option>
+              <option value="4" selected>2026-10~11　最新（營收 6.86 兆、0050 狂買）</option>
             </select>
-            <button id="sankeyPlayBtn" class="btn btn-sm" style="background:#059669;" onclick="toggleSankeyPlay()">▶ 播放資金流向演變</button>
-            <button class="btn btn-outline btn-sm" onclick="zoomSankey(1.15)">＋</button>
-            <button class="btn btn-outline btn-sm" onclick="zoomSankey(0.87)">－</button>
-            <button class="btn btn-outline btn-sm" onclick="zoomSankey(0)">重置</button>
+            <button id="sankeyPlayBtn" class="btn btn-sm btn-play" onclick="toggleSankeyPlay()">▶ 播放演變</button>
+            <div class="tool-group">
+              <button class="btn btn-sm" onclick="zoomSankey(1.15)" title="放大">＋</button>
+              <button class="btn btn-sm" onclick="zoomSankey(0.87)" title="縮小">－</button>
+              <button class="btn btn-sm" onclick="zoomSankey(0)" title="重置縮放">重置</button>
+            </div>
             <button id="sankeyViewToggleBtn" class="btn btn-outline btn-sm" onclick="toggleSankeyListView()">📋 結構清單</button>
+          </div>
+        </div>
+
+        <div class="kpi-tiles">
+          <div class="kpi-tile" style="--kpi-col:#34d399;">
+            <div class="kt-label">國內資金總池</div>
+            <div class="kt-value">83.30 兆元</div>
+            <div class="kt-note">國銀存款 68.54 兆 ＋ 外匯 10.06 兆 ＋ 劃撥 4.70 兆</div>
+          </div>
+          <div class="kpi-tile" style="--kpi-col:#fbbf24;">
+            <div class="kt-label">實質擴產與股市配置</div>
+            <div class="kt-value">56.98 兆元</div>
+            <div class="kt-note">國銀放款 49.68 兆 ＋ 0050／投信／債券 ETF</div>
+          </div>
+          <div class="kpi-tile" style="--kpi-col:#fb7185;">
+            <div class="kt-label">外資調節與房市降溫</div>
+            <div class="kt-value">−7,607 億元</div>
+            <div class="kt-note">外資匯出 2,112 億 ＋ 11 月賣超 5,495 億</div>
           </div>
         </div>
 
         <div class="sankey-stage" id="sankeyStageBox">
           <div id="sankeySvgContainer"></div>
-          <!-- Habr 風格浮動可釘選明細卡片 -->
+          <!-- 浮動可釘選明細卡片 -->
           <div id="sankeyFloatCard" class="sankey-float-card">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
               <div>
                 <div id="sfcCategoryTag" style="font-size:11px; color:var(--accent-blue); font-weight:700;"></div>
-                <div id="sfcTitle" style="font-size:16px; font-weight:800; color:#fff; margin-top:2px;"></div>
+                <div id="sfcTitle" style="font-size:16px; font-weight:700; color:#fff; margin-top:2px;"></div>
               </div>
               <button class="sfc-close" onclick="unpinSankeyCard(event)" title="關閉固定卡片">✕</button>
             </div>
@@ -135,68 +152,75 @@
         </div>
 
         <div id="sankeyAltListView" style="display:none; margin-top:12px;"></div>
-        <div id="sankeyPeriodNarrative" style="margin-top:10px; padding:9px 14px; background:rgba(15,23,42,0.75); border-radius:8px; border-left:4px solid var(--accent-emerald); font-size:12.5px;"></div>
+        <div id="sankeyPeriodNarrative" class="callout" style="margin-top:14px; --callout-col:var(--accent-emerald);"></div>
       </div>
 
-      <!-- 產業資金熱度地圖 + 內嵌時間軸控制列 (一體化動態產業板塊地圖) -->
-      <div class="sankey-wrapper" style="padding: 18px 22px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+      <!-- 產業資金熱度地圖 + 內嵌時間軸 -->
+      <div class="sankey-wrapper">
+        <div class="sankey-header-bar">
           <div>
-            <div style="font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:10px;">
-              <span>台灣 19 大產業板塊熱度地圖（點擊板塊滑出第二層分析，拖曳時間軸觀看歷史輪動）</span>
-            </div>
+            <div class="panel-title">19 大產業板塊熱度地圖</div>
+            <div class="panel-sub">點擊板塊查看第二層分析；拖曳時間軸觀看歷史輪動</div>
           </div>
           <div class="heatmap-legend">
-            <span><i class="legend-dot" style="background:#059669;"></i>深綠：加速流入(A)</span>
-            <span><i class="legend-dot" style="background:#15803d;"></i>淺綠：持續增加(B)</span>
-            <span><i class="legend-dot" style="background:#334155;"></i>灰色：觀望分化(C)</span>
-            <span><i class="legend-dot" style="background:#b45309;"></i>橘色：逐漸流出(D)</span>
-            <span><i class="legend-dot" style="background:#be123c;"></i>紅色：明顯撤退(E)</span>
+            <span><i class="legend-dot" style="background:#10b981;"></i>加速流入 A</span>
+            <span><i class="legend-dot" style="background:#4ade80;"></i>持續增加 B</span>
+            <span><i class="legend-dot" style="background:#94a3b8;"></i>觀望分化 C</span>
+            <span><i class="legend-dot" style="background:#fbbf24;"></i>逐漸流出 D</span>
+            <span><i class="legend-dot" style="background:#fb7185;"></i>明顯撤退 E</span>
           </div>
         </div>
 
-        <!-- 輕量化時間軸控制條直接融合在熱度地圖上方 -->
-        <div style="background:#0f172a; border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <!-- 時間軸控制 -->
+        <div class="timeline-panel">
+          <div class="timeline-toolbar">
             <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-              <button class="btn btn-sm" onclick="stepTimeline(-1)">⏪</button>
-              <button id="timelinePlayBtn" class="btn btn-sm" style="background:#059669;" onclick="toggleTimelinePlay()">▶ 播放產業輪動歷史</button>
-              <button class="btn btn-sm" onclick="stepTimeline(1)">⏩</button>
-              <span id="timelineCurrentLabel" style="font-size:13.5px; font-weight:800; color:#34d399; margin-left:8px;"></span>
+              <div class="tool-group">
+                <button class="btn btn-sm" onclick="stepTimeline(-1)" title="上一期">⏪</button>
+                <button class="btn btn-sm" onclick="stepTimeline(1)" title="下一期">⏩</button>
+              </div>
+              <button id="timelinePlayBtn" class="btn btn-sm btn-play" onclick="toggleTimelinePlay()">▶ 播放輪動歷史</button>
+              <span id="timelineCurrentLabel" style="font-size:13.5px; font-weight:700; color:#34d399; margin-left:6px;"></span>
             </div>
-            <div style="display:flex; gap:5px; flex-wrap:wrap;">
-              <button class="btn btn-outline btn-sm" onclick="jumpTimelineWindow('3Y')">近3年(2024)</button>
-              <button class="btn btn-outline btn-sm" onclick="jumpTimelineWindow('1Y')">近1年(2025下半年)</button>
-              <button class="btn btn-outline btn-sm" onclick="jumpTimelineWindow('6M')">近6個月(2026上半年)</button>
-              <button class="btn btn-outline btn-sm" onclick="jumpTimelineWindow('3M')">近3個月(2026-08)</button>
-              <button class="btn btn-outline btn-sm" onclick="jumpTimelineWindow('1M')">最新(2026-11)</button>
+            <div class="tool-group">
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('3Y')">近 3 年</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('1Y')">近 1 年</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('6M')">近 6 月</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('3M')">近 3 月</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('1M')">最新</button>
             </div>
           </div>
-          <input type="range" id="timelineRangeInput" class="timeline-slider" min="0" max="5" value="5" oninput="onTimelineSliderInput(this.value)" style="margin:10px 0 6px 0;" />
-          <div class="timeline-steps" style="margin-bottom:0; font-size:11.5px;">
-            <span>2024下半年(房市高峰)</span>
-            <span>2025上半年(CoWoS擴產)</span>
-            <span>2025下半年(水冷拐點/打房)</span>
-            <span>2026上半年(重電/測試崛起)</span>
-            <span>2026年8~9月(劃撥4.7兆創高)</span>
-            <span style="color:var(--accent-emerald); font-weight:800;">2026年10~11月(營收6.86兆/0050狂買)</span>
+          <input type="range" id="timelineRangeInput" class="timeline-slider" min="0" max="5" value="5" oninput="onTimelineSliderInput(this.value)" />
+          <div class="timeline-steps">
+            <span>2024 下半年<br/>房市高峰</span>
+            <span>2025 上半年<br/>CoWoS 擴產</span>
+            <span>2025 下半年<br/>水冷拐點／打房</span>
+            <span>2026 上半年<br/>重電／測試崛起</span>
+            <span>2026 年 8~9 月<br/>劃撥 4.7 兆創高</span>
+            <span style="color:var(--accent-emerald); font-weight:700;">2026 年 10~11 月<br/>營收 6.86 兆</span>
           </div>
         </div>
 
-        <div id="industryHeatmapGrid" class="heatmap-grid" style="margin-bottom:10px;"></div>
-        <div id="timelineCompactBar" style="font-size:12.5px; color:#cbd5e1; background:rgba(15,23,42,0.85); padding:10px 14px; border-radius:8px; border-left:4px solid var(--accent-blue);"></div>
+        <div id="industryHeatmapGrid" class="heatmap-grid"></div>
+        <div id="timelineCompactBar" class="callout"></div>
       </div>
 
-      <!-- 首頁底部：引導進入第二層與第三層的優雅傳送門 (不把報告塞在首頁) -->
-      <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-top:16px;">
-        <button class="btn" style="padding:11px 24px; font-size:14px; background:linear-gradient(135deg, #0284c7, #2563eb);" onclick="setAppMode('B')">
-          🔍 進入第二層：查看八大資金深度解讀、六大潛力排行榜與市場趨勢故事 ➔
+      <!-- 首頁底部：下一步 -->
+      <div class="next-steps">
+        <button class="next-step" style="--ns-accent:#38bdf8;" onclick="setAppMode('B')">
+          <div class="ns-kicker">第二層 ➔</div>
+          <div class="ns-title">研究分析與趨勢故事</div>
+          <div class="ns-desc">八大資金池深度解讀、六大潛力排行榜、市場趨勢故事</div>
         </button>
-        <button class="btn btn-outline" style="padding:11px 24px; font-size:14px;" onclick="setAppMode('C')">
-          🗄️ 進入第三層：查看 1,989 家上市櫃原始數據、91 樣本回測、固定報告與權重設定 ➔
+        <button class="next-step" style="--ns-accent:#c084fc;" onclick="setAppMode('C')">
+          <div class="ns-kicker">第三層 ➔</div>
+          <div class="ns-title">專業數據、回測與治理</div>
+          <div class="ns-desc">1,989 家上市櫃原始數據、91 樣本回測、固定報告與權重設定</div>
         </button>
-        <button class="btn" style="padding:11px 24px; font-size:14px; background:linear-gradient(135deg, #d97706, #f59e0b);" onclick="setAppMode('ETF')">
-          🎯 進入 ETF 投資決策中心：台美 28 檔核心 ETF 長期配置(模型A) ＋ 短中期進場(模型B) 雙軌評估 ➔
+        <button class="next-step" style="--ns-accent:#fbbf24;" onclick="setAppMode('ETF')">
+          <div class="ns-kicker">ETF ➔</div>
+          <div class="ns-title">ETF 投資決策中心</div>
+          <div class="ns-desc">台美 28 檔核心 ETF：長期配置（模型 A）＋ 短中期進場（模型 B）雙軌評估</div>
         </button>
       </div>
     </div>
@@ -206,24 +230,22 @@
          當使用者從首頁點擊「第二層」時才展開：八大資金卡、時間軸四維解析、六大排行榜、趨勢故事、個股四類名單與預警卡片
          ===================================================================== -->
     <div id="layer2AnalysisSection" style="display:none;">
-      <div class="card" style="margin-bottom:18px; background:linear-gradient(90deg, #0c192c, #172554); border-color:#1e3a8a; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div class="layer-hero" style="--hero-accent:#38bdf8;">
         <div>
-          <span class="badge badge-lvl3">🔍 第二層：研究分析中心</span>
-          <strong style="font-size:16px; color:#fff; margin-left:8px;">將首頁動態地圖所呈現的資金變化，拆解為白話原因、潛力排行、趨勢故事與個股觀察名單</strong>
+          <div class="lh-title"><span class="badge badge-lvl3">第二層</span>研究分析中心</div>
+          <div class="lh-sub">把首頁地圖上的資金變化，拆解為白話原因、潛力排行、趨勢故事與個股觀察名單</div>
         </div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-outline btn-sm" onclick="setAppMode('A')">⬅ 返回第一層動態經濟地圖</button>
-          <button class="btn btn-sm" style="background:#7e22ce;" onclick="setAppMode('C')">前往第三層專業數據與回測 ➔</button>
+        <div class="lh-actions">
+          <button class="btn btn-outline btn-sm" onclick="setAppMode('A')">⬅ 動態經濟地圖</button>
+          <button class="btn btn-outline btn-sm" onclick="setAppMode('C')">專業數據與回測 ➔</button>
         </div>
       </div>
 
       <!-- 1. 八大台灣資金總覽卡片 -->
       <div class="section-head" style="margin-top:8px;">
         <div>
-          <div class="section-title">
-            <span>一、台灣八大資金池深度解讀（點擊卡片滑出 AI 白話六問）</span>
-          </div>
-          <div class="section-desc">將央行貨幣、銀行借貸、外資動向、台股內資、債券、房地產與企業擴產轉化為狀態卡片與趨勢線。</div>
+          <div class="section-title"><span class="sec-no">1</span>台灣八大資金池</div>
+          <div class="section-desc">央行貨幣、銀行借貸、外資、內資、債券、房地產與企業擴產——點擊卡片展開 AI 白話六問</div>
         </div>
       </div>
       <div id="eightVitalCardsGrid" class="grid-8cards"></div>
@@ -231,10 +253,8 @@
       <!-- 2. 六大產業趨勢排行榜 (嚴格區分「目前最熱門」與「可能即將轉強」) -->
       <div class="section-head">
         <div>
-          <div class="section-title">
-            <span>二、六大產業趨勢白話排行榜（嚴格區分「目前最熱門」vs「★ 可能即將轉強」）</span>
-          </div>
-          <div class="section-desc">不因近期漲幅大就當成未來最有潛力！系統將「資金最擁擠熱門」與「基本面大好但股價受外資提款壓抑之低 PEG 潛力轉強產業」分開列示。</div>
+          <div class="section-title"><span class="sec-no">2</span>六大產業趨勢排行榜</div>
+          <div class="section-desc">嚴格區分「目前最熱門」與「★ 可能即將轉強」——近期漲幅大不代表未來最有潛力</div>
         </div>
       </div>
       <div id="sixLeaderboardsGrid" class="leaderboards-grid"></div>
@@ -242,9 +262,8 @@
       <!-- 3. 「市場正在發生什麼事」產業趨勢故事模式 -->
       <div class="section-head">
         <div>
-          <div class="section-title">
-            <span>三、市場正在發生什麼事？（四則結構化趨勢故事與正反方證據）</span>
-          </div>
+          <div class="section-title"><span class="sec-no">3</span>市場正在發生什麼事？</div>
+          <div class="section-desc">四則結構化趨勢故事，並列正方與反方證據</div>
         </div>
       </div>
       <div id="trendStoriesGrid" class="stories-grid"></div>
@@ -252,9 +271,8 @@
       <!-- 4. 時間軸當期四維度詳細解析面板 -->
       <div class="section-head">
         <div>
-          <div class="section-title">
-            <span>四、歷史輪動時期四維度對照解析</span>
-          </div>
+          <div class="section-title"><span class="sec-no">4</span>歷史輪動四維度對照</div>
+          <div class="section-desc">隨首頁時間軸切換：資金流向、湧入產業、撤退產業與重要事件</div>
         </div>
       </div>
       <div id="timelineSnapshotPanel" class="grid-4"></div>
@@ -265,28 +283,28 @@
          保留 100% 原始數據表、1,989家檢索、權重與門檻動態調整、91樣本回測、固定研究報告與資料字典
          ===================================================================== -->
     <div id="proResearchSection" style="display:none; margin-top: 10px;">
-      <div class="card" style="margin-bottom:16px; background:linear-gradient(90deg, #1e1b4b, #311042); border-color:#6b21a8; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div class="layer-hero" style="--hero-accent:#a855f7;">
         <div>
-          <span class="badge badge-lvl2">🗄️ 第三層：專業數據與模型治理底座</span>
-          <strong style="font-size:15.5px; color:#fff; margin-left:8px;">100% 原生 SQLite 資料表、1,989 家上市櫃 OpenAPI 檢索、五維權重/門檻動態重算、Point-in-Time 回測與資料字典</strong>
+          <div class="lh-title"><span class="badge badge-lvl2">第三層</span>專業數據與模型治理</div>
+          <div class="lh-sub">SQLite 原生資料表、1,989 家上市櫃檢索、五維權重／門檻動態重算、Point-in-Time 回測與資料字典</div>
         </div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-outline btn-sm" onclick="setAppMode('A')">⬅ 返回第一層動態經濟地圖</button>
-          <button class="btn btn-outline btn-sm" onclick="setAppMode('B')">⬅ 返回第二層研究分析</button>
+        <div class="lh-actions">
+          <button class="btn btn-outline btn-sm" onclick="setAppMode('A')">⬅ 動態經濟地圖</button>
+          <button class="btn btn-outline btn-sm" onclick="setAppMode('B')">⬅ 研究分析</button>
         </div>
       </div>
 
       <nav class="pro-nav-tabs">
-        <div class="pro-tab active" onclick="switchProTab('pro-rotation', this)">01. 產業五維評分與動態權重</div>
-        <div class="pro-tab" onclick="switchProTab('pro-companies', this)">02. 個股研究中心 (四類名單 + 1,989家檢索)</div>
-        <div class="pro-tab" onclick="switchProTab('pro-warnings', this)">03. 趨勢預警引擎與門檻設定</div>
-        <div class="pro-tab" onclick="switchProTab('pro-insti', this)">04. 三大法人資金追蹤 (日/週/月/季)</div>
-        <div class="pro-tab" onclick="switchProTab('pro-flowmap', this)">05. 資產配置矩陣 (防重複計算原文)</div>
-        <div class="pro-tab" onclick="switchProTab('pro-macro', this)">06. 總體與國際原始指標卡 (23項)</div>
-        <div class="pro-tab" onclick="switchProTab('pro-scenarios', this)">07. 情境分析與 3/6/12/24M 觀察表</div>
-        <div class="pro-tab" onclick="switchProTab('pro-reports', this)">08. 固定研究報告中心 (日/週/月/季)</div>
-        <div class="pro-tab" onclick="switchProTab('pro-backtest', this)">09. 樣本外回測驗證 (N=91)</div>
-        <div class="pro-tab" onclick="switchProTab('pro-governance', this)">10. 資料品質SLA、來源與資料字典</div>
+        <div class="pro-tab active" onclick="switchProTab('pro-rotation', this)"><span class="pt-no">01</span>產業五維評分</div>
+        <div class="pro-tab" onclick="switchProTab('pro-companies', this)"><span class="pt-no">02</span>個股研究中心</div>
+        <div class="pro-tab" onclick="switchProTab('pro-warnings', this)"><span class="pt-no">03</span>預警引擎</div>
+        <div class="pro-tab" onclick="switchProTab('pro-insti', this)"><span class="pt-no">04</span>三大法人</div>
+        <div class="pro-tab" onclick="switchProTab('pro-flowmap', this)"><span class="pt-no">05</span>資產配置矩陣</div>
+        <div class="pro-tab" onclick="switchProTab('pro-macro', this)"><span class="pt-no">06</span>總體與國際指標</div>
+        <div class="pro-tab" onclick="switchProTab('pro-scenarios', this)"><span class="pt-no">07</span>情境分析</div>
+        <div class="pro-tab" onclick="switchProTab('pro-reports', this)"><span class="pt-no">08</span>固定研究報告</div>
+        <div class="pro-tab" onclick="switchProTab('pro-backtest', this)"><span class="pt-no">09</span>樣本外回測</div>
+        <div class="pro-tab" onclick="switchProTab('pro-governance', this)"><span class="pt-no">10</span>資料品質與治理</div>
       </nav>
 
       <!-- PRO TAB 1: 產業五維評分與動態權重 -->
@@ -594,38 +612,28 @@
          ===================================================================== -->
     <div id="etfDecisionCenterSection" style="display:none; margin-top: 8px;">
       <!-- 頂部控制列：一般模式 vs 專業研究模式切換 -->
-      <div class="etf-clean-card" style="margin-bottom:24px; background:linear-gradient(135deg, #0f172a 0%, #162033 100%); border:1px solid #38bdf8;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-          <div>
-            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-              <span class="badge badge-lvl3" style="font-size:15px;">🎯 ETF 投資決策中心</span>
-              <span style="font-size:24px; font-weight:900; color:#f8fafc;">台灣 ETF ＋ 美國 ETF 雙軌獨立決策平台</span>
-            </div>
-            <div style="font-size:15.5px; color:#cbd5e1; margin-top:8px;">
-              <strong>10秒直覺判讀：</strong>將「長期配置價值（模型 A｜3～10年）」與「短中期進場環境（模型 B｜1～12個月）」分開評估。一般模式先呈現白話結論，點擊卡片「查看完整分析」或切換「專業研究模式」即可展開完整數據與七大視覺圖表。
-            </div>
+      <div class="layer-hero" style="--hero-accent:#f59e0b;">
+        <div>
+          <div class="lh-title"><span class="badge badge-grade-C">ETF 投資決策中心</span>台灣 ETF ＋ 美國 ETF 雙軌決策</div>
+          <div class="lh-sub">將「長期配置（模型 A｜3～10 年）」與「短中期進場環境（模型 B｜1～12 個月）」分開評估。一般模式先看白話結論，專業模式展開完整數據。</div>
+        </div>
+        <div class="lh-actions">
+          <div class="etf-mode-toggle" role="group" aria-label="閱讀模式">
+            <button id="etfModeBtnSimple" class="on" onclick="setEtfDetailMode(false)">一般模式</button>
+            <button id="etfModeBtnPro" onclick="setEtfDetailMode(true)">專業模式</button>
           </div>
-          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-            <button id="etfDetailModeBtn" class="btn" style="background:#059669; font-size:15px; padding:10px 18px;" onclick="toggleEtfDetailMode()">
-              🟢 目前為：一般白話模式（點擊切換專業研究模式）
-            </button>
-            <button class="btn" style="background:linear-gradient(135deg, #7e22ce, #a855f7); font-size:15px; padding:10px 18px; box-shadow:0 4px 14px rgba(168,85,247,0.35);" onclick="scrollToSectionId('argonMultiAgentCenterSection')">
-              🤖 AI 研究團隊（6 Agents 交叉辯論與提案審批）
-            </button>
-            <button class="btn btn-outline" style="font-size:15px; padding:10px 16px;" onclick="setAppMode('A')">
-              ⬅ 返回台灣動態經濟地圖
-            </button>
-          </div>
+          <button class="btn btn-outline btn-sm" onclick="scrollToSectionId('argonMultiAgentCenterSection')">🤖 AI 研究團隊</button>
+          <button class="btn btn-outline btn-sm" onclick="setAppMode('A')">⬅ 動態經濟地圖</button>
         </div>
       </div>
 
       <!-- ===================================================================
            第一區：全球市場環境（台灣市場 / 美國市場 / 利率環境 / 全球資金流向）
            =================================================================== -->
-      <div class="etf-section-banner" style="margin-top:8px;">
+      <div class="etf-section-banner" style="border-left-color:#10b981; margin-top:8px;">
         <div>
-          <div class="etf-section-title">第一區：全球市場環境（10 秒看懂現在台美市場與資金狀況）</div>
-          <div class="etf-section-sub">直接整合本系統總體經濟、央行貨幣與國際利率傳導真實數據（資料基準：2026年11月21日）</div>
+          <div class="etf-section-title"><span class="sec-no">1</span>全球市場環境</div>
+          <div class="etf-section-sub">10 秒看懂台美市場、利率與資金狀況（資料基準：2026 年 11 月 21 日）</div>
         </div>
       </div>
       <div id="etfSec1GlobalEnv" class="etf-grid-4"></div>
@@ -633,10 +641,10 @@
       <!-- ===================================================================
            第二區：ETF 決策摘要（長期配置環境 / 短中期進場環境 / 值得研究 / 注意風險）
            =================================================================== -->
-      <div class="etf-section-banner">
+      <div class="etf-section-banner" style="border-left-color:#f59e0b;">
         <div>
-          <div class="etf-section-title">第二區：ETF 決策摘要（現在哪些 ETF 值得研究？哪些風險偏高？）</div>
-          <div class="etf-section-sub">模型 A（長期配置）與模型 B（短中期進場）獨立判斷摘要——清楚標示一致順風與長短線分歧標的</div>
+          <div class="etf-section-title"><span class="sec-no">2</span>ETF 決策摘要</div>
+          <div class="etf-section-sub">哪些值得研究、哪些風險偏高？模型 A 與模型 B 獨立判斷，標示長短線一致與分歧的標的</div>
         </div>
       </div>
       <div id="etfSec2DecisionSummary" class="etf-grid-4"></div>
@@ -644,43 +652,43 @@
       <!-- ===================================================================
            第三區：ETF 研究清單（四大分類大頁籤 + 兩層式清爽大字體卡片）
            =================================================================== -->
-      <div class="etf-section-banner">
+      <div class="etf-section-banner" style="border-left-color:#38bdf8;">
         <div>
-          <div class="etf-section-title">第三區：ETF 研究清單（兩層式卡片：第一層 10 秒快速閱讀 ➔ 第二層點擊展開完整分析）</div>
-          <div class="etf-section-sub">點擊下方四大分類頁籤或使用搜尋框篩選；點擊任一卡片底部「▼ 查看完整分析」即可原地展開成分股圖表、配息拆解、歷史績效曲線與完整報告</div>
+          <div class="etf-section-title"><span class="sec-no">3</span>ETF 研究清單</div>
+          <div class="etf-section-sub">先看卡片上的 10 秒結論；需要細節時點「查看完整分析」原地展開成分股、配息拆解與歷史績效</div>
         </div>
       </div>
-
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:20px;">
-        <div class="etf-cat-tabs" style="margin-bottom:0;">
-          <button id="etfTab_TW" class="etf-cat-tab active" onclick="switchEtfMainTab('TW')">🇹🇼 台灣 ETF (市值 / 高股息 / 金融)</button>
-          <button id="etfTab_US" class="etf-cat-tab" onclick="switchEtfMainTab('US')">🇺🇸 美國 ETF (S&amp;P 500 / Nasdaq / 價值股息)</button>
-          <button id="etfTab_BOND" class="etf-cat-tab" onclick="switchEtfMainTab('BOND')">🛡️ 債券與黃金防禦 ETF (台美公債 / 投等債 / 短債)</button>
-          <button id="etfTab_SECTOR" class="etf-cat-tab" onclick="switchEtfMainTab('SECTOR')">🔬 產業型 ETF ＆ ⚠️ 槓反特殊風險隔離區</button>
-          <button id="etfTab_ALL" class="etf-cat-tab" onclick="switchEtfMainTab('ALL')">📋 全部 28 檔台美 ETF</button>
+      <div class="etf-toolbar">
+        <div class="etf-cat-tabs">
+          <button id="etfTab_TW" class="etf-cat-tab active" onclick="switchEtfMainTab('TW')">🇹🇼 台灣 ETF</button>
+          <button id="etfTab_US" class="etf-cat-tab" onclick="switchEtfMainTab('US')">🇺🇸 美國 ETF</button>
+          <button id="etfTab_BOND" class="etf-cat-tab" onclick="switchEtfMainTab('BOND')">🛡️ 債券與黃金</button>
+          <button id="etfTab_SECTOR" class="etf-cat-tab" onclick="switchEtfMainTab('SECTOR')">🔬 產業型與槓反</button>
+          <button id="etfTab_ALL" class="etf-cat-tab" onclick="switchEtfMainTab('ALL')">📋 全部 28 檔</button>
         </div>
-        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-          <select id="etfConclusionFilter" onchange="renderEtfLists()" style="font-size:15px; padding:9px 14px;">
-            <option value="ALL">篩選雙軌結論：全部顯示</option>
-            <option value="DUAL_FAVORABLE">🟢 長短線一致順風（長期佳＋短期條件相對有利）</option>
-            <option value="DIVERGENCE">🟠 長短線評估分歧（長期品質佳 vs 短期等待更佳條件）</option>
-            <option value="CONCENTRATION">🟠 需注意單一持股集中風險（如台積電 &gt; 50%）</option>
-            <option value="HIGH_RISK">🔴 目前風險偏高 / 不符合長期配置角色</option>
+        <div class="etf-filters">
+          <select id="etfConclusionFilter" onchange="renderEtfLists()">
+            <option value="ALL">雙軌結論：全部</option>
+            <option value="DUAL_FAVORABLE">🟢 長短線一致順風</option>
+            <option value="DIVERGENCE">🟠 長短線分歧（長期佳、短期等待）</option>
+            <option value="CONCENTRATION">🟠 單一持股集中風險（如台積電 &gt; 50%）</option>
+            <option value="HIGH_RISK">🔴 風險偏高／不符配置角色</option>
           </select>
-          <input type="text" id="etfSearchInput" placeholder="輸入代號、名稱或成分股 (如 0050 / VOO / 2330 / NVDA)..." style="width:330px; font-size:15px; padding:9px 14px;" oninput="renderEtfLists()" />
+          <input type="text" id="etfSearchInput" placeholder="搜尋代號、名稱或成分股（0050 / VOO / 2330 / NVDA）" oninput="renderEtfLists()" />
         </div>
       </div>
 
       <!-- 兩欄超寬大字體 ETF 卡片容器 -->
       <div id="etfCardsGridContainer" class="etf-grid-2"></div>
+      <div id="etfMoreBar" class="etf-more-bar"></div>
 
       <!-- ===================================================================
            第四區：AI 白話市場解讀（無金融術語，一眼看懂核心邏輯）
            =================================================================== -->
-      <div class="etf-section-banner">
+      <div class="etf-section-banner" style="border-left-color:#a855f7;">
         <div>
-          <div class="etf-section-title">第四區：AI 白話市場解讀（為什麼長短線結論會不同？現在該注意什麼？）</div>
-          <div class="etf-section-sub">以真實數據為基礎，用一般人最容易理解的白話回答當前 ETF 投資的四大關鍵問題</div>
+          <div class="etf-section-title"><span class="sec-no">4</span>AI 白話市場解讀</div>
+          <div class="etf-section-sub">用最容易理解的白話，回答當前 ETF 投資的四個關鍵問題</div>
         </div>
       </div>
       <div id="etfSec4AiPlainGrid" class="etf-grid-2"></div>
@@ -688,15 +696,13 @@
       <!-- ===================================================================
            第五區：完整研究數據、七大互動視覺化圖表、比較器與投資組合分析入口
            =================================================================== -->
-      <div class="etf-section-banner">
+      <div class="etf-section-banner" style="border-left-color:#10b981;">
         <div>
-          <div class="etf-section-title">第五區：完整研究數據與七大視覺化圖表分析中心</div>
-          <div class="etf-section-sub">包含：1.台美資金流向圖 2.長期配置分數圖 3.短中期動能與四象限圖 4.歷史績效曲線圖 5.持股與產業分布圖 6.持股重疊比較圖 7.風險與報酬比較圖，以及個人投資組合診斷與回測報告</div>
+          <div class="etf-section-title"><span class="sec-no">5</span>完整研究數據與視覺化圖表</div>
+          <div class="etf-section-sub">資金流向、長短期分數、績效曲線、持股分布、重疊比較、風險報酬，以及個人投資組合診斷與回測</div>
         </div>
         <div>
-          <button id="etfSec5ToggleBtn" class="btn" style="font-size:15px; padding:10px 20px;" onclick="toggleEtfSec5Panel()">
-            📊 展開 / 收合第五區完整視覺圖表與比較器
-          </button>
+          <button id="etfSec5ToggleBtn" class="btn btn-outline btn-sm" onclick="toggleEtfSec5Panel()">展開 ／ 收合圖表區</button>
         </div>
       </div>
 
@@ -825,14 +831,14 @@
         </div>
 
         <!-- 自動研究報告中心 (7問結構化報告) ＆ 雙軌獨立歷史回測驗證 -->
-        <div class="etf-section-banner">
+        <div class="etf-section-banner" style="border-left-color:#f59e0b;">
           <div>
-            <div class="etf-section-title">ETF 自動研究報告中心（7 問結構化報告）＆ 雙軌模型獨立歷史回測驗證</div>
-            <div class="etf-section-sub">涵蓋每日報告、每週報告、每月報告與 11/20 費半崩跌重大事件專題報告；下方完整揭露模型 A 與模型 B 獨立回測表現與限制</div>
+            <div class="etf-section-title">ETF 自動研究報告與雙軌回測</div>
+            <div class="etf-section-sub">每日／每週／每月報告與重大事件專題；下方揭露模型 A、B 獨立回測表現與限制</div>
           </div>
           <div>
-            <select id="etfReportTypeFilter" onchange="renderEtfReportsAndBacktests()" style="font-size:15px; padding:8px 14px;">
-              <option value="ALL">顯示全部報告（每日 / 每週 / 每月 / 重大事件）</option>
+            <select id="etfReportTypeFilter" onchange="renderEtfReportsAndBacktests()">
+              <option value="ALL">全部報告</option>
               <option value="每日報告">每日報告</option>
               <option value="每週報告">每週報告</option>
               <option value="每月報告">每月報告</option>
@@ -847,33 +853,26 @@
              第六區（第九節規範）：🤖 Argon ETF Multi-Agent Research Team 管理中心
              包含五大頁面：1.團隊總覽 2.研究討論室 3.改善提案中心 4.歷史紀錄 5.團隊設定
              =================================================================== -->
-        <div id="argonMultiAgentCenterSection" class="etf-section-banner" style="margin-top:38px; border-bottom:2px solid #a855f7;">
+        <div id="argonMultiAgentCenterSection" class="etf-section-banner" style="margin-top:56px; border-left-color:#a855f7;">
           <div>
-            <div class="etf-section-title" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-              <span class="badge badge-lvl2" style="font-size:15px;">🤖 Argon AI 研究團隊</span>
-              <span>多代理自主研究、交叉辯論與改善提案管理中心 (Multi-Agent System)</span>
-            </div>
-            <div class="etf-section-sub">
-              由 Argon 擔任總指揮，率領 6 位專業 Agent（長期配置、短中期時機、數據品質、風險管理、反方審查、系統工程）獨立研究並進行兩輪交叉辯論。<strong>最高鐵律：未獲使用者明確批准前，嚴禁自動修改正式系統。</strong>
-            </div>
-            <div class="etf-section-sub" style="color:#fbbf24; margin-top:6px;">
-              ⚠️ 說明：本區為<strong>規則式模擬</strong>。各 Agent 的研究內容與辯論由預先撰寫的範本，搭配資料庫即時數值組合而成，<strong>並非由大型語言模型 (LLM) 即時生成</strong>，請勿將其視為獨立的 AI 判斷。
+            <div class="etf-section-title"><span class="badge badge-lvl2">🤖 Argon AI 研究團隊</span>多代理研究、交叉辯論與提案管理</div>
+            <div class="etf-section-sub">Argon 擔任總指揮，率領 6 位專業 Agent（長期配置、短中期時機、數據品質、風險管理、反方審查、系統工程）獨立研究並進行兩輪交叉辯論。<strong style="color:var(--text-primary);">未獲明確批准前，嚴禁自動修改正式系統。</strong></div>
+            <div class="callout" style="margin-top:10px; --callout-col:#f59e0b; color:#fcd34d; max-width:90ch;">
+              ⚠️ 本區為<strong>規則式模擬</strong>：各 Agent 內容由預先撰寫的範本搭配資料庫即時數值組合而成，<strong>並非由大型語言模型即時生成</strong>，請勿視為獨立的 AI 判斷。
             </div>
           </div>
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn" style="background:#7e22ce; font-size:14.5px; padding:9px 16px;" onclick="triggerNewMultiAgentSession()">
-              🔄 手動啟動新一輪多代理研究
-            </button>
+          <div>
+            <button class="btn btn-sm" style="background:#7e22ce;" onclick="triggerNewMultiAgentSession()">🔄 啟動新一輪多代理研究</button>
           </div>
         </div>
 
         <!-- AI 研究團隊五大分頁切換器 -->
-        <div class="etf-cat-tabs" style="margin-bottom:20px;">
-          <button id="maTab_OVERVIEW" class="etf-cat-tab active" onclick="switchMultiAgentTab('OVERVIEW')">① 團隊總覽 (6 Agents 狀態)</button>
-          <button id="maTab_DEBATE" class="etf-cat-tab" onclick="switchMultiAgentTab('DEBATE')">② 研究討論室 (獨立研究 &amp; 反方辯論)</button>
-          <button id="maTab_PROPOSALS" class="etf-cat-tab" onclick="switchMultiAgentTab('PROPOSALS')">③ 改善提案中心 (人工批准閘門)</button>
-          <button id="maTab_HISTORY" class="etf-cat-tab" onclick="switchMultiAgentTab('HISTORY')">④ 歷史紀錄 &amp; 數據品質稽核</button>
-          <button id="maTab_SETTINGS" class="etf-cat-tab" onclick="switchMultiAgentTab('SETTINGS')">⑤ 團隊設定 &amp; 權限硬體鎖</button>
+        <div class="etf-cat-tabs" style="margin-bottom:20px; display:inline-flex;">
+          <button id="maTab_OVERVIEW" class="etf-cat-tab active" onclick="switchMultiAgentTab('OVERVIEW')">① 團隊總覽</button>
+          <button id="maTab_DEBATE" class="etf-cat-tab" onclick="switchMultiAgentTab('DEBATE')">② 研究討論室</button>
+          <button id="maTab_PROPOSALS" class="etf-cat-tab" onclick="switchMultiAgentTab('PROPOSALS')">③ 改善提案</button>
+          <button id="maTab_HISTORY" class="etf-cat-tab" onclick="switchMultiAgentTab('HISTORY')">④ 歷史與稽核</button>
+          <button id="maTab_SETTINGS" class="etf-cat-tab" onclick="switchMultiAgentTab('SETTINGS')">⑤ 團隊設定</button>
         </div>
 
         <!-- 子頁面 1：團隊總覽 -->

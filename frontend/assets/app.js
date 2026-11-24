@@ -137,39 +137,34 @@ function scrollToSectionId(elId) {
 function updateQuickJumpBar(mode) {
   const bar = document.getElementById('globalQuickJumpBar');
   if (!bar) return;
+  const pill = (label, target, cls = '') =>
+    `<button class="quick-jump-pill ${cls}" onclick="scrollToSectionId('${target}')">${label}</button>`;
+  const label = (t) => `<span class="quick-jump-label">${t}</span>`;
   if (mode === 'A') {
-    bar.innerHTML = `
-      <span style="color:#34d399; font-weight:800;">🧭 第一層快速跳轉：</span>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('tenSecPulseGrid')">① 10秒全局結論快覽</button>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('sankeyWrapperBox')">② 台灣四層全景桑基資金流向圖</button>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('industryHeatmapGrid')">③ 19大產業板塊熱度地圖＆歷史時間軸</button>
-      <button class="quick-jump-pill" style="border-color:#f59e0b; color:#fbbf24;" onclick="setAppMode('ETF')">🎯 直接前往 ETF 投資決策中心 ➔</button>
-    `;
+    bar.innerHTML = label('本頁導覽') +
+      pill('10 秒結論', 'tenSecPulseGrid') +
+      pill('資金流向全景圖', 'sankeyWrapperBox') +
+      pill('19 大產業熱度地圖', 'industryHeatmapGrid') +
+      `<button class="quick-jump-pill is-cta" onclick="setAppMode('ETF')">ETF 決策中心 ➔</button>`;
   } else if (mode === 'B') {
-    bar.innerHTML = `
-      <span style="color:#38bdf8; font-weight:800;">🧭 第二層快速跳轉：</span>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('eightVitalCardsGrid')">① 八大台灣資金池深度解讀</button>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('sixLeaderboardsGrid')">② 六大產業趨勢排行榜 (熱門 vs 即將轉強)</button>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('trendStoriesGrid')">③ 四則市場趨勢故事與正反證據</button>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('timelineSnapshotPanel')">④ 歷史輪動四維度對照</button>
-    `;
+    bar.innerHTML = label('本頁導覽') +
+      pill('八大資金池', 'eightVitalCardsGrid') +
+      pill('產業趨勢排行榜', 'sixLeaderboardsGrid') +
+      pill('市場趨勢故事', 'trendStoriesGrid') +
+      pill('歷史輪動對照', 'timelineSnapshotPanel');
   } else if (mode === 'C') {
-    bar.innerHTML = `
-      <span style="color:#c084fc; font-weight:800;">🧭 第三層專業數據中心：</span>
-      <span style="color:#cbd5e1;">請點擊下方 01 ～ 10 專業分頁切換五維評分、1,989家檢索、預警門檻、三大法人、回測驗證與資料字典</span>
-    `;
+    bar.innerHTML = label('專業數據') +
+      '<span style="color:var(--text-secondary);">使用下方 01～10 分頁，切換評分、個股檢索、預警、法人、回測與資料字典</span>';
   } else if (mode === 'ETF') {
-    bar.innerHTML = `
-      <span style="color:#fbbf24; font-weight:800;">🧭 ETF 決策中心快速定位：</span>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('etfSec1GlobalEnv')">① 全球市場環境</button>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('etfSec2DecisionSummary')">② ETF 決策摘要</button>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('etfCardsGridContainer')">③ ETF 研究清單 (兩層卡片)</button>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('etfSec4AiPlainGrid')">④ AI 白話市場解讀</button>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('etfChart1FlowsBox')">⑤ 七大視覺化圖表</button>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('etfChart6OverlapMatrixBox')">⑥ 持股重疊比較熱力圖</button>
-      <button class="quick-jump-pill" onclick="scrollToSectionId('userPortfolioAnalysisOutput')">⑦ 個人投資組合診斷</button>
-      <button class="quick-jump-pill" style="border-color:#a855f7; color:#c084fc;" onclick="scrollToSectionId('argonMultiAgentCenterSection')">🤖 AI 研究團隊 (6 Agents 提案中心)</button>
-    `;
+    bar.innerHTML = label('本頁導覽') +
+      pill('① 全球環境', 'etfSec1GlobalEnv') +
+      pill('② 決策摘要', 'etfSec2DecisionSummary') +
+      pill('③ ETF 清單', 'etfCardsGridContainer') +
+      pill('④ 白話解讀', 'etfSec4AiPlainGrid') +
+      pill('⑤ 圖表', 'etfChart1FlowsBox') +
+      pill('重疊比較', 'etfChart6OverlapMatrixBox') +
+      pill('我的投組', 'userPortfolioAnalysisOutput') +
+      pill('🤖 AI 研究團隊', 'argonMultiAgentCenterSection', 'is-ai');
   }
 }
 
@@ -224,7 +219,7 @@ function setAppMode(mode) {
 function toggleReducedMotion() {
   REDUCED_MOTION = !REDUCED_MOTION;
   document.body.classList.toggle('reduced-motion', REDUCED_MOTION);
-  document.getElementById('motionToggleBtn').textContent = REDUCED_MOTION ? '⏸ 動態流線：已降低' : '✨ 動態流線：開啟';
+  document.getElementById('motionToggleBtn').textContent = REDUCED_MOTION ? '⏸ 動畫關' : '✨ 動畫';
 }
 
 function switchProTab(tabId, el) {
@@ -312,8 +307,9 @@ function renderAll() {
   const m = STATE.active_model;
   const w = m.weights;
   renderDataProvenance();
-  document.getElementById('activeModelBadge').textContent =
-    `模型 ${m.version_id} (資${Math.round(w.capital_flow*100)}/基${Math.round(w.fundamentals*100)}/成${Math.round(w.future_growth*100)}/法${Math.round(w.institutional*100)}/估${Math.round(w.valuation*100)})`;
+  const modelBadge = document.getElementById('activeModelBadge');
+  modelBadge.textContent = `模型 ${String(m.version_id).split(' ')[0]}`;
+  modelBadge.title = `${m.version_id}\n權重：資金${Math.round(w.capital_flow*100)} / 基本面${Math.round(w.fundamentals*100)} / 成長${Math.round(w.future_growth*100)} / 法人${Math.round(w.institutional*100)} / 估值${Math.round(w.valuation*100)}`;
   document.getElementById('lastUpdatedText').textContent =
     `資料基準：${STATE.generated_at} ｜ 已串接 MOPS/TWSE/TPEx ${STATE.live_summary ? STATE.live_summary.total_companies : 1989} 家上市櫃真實數據`;
 
@@ -963,7 +959,7 @@ function renderSankeyDiagram(periodIdx) {
       <!-- 中樞匯聚條 -->
       <div class="mob-flow-hub-banner" onclick="pinSankeyNode('${HUB.id}', event)">
         <div style="font-size:12px; color:#cbd5e1; font-weight:700;">② 台灣總體資金配置樞紐（點擊檢視總池）</div>
-        <div style="font-size:19px; font-weight:900; color:#fff;">${HUB.val} <span style="font-size:13px; color:#34d399;">(100% 總池)</span></div>
+        <div style="font-size:19px; font-weight:700; color:#fff;">${HUB.val} <span style="font-size:13px; color:#34d399;">(100% 總池)</span></div>
       </div>
 
       <!-- 直向 SVG 動態瀑布流線 (中樞 ➔ 六大去向) -->
@@ -982,7 +978,7 @@ function renderSankeyDiagram(periodIdx) {
             <div class="mob-flow-acc-header" onclick="toggleMobFlowAcc('mobAcc_${n.id}', 'mobAccArrow_${n.id}')">
               <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                 <strong style="font-size:15.5px; color:#f8fafc;">${n.title}</strong>
-                <span style="font-size:15px; font-weight:900; color:${n.color}; white-space:nowrap;">${n.val} <span style="font-size:12px; color:#94a3b8;">(${n.share})</span></span>
+                <span style="font-size:15px; font-weight:700; color:${n.color}; white-space:nowrap;">${n.val} <span style="font-size:12px; color:#94a3b8;">(${n.share})</span></span>
               </div>
               <div class="mob-flow-acc-bar-track">
                 <div class="mob-flow-acc-bar-fill" style="width:${barW}%; background-image:linear-gradient(90deg, ${n.color}99 0%, #ffffffcc 50%, ${n.color}99 100%); background-color:${n.color};"></div>
@@ -1016,11 +1012,11 @@ function renderSankeyDiagram(periodIdx) {
     document.getElementById('sankeyStageBox').style.display = 'none';
     document.getElementById('sankeyAltListView').style.display = 'block';
     const tBtn = document.getElementById('sankeyViewToggleBtn');
-    if (tBtn) tBtn.textContent = '📊 切換橫向桑基全圖';
+    if (tBtn) tBtn.textContent = '📊 橫向桑基圖';
   }
 
   document.getElementById('sankeyPeriodNarrative').innerHTML =
-    `<strong>當前時間切片診斷：</strong>${cfg.title} <span style="color:var(--accent-blue); margin-left:8px;">（互動提示：將滑鼠移至任一色帶可啟動「聚光燈高亮」；點擊任一節點或流帶可釘選「Habr 風格浮動交易/營收明細卡」）</span>`;
+    `<strong>當前時期：</strong>${cfg.title} <span style="color:var(--text-muted); margin-left:8px;">（提示：滑過色帶可高亮；點擊節點或流帶可釘選明細卡）</span>`;
 }
 
 function populateSankeyFloatCard(nodeId, evt, isPinned = false) {
@@ -1154,7 +1150,7 @@ function toggleSankeyListView() {
   SANKEY_LIST_MODE = !SANKEY_LIST_MODE;
   document.getElementById('sankeyStageBox').style.display = SANKEY_LIST_MODE ? 'none' : 'block';
   document.getElementById('sankeyAltListView').style.display = SANKEY_LIST_MODE ? 'block' : 'none';
-  document.getElementById('sankeyViewToggleBtn').textContent = SANKEY_LIST_MODE ? '📊 切換橫向桑基全圖' : '📱 切換直向動態流線';
+  document.getElementById('sankeyViewToggleBtn').textContent = SANKEY_LIST_MODE ? '📊 橫向桑基圖' : '📋 結構清單';
 }
 
 function onSankeyPeriodChange(val) {
@@ -1167,10 +1163,10 @@ function toggleSankeyPlay() {
   if (SANKEY_TIMER) {
     clearInterval(SANKEY_TIMER);
     SANKEY_TIMER = null;
-    btn.textContent = '▶ 播放資金配置演變動畫';
+    btn.textContent = '▶ 播放演變';
     return;
   }
-  btn.textContent = '⏸ 暫停播放';
+  btn.textContent = '⏸ 暫停';
   let idx = 0;
   sel.value = String(idx);
   renderSankeyDiagram(idx);
@@ -1181,7 +1177,7 @@ function toggleSankeyPlay() {
     if (idx === SANKEY_PERIOD_CONFIGS.length - 1) {
       clearInterval(SANKEY_TIMER);
       SANKEY_TIMER = null;
-      btn.textContent = '▶ 重新播放資金配置演變';
+      btn.textContent = '▶ 重新播放';
     }
   }, 2200);
 }
@@ -1289,23 +1285,27 @@ function renderIndustryHeatmap(overrideMap = {}) {
   grid.innerHTML = sectors.map((sec, idx) => {
     const hInfo = stateToHeatClass(sec.effectiveState);
     const isUnratable = sec.total_weighted_score === null || sec.rotation_state === 'INSUFFICIENT_DATA';
-    const scoreDisplay = isUnratable ? '觀察中(不硬排名)' : `${sec.total_weighted_score.toFixed(1)} 分`;
+    const scoreDisplay = isUnratable ? '觀察中' : `${sec.total_weighted_score.toFixed(1)} 分`;
     const agg = sec.live_agg || {};
     const compNames = sec.focusTicker || (sec.representative_companies || []).slice(0, 2).map(c => `${c.ticker} ${c.name}`).join('、');
 
+    const sgn = (v) => (v >= 0 ? '+' : '') + v + '%';
     return `
       <div class="heat-tile ${hInfo.cls}" onclick="openIndustryDrawer(${idx})">
         <div>
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:22px;">${sec.icon}</span>
-            <span class="badge" style="background:rgba(0,0,0,0.45); color:#fff; font-size:14px;">${scoreDisplay}</span>
+          <div class="ht-head">
+            <span class="ht-icon">${sec.icon}</span>
+            <span class="ht-score ${isUnratable ? 'is-na' : ''}">${scoreDisplay}</span>
           </div>
-          <div style="font-size:17px; font-weight:900; color:#fff; margin-top:8px;">${sec.title}</div>
-          <div style="font-size:13.5px; color:rgba(255,255,255,0.9); margin-top:3px; font-weight:700;">${hInfo.label}</div>
+          <div class="ht-title">${sec.title}</div>
+          <div class="ht-state">${hInfo.label}</div>
         </div>
-        <div style="margin-top:12px; padding-top:9px; border-top:1px solid rgba(255,255,255,0.18); font-size:13.5px; color:#f8fafc;">
-          <div>10月營收YoY：<strong>${sec.rev_yoy_pct >= 0 ? '+' : ''}${sec.rev_yoy_pct}%</strong> ｜ 20日強弱：<strong>${sec.rel_strength_20d >= 0 ? '+' : ''}${sec.rel_strength_20d}%</strong></div>
-          <div style="color:rgba(255,255,255,0.85); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">代表：${compNames}</div>
+        <div>
+          <div class="ht-metrics">
+            <div><div class="ht-m-label">10 月營收 YoY</div><div class="ht-m-val ${sec.rev_yoy_pct >= 0 ? 'pos' : 'neg'}">${sgn(sec.rev_yoy_pct)}</div></div>
+            <div><div class="ht-m-label">20 日相對強弱</div><div class="ht-m-val ${sec.rel_strength_20d >= 0 ? 'pos' : 'neg'}">${sgn(sec.rel_strength_20d)}</div></div>
+          </div>
+          <div class="ht-comp" style="margin-top:8px;" title="${compNames}">${compNames}</div>
         </div>
       </div>
     `;
@@ -1409,10 +1409,10 @@ function toggleTimelinePlay() {
   if (TIMELINE_TIMER) {
     clearInterval(TIMELINE_TIMER);
     TIMELINE_TIMER = null;
-    btn.textContent = '▶ 自動播放輪動歷史';
+    btn.textContent = '▶ 播放輪動歷史';
     return;
   }
-  btn.textContent = '⏸ 暫停播放';
+  btn.textContent = '⏸ 暫停';
   let idx = 0;
   onTimelineSliderInput(idx);
   TIMELINE_TIMER = setInterval(() => {
@@ -1420,7 +1420,7 @@ function toggleTimelinePlay() {
     if (idx > 5) {
       clearInterval(TIMELINE_TIMER);
       TIMELINE_TIMER = null;
-      btn.textContent = '▶ 重新播放輪動歷史';
+      btn.textContent = '▶ 重新播放';
       return;
     }
     onTimelineSliderInput(idx);
@@ -1593,7 +1593,7 @@ function renderTrendStories() {
         <span class="badge badge-grade-A">${st.credibility}</span>
         <span style="font-size:14px; color:var(--text-secondary);">🕒 ${st.time}</span>
       </div>
-      <h3 style="font-size:19px; font-weight:900; color:#fff; margin-bottom:8px; line-height:1.4;">${st.title}</h3>
+      <h3 style="font-size:19px; font-weight:700; color:#fff; margin-bottom:8px; line-height:1.4;">${st.title}</h3>
       <div style="font-size:14.5px; color:var(--accent-blue); margin-bottom:12px;"><strong>相關產業：</strong>${st.industries}</div>
       <div style="background:#0a0f1d; padding:14px 16px; border-radius:8px; font-size:15px; color:#e2e8f0; line-height:1.75; margin-bottom:10px;">
         ${st.steps.join('<br/>')}
@@ -1728,17 +1728,17 @@ function renderIndustryTable() {
     return `
       <tr>
         <td>${rankDisplay}<div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">${ind.major_category}</div></td>
-        <td style="min-width:210px;">
+        <td style="min-width:170px;">
           <div style="font-weight:700; font-size:14px; color:#fff;">${ind.industry_name}</div>
           <div style="font-size:11.5px; color:var(--text-secondary); margin:3px 0;">${ind.sub_sectors}</div>
           <div>${companiesHtml}</div>
         </td>
-        <td style="min-width:165px;">
+        <td style="min-width:135px;">
           <div><span class="badge ${stateColor}">狀態 ${ind.rotation_state}</span></div>
           <div style="font-size:12px; font-weight:600; color:#fde68a; margin-top:5px;">轉折：${ind.transition_tag}</div>
           <div style="font-size:12px; color:var(--text-secondary); margin-top:3px;">景氣循環：<strong>${ind.cycle_stage}</strong></div>
         </td>
-        <td style="min-width:130px;">
+        <td style="min-width:95px;">
           ${isUnratable
             ? `<span class="badge badge-unratable">不可評分</span>`
             : `<div style="font-size:22px; font-weight:800; color:var(--accent-emerald);">${ind.total_weighted_score.toFixed(2)}</div>`
@@ -1746,7 +1746,7 @@ function renderIndustryTable() {
           <div style="font-size:11.5px; color:var(--text-secondary);">信心：${ind.confidence_level}</div>
           <div style="font-size:11.5px; color:${ind.missing_data_pct > 20 ? '#fb7185' : '#94a3b8'};">缺失率：${ind.missing_data_pct}%</div>
         </td>
-        <td style="min-width:155px; font-size:12px;">
+        <td style="min-width:120px; font-size:12px;">
           ${isUnratable ? '資料異質/缺失超標，依規不予補分' : `
             資金流向：<strong>${ind.score_capital_flow}</strong><br/>
             基本面：<strong>${ind.score_fundamentals}</strong><br/>
@@ -1755,14 +1755,14 @@ function renderIndustryTable() {
             估值合理：<strong>${ind.score_valuation}</strong>
           `}
         </td>
-        <td style="min-width:135px; font-size:12px;">
+        <td style="min-width:105px; font-size:12px;">
           ${isUnratable ? '-' : `
             短期動能：<strong>${ind.short_term_momentum_score}</strong><br/>
             中期基本：<strong>${ind.mid_term_fundamental_score}</strong><br/>
             長期結構：<strong>${ind.long_term_structural_score}</strong>
           `}
         </td>
-        <td style="min-width:170px; font-size:12px;">
+        <td style="min-width:180px; font-size:12px;">
           20日相對大盤：<span class="${ind.rel_strength_20d >= 0 ? 'pos' : 'neg'}">${ind.rel_strength_20d >= 0 ? '+' : ''}${ind.rel_strength_20d}%</span><br/>
           60日相對大盤：<span class="${ind.rel_strength_60d >= 0 ? 'pos' : 'neg'}">${ind.rel_strength_60d >= 0 ? '+' : ''}${ind.rel_strength_60d}%</span><br/>
           代表廠10月YoY：<span class="${ind.rev_yoy_pct >= 0 ? 'pos' : 'neg'}"><strong>${ind.rev_yoy_pct >= 0 ? '+' : ''}${ind.rev_yoy_pct}%</strong></span><br/>
@@ -1774,10 +1774,13 @@ function renderIndustryTable() {
             </div>
           ` : ''}
         </td>
-        <td style="min-width:340px;">
-          <div class="evidence-box"><strong>支持證據：</strong>${ind.supporting_evidence}</div>
-          <div class="evidence-box counter"><strong>反方證據：</strong>${ind.counter_evidence}</div>
-          <div class="evidence-box invalid"><strong>失效條件：</strong>${ind.invalidation_conditions}<br/><strong>資料限制：</strong>${ind.data_limitations}</div>
+        <td style="min-width:190px; max-width:360px;">
+          <details class="evi-details">
+            <summary>查看支持／反方證據與失效條件</summary>
+            <div class="evidence-box"><strong>支持證據：</strong>${ind.supporting_evidence}</div>
+            <div class="evidence-box counter"><strong>反方證據：</strong>${ind.counter_evidence}</div>
+            <div class="evidence-box invalid"><strong>失效條件：</strong>${ind.invalidation_conditions}<br/><strong>資料限制：</strong>${ind.data_limitations}</div>
+          </details>
         </td>
       </tr>
     `;
@@ -2251,21 +2254,25 @@ let ETF_PERF_HORIZON = '1Y'; // '1Y' | '3Y' | '5Y'
 let ETF_COMPARE_CODES = ['0050', '0052', '00878', 'VOO', 'SMH', '00937B'];
 // 第九節強制規範：使用者沒有提供持倉資料前，不得自行假設持倉！(初始為空陣列)
 let USER_PORTFOLIO = [];
+// 清單預設只顯示前幾檔，避免頁面過長（搜尋、篩選或專業模式時顯示全部）
+const ETF_PAGE_SIZE = 6;
+let ETF_SHOW_ALL = false;
 
-function toggleEtfDetailMode() {
-  ETF_DEEP_MODE = !ETF_DEEP_MODE;
-  const btn = document.getElementById('etfDetailModeBtn');
-  if (btn) {
-    btn.textContent = ETF_DEEP_MODE
-      ? '🔬 目前為：專業研究模式（全部卡片與10維度自動展開｜點擊切換一般白話模式）'
-      : '🟢 目前為：一般白話模式（點擊切換專業研究模式）';
-    btn.style.background = ETF_DEEP_MODE ? '#0284c7' : '#059669';
-  }
+function setEtfDetailMode(deep) {
+  ETF_DEEP_MODE = !!deep;
+  const simple = document.getElementById('etfModeBtnSimple');
+  const pro = document.getElementById('etfModeBtnPro');
+  if (simple) simple.classList.toggle('on', !ETF_DEEP_MODE);
+  if (pro) pro.classList.toggle('on', ETF_DEEP_MODE);
+  if (ETF_DEEP_MODE) ETF_SHOW_ALL = true;
   renderEtfLists();
 }
 
+function toggleEtfDetailMode() { setEtfDetailMode(!ETF_DEEP_MODE); }
+
 function switchEtfMainTab(tab) {
   ETF_MAIN_TAB = tab;
+  if (!ETF_DEEP_MODE) ETF_SHOW_ALL = false;
   ['TW', 'US', 'BOND', 'SECTOR', 'ALL'].forEach(t => {
     const el = document.getElementById('etfTab_' + t);
     if (el) el.classList.toggle('active', t === tab);
@@ -2286,12 +2293,13 @@ function toggleSingleEtfCard(code, evt) {
   if (panel) panel.classList.toggle('open', isOpen);
   if (btn) {
     btn.innerHTML = isOpen
-      ? '▲ 收合完整分析（返回第一層快速閱讀）'
-      : '▼ 查看完整分析（展開第二層：成分股、產業配置、估值、配息分析、歷史績效、費用率與完整報告）';
+      ? '▲ 收合完整分析'
+      : '▼ 查看完整分析';
   }
 }
 
 function jumpToEtfCard(code) {
+  ETF_SHOW_ALL = true;
   switchEtfMainTab('ALL');
   ETF_EXPANDED_SET.add(code);
   renderEtfLists();
@@ -2311,18 +2319,18 @@ function toggleEtfSec5Panel() {
 
 // 嚴格語意色彩紀律：綠色＝正向、紅色＝風險/負向、橘色＝警示、藍色＝資訊/中性
 function concABadge(c) {
-  if (c === '適合進一步研究') return '<span class="badge badge-lvl4">🟢 長期：適合進一步研究</span>';
-  if (c === '需注意集中風險') return '<span class="badge badge-grade-C">🟠 長期：需注意集中風險</span>';
-  if (c === '條件普通') return '<span class="badge badge-lvl3">🔵 長期：條件普通</span>';
-  if (c === '不符合配置角色') return '<span class="badge badge-lvlR">🔴 長期：不符合配置角色</span>';
+  if (c === '適合進一步研究') return '<span class="badge badge-lvl4">🟢 適合進一步研究</span>';
+  if (c === '需注意集中風險') return '<span class="badge badge-grade-C">🟠 需注意集中風險</span>';
+  if (c === '條件普通') return '<span class="badge badge-lvl3">🔵 條件普通</span>';
+  if (c === '不符合配置角色') return '<span class="badge badge-lvlR">🔴 不符合配置角色</span>';
   return `<span class="badge badge-unratable">${c}</span>`;
 }
 
 function concBBadge(c) {
-  if (c === '條件相對有利') return '<span class="badge badge-lvl4">🟢 短中期：條件相對有利</span>';
-  if (c === '持續觀察') return '<span class="badge badge-lvl3">🔵 短中期：持續觀察</span>';
-  if (c === '等待更佳條件') return '<span class="badge badge-grade-C">🟠 短中期：等待更佳條件</span>';
-  if (c === '風險偏高') return '<span class="badge badge-lvlR">🔴 短中期：風險偏高</span>';
+  if (c === '條件相對有利') return '<span class="badge badge-lvl4">🟢 條件相對有利</span>';
+  if (c === '持續觀察') return '<span class="badge badge-lvl3">🔵 持續觀察</span>';
+  if (c === '等待更佳條件') return '<span class="badge badge-grade-C">🟠 等待更佳條件</span>';
+  if (c === '風險偏高') return '<span class="badge badge-lvlR">🔴 風險偏高</span>';
   return `<span class="badge badge-unratable">${c}</span>`;
 }
 
@@ -2405,8 +2413,8 @@ function renderEtfDecisionCenter() {
     const highRiskList = etfs.filter(e => e.is_leveraged_or_inverse === 1 || e.conclusion_b_short_mid === '風險偏高' || e.total_score_b_short_mid < 62);
 
     const makePill = (e, col) => `
-      <span onclick="jumpToEtfCard('${e.etf_code}')" style="display:inline-flex; align-items:center; gap:5px; background:#0b1324; border:1px solid ${col}; color:#f8fafc; padding:5px 11px; border-radius:8px; font-size:14.5px; font-weight:700; cursor:pointer; margin:3px;">
-        <strong style="color:${col};">${e.etf_code}</strong> ${e.etf_name}
+      <span class="etf-pill" style="--pill-col:${col};" onclick="jumpToEtfCard('${e.etf_code}')" title="${e.etf_code} ${e.etf_name}">
+        <b>${e.etf_code}</b><span>${e.etf_name}</span>
       </span>
     `;
 
@@ -2456,7 +2464,7 @@ function renderEtfDecisionCenter() {
   if (sec4) {
     sec4.innerHTML = `
       <div class="etf-clean-card" style="border-left:5px solid #f59e0b;">
-        <div style="font-size:19px; font-weight:900; color:#f8fafc; margin-bottom:8px;">
+        <div style="font-size:17px; font-weight:700; color:#f8fafc; margin-bottom:10px; line-height:1.5;">
           💡 白話解讀 1：為什麼美股科技 ETF (QQQ / SMH / VOO)「長期分數很高」，但「短期分數卻建議等待」？
         </div>
         <div style="font-size:15.5px; color:#cbd5e1; line-height:1.75;">
@@ -2466,7 +2474,7 @@ function renderEtfDecisionCenter() {
       </div>
 
       <div class="etf-clean-card" style="border-left:5px solid #38bdf8;">
-        <div style="font-size:19px; font-weight:900; color:#f8fafc; margin-bottom:8px;">
+        <div style="font-size:17px; font-weight:700; color:#f8fafc; margin-bottom:10px; line-height:1.5;">
           💡 白話解讀 2：買高股息 ETF (0056 / 00878 / 00919) 只看「配息率 8%～10%」會有什麼盲點？
         </div>
         <div style="font-size:15.5px; color:#cbd5e1; line-height:1.75;">
@@ -2476,7 +2484,7 @@ function renderEtfDecisionCenter() {
       </div>
 
       <div class="etf-clean-card" style="border-left:5px solid #f43f5e;">
-        <div style="font-size:19px; font-weight:900; color:#f8fafc; margin-bottom:8px;">
+        <div style="font-size:17px; font-weight:700; color:#f8fafc; margin-bottom:10px; line-height:1.5;">
           💡 白話解讀 3：同時買「0050 ＋ 0052 ＋ 00881」以為很分散？小心全部都在買台積電！
         </div>
         <div style="font-size:15.5px; color:#cbd5e1; line-height:1.75;">
@@ -2486,7 +2494,7 @@ function renderEtfDecisionCenter() {
       </div>
 
       <div class="etf-clean-card" style="border-left:5px solid #10b981;">
-        <div style="font-size:19px; font-weight:900; color:#f8fafc; margin-bottom:8px;">
+        <div style="font-size:17px; font-weight:700; color:#f8fafc; margin-bottom:10px; line-height:1.5;">
           💡 白話解讀 4：現在美債殖利率將近 5%，「超短債、投資級公司債、20年長天期公債」該怎麼選？
         </div>
         <div style="font-size:15.5px; color:#cbd5e1; line-height:1.75;">
@@ -2664,9 +2672,20 @@ function renderEtfLists() {
 
   const container = document.getElementById('etfCardsGridContainer');
   if (!container) return;
+  const isFiltering = !!q || concFilter !== 'ALL';
+  const limit = (ETF_SHOW_ALL || isFiltering || ETF_DEEP_MODE) ? filtered.length : ETF_PAGE_SIZE;
+  const shown = filtered.slice(0, limit);
   container.innerHTML = filtered.length
-    ? filtered.map(e => buildEtfCardHtml(e)).join('')
-    : '<div class="etf-clean-card" style="grid-column: 1 / -1; text-align:center; font-size:17px; color:#cbd5e1;">無符合目前篩選條件之 ETF，請切換上方分類頁籤或清空搜尋關鍵字。</div>';
+    ? shown.map(e => buildEtfCardHtml(e)).join('')
+    : '<div class="etf-clean-card" style="grid-column: 1 / -1; text-align:center; font-size:16px; color:var(--text-secondary);">無符合目前篩選條件之 ETF，請切換上方分類頁籤或清空搜尋關鍵字。</div>';
+  const moreBar = document.getElementById('etfMoreBar');
+  if (moreBar) {
+    moreBar.innerHTML = filtered.length > shown.length
+      ? `<button class="btn btn-outline" onclick="ETF_SHOW_ALL = true; renderEtfLists();">顯示其餘 ${filtered.length - shown.length} 檔（共 ${filtered.length} 檔）</button>`
+      : (ETF_SHOW_ALL && !isFiltering && !ETF_DEEP_MODE && filtered.length > ETF_PAGE_SIZE
+          ? `<button class="btn btn-outline" onclick="ETF_SHOW_ALL = false; renderEtfLists(); scrollToSectionId('etfCardsGridContainer');">只顯示前 ${ETF_PAGE_SIZE} 檔</button>`
+          : '');
+  }
 }
 
 // [已批准提案 ETF-IMPROVE-20261122-002] 禁止對成立未滿 3/5 年之 ETF 外推成立前模擬績效曲線
@@ -2810,84 +2829,81 @@ function buildEtfCardHtml(e) {
   `;
 
   return `
-    <div id="etfCard_${e.etf_code}" class="etf-clean-card" style="border:1.5px solid ${borderCol};">
-      <!-- ================= 第一層：快速閱讀（僅保留 7 項核心重點，大字體清爽排版） ================= -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
-        <div>
+    <div id="etfCard_${e.etf_code}" class="etf-clean-card" style="border-color:${borderCol}; border-top:3px solid ${borderCol};">
+      <!-- ================= 第一層：快速閱讀（代號名稱 → 雙軌分數 → 一句結論 → 優勢/風險） ================= -->
+      <div class="etf-card-head">
+        <div style="min-width:0; flex:1 1 260px;">
           <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <span style="background:#0b1324; border:1px solid #38bdf8; color:#38bdf8; font-weight:800; font-size:14px; padding:3px 9px; border-radius:6px;">${e.listing_market === 'TW' ? '🇹🇼 台灣掛牌' : '🇺🇸 美國掛牌'}</span>
-            <span style="font-size:22px; font-weight:900; color:#f8fafc;">${e.etf_code} ${e.etf_name}</span>
-            ${isLev ? '<span class="badge badge-lvlR">🔴 槓桿/反向特殊風險隔離</span>' : ''}
+            <span class="etf-mkt-tag">${e.listing_market === 'TW' ? '🇹🇼 台灣' : '🇺🇸 美國'}</span>
+            ${isLev ? '<span class="badge badge-lvlR">🔴 槓桿/反向</span>' : ''}
           </div>
-          <div style="font-size:14.5px; color:#94a3b8; margin-top:4px;">
-            ${e.sub_category} ｜ 追蹤指數：${e.tracking_index} ｜ 規模：<strong style="color:#e2e8f0;">${e.aum_value.toLocaleString()} ${e.aum_unit}</strong>
+          <div style="margin-top:6px; line-height:1.3;">
+            <span class="etf-card-code">${e.etf_code}</span> <span class="etf-card-name">${e.etf_name}</span>
+          </div>
+          <div class="etf-card-meta">
+            ${e.sub_category} ｜ 規模 <strong>${e.aum_value.toLocaleString()} ${e.aum_unit}</strong>
           </div>
         </div>
         <div class="etf-card-price-box">
-          <div style="font-size:28px; font-weight:900; color:#f8fafc; line-height:1.15;">
-            ${e.close_price} <span style="font-size:14px; font-weight:700; color:#94a3b8;">${e.currency}</span>
+          <div style="font-size:26px; font-weight:800; color:var(--text-primary); line-height:1.15;">
+            ${e.close_price} <span style="font-size:12.5px; font-weight:600; color:var(--text-muted);">${e.currency}</span>
           </div>
-          <div>
-            <div class="${chgCls}" style="font-size:15px; font-weight:800; margin-top:3px;">
-              ${e.change_pct >= 0 ? '▲ +' : '▼ '}${e.change_pct}% <span style="color:#94a3b8; font-weight:500; font-size:13.5px;">(${e.trade_date})</span>
-            </div>
-            <div style="font-size:12px; color:#38bdf8; margin-top:2px;">${tzTag}</div>
+          <div class="${chgCls}" style="font-size:14px; font-weight:700; margin-top:2px;">
+            ${e.change_pct >= 0 ? '▲ +' : '▼ '}${e.change_pct}%
+            <span style="color:var(--text-muted); font-weight:500; font-size:12.5px;">${e.trade_date}</span>
           </div>
+          <div style="font-size:11.5px; color:var(--text-muted); margin-top:1px;">${tzTag}</div>
         </div>
       </div>
 
-      <!-- 雙軌大字體分數並排框 (28~30px 大數字 + 視覺化發光進度條 + 提案003 短/中期雙尺度拆解) -->
+      <!-- 雙軌分數 -->
       <div class="etf-dual-score-grid">
         <div class="etf-dual-score-left">
-          <div style="font-size:14px; font-weight:700; color:#94a3b8; margin-bottom:6px;">【模型 A】長期配置分數 (3～10年)</div>
-          <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-            <span class="etf-hero-num" style="color:${scoreAColor};">${isLev ? '隔離不評比' : e.total_score_a_long_term.toFixed(1) + ' <span style="font-size:15px;">/ 100</span>'}</span>
+          <div class="etf-score-label">模型 A　長期配置 <b>3～10 年</b></div>
+          <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:6px;">
+            <span class="etf-hero-num" style="color:${scoreAColor};">${isLev ? '隔離不評比' : e.total_score_a_long_term.toFixed(1) + ' <span style="font-size:13px; font-weight:600; color:var(--text-muted);">/ 100</span>'}</span>
             ${concABadge(e.conclusion_a_long_term)}
           </div>
           <div class="etf-score-gauge-track">
             <div class="etf-score-gauge-fill" style="width:${isLev ? 15 : Math.min(100, e.total_score_a_long_term)}%; background:${scoreAColor};"></div>
           </div>
-          <div style="font-size:13px; color:#cbd5e1; margin-top:7px;">
-            台灣投資人實質年化總成本：<strong style="color:#38bdf8;">${taxDragInfo.totalDragPct}%</strong> <span style="color:#94a3b8;">(TER ${taxDragInfo.terPct}%)</span>
+          <div class="etf-score-foot">
+            年化總成本 <strong style="color:var(--text-body);">${taxDragInfo.totalDragPct}%</strong> <span style="color:var(--text-muted);">（TER ${taxDragInfo.terPct}%）</span>
           </div>
         </div>
         <div class="etf-dual-score-right">
-          <div style="font-size:14px; font-weight:700; color:#94a3b8; margin-bottom:6px;">【模型 B】短中期環境分數 (1～12月)</div>
-          <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-            <span class="etf-hero-num" style="color:${scoreBColor};">${e.total_score_b_short_mid.toFixed(1)} <span style="font-size:15px;">/ 100</span></span>
+          <div class="etf-score-label">模型 B　短中期環境 <b>1～12 個月</b></div>
+          <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:6px;">
+            <span class="etf-hero-num" style="color:${scoreBColor};">${e.total_score_b_short_mid.toFixed(1)} <span style="font-size:13px; font-weight:600; color:var(--text-muted);">/ 100</span></span>
             ${concBBadge(e.conclusion_b_short_mid)}
           </div>
           <div class="etf-score-gauge-track">
             <div class="etf-score-gauge-fill" style="width:${Math.min(100, e.total_score_b_short_mid)}%; background:${scoreBColor};"></div>
           </div>
-          <div style="font-size:13px; color:#cbd5e1; margin-top:7px;">
-            短期戰術(1~3M) <strong style="color:${mbDual.s1_3m >= 74 ? '#34d399' : '#fbbf24'};">${mbDual.s1_3m}分</strong> ｜ 中期景氣(3~12M) <strong style="color:${mbDual.s3_12m >= 76 ? '#34d399' : '#38bdf8'};">${mbDual.s3_12m}分</strong>
+          <div class="etf-score-foot">
+            短期 1~3M <strong style="color:${mbDual.s1_3m >= 74 ? '#34d399' : '#fbbf24'};">${mbDual.s1_3m}</strong>　中期 3~12M <strong style="color:${mbDual.s3_12m >= 76 ? '#34d399' : '#7dd3fc'};">${mbDual.s3_12m}</strong>
           </div>
         </div>
       </div>
 
       <!-- 一句白話結論 -->
-      <div class="etf-verdict-box" style="margin-bottom:14px; border-left-color:${borderCol};">
-        💡 <strong>一句白話結論：</strong>${e.divergence_tag}
+      <div class="etf-verdict-box" style="border-left-color:${borderCol};">
+        💡 ${e.divergence_tag}
       </div>
 
-      <!-- 最大優勢 & 最大風險 (嚴格語意色彩：綠＝優勢正向、紅＝風險負向) -->
-      <div style="font-size:15.5px; line-height:1.7; color:#f8fafc;">
-        <div style="margin-bottom:8px;">
-          <strong style="color:#34d399;">🟢 最大優勢：</strong>${e.top_advantage}
-        </div>
-        <div>
-          <strong style="color:#fb7185;">🔴 最大風險：</strong>${e.top_risk}
-        </div>
+      <!-- 最大優勢 & 最大風險 -->
+      <div class="etf-pros-cons">
+        <div class="etf-pc-row"><span class="etf-pc-tag pro">最大優勢</span><span>${e.top_advantage}</span></div>
+        <div class="etf-pc-row"><span class="etf-pc-tag con">最大風險</span><span>${e.top_risk}</span></div>
       </div>
 
       <!-- 展開 / 收合第二層詳細研究按鈕 -->
       <div class="etf-action-btn-row">
         <button id="etfExpandBtn_${e.etf_code}" class="etf-expand-btn" style="margin-top:0; flex:1;" onclick="toggleSingleEtfCard('${e.etf_code}', event)">
-          ${isExpanded ? '▲ 收合完整分析（返回第一層快速閱讀）' : '▼ 查看完整分析（展開第二層：成分股、產業配置、估值、配息分析、歷史績效、費用率與完整報告）'}
+          ${isExpanded ? '▲ 收合完整分析' : '▼ 查看完整分析（成分股、配息、績效、費用）'}
         </button>
-        <button class="btn btn-outline" style="font-size:14.5px; padding:10px 14px; white-space:nowrap;" onclick="openEtfDetailDrawer('${e.etf_code}')">
-          📑 獨立視窗報告
+        <button class="btn btn-outline" onclick="openEtfDetailDrawer('${e.etf_code}')">
+          📑 獨立報告
         </button>
       </div>
 
@@ -2992,12 +3008,12 @@ function openEtfDetailDrawer(etfCode) {
       <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;">
         <div>
           <div style="font-size:13.5px; color:var(--text-secondary);">【模型 A】長期配置評估 (3~10年)</div>
-          <div style="font-size:26px; font-weight:900; color:#34d399;">${isLev ? '槓反隔離' : e.total_score_a_long_term + ' 分'}</div>
+          <div style="font-size:26px; font-weight:700; color:#34d399;">${isLev ? '槓反隔離' : e.total_score_a_long_term + ' 分'}</div>
           ${concABadge(e.conclusion_a_long_term)}
         </div>
         <div>
           <div style="font-size:13.5px; color:var(--text-secondary);">【模型 B】短中期進場環境 (1~12M)</div>
-          <div style="font-size:26px; font-weight:900; color:#38bdf8;">${e.total_score_b_short_mid} 分</div>
+          <div style="font-size:26px; font-weight:700; color:#38bdf8;">${e.total_score_b_short_mid} 分</div>
           ${concBBadge(e.conclusion_b_short_mid)}
         </div>
       </div>
@@ -3101,7 +3117,7 @@ function renderChart2And3Scores() {
         <div style="background:#090e1a; height:16px; border-radius:4px; overflow:hidden;">
           <div style="width:${s}%; height:100%; background:${col};"></div>
         </div>
-        <div style="text-align:right; font-weight:900; color:${col};">${s.toFixed(1)} 分</div>
+        <div style="text-align:right; font-weight:700; color:${col};">${s.toFixed(1)} 分</div>
       </div>
     `;
   }).join('');
@@ -3117,7 +3133,7 @@ function renderChart2And3Scores() {
         <div style="background:#090e1a; height:16px; border-radius:4px; overflow:hidden;">
           <div style="width:${s}%; height:100%; background:${col};"></div>
         </div>
-        <div style="text-align:right; font-weight:900; color:${col};">${s.toFixed(1)} 分</div>
+        <div style="text-align:right; font-weight:700; color:${col};">${s.toFixed(1)} 分</div>
       </div>
     `;
   }).join('');
@@ -3628,22 +3644,22 @@ function renderUserPortfolioAnalysis() {
     <div class="etf-grid-4" style="margin-bottom:14px;">
       <div style="background:#090e1a; padding:14px; border-radius:10px; border:1px solid #1e293b;">
         <div style="font-size:14px; color:var(--text-secondary);">1. 股債比例與稅後實質年化成本</div>
-        <div style="font-size:20px; font-weight:900; color:#fff; margin-top:4px;">股票 ${stockW.toFixed(1)}% ｜ 債券 ${bondW.toFixed(1)}%</div>
+        <div style="font-size:20px; font-weight:700; color:#fff; margin-top:4px;">股票 ${stockW.toFixed(1)}% ｜ 債券 ${bondW.toFixed(1)}%</div>
         <div style="font-size:13.5px; color:#94a3b8; margin-top:4px;">加權TER：${weightedTer.toFixed(2)}% ｜ 含美股預扣稅實質年耗損：<strong style="color:#fbbf24;">${weightedEffectiveCost.toFixed(2)}%</strong></div>
       </div>
       <div style="background:#090e1a; padding:14px; border-radius:10px; border:1px solid #1e293b;">
         <div style="font-size:14px; color:var(--text-secondary);">2. 台灣 vs 美國市場與匯率曝險</div>
-        <div style="font-size:20px; font-weight:900; color:#38bdf8; margin-top:4px;">台灣 ${twMarketW.toFixed(1)}% ｜ 美國 ${usMarketW.toFixed(1)}%</div>
+        <div style="font-size:20px; font-weight:700; color:#38bdf8; margin-top:4px;">台灣 ${twMarketW.toFixed(1)}% ｜ 美國 ${usMarketW.toFixed(1)}%</div>
         <div style="font-size:14px; color:#fde68a; margin-top:4px;">美元(USD)自然匯率曝險：<strong>${usdFxExposureW.toFixed(1)}%</strong></div>
       </div>
       <div style="background:#090e1a; padding:14px; border-radius:10px; border:1px solid #1e293b;">
         <div style="font-size:14px; color:var(--text-secondary);">3. 跨國實體穿透重疊警訊 (2330+TSM)</div>
-        <div style="font-size:20px; font-weight:900; color:${maxStock[1] > 25 ? '#fb7185' : '#34d399'}; margin-top:4px;">最大穿透：${maxStock[0]} (${maxStock[1].toFixed(1)}%)</div>
+        <div style="font-size:20px; font-weight:700; color:${maxStock[1] > 25 ? '#fb7185' : '#34d399'}; margin-top:4px;">最大穿透：${maxStock[0]} (${maxStock[1].toFixed(1)}%)</div>
         <div style="font-size:13.5px; color:#cbd5e1; margin-top:4px;">${topPenetratedStocks.slice(0, 3).map(x => `${x[0]} ${x[1].toFixed(1)}%`).join('｜')}</div>
       </div>
       <div style="background:#090e1a; padding:14px; border-radius:10px; border:1px solid #1e293b;">
         <div style="font-size:14px; color:var(--text-secondary);">4. 組合波動率、Beta 與有效存續期</div>
-        <div style="font-size:20px; font-weight:900; color:#fff; margin-top:4px;">波動度 ${weightedVol.toFixed(1)}% ｜ 存續期 ${weightedDuration.toFixed(1)}年</div>
+        <div style="font-size:20px; font-weight:700; color:#fff; margin-top:4px;">波動度 ${weightedVol.toFixed(1)}% ｜ 存續期 ${weightedDuration.toFixed(1)}年</div>
         <div style="font-size:13.5px; color:#cbd5e1; margin-top:4px;">組合加權 Beta：<strong>${weightedBeta.toFixed(2)}</strong> ｜ 前二產業：${topSectors.slice(0, 2).map(x => `${x[0]}(${x[1].toFixed(1)}%)`).join('、')}</div>
       </div>
     </div>
@@ -3951,7 +3967,7 @@ function renderArgonMultiAgentCenter() {
           return `
             <div class="etf-clean-card" style="border-left:5px solid ${m.color};">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-                <div style="font-size:19px; font-weight:900; color:#f8fafc;">${m.icon} ${rpt.agent_name || m.id}</div>
+                <div style="font-size:19px; font-weight:700; color:#f8fafc;">${m.icon} ${rpt.agent_name || m.id}</div>
                 <span class="badge ${enabled ? 'badge-lvl4' : 'badge-unratable'}">${enabled ? '🟢 獨立研究完成' : '已停用'}</span>
               </div>
               <div style="font-size:14.5px; color:#38bdf8; margin-bottom:8px;">${m.desc}</div>
@@ -3973,7 +3989,7 @@ function renderArgonMultiAgentCenter() {
     const p5 = ma.phase5_synthesis || {};
     dbBox.innerHTML = `
       <div class="etf-clean-card" style="margin-bottom:20px; border-left:5px solid #f43f5e;">
-        <div style="font-size:20px; font-weight:900; color:#f8fafc; margin-bottom:10px;">
+        <div style="font-size:20px; font-weight:700; color:#f8fafc; margin-bottom:10px;">
           ⚡ Argon 總指揮最終整合與保留之反方分歧（禁止以多數決抹除異議）
         </div>
         <div class="etf-grid-2" style="margin-bottom:0;">
@@ -3995,7 +4011,7 @@ function renderArgonMultiAgentCenter() {
         </div>
       </div>
 
-      <div style="font-size:20px; font-weight:900; color:#f8fafc; margin:18px 0 12px 0;">
+      <div style="font-size:20px; font-weight:700; color:#f8fafc; margin:18px 0 12px 0;">
         🔬 各 Agent 獨立研究 ➔ Phase 3 交叉審查 ➔ Phase 4 第二輪辯論立場（分欄清晰呈現）
       </div>
       <div class="etf-grid-2">
@@ -4007,7 +4023,7 @@ function renderArgonMultiAgentCenter() {
           return `
             <div class="etf-clean-card" style="border-top:4px solid ${m.color};">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
-                <span style="font-size:19px; font-weight:900; color:#fff;">${m.icon} ${rpt.agent_name || m.id}</span>
+                <span style="font-size:19px; font-weight:700; color:#fff;">${m.icon} ${rpt.agent_name || m.id}</span>
                 <span class="badge badge-grade-B">${rpt.data_timestamp_used || '2026-11-20'}</span>
               </div>
 
@@ -4050,7 +4066,7 @@ function renderArgonMultiAgentCenter() {
       <div class="etf-clean-card" style="margin-bottom:20px; border:1px solid #f59e0b; background:#111a2e;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
           <div>
-            <div style="font-size:19px; font-weight:900; color:#fbbf24;">⚖️ 人工批准閘門（Human-in-the-Loop Approval Gate）</div>
+            <div style="font-size:19px; font-weight:700; color:#fbbf24;">⚖️ 人工批准閘門（Human-in-the-Loop Approval Gate）</div>
             <div style="font-size:15px; color:#cbd5e1; margin-top:4px;">
               每項提案均附 10 大必填欄位與 100 分制量化評分（資料25/價值25/風控20/技術15/相容15）。批准單一項目不影響其他項目。
             </div>
@@ -4078,10 +4094,10 @@ function renderArgonMultiAgentCenter() {
                   <strong style="font-size:16px; color:#38bdf8;">${p.proposal_id}</strong>
                   ${maStatusBadge(p.status)}
                 </div>
-                <div style="font-size:24px; font-weight:900; color:#34d399;">${sb.total_score || 0} <span style="font-size:14px; color:#94a3b8;">/ 100分</span></div>
+                <div style="font-size:24px; font-weight:700; color:#34d399;">${sb.total_score || 0} <span style="font-size:14px; color:#94a3b8;">/ 100分</span></div>
               </div>
 
-              <div style="font-size:19px; font-weight:900; color:#fff; margin-bottom:10px; line-height:1.4;">${p.title}</div>
+              <div style="font-size:19px; font-weight:700; color:#fff; margin-bottom:10px; line-height:1.4;">${p.title}</div>
               <div style="font-size:14px; color:#cbd5e1; margin-bottom:10px;">
                 提案成員：<strong>${(p.proposer_agents || []).join('、')}</strong> ｜ 影響模組：<code>${(p.affected_modules || []).join(', ')}</code>
               </div>
@@ -4117,7 +4133,7 @@ function renderArgonMultiAgentCenter() {
     const checks = dq.seven_statutory_checks || [];
     histBox.innerHTML = `
       <div class="etf-clean-card" style="margin-bottom:20px;">
-        <div style="font-size:19px; font-weight:900; color:#fff; margin-bottom:10px;">
+        <div style="font-size:19px; font-weight:700; color:#fff; margin-bottom:10px;">
           🔍 Agent 03 數據品質研究員 — 七項法定檢查實證紀錄 (${dq.audited_at || ''})
         </div>
         <div style="overflow-x:auto;">
@@ -4138,7 +4154,7 @@ function renderArgonMultiAgentCenter() {
       </div>
 
       <div class="etf-clean-card">
-        <div style="font-size:19px; font-weight:900; color:#fff; margin-bottom:10px;">📜 歷次研究與提案執行歷史紀錄</div>
+        <div style="font-size:19px; font-weight:700; color:#fff; margin-bottom:10px;">📜 歷次研究與提案執行歷史紀錄</div>
         <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
           <table>
           <thead><tr><th>Session ID</th><th>研究主題</th><th>觸發方式</th><th>完成時間</th><th>正式系統完整性</th><th>提案結果</th></tr></thead>
@@ -4163,7 +4179,7 @@ function renderArgonMultiAgentCenter() {
   if (setBox) {
     setBox.innerHTML = `
       <div class="etf-clean-card" style="border-left:5px solid #a855f7;">
-        <div style="font-size:20px; font-weight:900; color:#fff; margin-bottom:10px;">⚙️ AI 研究團隊運作設定（安全鎖保護中）</div>
+        <div style="font-size:20px; font-weight:700; color:#fff; margin-bottom:10px;">⚙️ AI 研究團隊運作設定（安全鎖保護中）</div>
         <div class="evidence-box counter" style="margin-bottom:16px;">
           <strong>🔒 最高安全規範鎖定：</strong>本設定頁面僅可調整研究任務主題、討論輪數與排程觸發模式；<strong>任何研究設定皆無法繞過人工批准閘門</strong>，排程任務僅限產出報告與提案，絕不自動修改正式程式碼。
         </div>
