@@ -6,11 +6,14 @@
 - 動態調整 PART 4 評分權重 (保留歷史版本與變更理由於 SQLite) 並即時重算所有產業分數
 - 執行真實外部 API 連線測試 (TWSE / TPEx / Gov OpenData)，並自動記錄審計日誌與離線降級保護
 """
+import gzip
+import hashlib
 import hmac
 import json
 import os
 import re
 import threading
+import time
 import urllib.request
 import urllib.error
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
@@ -47,6 +50,11 @@ FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 ADMIN_TOKEN = os.environ.get("TWFIN_ADMIN_TOKEN", "").strip()
 LOCAL_ADDRESSES = {"127.0.0.1", "::1", "::ffff:127.0.0.1"}
 MAX_BODY_BYTES = 64 * 1024
+STARTED_AT = time.time()
+# 預先打包好的單檔網站 (docs/index.html，已內嵌資料快照)。TWFIN_SERVE_BUNDLE=1 時，首頁直接提供它：
+# 只需一次請求、第一個畫面不必等 /api/dashboard，對 Render 免費方案閒置喚醒後的首次載入特別有幫助。
+BUNDLE_PATH = os.path.join(os.path.dirname(FRONTEND_DIR), "docs", "index.html")
+GZIP_MIN_BYTES = 1024
 
 # 每個模型版本都會複製一份產業分數；只保留最近 N 個版本的分數列以免資料表無限成長
 KEEP_SCORE_VERSIONS = 20
@@ -636,33 +644,107 @@ def probe_live_sources():
     invalidate_dashboard_cache()
     return results
 
+def _bundle_requested(path):
+    """首頁請求，且已啟用 TWFIN_SERVE_BUNDLE=1、單檔網站存在時，改提供內嵌資料快照的單檔網站。"""
+    return (path in ("/", "/index.html")
+            and os.environ.get("TWFIN_SERVE_BUNDLE") == "1"
+            and os.path.isfile(BUNDLE_PATH))
+
+
 class TWFinRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=FRONTEND_DIR, **kwargs)
 
-    def _send_json(self, data, status=200):
+    def send_response(self, code, message=None):
+        self._cache_header_sent = False
+        super().send_response(code, message)
+
+    def _send_bytes(self, body, content_type, status=200, cache_control="no-cache"):
+        """
+        送出回應：支援 gzip (JSON/HTML/JS 可縮小約 4 倍，喚醒後慢速連線也能較快載入)，
+        並以 ETag 讓瀏覽器重新驗證時回 304，不必重複下載；no-cache 代表每次仍會向伺服器確認是否為最新。
+        """
+        etag = '"' + hashlib.sha256(body).hexdigest()[:24] + '"'
+        if self.headers.get("If-None-Match") == etag:
+            self.send_response(304)
+            self.send_header("ETag", etag)
+            self.send_header("Cache-Control", cache_control)
+            self._cache_header_sent = True
+            self.end_headers()
+            return
+        accepts_gzip = "gzip" in (self.headers.get("Accept-Encoding") or "").lower()
+        encoded = gzip.compress(body, compresslevel=6) if accepts_gzip and len(body) >= GZIP_MIN_BYTES else None
+        payload = encoded if encoded is not None else body
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(payload)))
+        self.send_header("ETag", etag)
+        self.send_header("Cache-Control", cache_control)
+        self._cache_header_sent = True
+        self.send_header("Vary", "Accept-Encoding")
+        if encoded is not None:
+            self.send_header("Content-Encoding", "gzip")
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(payload)
+
+    def _send_json(self, data, status=200, cacheable=False):
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        if cacheable:
+            self._send_bytes(body, "application/json; charset=utf-8", status)
+            return
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
         self.end_headers()
-        self.wfile.write(body)
+        if self.command != "HEAD":
+            self.wfile.write(body)
 
     def end_headers(self):
-        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
-        self.send_header("Pragma", "no-cache")
-        self.send_header("Expires", "0")
+        # 預設不快取；_send_bytes 已自行設定 Cache-Control (no-cache + ETag) 時不覆蓋
+        if not getattr(self, "_cache_header_sent", False):
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
         super().end_headers()
+
+    def _serve_static_file(self, path):
+        """讀檔後經 _send_bytes 送出 (gzip + ETag)。找不到檔案回傳 False，交給父類別處理 404。"""
+        if os.path.isdir(path):
+            path = os.path.join(path, "index.html")
+        if not os.path.isfile(path):
+            return False
+        with open(path, "rb") as f:
+            body = f.read()
+        ctype = self.guess_type(path)
+        if ctype.startswith("text/") or ctype in ("application/javascript", "application/json"):
+            ctype += "; charset=utf-8" if "charset" not in ctype else ""
+        self._send_bytes(body, ctype)
+        return True
 
     def do_GET(self):
         parsed = urlparse(self.path)
         if parsed.path == "/api/dashboard":
-            self._send_json(get_dashboard_payload())
+            self._send_json(get_dashboard_payload(), cacheable=True)
         elif parsed.path == "/api/health":
-            self._send_json({"status": "ok", "system": "Taiwan Capital Flow Intelligence & Industry Rotation System v1.0"})
+            self._send_json({
+                "status": "ok",
+                "system": "Taiwan Capital Flow Intelligence & Industry Rotation System v1.0",
+                "uptime_sec": round(time.time() - STARTED_AT, 1),
+                "dashboard_cache_ready": _payload_cache.get("data") is not None,
+            })
+        elif _bundle_requested(parsed.path) and self._serve_static_file(BUNDLE_PATH):
+            return
+        elif self._serve_static_file(self.translate_path(parsed.path)):
+            return
+        elif self.command == "HEAD":
+            super().do_HEAD()
         else:
             super().do_GET()
+
+    def do_HEAD(self):
+        # 保活 / 監控服務 (UptimeRobot 等) 預設用 HEAD；與 GET 走同一套路由，只是不送內容
+        self.do_GET()
 
     def _authorize_write(self):
         """寫入端點授權：有設定 TWFIN_ADMIN_TOKEN 時比對 X-Admin-Token；否則只允許本機。"""
@@ -765,6 +847,8 @@ def run_server(port=None):
         seed_and_compute_all()
         build_and_compute_etf_center()
     server = ThreadingHTTPServer((host, port), TWFinRequestHandler)
+    # 啟動後在背景先算好儀表板資料，第一個使用者請求就能直接命中快取
+    threading.Thread(target=get_dashboard_payload, name="dashboard-warmup", daemon=True).start()
     print(f"TWFin Intelligence Server running at http://127.0.0.1:{port} (bound to {host}:{port})")
     if ADMIN_TOKEN:
         print("寫入型 API 已啟用管理權杖保護 (TWFIN_ADMIN_TOKEN)")

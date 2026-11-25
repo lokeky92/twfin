@@ -155,20 +155,150 @@ function readEmbeddedSnapshot(doc) {
   try { return JSON.parse(el.textContent); } catch (e) { return null; }
 }
 
-async function loadDashboard() {
-  // 直接雙擊開啟 (file://) 時不可能有 API，直接使用內嵌快照
-  const embedded = readEmbeddedSnapshot();
-  if (embedded && location.protocol === 'file:') {
-    STATE = embedded;
+/* -------------------------------------------------------------------------
+   資料載入策略 (針對 Render 免費方案閒置後的冷啟動，以及純靜態託管)：
+   1. 有內嵌快照：立刻用快照畫出完整畫面，再於背景向 /api/dashboard 取得最新資料 (逾時與重試)
+   2. 沒有內嵌快照 (本機開發版)：顯示「伺服器喚醒中」狀態並重試，不再留下空白頁
+   3. 純靜態託管 (GitHub Pages / Cloudflare) 沒有 API：回應 404 等明確拒絕時不重試，直接標示為離線快照
+   ------------------------------------------------------------------------- */
+const API_RETRY_TIMEOUTS_MS = [8000, 25000, 45000];   // 第 2、3 次給喚醒中的伺服器更長的等待時間
+let API_MODE = 'unknown';                              // unknown | live | snapshot | waking
+let API_REASON = '';                                   // no-api (純靜態託管) | unreachable (連不上伺服器)
+
+function bannerDismissed() {
+  try { return sessionStorage.getItem('twfin_api_banner_dismissed') === '1'; } catch (e) { return false; }
+}
+function dismissApiBanner() {
+  try { sessionStorage.setItem('twfin_api_banner_dismissed', '1'); } catch (e) {}
+  setApiBanner(null);
+}
+
+function setApiBanner(kind, html, withRetry, dismissible) {
+  let el = document.getElementById('apiStatusBanner');
+  if (!kind) { if (el) el.style.display = 'none'; return; }
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'apiStatusBanner';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.style.cssText = 'margin:8px 16px; padding:9px 14px; border-radius:8px; font-size:13px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;';
+    const header = document.querySelector('header');
+    header.parentNode.insertBefore(el, header.nextSibling);
+  }
+  const palette = {
+    waking: ['rgba(245,158,11,.12)', 'rgba(245,158,11,.4)', '#fbbf24'],
+    snapshot: ['rgba(56,189,248,.1)', 'rgba(56,189,248,.35)', '#7dd3fc'],
+    error: ['rgba(244,63,94,.12)', 'rgba(244,63,94,.4)', '#fda4af'],
+  }[kind];
+  el.style.background = palette[0];
+  el.style.border = '1px solid ' + palette[1];
+  el.style.color = palette[2];
+  el.style.display = 'flex';
+  el.innerHTML = `<span>${html}</span>`
+    + (withRetry ? '<button class="btn btn-outline btn-sm" onclick="retryLoadDashboard()">重新連線</button>' : '')
+    + (dismissible ? '<button class="btn btn-outline btn-sm" onclick="dismissApiBanner()" aria-label="關閉提示">✕</button>' : '');
+}
+
+// 只有「網路不通 / 逾時 / 伺服器 5xx」才值得重試；404、401 等代表此站台根本沒有 API (純靜態託管)
+async function fetchDashboardOnce(timeoutMs) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch('/api/dashboard', { signal: ctrl.signal });
+    if (res.status >= 500) return { retry: true };
+    if (!res.ok) return { retry: false, noApi: true };
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('json')) return { retry: false, noApi: true };   // 靜態託管常把未知路徑導回 HTML
+    return { data: await res.json() };
+  } catch (e) {
+    return { retry: true };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchDashboardWithRetry(onWaiting) {
+  for (let i = 0; i < API_RETRY_TIMEOUTS_MS.length; i++) {
+    const r = await fetchDashboardOnce(API_RETRY_TIMEOUTS_MS[i]);
+    if (r.data) { API_REASON = ''; return r.data; }
+    if (!r.retry) { API_REASON = 'no-api'; return null; }
+    if (onWaiting) onWaiting(i + 1);
+  }
+  API_REASON = 'unreachable';
+  return null;
+}
+
+// 內容有實質變動才重畫，避免伺服器與快照內容相同時畫面閃動
+function dashboardFingerprint(d) {
+  if (!d) return '';
+  const p = d.data_provenance || {};
+  const m = d.active_model || {};
+  return [m.version_id, JSON.stringify(m.weights), JSON.stringify(m.thresholds), p.last_live_ingestion,
+    (d.warnings || []).length, (d.industries || []).map(i => i.total_weighted_score).join(',')].join('|');
+}
+
+async function refreshFromApi() {
+  const embedded = STATE;
+  setApiBanner('waking', '⏳ 正在連線伺服器取得最新資料…（免費主機閒置後首次喚醒約需 30～60 秒，目前先顯示內嵌的資料快照）', false);
+  API_MODE = 'waking';
+  const data = await fetchDashboardWithRetry(() =>
+    setApiBanner('waking', '⏳ 伺服器仍在喚醒中，請稍候…（目前顯示的是內嵌的資料快照）', false));
+  if (data) {
+    API_MODE = 'live';
+    const changed = dashboardFingerprint(data) !== dashboardFingerprint(embedded);
+    STATE = data;
+    if (changed) renderAll();
+    setApiBanner(null);
   } else {
-    try {
-      const res = await fetch('/api/dashboard');
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      STATE = await res.json();
-    } catch (e) {
-      STATE = embedded;
+    API_MODE = 'snapshot';
+    const when = (embedded && embedded.generated_at) || '未知';
+    if (API_REASON === 'no-api') {
+      // 純靜態託管 (GitHub Pages / Cloudflare) 本來就沒有 API，這是正常模式：低調提示，可關閉
+      if (!bannerDismissed()) {
+        setApiBanner('snapshot', `ℹ️ 雲端快照模式（資料時間：${when}），每個交易日台灣時間 16:30 與 20:00 自動更新。權重調整等需要伺服器的功能在此模式不可用。`, false, true);
+      } else {
+        setApiBanner(null);
+      }
+    } else {
+      setApiBanner('error', `⚠️ 連不上伺服器，目前顯示離線快照（資料時間：${when}）。`, true);
     }
   }
+}
+
+function retryLoadDashboard() {
+  if (STATE) refreshFromApi();
+  else loadDashboard();
+}
+
+async function loadDashboard() {
+  const embedded = readEmbeddedSnapshot();
+  // 直接雙擊開啟 (file://) 時不可能有 API，直接使用內嵌快照
+  if (embedded && location.protocol === 'file:') {
+    API_MODE = 'snapshot';
+    STATE = embedded;
+    if (typeof loadMultiAgentLocalOverrides === 'function') loadMultiAgentLocalOverrides();
+    renderAll();
+    return;
+  }
+  if (embedded) {
+    STATE = embedded;
+    if (typeof loadMultiAgentLocalOverrides === 'function') loadMultiAgentLocalOverrides();
+    renderAll();          // 第一個畫面不等網路
+    refreshFromApi();     // 背景更新，不阻塞
+    return;
+  }
+  // 本機開發版：沒有快照，只能等 API
+  setApiBanner('waking', '⏳ 正在連線伺服器載入資料…（若為免費主機閒置後首次喚醒，約需 30～60 秒）', false);
+  const data = await fetchDashboardWithRetry(() =>
+    setApiBanner('waking', '⏳ 伺服器仍在喚醒中，請稍候…', false));
+  if (!data) {
+    API_MODE = 'snapshot';
+    setApiBanner('error', '❌ 無法連線到伺服器，也沒有內嵌的資料快照可顯示。', true);
+    return;
+  }
+  API_MODE = 'live';
+  STATE = data;
+  setApiBanner(null);
   if (typeof loadMultiAgentLocalOverrides === 'function') loadMultiAgentLocalOverrides();
   renderAll();
 }

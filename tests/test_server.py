@@ -80,6 +80,95 @@ class TestServerAPI(unittest.TestCase):
         status, _ = self._get("/assets/app.css")
         self.assertEqual(status, 200)
 
+    def _raw(self, path, headers=None):
+        """回傳 (status, headers, body)；不自動解壓縮，304 也當成一般回應處理。"""
+        req = urllib.request.Request(self.base + path, headers=headers or {})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return resp.status, resp.headers, resp.read()
+        except urllib.error.HTTPError as e:
+            return e.code, e.headers, e.read()
+
+    def test_dashboard_gzip_when_accepted(self):
+        import gzip
+        status, headers, body = self._raw("/api/dashboard", {"Accept-Encoding": "gzip"})
+        self.assertEqual(status, 200)
+        self.assertEqual(headers.get("Content-Encoding"), "gzip")
+        self.assertEqual(headers.get("Vary"), "Accept-Encoding")
+        data = json.loads(gzip.decompress(body))
+        self.assertIn("data_provenance", data)
+        # 壓縮後要明顯小於原始大小，否則代表沒有真的壓縮
+        raw_status, raw_headers, raw_body = self._raw("/api/dashboard")
+        self.assertIsNone(raw_headers.get("Content-Encoding"))
+        self.assertLess(len(body), len(raw_body) / 2)
+
+    def test_etag_revalidation_returns_304(self):
+        _, headers, _ = self._raw("/api/dashboard")
+        etag = headers.get("ETag")
+        self.assertTrue(etag)
+        self.assertEqual(headers.get("Cache-Control"), "no-cache")
+        status, h2, body = self._raw("/api/dashboard", {"If-None-Match": etag})
+        self.assertEqual(status, 304)
+        self.assertEqual(body, b"")
+        # 內容不同的 ETag 必須拿到完整內容
+        status, _, body = self._raw("/api/dashboard", {"If-None-Match": '"stale"'})
+        self.assertEqual(status, 200)
+        self.assertGreater(len(body), 1000)
+
+    def test_static_assets_compressed_with_etag(self):
+        import gzip
+        status, headers, body = self._raw("/assets/js/01-core.js", {"Accept-Encoding": "gzip"})
+        self.assertEqual(status, 200)
+        self.assertEqual(headers.get("Content-Encoding"), "gzip")
+        self.assertIn("javascript", headers.get("Content-Type", ""))
+        self.assertIn(b"function esc", gzip.decompress(body))
+        status, _, _ = self._raw("/assets/js/01-core.js", {"If-None-Match": headers.get("ETag")})
+        self.assertEqual(status, 304)
+
+    def test_missing_file_still_404_and_no_path_escape(self):
+        status, _, _ = self._raw("/assets/js/does-not-exist.js")
+        self.assertEqual(status, 404)
+        status, _, body = self._raw("/..%2f..%2fREADME.md")
+        self.assertNotEqual(status, 200)
+
+    def test_health_reports_uptime(self):
+        status, _, body = self._raw("/api/health")
+        data = json.loads(body)
+        self.assertEqual(status, 200)
+        self.assertEqual(data["status"], "ok")
+        self.assertIn("uptime_sec", data)
+        self.assertIn("dashboard_cache_ready", data)
+
+    def test_head_requests_supported_without_body(self):
+        # 保活監控 (UptimeRobot 等) 預設送 HEAD；必須回 200、有 Content-Length、且不能夾帶內容
+        for path in ("/api/health", "/api/dashboard", "/"):
+            req = urllib.request.Request(self.base + path, method="HEAD")
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                self.assertEqual(resp.status, 200, path)
+                self.assertEqual(resp.read(), b"", path)
+                self.assertTrue(resp.headers.get("Content-Length"), path)
+
+    def test_bundle_served_at_root_only_when_enabled(self):
+        status, _, body = self._raw("/")
+        self.assertIn(b"assets/js/01-core.js", body)           # 預設：開發用的多檔版
+        self.assertNotIn(b'id="twfin-snapshot"', body)
+        os.environ["TWFIN_SERVE_BUNDLE"] = "1"
+        try:
+            status, headers, body = self._raw("/")
+            self.assertEqual(status, 200)
+            self.assertIn(b'id="twfin-snapshot"', body)         # 啟用：單檔、已內嵌資料快照
+            self.assertNotIn(b'src="assets/js/', body)
+        finally:
+            os.environ.pop("TWFIN_SERVE_BUNDLE", None)
+
+    def test_post_responses_never_cached(self):
+        status, body = self._post("/api/rescore", {}, token=None)
+        self.assertEqual(status, 401)
+        req = urllib.request.Request(self.base + "/api/rescore", data=b"{}", headers={"Content-Type": "application/json"}, method="POST")
+        with self.assertRaises(urllib.error.HTTPError) as ctx:
+            urllib.request.urlopen(req, timeout=10)
+        self.assertIn("no-store", ctx.exception.headers.get("Cache-Control", ""))
+
     def test_write_requires_token(self):
         status, body = self._post("/api/rescore", {}, token=None)
         self.assertEqual(status, 401)

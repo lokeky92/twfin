@@ -7,6 +7,8 @@ COPY . /app
 
 ENV PORT=7860
 ENV HOST=0.0.0.0
+# 首頁提供內嵌資料快照的單檔網站 (啟動時 run_pipeline 會重新產生)，第一個畫面不必等 API
+ENV TWFIN_SERVE_BUNDLE=1
 # 公開部署時請設定 TWFIN_ADMIN_TOKEN，否則寫入型 API 只接受容器內 127.0.0.1 的請求
 # ENV TWFIN_ADMIN_TOKEN=...
 

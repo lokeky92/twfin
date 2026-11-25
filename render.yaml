@@ -3,13 +3,19 @@ services:
     name: twfin-intelligence-center
     runtime: python
     plan: free
-    buildCommand: python backend/run_pipeline.py --all
+    # 官方 API 暫時失敗時 run_pipeline 會以非 0 結束 (排程用來中止發佈)；部署不應因此失敗，改用內建種子資料與既有快照啟動
+    buildCommand: python backend/run_pipeline.py --all || echo "Pipeline reported a data-source problem; deploying with existing/seed data"
     startCommand: python backend/server.py
+    # Render 以此判斷服務是否已喚醒完成 (輕量、不查資料庫)
+    healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: HOST
         value: 0.0.0.0
+      # 首頁直接提供預先打包、內嵌資料快照的單檔網站：免費方案閒置喚醒後，第一個畫面不必再等 /api/dashboard
+      - key: TWFIN_SERVE_BUNDLE
+        value: "1"
       # 寫入型 API (調整權重、門檻、觸發同步) 的管理權杖；請在 Render 後台填入，未設定時公開部署將無法寫入
       - key: TWFIN_ADMIN_TOKEN
         sync: false

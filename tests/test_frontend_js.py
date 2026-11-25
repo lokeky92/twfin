@@ -77,6 +77,75 @@ class TestExportCsv(unittest.TestCase):
         self.assertEqual(self.out["fnameNoDate"], "twfin_ranking_export.csv")
 
 
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過前端載入流程測試")
+class TestDashboardLoadFlow(unittest.TestCase):
+    """冷啟動 / 離線 / 純靜態託管的資料載入行為 (以假的 fetch 在 Node 內執行 03-navigation.js)"""
+
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", os.path.join(ROOT, "tests", "frontend_load_driver.js"), ROOT],
+                           capture_output=True, text=True, encoding="utf-8", timeout=60)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.s = json.loads(r.stdout)
+
+    def test_file_protocol_uses_snapshot_without_any_request(self):
+        s = self.s["file"]
+        self.assertEqual((s["calls"], s["renders"], s["stateGen"]), (0, 1, "SNAPSHOT"))
+        self.assertFalse(s["bannerShown"])
+
+    def test_first_paint_does_not_wait_for_api(self):
+        # 有內嵌快照時一定先 renderAll 一次 (第一個畫面)，API 是之後才補上的
+        for name in ("sameData", "changedData", "wakesOnThird"):
+            self.assertGreaterEqual(self.s[name]["renders"], 1, name)
+
+    def test_unchanged_data_does_not_rerender_but_adopts_api_state(self):
+        s = self.s["sameData"]
+        self.assertEqual(s["renders"], 1)
+        self.assertEqual(s["stateGen"], "API-SAME")
+        self.assertEqual(s["mode"], "live")
+        self.assertFalse(s["bannerShown"])
+
+    def test_changed_data_rerenders_once(self):
+        s = self.s["changedData"]
+        self.assertEqual(s["renders"], 2)
+        self.assertEqual(s["stateGen"], "API-CHANGED")
+
+    def test_static_hosting_does_not_retry_and_shows_dismissible_note(self):
+        for name in ("static404", "staticHtml200"):
+            s = self.s[name]
+            self.assertEqual(s["calls"], 1, name)        # 404 或回傳 HTML = 沒有 API，不必重試
+            self.assertEqual(s["reason"], "no-api", name)
+            self.assertTrue(s["bannerShown"], name)
+            self.assertIn("雲端快照模式", s["banner"])
+            self.assertIn("dismissApiBanner", s["banner"])
+        self.assertFalse(self.s["staticDismissed"]["bannerShown"])   # 使用者關閉後不再顯示
+
+    def test_unreachable_server_retries_three_times_then_offers_retry(self):
+        s = self.s["unreachable"]
+        self.assertEqual(s["calls"], 3)
+        self.assertEqual(s["reason"], "unreachable")
+        self.assertIn("連不上伺服器", s["banner"])
+        self.assertIn("retryLoadDashboard", s["banner"])
+        self.assertEqual(s["stateGen"], "SNAPSHOT")      # 仍保有快照畫面
+
+    def test_server_waking_up_succeeds_on_third_attempt(self):
+        s = self.s["wakesOnThird"]
+        self.assertEqual(s["calls"], 3)
+        self.assertEqual(s["mode"], "live")
+        self.assertEqual(s["renders"], 2)
+        self.assertFalse(s["bannerShown"])
+
+    def test_without_snapshot_waits_for_api_and_reports_failure(self):
+        ok = self.s["noSnapshotOk"]
+        self.assertEqual((ok["renders"], ok["mode"]), (1, "live"))
+        down = self.s["noSnapshotDown"]
+        self.assertEqual(down["renders"], 0)
+        self.assertTrue(down["bannerShown"])
+        self.assertIn("無法連線到伺服器", down["banner"])
+        self.assertIn("retryLoadDashboard", down["banner"])
+
+
 class TestInlineHandlersDefined(unittest.TestCase):
     ALLOWED = {"alert", "confirm", "parseInt", "parseFloat", "String", "Number", "Boolean"}
 
