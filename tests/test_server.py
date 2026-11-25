@@ -231,6 +231,28 @@ class TestServerAPI(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual(body["result"]["thresholds"]["numeric"]["lvl4_min"], 85.0)
 
+    def test_sensitivity_payloads_follow_governance_thresholds(self):
+        def dashboard():
+            return json.loads(self._get("/api/dashboard")[1])
+        d = dashboard()
+        self.assertTrue(d["weight_sensitivity"]["available"])
+        self.assertTrue(d["threshold_sensitivity"]["available"])
+        try:
+            status, _ = self._post("/api/update_governance",
+                                   {"action_type": "THRESHOLDS", "lvl4_min": 88, "lvl3_min": 78, "lvl2_min": 66,
+                                    "lvlR_cap_max": 42, "reason": "sensitivity test"})
+            self.assertEqual(status, 200)
+            d = dashboard()
+            self.assertEqual(d["threshold_sensitivity"]["thresholds"]["lvl4_min"], 88.0)
+            # 兩種敏感度分析的「目前等級」必須一致 (都以生效中的權重與門檻計算)
+            ws = {x["industry_id"]: x["base_level"] for x in d["weight_sensitivity"]["industries"]}
+            ts = {x["industry_id"]: x["base_level"] for x in d["threshold_sensitivity"]["industries"]}
+            self.assertEqual(ws, ts)
+        finally:
+            self._post("/api/update_governance",
+                       {"action_type": "THRESHOLDS", "lvl4_min": 80, "lvl3_min": 72, "lvl2_min": 62,
+                        "lvlR_cap_max": 45, "reason": "restore defaults"})
+
     def test_company_mapping_validates_input(self):
         status, body = self._post("/api/update_governance",
                                   {"action_type": "COMPANY_MAPPING", "company_code": "2330",

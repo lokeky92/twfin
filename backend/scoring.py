@@ -209,3 +209,138 @@ def sensitivity_analysis(rows, weights=None, thresholds=None, delta=0.05, trials
         "industries": industries,
         "by_weight": by_weight,
     }
+
+
+# ---------------------------------------------------------------------------
+# 預警門檻敏感度分析：LEVEL 2/3/4 的分數線與 LEVEL R 的資金分數線同樣是主觀設定。
+# 若某產業的總分剛好貼著門檻，它的預警等級就只是門檻選擇的結果，不是市場訊號。
+# ---------------------------------------------------------------------------
+THRESHOLD_KEYS = ("lvl4_min", "lvl3_min", "lvl2_min", "lvlR_cap_max")
+THRESHOLD_LABELS = {
+    "lvl4_min": "LEVEL 4 總分門檻", "lvl3_min": "LEVEL 3 總分門檻",
+    "lvl2_min": "LEVEL 2 總分門檻", "lvlR_cap_max": "LEVEL R 資金分數上限",
+}
+
+
+def effective_thresholds(stored):
+    """
+    由資料庫存的 thresholds_json 取得「實際生效」的四個數值門檻。
+    種子模型存的是描述文字 (沒有數值)，使用者經治理介面更新後數值放在 "numeric" 底下；
+    缺漏或無法轉成數字的項目一律回到預設值。
+    """
+    th = dict(DEFAULT_THRESHOLDS)
+    stored = stored if isinstance(stored, dict) else {}
+    numeric = stored.get("numeric") if isinstance(stored.get("numeric"), dict) else stored
+    for key in DEFAULT_THRESHOLDS:
+        try:
+            th[key] = float(numeric[key])
+        except (KeyError, TypeError, ValueError):
+            pass
+    return th
+
+
+def _thresholds_valid(th):
+    try:
+        validate_thresholds({k: th[k] for k in THRESHOLD_KEYS})
+        return True
+    except (ValueError, KeyError, TypeError):
+        return False
+
+
+def _boundary_margin(total, cap, th):
+    """回傳 (距離最近門檻的分數, 該門檻代號)；只看「可能讓等級改變」的門檻。"""
+    candidates = [(abs(total - th["lvl4_min"]), "lvl4_min"),
+                  (abs(total - th["lvl3_min"]), "lvl3_min"),
+                  (abs(total - th["lvl2_min"]), "lvl2_min")]
+    if cap is not None:
+        candidates.append((abs(cap - th["lvlR_cap_max"]), "lvlR_cap_max"))
+    return min(candidates)
+
+
+def threshold_sensitivity(rows, weights=None, thresholds=None, delta=2.0, trials=500, seed=20261126):
+    """
+    對目前預警門檻做兩種擾動，觀察各產業的預警等級穩不穩：
+      1. 單一門檻 ±delta 分 (其餘不變)，共 2×4 = 8 個情境 (違反 L4 > L3 > L2 的情境略過)
+      2. 隨機擾動：四個門檻各加 U(-delta, +delta)，不合法 (順序錯誤或超出 0~100) 時重抽，共 trials 個情境
+    固定亂數種子，同樣輸入永遠得到同樣結果。
+    rows 需含 industry_id、industry_name 與五個 score_* 欄位 (權重使用目前啟用的版本)。
+    """
+    weights = weights or DEFAULT_WEIGHTS
+    base_th = effective_thresholds(thresholds)
+    names, scored = {}, []
+    for r in rows:
+        total = compute_weighted_total(r, weights)
+        if total is None:
+            continue
+        names[r["industry_id"]] = r.get("industry_name", r["industry_id"])
+        scored.append((r["industry_id"], total, r.get("score_capital_flow")))
+    if not scored:
+        return {"available": False, "reason": "沒有可評分的產業"}
+
+    scenarios, single = [], []
+    for key in THRESHOLD_KEYS:
+        for sign in (-1, 1):
+            th = dict(base_th)
+            th[key] = round(th[key] + sign * delta, 4)
+            if _thresholds_valid(th):
+                scenarios.append(th)
+                single.append((key, sign, len(scenarios) - 1))
+    rng = random.Random(seed)
+    for _ in range(trials):
+        for _attempt in range(20):
+            th = {k: round(base_th[k] + rng.uniform(-delta, delta), 4) for k in THRESHOLD_KEYS}
+            if _thresholds_valid(th):
+                scenarios.append(th)
+                break
+    n = len(scenarios)
+
+    def level(total, cap, th):
+        return classify_alert_level(total, cap, th)
+
+    industries = []
+    for iid, total, cap in sorted(scored, key=lambda t: -t[1]):
+        base_level = level(total, cap, base_th)
+        levels = [level(total, cap, th) for th in scenarios]
+        dist = {}
+        for lv in levels:
+            dist[lv] = dist.get(lv, 0) + 1
+        change_pct = round(sum(1 for lv in levels if lv != base_level) * 100.0 / n, 1)
+        margin, boundary = _boundary_margin(total, cap, base_th)
+        if change_pct < 10:
+            label = "穩定"
+        elif change_pct >= 30:
+            label = "不穩定"
+        else:
+            label = "中等"
+        industries.append({
+            "industry_id": iid, "industry_name": names[iid], "total_score": total, "capital_flow_score": cap,
+            "base_level": base_level, "margin_points": round(margin, 2), "nearest_threshold": boundary,
+            "level_distribution": {lv: round(c * 100.0 / n, 1) for lv, c in sorted(dist.items())},
+            "level_change_pct": change_pct, "stability": label,
+        })
+
+    by_threshold = []
+    for key in THRESHOLD_KEYS:
+        affected = set()
+        for k, _sign, idx in single:
+            if k != key:
+                continue
+            for iid, total, cap in scored:
+                if level(total, cap, scenarios[idx]) != level(total, cap, base_th):
+                    affected.add(names[iid])
+        by_threshold.append({"threshold_key": key, "label": THRESHOLD_LABELS[key], "value": base_th[key],
+                             "affected_count": len(affected), "affected": sorted(affected)})
+
+    unchanged = sum(1 for x in industries if x["level_change_pct"] == 0)
+    return {
+        "available": True,
+        "delta_points": delta,
+        "scenario_count": n,
+        "thresholds": base_th,
+        "industry_count": len(industries),
+        "never_changes_count": unchanged,
+        "unstable_count": sum(1 for x in industries if x["stability"] == "不穩定"),
+        "near_boundary_count": sum(1 for x in industries if x["margin_points"] <= delta),
+        "industries": industries,
+        "by_threshold": by_threshold,
+    }

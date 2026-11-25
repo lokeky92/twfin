@@ -334,6 +334,7 @@ function renderAll() {
   renderAssetFlows();
   renderIndustryTable();
   renderWeightSensitivity();
+  renderThresholdSensitivity();
   renderInstiFlows();
   renderWarnings();
   renderCompanies();

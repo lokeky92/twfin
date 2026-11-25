@@ -11,8 +11,10 @@ from scoring import (  # noqa: E402
     compute_weighted_total,
     WEIGHT_KEYS,
     parse_weights,
+    effective_thresholds,
     sensitivity_analysis,
     shift_weight,
+    threshold_sensitivity,
     validate_thresholds,
 )
 
@@ -151,6 +153,87 @@ class TestSensitivityAnalysis(unittest.TestCase):
         rows = [_ind("G", 75, 75, 75, 60, 70)]
         res = sensitivity_analysis(rows)
         self.assertGreater(res["industries"][0]["level_change_pct"], 0)
+
+
+class TestEffectiveThresholds(unittest.TestCase):
+    def test_seed_description_text_falls_back_to_defaults(self):
+        # 種子模型存的是描述文字 (沒有數值)
+        seed = {"LEVEL 4": "總分 >= 80 且 ...", "LEVEL R": "資金流向 < 45"}
+        self.assertEqual(effective_thresholds(seed), {"lvl4_min": 80.0, "lvl3_min": 72.0, "lvl2_min": 62.0, "lvlR_cap_max": 45.0})
+
+    def test_numeric_block_written_by_governance_update_is_used(self):
+        stored = {"LEVEL 4": "文字", "numeric": {"lvl4_min": 85, "lvl3_min": 75, "lvl2_min": 65, "lvlR_cap_max": 40}}
+        self.assertEqual(effective_thresholds(stored), {"lvl4_min": 85.0, "lvl3_min": 75.0, "lvl2_min": 65.0, "lvlR_cap_max": 40.0})
+
+    def test_partial_or_garbage_values_fall_back_per_key(self):
+        th = effective_thresholds({"numeric": {"lvl4_min": "abc", "lvl3_min": 70}})
+        self.assertEqual(th["lvl4_min"], 80.0)
+        self.assertEqual(th["lvl3_min"], 70.0)
+        self.assertEqual(effective_thresholds(None), effective_thresholds({}))
+
+
+class TestThresholdSensitivity(unittest.TestCase):
+    def test_far_from_every_threshold_is_stable(self):
+        rows = [_ind("A", 95, 95, 95, 95, 95), _ind("B", 20, 20, 20, 20, 20)]
+        res = threshold_sensitivity(rows)
+        a, b = res["industries"]
+        self.assertEqual((a["base_level"], a["level_change_pct"], a["stability"]), ("LEVEL 4", 0.0, "穩定"))
+        self.assertEqual(a["margin_points"], 15.0)
+        self.assertEqual(a["nearest_threshold"], "lvl4_min")
+        self.assertEqual(b["base_level"], "LEVEL R")          # 資金分數 20 < 45
+        self.assertEqual(res["never_changes_count"], 2)
+        self.assertEqual(res["unstable_count"], 0)
+
+    def test_score_exactly_on_threshold_flips_about_half_the_time(self):
+        res = threshold_sensitivity([_ind("G", 80, 80, 80, 80, 80)])      # 總分 80.0 = LEVEL 4 門檻
+        g = res["industries"][0]
+        self.assertEqual(g["base_level"], "LEVEL 4")
+        self.assertEqual(g["margin_points"], 0.0)
+        self.assertGreater(g["level_change_pct"], 25)
+        self.assertLess(g["level_change_pct"], 75)
+        self.assertEqual(g["stability"], "不穩定")
+        self.assertEqual(set(g["level_distribution"]), {"LEVEL 3", "LEVEL 4"})
+        self.assertEqual(res["near_boundary_count"], 1)
+
+    def test_capital_flow_cutoff_for_level_r(self):
+        res = threshold_sensitivity([_ind("H", 45.5, 70, 70, 70, 70)])    # 資金分數貼著 LEVEL R 上限 45
+        h = res["industries"][0]
+        self.assertEqual(h["nearest_threshold"], "lvlR_cap_max")
+        self.assertIn("LEVEL R", h["level_distribution"])
+        self.assertGreater(h["level_change_pct"], 0)
+
+    def test_by_threshold_lists_affected_industries(self):
+        rows = [_ind("G", 80, 80, 80, 80, 80), _ind("A", 95, 95, 95, 95, 95)]
+        by = {b["threshold_key"]: b for b in threshold_sensitivity(rows)["by_threshold"]}
+        self.assertEqual(by["lvl4_min"]["affected"], ["產業G"])
+        self.assertEqual(by["lvl4_min"]["affected_count"], 1)
+        self.assertEqual(by["lvl2_min"]["affected_count"], 0)
+
+    def test_invalid_orderings_are_skipped(self):
+        # L4=80, L3=79：L4 -2 與 L3 +2 都會違反 L4 > L3 > L2，應被略過 (508 - 2 = 506)
+        th = {"numeric": {"lvl4_min": 80, "lvl3_min": 79, "lvl2_min": 62, "lvlR_cap_max": 45}}
+        res = threshold_sensitivity([_ind("A", 90, 90, 90, 90, 90)], thresholds=th)
+        self.assertEqual(res["scenario_count"], 506)
+
+    def test_uses_numeric_thresholds_from_governance(self):
+        th = {"numeric": {"lvl4_min": 90, "lvl3_min": 80, "lvl2_min": 70, "lvlR_cap_max": 45}}
+        res = threshold_sensitivity([_ind("A", 85, 85, 85, 85, 85)], thresholds=th)   # 總分 85：LEVEL 3，距 L4 門檻 5
+        self.assertEqual(res["industries"][0]["base_level"], "LEVEL 3")
+        self.assertEqual(res["thresholds"]["lvl4_min"], 90.0)
+
+    def test_deterministic_excludes_unrated_and_handles_empty(self):
+        rows = [_ind("G", 80, 80, 80, 80, 80), _ind("X", 50, 50, 50, 50, 50, state="INSUFFICIENT_DATA")]
+        self.assertEqual(threshold_sensitivity(rows), threshold_sensitivity(rows))
+        self.assertEqual([x["industry_id"] for x in threshold_sensitivity(rows)["industries"]], ["G"])
+        self.assertFalse(threshold_sensitivity([rows[1]])["available"])
+
+    def test_weight_sensitivity_levels_follow_governance_thresholds(self):
+        # 回歸測試：舊版把整包 thresholds_json 直接傳入，使用者調過門檻 (numeric) 後仍用預設值判等級
+        rows = [_ind("G", 80, 80, 80, 80, 80)]
+        default = sensitivity_analysis(rows, thresholds=effective_thresholds({}))["industries"][0]["base_level"]
+        raised = sensitivity_analysis(rows, thresholds=effective_thresholds(
+            {"numeric": {"lvl4_min": 90, "lvl3_min": 80, "lvl2_min": 70, "lvlR_cap_max": 45}}))["industries"][0]["base_level"]
+        self.assertEqual((default, raised), ("LEVEL 4", "LEVEL 3"))
 
 
 if __name__ == "__main__":

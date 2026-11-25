@@ -26,8 +26,10 @@ from scoring import (
     DEFAULT_THRESHOLDS,
     classify_alert_level,
     compute_weighted_total,
+    effective_thresholds,
     parse_weights,
     sensitivity_analysis,
+    threshold_sensitivity,
     validate_thresholds,
 )
 from seed_and_engine import seed_and_compute_all
@@ -411,7 +413,8 @@ def _build_dashboard_base():
         "generated_at": now_tw().strftime("%Y-%m-%d %H:%M:%S (UTC+8)"),
         "data_provenance": provenance,
         "active_model": active_model,
-        "weight_sensitivity": sensitivity_analysis(industries, active_model["weights"], active_model["thresholds"]),
+        "weight_sensitivity": sensitivity_analysis(industries, active_model["weights"], effective_thresholds(active_model["thresholds"])),
+        "threshold_sensitivity": threshold_sensitivity(industries, active_model["weights"], active_model["thresholds"]),
         "macro_latest": list(macro_latest.values()),
         "macro_series": macro_series,
         "asset_flows": asset_flows,
@@ -773,10 +776,20 @@ class TWFinRequestHandler(SimpleHTTPRequestHandler):
             raise ValueError("請求內容必須是 JSON 物件")
         return payload
 
+    def _drain_request_body(self):
+        """回應錯誤前先把客戶端已送出的內容讀掉 (有上限)；否則直接關閉連線會讓客戶端收到連線重置而非錯誤訊息。"""
+        try:
+            length = min(int(self.headers.get("Content-Length", 0)), MAX_BODY_BYTES)
+            if length > 0:
+                self.rfile.read(length)
+        except (ValueError, OSError):
+            pass
+
     def do_POST(self):
         path = urlparse(self.path).path
         handler = POST_ROUTES.get(path)
         if handler is None:
+            self._drain_request_body()
             self._send_json({"status": "error", "message": "Unknown endpoint"}, status=404)
             return
         try:
@@ -784,6 +797,7 @@ class TWFinRequestHandler(SimpleHTTPRequestHandler):
             payload = self._read_json_body()
             self._send_json(handler(payload))
         except AuthError as e:
+            self._drain_request_body()
             self._send_json({"status": "error", "message": str(e)}, status=e.status)
         except (ValueError, KeyError, PermissionError) as e:
             self._send_json({"status": "error", "message": str(e)}, status=400)
