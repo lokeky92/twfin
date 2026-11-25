@@ -22,6 +22,7 @@ from common import logger, now_iso, now_tw
 from db import DB_PATH, get_connection
 from data_health import SOURCES, age_status
 from history import history_summary
+from snapshot_bundle import inline_snapshot
 from scoring import (
     DEFAULT_THRESHOLDS,
     classify_alert_level,
@@ -54,9 +55,12 @@ ADMIN_TOKEN = os.environ.get("TWFIN_ADMIN_TOKEN", "").strip()
 LOCAL_ADDRESSES = {"127.0.0.1", "::1", "::ffff:127.0.0.1"}
 MAX_BODY_BYTES = 64 * 1024
 STARTED_AT = time.time()
-# 預先打包好的單檔網站 (docs/index.html，已內嵌資料快照)。TWFIN_SERVE_BUNDLE=1 時，首頁直接提供它：
-# 只需一次請求、第一個畫面不必等 /api/dashboard，對 Render 免費方案閒置喚醒後的首次載入特別有幫助。
+# 預先打包好的網站：docs/index.html (只有程式) + docs/data.json (資料快照)。TWFIN_SERVE_BUNDLE=1 時，
+# 首頁由這兩個檔案即時組成「內嵌資料快照的單檔」再提供：只需一次請求、第一個畫面不必等 /api/dashboard，
+# 對 Render 免費方案閒置喚醒後的首次載入特別有幫助。舊格式的單檔 docs/index.html (資料已內嵌) 則原樣提供。
 BUNDLE_PATH = os.path.join(os.path.dirname(FRONTEND_DIR), "docs", "index.html")
+DATA_JSON_PATH = os.path.join(os.path.dirname(FRONTEND_DIR), "docs", "data.json")
+_bundle_cache = {"key": None, "body": None}
 GZIP_MIN_BYTES = 1024
 
 # 每個模型版本都會複製一份產業分數；只保留最近 N 個版本的分數列以免資料表無限成長
@@ -648,6 +652,27 @@ def probe_live_sources():
     invalidate_dashboard_cache()
     return results
 
+def _composed_bundle():
+    """回傳組好的單檔 (bytes)；以兩個檔案的修改時間與大小為快取鍵，檔案沒變就不重組。"""
+    def sig(path):
+        try:
+            st = os.stat(path)
+            return (st.st_mtime_ns, st.st_size)
+        except OSError:
+            return None
+    key = (sig(BUNDLE_PATH), sig(DATA_JSON_PATH))
+    if _bundle_cache["key"] != key:
+        with open(BUNDLE_PATH, "r", encoding="utf-8") as f:
+            shell = f.read()
+        data = None
+        if key[1] is not None:
+            with open(DATA_JSON_PATH, "r", encoding="utf-8") as f:
+                data = f.read()
+        _bundle_cache["body"] = inline_snapshot(shell, data).encode("utf-8")
+        _bundle_cache["key"] = key
+    return _bundle_cache["body"]
+
+
 def _bundle_requested(path):
     """首頁請求，且已啟用 TWFIN_SERVE_BUNDLE=1、單檔網站存在時，改提供內嵌資料快照的單檔網站。"""
     return (path in ("/", "/index.html")
@@ -737,8 +762,8 @@ class TWFinRequestHandler(SimpleHTTPRequestHandler):
                 "uptime_sec": round(time.time() - STARTED_AT, 1),
                 "dashboard_cache_ready": _payload_cache.get("data") is not None,
             })
-        elif _bundle_requested(parsed.path) and self._serve_static_file(BUNDLE_PATH):
-            return
+        elif _bundle_requested(parsed.path):
+            self._send_bytes(_composed_bundle(), "text/html; charset=utf-8")
         elif self._serve_static_file(self.translate_path(parsed.path)):
             return
         elif self.command == "HEAD":

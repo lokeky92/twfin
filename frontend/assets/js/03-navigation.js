@@ -148,7 +148,8 @@ function buildSixQuestionsHtml(q1, q2, q3, q4, q5, q6, metaFooter) {
   `;
 }
 
-// 匯出的靜態版 (docs/index.html) 會把資料快照嵌在 <script id="twfin-snapshot" type="application/json">
+// 單檔離線版 (Cloudflare / Render 首頁 / Release 下載) 會把資料快照內嵌在 id 為 twfin-snapshot 的 JSON script 標籤內；
+// 拆分部署的 docs/index.html 沒有內嵌，資料改由 fetchSnapshotFile() 讀取同目錄的 data.json
 function readEmbeddedSnapshot(doc) {
   const el = (doc || document).getElementById('twfin-snapshot');
   if (!el) return null;
@@ -270,8 +271,33 @@ function retryLoadDashboard() {
   else loadDashboard();
 }
 
+// 拆分部署：index.html 只有程式，資料快照放在同目錄的 data.json (單檔離線版則內嵌在頁面內)。
+// 以 no-cache 向伺服器驗證：資料沒變時回 304 不必重新下載，有更新時一定拿到最新版。
+async function fetchSnapshotFile() {
+  try {
+    const res = await fetch('data.json', { cache: 'no-cache' });
+    if (!res.ok) return null;
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('html')) return null;      // 靜態託管常把不存在的路徑導回 HTML
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
 async function loadDashboard() {
-  const embedded = readEmbeddedSnapshot();
+  let embedded = readEmbeddedSnapshot();
+  if (!embedded && location.protocol === 'file:') {
+    // file:// 無法 fetch 旁邊的 data.json，也不可能有 API
+    API_MODE = 'snapshot';
+    setApiBanner('error', '❌ 以檔案方式開啟時，瀏覽器無法讀取旁邊的 data.json。請改用「單檔離線版」(twfin-standalone.html：可從 GitHub Release 下載，或執行 python backend/export_standalone.py --single twfin-standalone.html)，或透過網址 (http / https) 開啟。', false);
+    return;
+  }
+  if (!embedded) {
+    setApiBanner('waking', '⏳ 正在載入資料快照…', false);
+    embedded = await fetchSnapshotFile();
+    if (embedded) setApiBanner(null);
+  }
   // 直接雙擊開啟 (file://) 時不可能有 API，直接使用內嵌快照
   if (embedded && location.protocol === 'file:') {
     API_MODE = 'snapshot';

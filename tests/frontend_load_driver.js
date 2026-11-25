@@ -15,7 +15,7 @@ const ok = (data) => ({ status: 200, ct: 'application/json', json: data });
 const rejectNet = { reject: true };
 
 async function scenario(o) {
-  let created = null, calls = 0;
+  let created = null, calls = 0, dataCalls = 0;
   const header = { parentNode: { insertBefore(el) { created = el; } } };
   const doc = {
     getElementById(id) {
@@ -31,7 +31,14 @@ async function scenario(o) {
     document: doc, console, AbortController, setTimeout, clearTimeout,
     location: { protocol: o.protocol || 'https:' },
     sessionStorage: { getItem: k => store[k] || null, setItem: (k, v) => { store[k] = v; } },
-    fetch: async () => {
+    fetch: async (url) => {
+      if (String(url).includes('data.json')) {     // 拆分部署的資料檔 (預設不存在 = 404)
+        dataCalls++;
+        const d = o.dataFile || { status: 404, ct: 'text/html' };
+        if (d.reject) throw new Error('network');
+        return { ok: d.status >= 200 && d.status < 300, status: d.status,
+          headers: { get: () => d.ct || '' }, json: async () => d.json };
+      }
       const b = o.responses[Math.min(calls, o.responses.length - 1)];
       calls++;
       if (b.reject) throw new Error('network');
@@ -46,7 +53,7 @@ async function scenario(o) {
   await ctx.loadDashboard();
   for (let i = 0; i < 40 && vm.runInContext('API_MODE', ctx) === 'waking'; i++) await new Promise(r => setTimeout(r, 25));
   return {
-    renders: ctx.__renders, calls,
+    renders: ctx.__renders, calls, dataCalls,
     mode: vm.runInContext('API_MODE', ctx), reason: vm.runInContext('API_REASON', ctx),
     stateGen: vm.runInContext('STATE && STATE.generated_at', ctx),
     bannerShown: !!(created && created.style.display !== 'none' && created.innerHTML),
@@ -66,5 +73,11 @@ async function scenario(o) {
   out.wakesOnThird = await scenario({ embedded: SNAP, responses: [rejectNet, { status: 503, ct: '' }, ok(CHANGED)] });
   out.noSnapshotOk = await scenario({ embedded: null, responses: [ok(CHANGED)] });
   out.noSnapshotDown = await scenario({ embedded: null, responses: [rejectNet] });
+  // 拆分部署：index.html 只有程式，資料在 data.json
+  out.splitStatic = await scenario({ embedded: null, dataFile: ok(SNAP), responses: [{ status: 404, ct: 'text/html' }] });
+  out.splitThenApi = await scenario({ embedded: null, dataFile: ok(SNAP), responses: [ok(CHANGED)] });
+  out.splitDataHtml200 = await scenario({ embedded: null, dataFile: { status: 200, ct: 'text/html; charset=utf-8' }, responses: [ok(CHANGED)] });
+  out.splitFileProtocol = await scenario({ embedded: null, protocol: 'file:', responses: [ok(CHANGED)] });
+  out.embeddedSkipsDataFile = await scenario({ embedded: SNAP, dataFile: ok(CHANGED), responses: [{ status: 404, ct: 'text/html' }] });
   console.log(JSON.stringify(out));
 })();

@@ -176,6 +176,37 @@ class TestWorkerDispatch(unittest.TestCase):
         self.assertFalse(self.o["tokenLeakedInLogs"])
 
 
+class TestWorkerBuildComposesSingleFile(unittest.TestCase):
+    """拆分部署後 docs/index.html 只有程式；Worker 只提供一個頁面，所以建置時要把 data.json 內嵌回去"""
+
+    def _load_build_worker(self):
+        spec = importlib.util.spec_from_file_location("build_worker_mod", os.path.join(ROOT, "cloudflare", "build_worker.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_compose_inlines_data_json_and_handles_legacy_single_file(self):
+        from pathlib import Path
+        bw = self._load_build_worker()
+        tmp = Path(tempfile.mkdtemp(prefix="twfin_bw_"))
+        try:
+            bw.DOCS_HTML, bw.DOCS_DATA = tmp / "index.html", tmp / "data.json"
+            bw.DOCS_HTML.write_text("<html><!-- twfin-snapshot-slot --><script>app()</script></html>", encoding="utf-8")
+            bw.DOCS_DATA.write_text('{"generated_at": "2026-11-26"}', encoding="utf-8")
+            html = bw.compose_html().decode("utf-8")
+            self.assertIn('id="twfin-snapshot"', html)
+            self.assertIn('"generated_at":"2026-11-26"', html)
+            self.assertNotIn("twfin-snapshot-slot", html)
+
+            # 舊格式 (資料已內嵌、沒有 data.json)：原樣使用
+            legacy = '<html><script id="twfin-snapshot" type="application/json">{"a":1}</script></html>'
+            bw.DOCS_HTML.write_text(legacy, encoding="utf-8")
+            bw.DOCS_DATA.unlink()
+            self.assertEqual(bw.compose_html().decode("utf-8"), legacy)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 class TestWranglerConfig(unittest.TestCase):
     def test_cron_matches_intended_times_and_no_secret_in_file(self):
         with open(os.path.join(ROOT, "cloudflare", "wrangler.toml"), encoding="utf-8") as f:

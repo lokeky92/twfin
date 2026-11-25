@@ -136,6 +136,37 @@ class TestDashboardLoadFlow(unittest.TestCase):
         self.assertEqual(s["renders"], 2)
         self.assertFalse(s["bannerShown"])
 
+    def test_split_deploy_loads_data_json_then_paints_before_api(self):
+        # 拆分部署：index.html 沒有內嵌快照，先 fetch data.json 畫第一個畫面，再向 API 更新
+        s = self.s["splitThenApi"]
+        self.assertEqual(s["dataCalls"], 1)
+        self.assertEqual(s["renders"], 2)               # 先用 data.json 畫一次，API 資料有變再畫一次
+        self.assertEqual((s["mode"], s["stateGen"]), ("live", "API-CHANGED"))
+
+    def test_split_deploy_on_static_hosting_has_no_api_but_still_renders(self):
+        s = self.s["splitStatic"]
+        self.assertEqual((s["dataCalls"], s["calls"], s["renders"]), (1, 1, 1))   # 404 不重試
+        self.assertEqual(s["stateGen"], "SNAPSHOT")
+        self.assertEqual(s["reason"], "no-api")
+        self.assertIn("雲端快照模式", s["banner"])
+
+    def test_html_returned_for_data_json_is_treated_as_missing(self):
+        # 靜態託管常把不存在的路徑導回 index.html；不可把它當成 JSON，應退回等待 API
+        s = self.s["splitDataHtml200"]
+        self.assertEqual(s["renders"], 1)
+        self.assertEqual((s["mode"], s["stateGen"]), ("live", "API-CHANGED"))
+
+    def test_opening_split_page_as_file_explains_the_single_file_version(self):
+        s = self.s["splitFileProtocol"]
+        self.assertEqual((s["dataCalls"], s["calls"], s["renders"]), (0, 0, 0))   # file:// 不發任何請求
+        self.assertTrue(s["bannerShown"])
+        self.assertIn("單檔離線版", s["banner"])
+        self.assertIn("--single", s["banner"])
+
+    def test_embedded_snapshot_never_fetches_data_json(self):
+        self.assertEqual(self.s["embeddedSkipsDataFile"]["dataCalls"], 0)
+        self.assertEqual(self.s["embeddedSkipsDataFile"]["stateGen"], "SNAPSHOT")
+
     def test_without_snapshot_waits_for_api_and_reports_failure(self):
         ok = self.s["noSnapshotOk"]
         self.assertEqual((ok["renders"], ok["mode"]), (1, "live"))

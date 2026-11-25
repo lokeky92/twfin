@@ -15,7 +15,18 @@ async function probeLiveSources() {
     }
     throw new Error('Unexpected response');
   } catch (e) {
-    // Cloudflare 私有雲端模式：向伺服器抓取無快取最新快照
+    // 雲端快照模式 (沒有 API)：優先重新抓取 data.json；Cloudflare 單檔版則重新抓頁面並讀取內嵌快照
+    try {
+      const fresh = await fetchSnapshotFile();
+      if (fresh) {
+        STATE = fresh;
+        loadMultiAgentLocalOverrides();
+        renderAll();
+        alert(`✅ 已重新同步雲端最新快照！
+資料更新時間：${STATE.generated_at || '最新'}`);
+        return;
+      }
+    } catch (dataErr) {}
     try {
       const freshRes = await fetch(window.location.pathname + '?_sync=' + Date.now(), { cache: 'no-store' });
       if (freshRes.ok) {

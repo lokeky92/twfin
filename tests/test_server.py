@@ -171,6 +171,83 @@ class TestServerAPI(unittest.TestCase):
         self.assertEqual(by_id[pid], "APPROVED_BY_USER")
         self.assertEqual(by_id["ETF-IMPROVE-20261122-001"], "IMPLEMENTED_ON_BRANCH")
 
+    def test_split_export_writes_app_shell_and_data_json(self):
+        import export_standalone as ex
+        tmp = tempfile.mkdtemp(prefix="twfin_docs_")
+        saved = (ex.DOCS_DIR, ex.DOCS_INDEX_HTML, ex.DOCS_DATA_JSON)
+        ex.DOCS_DIR, ex.DOCS_INDEX_HTML, ex.DOCS_DATA_JSON = tmp, os.path.join(tmp, "index.html"), os.path.join(tmp, "data.json")
+        try:
+            ex.export_standalone()
+            with open(ex.DOCS_INDEX_HTML, encoding="utf-8") as f:
+                shell = f.read()
+            with open(ex.DOCS_DATA_JSON, encoding="utf-8") as f:
+                data_text = f.read()
+        finally:
+            ex.DOCS_DIR, ex.DOCS_INDEX_HTML, ex.DOCS_DATA_JSON = saved
+            shutil.rmtree(tmp, ignore_errors=True)
+        # index.html：只有程式，不含資料，且保留插入點
+        self.assertNotIn('id="twfin-snapshot"', shell)
+        self.assertIn("<!-- twfin-snapshot-slot -->", shell)
+        self.assertNotIn('src="assets/', shell)
+        self.assertLess(len(shell), 700 * 1024)
+        # data.json：合法 JSON、縮排輸出 (git diff 以行為單位)、結尾有換行
+        data = json.loads(data_text)
+        self.assertIn("data_provenance", data)
+        self.assertGreater(data_text.count("\n"), 1000)
+        self.assertTrue(data_text.endswith("\n"))
+        # 兩者組合 = 單檔離線版
+        from snapshot_bundle import inline_snapshot
+        single = inline_snapshot(shell, data_text)
+        self.assertIn('id="twfin-snapshot"', single)
+        self.assertNotIn("twfin-snapshot-slot", single)
+        embedded = single.split('id="twfin-snapshot" type="application/json">')[1].split("</script>")[0]
+        self.assertEqual(json.loads(embedded.replace("<\\/", "</")), data)
+
+    def test_inline_snapshot_edge_cases(self):
+        from snapshot_bundle import SNAPSHOT_SLOT, inline_snapshot
+        shell = f"<body>{SNAPSHOT_SLOT}<script>app()</script></body>"
+        self.assertEqual(inline_snapshot(shell, None), shell)                       # 沒有資料：原樣
+        legacy = '<body><script id="twfin-snapshot" type="application/json">{}</script></body>'
+        self.assertEqual(inline_snapshot(legacy, '{"a":1}'), legacy)                # 舊格式單檔：原樣，不重複內嵌
+        out = inline_snapshot(shell, {"x": "</script><script>alert(1)</script>"})
+        self.assertNotIn("</script><script>alert(1)", out)                          # 資料中的 </script> 已跳脫
+        self.assertEqual(out.count('id="twfin-snapshot"'), 1)
+        self.assertLess(out.index("twfin-snapshot"), out.index("app()"))            # 快照在程式之前
+
+    def test_server_composes_bundle_from_shell_and_data_json(self):
+        from snapshot_bundle import SNAPSHOT_SLOT
+        tmp = tempfile.mkdtemp(prefix="twfin_bundle_")
+        shell_p, data_p = os.path.join(tmp, "index.html"), os.path.join(tmp, "data.json")
+        with open(shell_p, "w", encoding="utf-8") as f:
+            f.write(f"<html>{SNAPSHOT_SLOT}<script>app()</script></html>")
+        with open(data_p, "w", encoding="utf-8") as f:
+            f.write('{"generated_at": "v1"}')
+        saved = (server.BUNDLE_PATH, server.DATA_JSON_PATH)
+        server.BUNDLE_PATH, server.DATA_JSON_PATH = shell_p, data_p
+        server._bundle_cache["key"] = None
+        os.environ["TWFIN_SERVE_BUNDLE"] = "1"
+        try:
+            _, _, body = self._raw("/")
+            self.assertIn(b'"generated_at":"v1"', body)
+            self.assertNotIn(SNAPSHOT_SLOT.encode(), body)
+            # data.json 更新後 (大小不同) 下一次請求就會組出新內容；ETag 也跟著變
+            _, h1, _ = self._raw("/")
+            with open(data_p, "w", encoding="utf-8") as f:
+                f.write('{"generated_at": "version-2"}')
+            _, h2, body2 = self._raw("/")
+            self.assertIn(b'"generated_at":"version-2"', body2)
+            self.assertNotEqual(h1.get("ETag"), h2.get("ETag"))
+            # 沒有 data.json (例如舊部署)：原樣提供 index.html，不報錯
+            os.remove(data_p)
+            status, _, body3 = self._raw("/")
+            self.assertEqual(status, 200)
+            self.assertIn(SNAPSHOT_SLOT.encode(), body3)
+        finally:
+            os.environ.pop("TWFIN_SERVE_BUNDLE", None)
+            server.BUNDLE_PATH, server.DATA_JSON_PATH = saved
+            server._bundle_cache["key"] = None
+            shutil.rmtree(tmp, ignore_errors=True)
+
     def test_head_requests_supported_without_body(self):
         # 保活監控 (UptimeRobot 等) 預設送 HEAD；必須回 200、有 Content-Length、且不能夾帶內容
         for path in ("/api/health", "/api/dashboard", "/"):
