@@ -36,7 +36,7 @@ function renderSixLeaderboards() {
     {
       title: "4. 🌱 可能即將轉強的產業（基本面強但股價未充分反映）",
       badge: "★ 不追高！低PEG潛力轉折區",
-      color: "#a855f7",
+      color: "#c084fc",
       items: [
         { name: "AI伺服器一線系統組裝 (鴻海/廣達)", metric: "P/E僅 10.3x ~ 12.7x", plain: "10月營收雙創歷史新高(+45%~+104%)，但受11月外資期現貨避險壓抑，本益比僅10~12倍具極高安全邊際。", indId: "IND_AI_SERVER" },
         { name: "高階800G網通交換器 (智邦)", metric: "10月YoY +91.2%｜P/E 16.8x", plain: "別只看高本益比純題材股！智邦實質營收年增91%且TWSE官方本益比僅16.84倍，基本面遠強於股價反映。", indId: "IND_CPO_NET" },
@@ -56,7 +56,7 @@ function renderSixLeaderboards() {
     {
       title: "6. 🚨 目前風險最高的產業（LEVEL R / 估值擁擠警告）",
       badge: "基本面惡化或估值過熱洗牌",
-      color: "#f43f5e",
+      color: "#fb7185",
       items: [
         { name: "傳統塑化與大宗鋼鐵 (LEVEL R)", metric: "價值陷阱風險｜總分 43.0", plain: "雖股價淨值比低(如台塑P/B 0.52x)，但受中國產能過剩與10月進口礦產物價大漲雙重擠壓。", indId: "IND_STEEL_PLASTIC" },
         { name: "營建與不動產代銷 (LEVEL R)", metric: "政策緊縮風險｜總分 47.1", plain: "表面P/E看似極低(興富發P/E 7.25x、殖利率11%)，但此為過去完銷交屋之落後反映，未來新案去化與土建融成本壓力大。", indId: "IND_CONSTRUCTION" },

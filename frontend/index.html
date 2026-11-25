@@ -7,12 +7,13 @@
   <link rel="stylesheet" href="assets/app.css" />
 </head>
 <body>
+  <a class="skip-link" href="#mainContent">跳到主要內容</a>
   <!-- 頂部導覽列：單列（品牌｜四大中心切換｜狀態與操作） -->
   <header>
     <div class="brand">
       <div class="brand-logo">TW</div>
       <div>
-        <div class="brand-title">
+        <div class="brand-title" role="heading" aria-level="1">
           <span>台灣資金流向研究中心</span>
           <span class="live-dot" title="LIVE OpenAPI：TWSE / TPEx / MOPS 1,989 家上市櫃">LIVE</span>
         </div>
@@ -29,7 +30,7 @@
     </div>
 
     <div class="header-controls">
-      <span id="dataProvenanceBadge" class="badge badge-grade-C" style="cursor:help;" title="">資料來源判定中…</span>
+      <span id="dataProvenanceBadge" class="badge badge-grade-C" style="cursor:help;" title="" role="button" tabindex="0">資料來源判定中…</span>
       <span id="activeModelBadge" class="badge badge-grade-B">模型 v1.0.0</span>
       <button id="motionToggleBtn" class="btn btn-outline btn-sm" onclick="toggleReducedMotion()" title="開關桑基圖資金流動畫">✨ 動畫</button>
       <button class="btn btn-sm" onclick="probeLiveSources()">🔄 同步資料</button>
@@ -62,7 +63,7 @@
     </button>
   </nav>
 
-  <main>
+  <main id="mainContent" tabindex="-1">
     <!-- =====================================================================
          【第一層（首頁）：動態經濟地圖 (Layer 1: Dynamic Economic Map)】
          純粹視覺化指揮中心：10秒狀態膠囊 + 四層全景桑基圖 + 時間軸連動19宮格五色熱度地圖
@@ -190,7 +191,7 @@
               <button class="btn btn-sm" onclick="jumpTimelineWindow('1M')">最新</button>
             </div>
           </div>
-          <input type="range" id="timelineRangeInput" class="timeline-slider" min="0" max="5" value="5" oninput="onTimelineSliderInput(this.value)" />
+          <input type="range" id="timelineRangeInput" class="timeline-slider" aria-label="資金輪動歷史時間軸 (拖曳切換時期)" min="0" max="5" value="5" oninput="onTimelineSliderInput(this.value)" />
           <div class="timeline-steps">
             <span>2024 下半年<br/>房市高峰</span>
             <span>2025 上半年<br/>CoWoS 擴產</span>
@@ -313,14 +314,14 @@
           <div class="card">
             <div class="card-title" style="margin-bottom: 10px;">PART 4：產業研究評分模型權重設定（動態重算並保存SQLite版本）</div>
             <div class="weight-input-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 10px;">
-              <div><label style="font-size:12px;color:var(--text-secondary);">資金流向 (%)</label><input type="number" id="w_cap" value="25" min="0" max="100" style="width:100%;" /></div>
-              <div><label style="font-size:12px;color:var(--text-secondary);">產業基本面 (%)</label><input type="number" id="w_fun" value="25" min="0" max="100" style="width:100%;" /></div>
-              <div><label style="font-size:12px;color:var(--text-secondary);">未來成長性 (%)</label><input type="number" id="w_gro" value="20" min="0" max="100" style="width:100%;" /></div>
-              <div><label style="font-size:12px;color:var(--text-secondary);">法人布局 (%)</label><input type="number" id="w_ins" value="15" min="0" max="100" style="width:100%;" /></div>
-              <div><label style="font-size:12px;color:var(--text-secondary);">估值合理性 (%)</label><input type="number" id="w_val" value="15" min="0" max="100" style="width:100%;" /></div>
+              <div><label style="font-size:12px;color:var(--text-secondary);">資金流向 (%)</label><input type="number" id="w_cap" aria-label="資金流向權重 (%)" value="25" min="0" max="100" style="width:100%;" /></div>
+              <div><label style="font-size:12px;color:var(--text-secondary);">產業基本面 (%)</label><input type="number" id="w_fun" aria-label="產業基本面權重 (%)" value="25" min="0" max="100" style="width:100%;" /></div>
+              <div><label style="font-size:12px;color:var(--text-secondary);">未來成長性 (%)</label><input type="number" id="w_gro" aria-label="未來成長性權重 (%)" value="20" min="0" max="100" style="width:100%;" /></div>
+              <div><label style="font-size:12px;color:var(--text-secondary);">法人布局 (%)</label><input type="number" id="w_ins" aria-label="法人布局權重 (%)" value="15" min="0" max="100" style="width:100%;" /></div>
+              <div><label style="font-size:12px;color:var(--text-secondary);">估值合理性 (%)</label><input type="number" id="w_val" aria-label="估值合理性權重 (%)" value="15" min="0" max="100" style="width:100%;" /></div>
             </div>
             <div class="weight-action-row" style="display:flex; gap:10px; align-items:center;">
-              <input type="text" id="w_reason" placeholder="輸入權重調整理由（將寫入模型版本歷史紀錄）..." style="flex:1;" />
+              <input type="text" id="w_reason" aria-label="權重調整理由" placeholder="輸入權重調整理由（將寫入模型版本歷史紀錄）..." style="flex:1;" />
               <button class="btn" onclick="submitNewWeights()">套用權重並重算排名</button>
             </div>
             <div id="weightStatusMsg" style="font-size:12px; color:var(--accent-emerald); margin-top:6px;"></div>
@@ -381,7 +382,7 @@
             </div>
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
               <span style="font-size:12px; color:var(--text-secondary);">動態調整公司產業分類歸屬：</span>
-              <input type="text" id="remap_code" placeholder="代號 (如 2330)" style="width:110px;" />
+              <input type="text" id="remap_code" aria-label="要重新對應的股票代號" placeholder="代號 (如 2330)" style="width:110px;" />
               <select id="remap_ind">
                 <option value="IND_SEMI_FOUNDRY">半導體－晶圓代工與先進封裝</option>
                 <option value="IND_SEMI_EQUIP">半導體－設備、材料與測試介面</option>
@@ -415,7 +416,7 @@
         <div class="card" style="margin-top: 18px; overflow-x:auto;">
           <div class="card-title" style="margin-bottom: 10px;">全市場上市櫃公司 Live OpenAPI 營收、估值(P/E、P/B、殖利率)與三大法人買賣超檢索表</div>
           <div style="margin-bottom: 10px;">
-            <input type="text" id="liveCompanySearch" placeholder="輸入股票代號、公司名稱或產業關鍵字即時篩選..." style="width:360px;" oninput="renderLiveTopCompanies()" />
+            <input type="text" id="liveCompanySearch" aria-label="搜尋上市櫃公司" placeholder="輸入股票代號、公司名稱或產業關鍵字即時篩選..." style="width:360px;" oninput="renderLiveTopCompanies()" />
           </div>
           <table>
             <thead>
@@ -442,11 +443,11 @@
         <div class="card" style="margin-bottom: 14px;">
           <div class="card-title" style="margin-bottom: 8px;">動態調整預警門檻 (LEVEL 4 / LEVEL 3 / LEVEL 2 / LEVEL R) 並即時重算警示等級</div>
           <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-            <div><label style="font-size:12px; color:var(--text-secondary);">LEVEL 4 總分 (&ge;)</label> <input type="number" id="th_lvl4" value="80" style="width:70px;" /></div>
-            <div><label style="font-size:12px; color:var(--text-secondary);">LEVEL 3 總分 (&ge;)</label> <input type="number" id="th_lvl3" value="72" style="width:70px;" /></div>
-            <div><label style="font-size:12px; color:var(--text-secondary);">LEVEL 2 總分 (&ge;)</label> <input type="number" id="th_lvl2" value="62" style="width:70px;" /></div>
-            <div><label style="font-size:12px; color:var(--text-secondary);">LEVEL R 資金上限 (&lt;)</label> <input type="number" id="th_lvlR" value="45" style="width:70px;" /></div>
-            <input type="text" id="th_reason" placeholder="門檻變更理由..." style="width:200px;" />
+            <div><label style="font-size:12px; color:var(--text-secondary);">LEVEL 4 總分 (&ge;)</label> <input type="number" id="th_lvl4" aria-label="LEVEL 4 總分門檻" value="80" style="width:70px;" /></div>
+            <div><label style="font-size:12px; color:var(--text-secondary);">LEVEL 3 總分 (&ge;)</label> <input type="number" id="th_lvl3" aria-label="LEVEL 3 總分門檻" value="72" style="width:70px;" /></div>
+            <div><label style="font-size:12px; color:var(--text-secondary);">LEVEL 2 總分 (&ge;)</label> <input type="number" id="th_lvl2" aria-label="LEVEL 2 總分門檻" value="62" style="width:70px;" /></div>
+            <div><label style="font-size:12px; color:var(--text-secondary);">LEVEL R 資金上限 (&lt;)</label> <input type="number" id="th_lvlR" aria-label="LEVEL R 資金分數上限" value="45" style="width:70px;" /></div>
+            <input type="text" id="th_reason" aria-label="門檻變更理由" placeholder="門檻變更理由..." style="width:200px;" />
             <button class="btn btn-sm" onclick="submitNewThresholds()">套用預警門檻並寫入SQLite</button>
             <span id="thStatusMsg" style="font-size:12px; color:var(--accent-emerald);"></span>
           </div>
@@ -675,7 +676,7 @@
             <option value="CONCENTRATION">🟠 單一持股集中風險（如台積電 &gt; 50%）</option>
             <option value="HIGH_RISK">🔴 風險偏高／不符配置角色</option>
           </select>
-          <input type="text" id="etfSearchInput" placeholder="搜尋代號、名稱或成分股（0050 / VOO / 2330 / NVDA）" oninput="renderEtfLists()" />
+          <input type="text" id="etfSearchInput" aria-label="搜尋 ETF" placeholder="搜尋代號、名稱或成分股（0050 / VOO / 2330 / NVDA）" oninput="renderEtfLists()" />
         </div>
       </div>
 
@@ -825,7 +826,7 @@
             <span style="font-size:15px; font-weight:700;">選擇 ETF：</span>
             <select id="portAddEtfSelect" style="font-size:15px; padding:8px 12px;"></select>
             <span style="font-size:15px; font-weight:700;">投入金額 (萬台幣)：</span>
-            <input type="number" id="portAddAmountInput" value="100" min="1" style="width:120px; font-size:15px; padding:8px 12px;" />
+            <input type="number" id="portAddAmountInput" aria-label="持倉金額" value="100" min="1" style="width:120px; font-size:15px; padding:8px 12px;" />
             <button class="btn" style="font-size:15px; padding:8px 18px;" onclick="addUserPortfolioItem()">＋ 加入我的投資組合</button>
           </div>
           <div id="userPortfolioAnalysisOutput"></div>
@@ -896,10 +897,10 @@
 
   <!-- 右側滑出式「AI 白話六問解說與詳細數據」抽屜 (Slide-over Drawer) -->
   <div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawer()"></div>
-  <aside id="drawerPanel" class="drawer-panel">
+  <aside id="drawerPanel" class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" tabindex="-1">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border);">
       <div id="drawerHeaderBadge"></div>
-      <button class="btn btn-outline btn-sm" onclick="closeDrawer()">✕ 關閉面板</button>
+      <button class="btn btn-outline btn-sm" onclick="closeDrawer()" aria-label="關閉面板">✕ 關閉面板</button>
     </div>
     <h2 id="drawerTitle" style="font-size:20px; font-weight:800; color:#fff; margin-bottom:6px;"></h2>
     <div id="drawerSubtitle" style="font-size:13px; color:var(--accent-blue); margin-bottom:14px;"></div>
@@ -924,5 +925,6 @@
   <script src="assets/js/16-multi-agent.js"></script>
   <script src="assets/js/17-main.js"></script>
   <script src="assets/js/18-weight-sensitivity.js"></script>
+  <script src="assets/js/19-a11y.js"></script>
 </body>
 </html>

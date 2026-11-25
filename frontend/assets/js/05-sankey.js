@@ -93,8 +93,8 @@ function renderSankeyDiagram(periodIdx) {
     { id: "N3_03", parent: "N2_CAPEX", title: "半導體測試介面與設備採購 (6223 旺矽 / 3131 弘塑)", val: "旺矽10月+92.7% 創高", y: 82, h: 16, color: "#eab308", indId: "IND_SEMI_EQUIP", flowIdx: 5 },
     { id: "N3_04", parent: "N2_CAPEX", title: "水冷散熱Cold Plate/CDU擴產 (3017 奇鋐 / 3324 雙鴻)", val: "奇鋐221億 (+34.4%)", y: 104, h: 15, color: "#ca8a04", indId: "IND_THERMAL", flowIdx: 5 },
     { id: "N3_05", parent: "N2_CAPEX", title: "強韌電網與外銷變壓器重電 (1519 華城 / 1513 中興電)", val: "在手訂單能見度2~3年", y: 125, h: 13, color: "#ca8a04", indId: "IND_POWER_GREEN", flowIdx: 5 },
-    { id: "N3_06", parent: "N2_CAPEX", title: "高階CCL銅箔基板與PCB擴產 (2383 台光電 / 2368 金像電)", val: "M8材料與AI伺服器板", y: 144, h: 11, color: "#a16207", indId: "IND_PCB_ABF", flowIdx: 5 },
-    { id: "N3_07", parent: "N2_CAPEX", title: "綠能儲能、精密機械與車用零組件 (1319 東陽 / 2049 上銀)", val: "AM車用旺季+台幣貶值匯兌", y: 161, h: 9, color: "#a16207", indId: "IND_MACH_AUTO", flowIdx: 5 },
+    { id: "N3_06", parent: "N2_CAPEX", title: "高階CCL銅箔基板與PCB擴產 (2383 台光電 / 2368 金像電)", val: "M8材料與AI伺服器板", y: 144, h: 11, color: "#d97706", indId: "IND_PCB_ABF", flowIdx: 5 },
+    { id: "N3_07", parent: "N2_CAPEX", title: "綠能儲能、精密機械與車用零組件 (1319 東陽 / 2049 上銀)", val: "AM車用旺季+台幣貶值匯兌", y: 161, h: 9, color: "#d97706", indId: "IND_MACH_AUTO", flowIdx: 5 },
 
     // 來自 N2_STOCK (台股市場與ETF配置流線束 - 珊瑚橘色系)
     { id: "N3_08", parent: "N2_STOCK", title: "市值型ETF 0050權值核心 (台積電/鴻海/聯發科)", val: "0050單月吸金 >2,200億", y: 184, h: 24, color: "#fb923c", indId: "IND_SEMI_FOUNDRY", flowIdx: 1 },
@@ -102,8 +102,8 @@ function renderSankeyDiagram(periodIdx) {
     { id: "N3_10", parent: "N2_STOCK", title: "大型金控穩盤與利差擴張 (2891 中信金 / 2882 國泰金)", val: "20日相對大盤 +5.2% 居冠", y: 239, h: 18, color: "#f97316", indId: "IND_FIN_HOLDING", flowIdx: 1 },
     { id: "N3_11", parent: "N2_STOCK", title: "800G資料中心交換器與CPO光通訊 (2345 智邦 / 3363 上詮)", val: "智邦446.6億 (+91.2%) P/E 16.8x", y: 263, h: 15, color: "#ea580c", indId: "IND_CPO_NET", flowIdx: 1 },
     { id: "N3_12", parent: "N2_STOCK", title: "IC設計與CSP自研AI ASIC (2454 聯發科 / 3661 世芯-KY)", val: "旗艦SoC與ASIC設計服務", y: 284, h: 13, color: "#ea580c", indId: "IND_IC_DESIGN", flowIdx: 1 },
-    { id: "N3_13", parent: "N2_STOCK", title: "貨櫃航運與AI晶片航空物流 (2603 長榮 / 2618 長榮航)", val: "高現金流與高息防禦支撐", y: 303, h: 11, color: "#c2410c", indId: "IND_SHIPPING", flowIdx: 1 },
-    { id: "N3_14", parent: "N2_STOCK", title: "電信防禦、生技新藥與內需餐飲零售 (2412 中華電 / 6446 藥華藥)", val: "次產業異質觀察(不硬排名)", y: 320, h: 9, color: "#9a3412", indId: "IND_BIO_RETAIL", flowIdx: 1 },
+    { id: "N3_13", parent: "N2_STOCK", title: "貨櫃航運與AI晶片航空物流 (2603 長榮 / 2618 長榮航)", val: "高現金流與高息防禦支撐", y: 303, h: 11, color: "#ea580c", indId: "IND_SHIPPING", flowIdx: 1 },
+    { id: "N3_14", parent: "N2_STOCK", title: "電信防禦、生技新藥與內需餐飲零售 (2412 中華電 / 6446 藥華藥)", val: "次產業異質觀察(不硬排名)", y: 320, h: 9, color: "#f97316", indId: "IND_BIO_RETAIL", flowIdx: 1 },
 
     // 來自 N2_DEPOSIT / N2_BOND / N2_PROP / N2_OUT (下方細分去向)
     { id: "N3_15", parent: "N2_DEPOSIT", title: "企業海外ECB暫泊與外幣活存池 (外匯存款 10.06兆)", val: "待匯率穩定轉資本支出", y: 376, h: 24, color: "#14b8a6", indId: "IND_FIN_HOLDING", flowIdx: 0 },
