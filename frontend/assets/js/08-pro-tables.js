@@ -515,7 +515,7 @@ function renderBacktest() {
           <div class="card-title" style="font-size:16px;">第五階段：時間序列滾動樣本外回測與三大基準模型對照 (${bt.run_id})</div>
           <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">回測區間：${bt.backtest_window} ｜ 模型版本：${bt.model_version} ｜ 單邊交易摩擦成本假設：${bt.cost_assumption_bps} bps</div>
         </div>
-        <span class="badge badge-lvl4">Point-in-Time 零未來資料洩漏驗證通過</span>
+        <span class="badge badge-lvlR">示範數據 (非實測)</span>
       </div>
       <div class="grid-4" style="margin-top:12px; margin-bottom:12px;">
         <div style="background:#090e1a; padding:12px; border-radius:6px;">

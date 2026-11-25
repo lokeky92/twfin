@@ -216,7 +216,7 @@
         <button class="next-step" style="--ns-accent:#c084fc;" onclick="setAppMode('C')">
           <div class="ns-kicker">第三層 ➔</div>
           <div class="ns-title">專業數據、回測與治理</div>
-          <div class="ns-desc">1,989 家上市櫃原始數據、91 樣本回測、固定報告與權重設定</div>
+          <div class="ns-desc">1,989 家上市櫃原始數據、前瞻追蹤回測、固定報告與權重設定</div>
         </button>
         <button class="next-step" style="--ns-accent:#fbbf24;" onclick="setAppMode('ETF')">
           <div class="ns-kicker">ETF ➔</div>
@@ -281,13 +281,13 @@
 
     <!-- =====================================================================
          【第三層：專業數據、回測驗證與模型治理中心 (Layer 3: Professional Data & Governance)】
-         保留 100% 原始數據表、1,989家檢索、權重與門檻動態調整、91樣本回測、固定研究報告與資料字典
+         保留 100% 原始數據表、1,989家檢索、權重與門檻動態調整、前瞻追蹤回測、固定研究報告與資料字典
          ===================================================================== -->
     <div id="proResearchSection" style="display:none; margin-top: 10px;">
       <div class="layer-hero" style="--hero-accent:#a855f7;">
         <div>
           <div class="lh-title"><span class="badge badge-lvl2">第三層</span>專業數據與模型治理</div>
-          <div class="lh-sub">SQLite 原生資料表、1,989 家上市櫃檢索、五維權重／門檻動態重算、Point-in-Time 回測與資料字典</div>
+          <div class="lh-sub">SQLite 原生資料表、1,989 家上市櫃檢索、五維權重／門檻動態重算、前瞻追蹤回測與資料字典</div>
         </div>
         <div class="lh-actions">
           <button class="btn btn-outline btn-sm" onclick="setAppMode('A')">⬅ 動態經濟地圖</button>
@@ -304,7 +304,7 @@
         <div class="pro-tab" onclick="switchProTab('pro-macro', this)"><span class="pt-no">06</span>總體與國際指標</div>
         <div class="pro-tab" onclick="switchProTab('pro-scenarios', this)"><span class="pt-no">07</span>情境分析</div>
         <div class="pro-tab" onclick="switchProTab('pro-reports', this)"><span class="pt-no">08</span>固定研究報告</div>
-        <div class="pro-tab" onclick="switchProTab('pro-backtest', this)"><span class="pt-no">09</span>樣本外回測</div>
+        <div class="pro-tab" onclick="switchProTab('pro-backtest', this)"><span class="pt-no">09</span>前瞻追蹤回測</div>
         <div class="pro-tab" onclick="switchProTab('pro-governance', this)"><span class="pt-no">10</span>資料品質與治理</div>
       </nav>
 
@@ -543,8 +543,15 @@
         <div id="reportsContainer"></div>
       </section>
 
-      <!-- PRO TAB 9: 樣本外回測驗證 -->
+      <!-- PRO TAB 9: 前瞻追蹤回測 (真實計算) + 舊版示範回測 (手寫數據，預設收合) -->
       <section id="pro-backtest" class="pro-panel">
+        <div id="liveBacktestContainer"></div>
+        <details class="card" style="margin-top:16px; border-left:4px solid #fb7185;">
+          <summary style="cursor:pointer; font-weight:700; color:#fda4af;">⚠️ 舊版「示範回測」（手寫數據，非實測）— 請勿當成模型有效的證據</summary>
+          <p style="font-size:12.5px; color:var(--text-secondary); margin:8px 0;">
+            下面的命中率、超額報酬與 8 筆事件，是直接寫在程式碼裡的示範內容，並非由歷史資料計算而來
+            （且摘要的「91 樣本、21 次訊號」與事件表的 8 筆本身就對不起來）。保留僅供參考版面與欄位設計，不應用來評估模型。
+          </p>
         <div id="backtestSummaryContainer"></div>
         <div class="card" style="margin-top: 16px; overflow-x:auto;">
           <div class="card-title" style="margin-bottom: 10px;">PART 8：Point-in-Time 歷史預警訊號逐筆驗證明細（零未來資料洩漏）</div>
@@ -564,6 +571,7 @@
             <tbody id="backtestEventsBody"></tbody>
           </table>
         </div>
+        </details>
       </section>
 
       <!-- PRO TAB 10: 資料品質SLA、來源與資料字典 -->
@@ -929,5 +937,6 @@
   <script src="assets/js/18-weight-sensitivity.js"></script>
   <script src="assets/js/19-a11y.js"></script>
   <script src="assets/js/20-export.js"></script>
+  <script src="assets/js/21-live-backtest.js"></script>
 </body>
 </html>

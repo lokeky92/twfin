@@ -571,6 +571,7 @@ CREATE TABLE IF NOT EXISTS industry_score_history (
     score_institutional REAL,
     score_valuation REAL,
     rotation_state TEXT,
+    alert_level TEXT,                -- 快照當下依生效門檻判定的預警等級 (前瞻追蹤回測用)
     PRIMARY KEY (snapshot_date, industry_id, model_version)
 );
 
@@ -590,10 +591,18 @@ def get_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+def _migrate(conn):
+    """既有資料庫補上後來新增的欄位 (CREATE TABLE IF NOT EXISTS 不會修改已存在的表)。"""
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(industry_score_history)")}
+    if cols and "alert_level" not in cols:
+        conn.execute("ALTER TABLE industry_score_history ADD COLUMN alert_level TEXT")
+
+
 def init_database():
     conn = get_connection()
     with conn:
         conn.executescript(SCHEMA_SQL)
+        _migrate(conn)
     conn.close()
     return DB_PATH
 

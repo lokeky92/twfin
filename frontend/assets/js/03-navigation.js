@@ -367,6 +367,7 @@ function renderAll() {
   renderScenarios();
   renderReports();
   renderBacktest();
+  renderLiveBacktest();
   renderGovernance();
   renderEtfDecisionCenter();
   updateQuickJumpBar(APP_MODE);

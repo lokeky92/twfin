@@ -22,6 +22,7 @@ from common import logger, now_iso, now_tw
 from db import DB_PATH, get_connection
 from data_health import SOURCES, age_status
 from history import history_summary
+from backtest import compute_live_backtest
 from snapshot_bundle import inline_snapshot
 from scoring import (
     DEFAULT_THRESHOLDS,
@@ -67,9 +68,10 @@ GZIP_MIN_BYTES = 1024
 KEEP_SCORE_VERSIONS = 20
 
 # 各區塊資料來源分類 (顯示於前端「即時 / 種子」標示)
-LIVE_SECTIONS = ["上市櫃月營收與估值 (MOPS/TWSE/TPEx)", "三大法人個股買賣超", "大盤與類股指數", "ETF 每日行情"]
+LIVE_SECTIONS = ["上市櫃月營收與估值 (MOPS/TWSE/TPEx)", "三大法人個股買賣超", "大盤與類股指數", "ETF 每日行情",
+                 "前瞻追蹤回測 (每日評分快照 × 類股報酬指數)"]
 SEED_SECTIONS = ["總體經濟指標", "資產配置流向矩陣", "產業輪動子分數", "趨勢預警訊號", "個股研究名單",
-                 "情境分析", "歷史回測結果", "固定研究報告", "ETF 持股／配息／回測", "AI 研究團隊 (規則式模擬)"]
+                 "情境分析", "舊版示範回測 (手寫數據，非實測)", "固定研究報告", "ETF 持股／配息／回測", "AI 研究團隊 (規則式模擬)"]
 
 
 class AuthError(Exception):
@@ -412,11 +414,13 @@ def _build_dashboard_base():
         etf_center = {"error": str(e), "etfs": [], "backtests": [], "reports": []}
 
     provenance = _data_provenance(cur)
+    live_backtest = compute_live_backtest(conn)
     conn.close()
     return {
         "generated_at": now_tw().strftime("%Y-%m-%d %H:%M:%S (UTC+8)"),
         "data_provenance": provenance,
         "active_model": active_model,
+        "live_backtest": live_backtest,
         "weight_sensitivity": sensitivity_analysis(industries, active_model["weights"], effective_thresholds(active_model["thresholds"])),
         "threshold_sensitivity": threshold_sensitivity(industries, active_model["weights"], active_model["thresholds"]),
         "macro_latest": list(macro_latest.values()),
