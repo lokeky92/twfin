@@ -31,10 +31,15 @@ workflow 的 `gate` job 判斷「資料庫 90 分鐘內剛更新過」而略過�
    `GH_WORKFLOW`、`GH_REF`。
 4. **建置並部署**
    ```bash
-   python build_worker.py      # 產生 worker.mjs (內嵌目前的 docs/index.html)
+   python build_worker.py      # 產生 worker.mjs (把 docs/data.json 內嵌回 docs/index.html，組成單檔)
    npx wrangler deploy
    ```
-   注意：私有網站內容是「建置當下」的 `docs/index.html`；之後要更新私有網站的畫面，需要重新建置並部署。
+   私有網站的內容是「建置當下」的 `docs/index.html` + `docs/data.json`，所以資料要更新就必須重新建置並部署。
+
+   **已連接 Git 時不需要手動部署**：若在 Cloudflare 後台以 Workers Builds 連接了這個 repo，
+   每次 `docs/` 變動 (也就是每次排程更新資料) 都會自動建置並部署，私有網站會跟著更新。
+   前提是建置指令會先執行 `python cloudflare/build_worker.py` (`worker.mjs` 不在版本控制內)；
+   可在 GitHub 各 commit 的 check 狀態看到 `Workers Builds: twfin-private` 的結果。
 
 ## 驗證
 
