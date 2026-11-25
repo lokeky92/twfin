@@ -195,15 +195,17 @@ def _load_series(cur, names):
     return out
 
 
-def compute_live_backtest(conn):
+def load_inputs(conn):
+    """
+    讀取前瞻追蹤共用的輸入 (回測與規則模擬器共用)：
+    回傳 (model, snapshots, series_by_industry, bench)；沒有啟用中的模型或舊資料庫尚未建表時回傳 None。
+    """
     cur = conn.cursor()
-    base = {"available": False, "caveats": CAVEATS, "horizons": list(HORIZONS), "min_signals": MIN_SIGNALS_FOR_RATES,
-            "min_dates": MIN_DATES_FOR_IC, "benchmark": BENCHMARK_INDEX}
     try:
         cur.execute("SELECT * FROM model_governance_configs WHERE active = 1 ORDER BY created_at DESC LIMIT 1")
         model = cur.fetchone()
         if not model:
-            return base
+            return None
         th = effective_thresholds(json.loads(model["thresholds_json"]))
         cur.execute("""
             SELECT h.*, t.industry_name FROM industry_score_history h
@@ -213,7 +215,7 @@ def compute_live_backtest(conn):
         """, (model["version_id"],))
         rows = [dict(r) for r in cur.fetchall()]
     except Exception:  # noqa: BLE001 — 舊資料庫尚未建表
-        return base
+        return None
 
     snapshots = []
     for r in rows:
@@ -228,6 +230,16 @@ def compute_live_backtest(conn):
     series_all = _load_series(cur, names)
     bench = series_all.get(BENCHMARK_INDEX, {})
     series_by_industry = {iid: series_all.get(idx, {}) for iid, idx in INDUSTRY_INDEX_MAP.items()}
+    return model, snapshots, series_by_industry, bench
+
+
+def compute_live_backtest(conn):
+    base = {"available": False, "caveats": CAVEATS, "horizons": list(HORIZONS), "min_signals": MIN_SIGNALS_FOR_RATES,
+            "min_dates": MIN_DATES_FOR_IC, "benchmark": BENCHMARK_INDEX}
+    loaded = load_inputs(conn)
+    if loaded is None:
+        return base
+    model, snapshots, series_by_industry, bench = loaded
 
     snap_dates = sorted({s["snapshot_date"] for s in snapshots})
     index_dates = sorted(bench)
