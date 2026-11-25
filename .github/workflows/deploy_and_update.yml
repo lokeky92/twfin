@@ -6,9 +6,12 @@ on:
     branches: [main]
     paths: ['backend/**', 'frontend/**', 'tests/**', 'argon_multi_agent/engine/**', 'argon_multi_agent/tests/**']
   schedule:
-    # 每個交易日台灣時間 16:30 (UTC 08:30) 與 20:00 (UTC 12:00) 自動在雲端抓取 TWSE / TPEx / MOPS 最新數據並更新網站
-    - cron: '30 8 * * 1-5'
-    - cron: '0 12 * * 1-5'
+    # 每個交易日台灣時間約 16:43 (UTC 08:43) 與 20:17 (UTC 12:17) 抓取 TWSE / TPEx / MOPS 最新數據並更新網站。
+    # 刻意避開整點與半點：GitHub 在 :00 / :30 最擁擠，實測 08:30 與 12:00 的排程會延遲 60~80 分鐘。
+    # 這裡是「備援」：準時觸發由 Cloudflare Worker 的 cron 以 workflow_dispatch 負責 (見 cloudflare/README.md)，
+    # 兩者都存在時，晚到的排程會由下方的 gate job 判斷資料剛更新過而略過。每次排程的實際延遲會寫進 step summary。
+    - cron: '43 8 * * 1-5'
+    - cron: '17 12 * * 1-5'
 
 permissions:
   contents: write
@@ -24,6 +27,20 @@ env:
   DB_FILE: data/twfin_intelligence.db
 
 jobs:
+  # 排程閘門：晚到的備援排程若發現資料庫 90 分鐘內剛更新過就略過；手動 / Cloudflare 觸發 / push 一律不受影響
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.gate.outputs.skip }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EVENT_SCHEDULE: ${{ github.event.schedule }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decide whether this scheduled run is still needed
+        id: gate
+        run: python3 backend/sync_gate.py --min-gap-minutes 90
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -37,9 +54,9 @@ jobs:
           python -m unittest discover -s argon_multi_agent/tests -v
 
   sync-and-update-db:
-    needs: test
-    # push 只跑測試；排程與手動觸發才抓資料、部署
-    if: github.event_name != 'push'
+    needs: [test, gate]
+    # push 只跑測試；排程與手動觸發才抓資料、部署；gate 判定資料剛更新過時略過
+    if: github.event_name != 'push' && needs.gate.outputs.skip != 'true'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}

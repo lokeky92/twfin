@@ -2,3 +2,12 @@ name = "twfin-private"
 main = "worker.mjs"
 compatibility_date = "2026-01-01"
 workers_dev = true
+
+# 準時觸發資料同步 (UTC)：台灣時間 16:30 與 20:00，週一至週五。
+# 部署後由 Worker 的 scheduled() 呼叫 GitHub 的 workflow_dispatch；設定步驟見 cloudflare/README.md
+[triggers]
+crons = ["30 8 * * MON-FRI", "0 12 * * MON-FRI"]
+
+[vars]
+GH_REPO = "lokeky92/twfin"
+# GH_DISPATCH_TOKEN 是機密，請用 `wrangler secret put GH_DISPATCH_TOKEN` 設定，不要寫在這個檔案裡

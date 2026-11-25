@@ -165,7 +165,71 @@ function decodeHtmlResponse() {
   });
 }
 
+// ---------------------------------------------------------------------------
+// 準時排程：Cloudflare 的 cron 觸發很準時 (GitHub Actions 的 schedule 實測常延遲 60~80 分鐘)，
+// 因此由這裡在預定時間呼叫 GitHub API 的 workflow_dispatch 來啟動同步。
+// GitHub 自己的排程保留為備援，晚到時會由 workflow 的 gate job 判斷資料剛更新過而略過。
+// 需要的設定：secret GH_DISPATCH_TOKEN (僅授權此 repo 的 Actions: Read and write)、變數 GH_REPO ("owner/repo")。
+// 未設定時只會記錄訊息、不做任何事，不影響網站本身。
+// ---------------------------------------------------------------------------
+const GITHUB_API = "https://api.github.com";
+const DISPATCH_MAX_ATTEMPTS = 3;
+
+export async function dispatchSync(env, fetchFn = fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms))) {
+  const token = env.GH_DISPATCH_TOKEN || "";
+  const repo = env.GH_REPO || "";
+  if (!token || !repo) {
+    console.log("dispatchSync skipped: GH_DISPATCH_TOKEN or GH_REPO is not configured");
+    return { ok: false, skipped: true };
+  }
+  const workflow = env.GH_WORKFLOW || "deploy_and_update.yml";
+  const ref = env.GH_REF || "main";
+  const url = `${GITHUB_API}/repos/${repo}/actions/workflows/${workflow}/dispatches`;
+  const init = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "twfin-cron-dispatcher",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ref }),
+  };
+  let lastStatus = 0;
+  for (let attempt = 1; attempt <= DISPATCH_MAX_ATTEMPTS; attempt++) {
+    try {
+      const res = await fetchFn(url, init);
+      lastStatus = res.status;
+      if (res.status === 204) {
+        console.log(`dispatchSync ok (attempt ${attempt})`);
+        return { ok: true, attempts: attempt };
+      }
+      // 權杖錯誤 / 權限不足 / 找不到 workflow：重試也沒用，直接回報 (429 例外)
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+        console.error(`dispatchSync rejected with HTTP ${res.status} (check token permissions and GH_REPO)`);
+        return { ok: false, status: res.status, attempts: attempt };
+      }
+    } catch (err) {
+      lastStatus = 0;
+      console.error(`dispatchSync network error on attempt ${attempt}: ${err && err.message}`);
+    }
+    if (attempt < DISPATCH_MAX_ATTEMPTS) await sleep(2000 * attempt);
+  }
+  console.error(`dispatchSync failed after ${DISPATCH_MAX_ATTEMPTS} attempts (last status ${lastStatus})`);
+  return { ok: false, status: lastStatus, attempts: DISPATCH_MAX_ATTEMPTS };
+}
+
 export default {
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(
+      dispatchSync(env).then((r) => {
+        // 失敗時丟出錯誤，Cloudflare 後台會把這次 cron 標示為失敗，容易被發現
+        if (!r.ok && !r.skipped) throw new Error(`workflow dispatch failed (status ${r.status})`);
+      })
+    );
+  },
+
   async fetch(request, env) {
     const url = new URL(request.url);
     const passcodeSecret = env.ACCESS_PASSCODE || "";
