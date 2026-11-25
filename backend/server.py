@@ -24,6 +24,7 @@ from scoring import (
     classify_alert_level,
     compute_weighted_total,
     parse_weights,
+    sensitivity_analysis,
     validate_thresholds,
 )
 from seed_and_engine import seed_and_compute_all
@@ -401,6 +402,7 @@ def _build_dashboard_base():
         "generated_at": now_tw().strftime("%Y-%m-%d %H:%M:%S (UTC+8)"),
         "data_provenance": provenance,
         "active_model": active_model,
+        "weight_sensitivity": sensitivity_analysis(industries, active_model["weights"], active_model["thresholds"]),
         "macro_latest": list(macro_latest.values()),
         "macro_series": macro_series,
         "asset_flows": asset_flows,

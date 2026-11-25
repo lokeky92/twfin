@@ -203,6 +203,7 @@ function renderAll() {
   renderMacroCards();
   renderAssetFlows();
   renderIndustryTable();
+  renderWeightSensitivity();
   renderInstiFlows();
   renderWarnings();
   renderCompanies();
