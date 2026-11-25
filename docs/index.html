@@ -1745,7 +1745,7 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
         <button class="next-step" style="--ns-accent:#c084fc;" onclick="setAppMode('C')">
           <div class="ns-kicker">第三層 ➔</div>
           <div class="ns-title">專業數據、回測與治理</div>
-          <div class="ns-desc">1,989 家上市櫃原始數據、91 樣本回測、固定報告與權重設定</div>
+          <div class="ns-desc">1,989 家上市櫃原始數據、前瞻追蹤回測、固定報告與權重設定</div>
         </button>
         <button class="next-step" style="--ns-accent:#fbbf24;" onclick="setAppMode('ETF')">
           <div class="ns-kicker">ETF ➔</div>
@@ -1810,13 +1810,13 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
 
     <!-- =====================================================================
          【第三層：專業數據、回測驗證與模型治理中心 (Layer 3: Professional Data & Governance)】
-         保留 100% 原始數據表、1,989家檢索、權重與門檻動態調整、91樣本回測、固定研究報告與資料字典
+         保留 100% 原始數據表、1,989家檢索、權重與門檻動態調整、前瞻追蹤回測、固定研究報告與資料字典
          ===================================================================== -->
     <div id="proResearchSection" style="display:none; margin-top: 10px;">
       <div class="layer-hero" style="--hero-accent:#a855f7;">
         <div>
           <div class="lh-title"><span class="badge badge-lvl2">第三層</span>專業數據與模型治理</div>
-          <div class="lh-sub">SQLite 原生資料表、1,989 家上市櫃檢索、五維權重／門檻動態重算、Point-in-Time 回測與資料字典</div>
+          <div class="lh-sub">SQLite 原生資料表、1,989 家上市櫃檢索、五維權重／門檻動態重算、前瞻追蹤回測與資料字典</div>
         </div>
         <div class="lh-actions">
           <button class="btn btn-outline btn-sm" onclick="setAppMode('A')">⬅ 動態經濟地圖</button>
@@ -1833,7 +1833,7 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
         <div class="pro-tab" onclick="switchProTab('pro-macro', this)"><span class="pt-no">06</span>總體與國際指標</div>
         <div class="pro-tab" onclick="switchProTab('pro-scenarios', this)"><span class="pt-no">07</span>情境分析</div>
         <div class="pro-tab" onclick="switchProTab('pro-reports', this)"><span class="pt-no">08</span>固定研究報告</div>
-        <div class="pro-tab" onclick="switchProTab('pro-backtest', this)"><span class="pt-no">09</span>樣本外回測</div>
+        <div class="pro-tab" onclick="switchProTab('pro-backtest', this)"><span class="pt-no">09</span>前瞻追蹤回測</div>
         <div class="pro-tab" onclick="switchProTab('pro-governance', this)"><span class="pt-no">10</span>資料品質與治理</div>
       </nav>
 
@@ -2072,8 +2072,15 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
         <div id="reportsContainer"></div>
       </section>
 
-      <!-- PRO TAB 9: 樣本外回測驗證 -->
+      <!-- PRO TAB 9: 前瞻追蹤回測 (真實計算) + 舊版示範回測 (手寫數據，預設收合) -->
       <section id="pro-backtest" class="pro-panel">
+        <div id="liveBacktestContainer"></div>
+        <details class="card" style="margin-top:16px; border-left:4px solid #fb7185;">
+          <summary style="cursor:pointer; font-weight:700; color:#fda4af;">⚠️ 舊版「示範回測」（手寫數據，非實測）— 請勿當成模型有效的證據</summary>
+          <p style="font-size:12.5px; color:var(--text-secondary); margin:8px 0;">
+            下面的命中率、超額報酬與 8 筆事件，是直接寫在程式碼裡的示範內容，並非由歷史資料計算而來
+            （且摘要的「91 樣本、21 次訊號」與事件表的 8 筆本身就對不起來）。保留僅供參考版面與欄位設計，不應用來評估模型。
+          </p>
         <div id="backtestSummaryContainer"></div>
         <div class="card" style="margin-top: 16px; overflow-x:auto;">
           <div class="card-title" style="margin-bottom: 10px;">PART 8：Point-in-Time 歷史預警訊號逐筆驗證明細（零未來資料洩漏）</div>
@@ -2093,6 +2100,7 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
             <tbody id="backtestEventsBody"></tbody>
           </table>
         </div>
+        </details>
       </section>
 
       <!-- PRO TAB 10: 資料品質SLA、來源與資料字典 -->
@@ -2998,6 +3006,7 @@ function renderAll() {
   renderScenarios();
   renderReports();
   renderBacktest();
+  renderLiveBacktest();
   renderGovernance();
   renderEtfDecisionCenter();
   updateQuickJumpBar(APP_MODE);
@@ -4787,7 +4796,7 @@ function renderBacktest() {
           <div class="card-title" style="font-size:16px;">第五階段：時間序列滾動樣本外回測與三大基準模型對照 (${bt.run_id})</div>
           <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">回測區間：${bt.backtest_window} ｜ 模型版本：${bt.model_version} ｜ 單邊交易摩擦成本假設：${bt.cost_assumption_bps} bps</div>
         </div>
-        <span class="badge badge-lvl4">Point-in-Time 零未來資料洩漏驗證通過</span>
+        <span class="badge badge-lvlR">示範數據 (非實測)</span>
       </div>
       <div class="grid-4" style="margin-top:12px; margin-bottom:12px;">
         <div style="background:#090e1a; padding:12px; border-radius:6px;">
@@ -7655,6 +7664,96 @@ function exportIndustriesPng() {
     if (!blob) { alert('圖片產生失敗，請改用 CSV 匯出。'); return; }
     downloadBlob(exportFilename('industry_ranking', 'png'), blob);
   }, 'image/png');
+}
+
+/* =========================================================================
+   前瞻追蹤回測 (Live out-of-sample tracking)
+   資料由後端 backtest.compute_live_backtest() 產生 (STATE.live_backtest)，全部由資料庫計算，沒有手寫數字。
+   模型分數的歷史無法事後重建，所以只統計「快照日之後」實際發生的行情；累積期間會明確顯示進度與樣本不足。
+   ========================================================================= */
+function renderLiveBacktest() {
+  const box = document.getElementById('liveBacktestContainer');
+  if (!box) return;
+  const lb = STATE && STATE.live_backtest;
+  if (!lb || !lb.available) {
+    box.innerHTML = '<div class="card"><div class="card-title">前瞻追蹤回測</div><div style="color:var(--text-secondary);">尚無評分快照資料，累積後才會顯示。</div></div>';
+    return;
+  }
+  const names = {};
+  (STATE.industries || []).forEach(i => { names[i.industry_id] = i.industry_name; });
+  const fmtPct = (v) => v == null ? '—' : `<span class="${v >= 0 ? 'pos' : 'neg'}">${v >= 0 ? '+' : ''}${v}%</span>`;
+
+  const statusBadge = lb.any_matured
+    ? '<span class="badge badge-grade-B">已有成熟訊號</span>'
+    : '<span class="badge badge-grade-C">累積中：尚無成熟樣本</span>';
+
+  const progress = lb.horizon_results.map(h => {
+    const needed = h.horizon + 1;
+    const have = Math.min(needed, lb.index_trading_days_after_first_snapshot);
+    const pct = Math.round(100 * have / needed);
+    const state = h.matured_signals
+      ? `已成熟 ${h.matured_signals} 筆，尚待 ${h.pending_signals} 筆`
+      : `還需約 ${h.trading_days_needed} 個交易日才會有第一筆結果`;
+    return `<div style="margin:6px 0;">
+      <div style="display:flex; justify-content:space-between; font-size:12.5px;"><span><strong>${h.horizon} 個交易日</strong>觀察期</span><span style="color:var(--text-secondary);">${state}</span></div>
+      <div style="height:8px; background:rgba(255,255,255,.08); border-radius:4px; overflow:hidden;"><div style="height:100%; width:${pct}%; background:#38bdf8;"></div></div>
+    </div>`;
+  }).join('');
+
+  const results = lb.horizon_results.filter(h => h.matured_signals > 0).map(h => {
+    const levelRows = h.levels.map(l => `<tr>
+        <td><span class="badge ${l.level === 'LEVEL R' ? 'badge-lvlR' : 'badge-grade-B'}">${esc(l.level)}</span></td>
+        <td>${l.n}</td><td>${fmtPct(l.mean_rel_pct)}</td>
+        <td>${l.hit_rate_pct == null ? '—' : l.hit_rate_pct + '%'}<div style="font-size:11px; color:var(--text-secondary);">${esc(l.hit_definition || '不計命中率')}</div></td>
+      </tr>`).join('');
+    const warn = (!h.enough_for_rates || !h.enough_for_ic)
+      ? `<div class="evidence-box invalid" style="margin:8px 0;"><strong>樣本不足，僅供觀察，不是結論：</strong>
+          命中率至少需要 ${lb.min_signals} 筆成熟訊號 (目前 ${h.levels.filter(l => l.level === 'LEVEL 3' || l.level === 'LEVEL 4' || l.level === 'LEVEL R').reduce((a, l) => a + l.n, 0)} 筆)，
+          IC 至少需要 ${lb.min_dates} 個快照日 (目前 ${h.ic ? h.ic.dates : 0} 天)。</div>` : '';
+    const ic = h.ic
+      ? `平均 IC <strong>${h.ic.mean}</strong>（${h.ic.dates} 個快照日，其中 ${h.ic.positive_pct}% 為正；0 代表沒有預測力）`
+      : '截面 IC：資料不足 (每個快照日需要至少 8 個產業已成熟)';
+    const spread = h.top_bottom_spread_pct == null ? '' : `｜總分前 3 名 vs 後 3 名的平均超額報酬差 ${fmtPct(h.top_bottom_spread_pct)}（${h.spread_dates} 天）`;
+    return `<div style="margin-top:14px;">
+      <div style="font-weight:700;">${h.horizon} 個交易日後：${h.matured_signals} 筆成熟訊號（${h.matured_dates} 個快照日）</div>
+      ${warn}
+      <table><thead><tr><th>預警等級</th><th>筆數</th><th>平均超額報酬</th><th>命中率</th></tr></thead><tbody>${levelRows}</tbody></table>
+      <div style="font-size:12.5px; margin-top:6px;">${ic}${spread}</div>
+    </div>`;
+  }).join('');
+
+  const emptyState = lb.any_matured ? '' : `
+    <div class="evidence-box" style="margin:10px 0;">
+      目前還沒有任何一筆訊號走完觀察期，所以<strong>沒有命中率、IC 或超額報酬可以顯示</strong>，這是刻意的：系統不會用事後重建或手寫的數字替代。
+      每天排程都會累積一份評分快照；最早的快照日是 ${esc(lb.first_snapshot || '—')}，之後每多一個交易日，進度就會前進。
+      預期 5 日結果最先出現，統計上有意義的結論通常要累積 2～3 個月。
+    </div>`;
+
+  const mapRows = lb.mapping.map(m => `<tr><td>${esc(names[m.industry_id] || m.industry_id)}</td><td>${esc(m.index_name)}</td><td>${m.index_points}</td></tr>`).join('');
+
+  box.innerHTML = `
+    <div class="card" style="border-left:4px solid var(--accent-blue);">
+      <div class="card-header">
+        <div>
+          <div class="card-title" style="font-size:16px;">前瞻追蹤回測（只統計快照日之後實際發生的行情）</div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">
+            模型 ${esc(lb.model_version)}｜已累積 ${lb.snapshot_days} 個快照日（${esc(lb.first_snapshot || '—')} ～ ${esc(lb.last_snapshot || '—')}）｜類股指數最新資料 ${esc(lb.index_last_date || '—')}
+          </div>
+        </div>
+        ${statusBadge}
+      </div>
+      <div style="margin:10px 0;">${progress}</div>
+      ${emptyState}
+      ${results}
+      <details style="margin-top:12px;">
+        <summary style="cursor:pointer; font-weight:600;">每個產業用哪條指數檢驗（近似對應，基準：${esc(lb.benchmark)}）</summary>
+        <div style="overflow-x:auto;"><table><thead><tr><th>產業</th><th>對照的類股報酬指數</th><th>已累積資料點</th></tr></thead><tbody>${mapRows}</tbody></table></div>
+      </details>
+      <details style="margin-top:8px;" open>
+        <summary style="cursor:pointer; font-weight:600;">方法與限制</summary>
+        <ul style="font-size:12.5px; color:var(--text-secondary); margin:6px 0 0 18px;">${lb.caveats.map(c => `<li>${esc(c)}</li>`).join('')}</ul>
+      </details>
+    </div>`;
 }
 </script>
 </body>
