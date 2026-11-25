@@ -60,6 +60,24 @@ function exportMetaColumns() {
   ];
 }
 
+/* ---------- 敏感度資料：把權重與門檻敏感度依產業編號合併 (純函式) ---------- */
+function joinSensitivity(state) {
+  const out = {};
+  const ws = state && state.weight_sensitivity;
+  const ts = state && state.threshold_sensitivity;
+  if (ws && ws.available) ws.industries.forEach(x => { (out[x.industry_id] = out[x.industry_id] || {}).w = x; });
+  if (ts && ts.available) ts.industries.forEach(x => { (out[x.industry_id] = out[x.industry_id] || {}).t = x; });
+  return out;
+}
+
+function sensitivitySettingText(state) {
+  const ws = state && state.weight_sensitivity, ts = state && state.threshold_sensitivity;
+  const parts = [];
+  if (ws && ws.available) parts.push(`權重±${ws.delta_pct}%(${ws.scenario_count}種情境)`);
+  if (ts && ts.available) parts.push(`門檻±${ts.delta_points}分(${ts.scenario_count}種情境)`);
+  return parts.join('；');
+}
+
 /* ---------- CSV：產業排行 ---------- */
 function exportIndustriesCsv() {
   const list = getVisibleIndustries();
@@ -69,6 +87,13 @@ function exportIndustriesCsv() {
     return { ind, rank: rated ? ++rank : null };
   });
   const agg = (r, k) => (r.ind.live_agg ? r.ind.live_agg[k] : null);
+  const sens = joinSensitivity(STATE);
+  const sw = (r, k) => { const x = sens[r.ind.industry_id]; return x && x.w ? x.w[k] : null; };
+  const st = (r, k) => { const x = sens[r.ind.industry_id]; return x && x.t ? x.t[k] : null; };
+  const thLabel = (key) => {
+    const hit = ((STATE.threshold_sensitivity || {}).by_threshold || []).find(b => b.threshold_key === key);
+    return hit ? hit.label : key;
+  };
   const columns = [
     { label: '排名', value: r => r.rank },
     { label: '產業', value: r => r.ind.industry_name },
@@ -99,6 +124,19 @@ function exportIndustriesCsv() {
     { label: '反方證據', value: r => r.ind.counter_evidence },
     { label: '失效條件', value: r => r.ind.invalidation_conditions },
     { label: '資料限制', value: r => r.ind.data_limitations },
+    // 敏感度：結論有多依賴權重與門檻的主觀設定 (名次為「全部產業」中的名次，與上方依目前排序的排名可能不同)
+    { label: '基準名次(全部產業)', value: r => sw(r, 'base_rank') },
+    { label: '權重擾動最佳名次', value: r => sw(r, 'min_rank') },
+    { label: '權重擾動最差名次', value: r => sw(r, 'max_rank') },
+    { label: '權重擾動進入前三名機率(%)', value: r => sw(r, 'top3_pct') },
+    { label: '權重擾動預警等級變動機率(%)', value: r => sw(r, 'level_change_pct') },
+    { label: '權重敏感度穩定度', value: r => sw(r, 'stability') },
+    { label: '目前預警等級', value: r => st(r, 'base_level') },
+    { label: '距最近預警門檻(分)', value: r => st(r, 'margin_points') },
+    { label: '最近預警門檻', value: r => (st(r, 'nearest_threshold') ? thLabel(st(r, 'nearest_threshold')) : null) },
+    { label: '門檻擾動預警等級變動機率(%)', value: r => st(r, 'level_change_pct') },
+    { label: '門檻敏感度穩定度', value: r => st(r, 'stability') },
+    { label: '敏感度設定', value: () => sensitivitySettingText(STATE) },
   ].concat(exportMetaColumns());
   downloadCsv('industry_ranking', columns, ranked);
 }
@@ -186,13 +224,19 @@ function truncateToWidth(ctx, text, maxWidth) {
   return t + '…';
 }
 
+const EXPORT_STABILITY_COLORS = { '穩定': '#34d399', '中等': '#fbbf24', '不穩定': '#fb7185' };
+
 function exportIndustriesPng() {
   const list = getVisibleIndustries();
   const rated = list.filter(i => !(i.total_weighted_score === null || i.rotation_state === 'INSUFFICIENT_DATA'));
   const unrated = list.filter(i => !rated.includes(i));
   if (!list.length) { alert('目前沒有可匯出的資料（請檢查篩選條件）。'); return; }
+  const sens = joinSensitivity(STATE);
+  const hasSens = rated.some(i => sens[i.industry_id] && (sens[i.industry_id].w || sens[i.industry_id].t));
 
-  const W = 1200, PAD = 40, ROW_H = 54, HEAD_H = 130, FOOT_H = 120 + (unrated.length ? 28 : 0);
+  const W = hasSens ? 1560 : 1200, PAD = 40, ROW_H = 54, HEAD_H = 150;
+  const NOTE_LINES = hasSens ? 3 : 2;
+  const FOOT_H = 70 + NOTE_LINES * 24 + (unrated.length ? 28 : 0);
   const H = HEAD_H + rated.length * ROW_H + FOOT_H;
   const scale = 2;   // 固定 2 倍解析度，分享時文字才清楚
   const canvas = document.createElement('canvas');
@@ -219,8 +263,26 @@ function exportIndustriesPng() {
   const catSel = document.getElementById('rotationCatFilter').value;
   ctx.fillText(`範圍：${catSel === 'ALL' ? '全部產業' : catSel}　｜　綜合加權總分 (0~100)`, PAD, 108);
 
+  // 欄位 (含敏感度) 的 x 座標
+  const nameX = PAD + 60, barX = 470, barW = hasSens ? 400 : 520;
+  const scoreX = barX + barW + 16, stateX = scoreX + 62;
+  // 「狀態」欄約佔 stateX 起算 80px，名次範圍欄要留出空隙以免重疊
+  const rangeX = 1050, levelX = 1170, wStabX = 1340, tStabX = 1450;
+
+  // 欄位標題
+  ctx.fillStyle = '#6f84a8';
+  ctx.font = `600 13px ${EXPORT_FONT}`;
+  const headY = HEAD_H - 16;
+  ctx.fillText('產業', nameX, headY);
+  ctx.fillText('綜合總分', barX, headY);
+  if (hasSens) {
+    ctx.fillText('權重±擾動名次', rangeX, headY);
+    ctx.fillText('預警等級 / 距門檻', levelX, headY);
+    ctx.fillText('權重穩定度', wStabX, headY);
+    ctx.fillText('門檻穩定度', tStabX, headY);
+  }
+
   // 排行列
-  const nameX = PAD + 60, barX = 470, barW = 520, scoreX = barX + barW + 16;
   rated.forEach((ind, i) => {
     const y = HEAD_H + i * ROW_H;
     if (i % 2 === 0) { ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fillRect(PAD - 12, y, W - 2 * PAD + 24, ROW_H); }
@@ -242,18 +304,62 @@ function exportIndustriesPng() {
     ctx.fillText(ind.total_weighted_score.toFixed(1), scoreX, cy);
     ctx.fillStyle = color;
     ctx.font = `600 14px ${EXPORT_FONT}`;
-    ctx.fillText('狀態 ' + ind.rotation_state, scoreX + 62, cy);
+    ctx.fillText('狀態 ' + ind.rotation_state, stateX, cy);
+
+    if (!hasSens) return;
+    const s = sens[ind.industry_id] || {};
+    // 名次範圍：基準名次與擾動後最佳~最差名次
+    if (s.w) {
+      ctx.fillStyle = '#e8eefb';
+      ctx.font = `600 16px ${EXPORT_FONT}`;
+      const rng = s.w.min_rank === s.w.max_rank ? `${s.w.base_rank}` : `${s.w.min_rank} – ${s.w.max_rank}`;
+      ctx.fillText(`#${s.w.base_rank}`, rangeX, cy - 9);
+      ctx.fillStyle = '#9aabc6';
+      ctx.font = `400 13px ${EXPORT_FONT}`;
+      ctx.fillText(`範圍 ${rng}`, rangeX, cy + 11);
+    }
+    // 預警等級與距最近門檻
+    if (s.t) {
+      ctx.fillStyle = '#e8eefb';
+      ctx.font = `600 16px ${EXPORT_FONT}`;
+      ctx.fillText(s.t.base_level || '—', levelX, cy - 9);
+      ctx.fillStyle = s.t.margin_points <= (STATE.threshold_sensitivity.delta_points || 0) ? '#fbbf24' : '#9aabc6';
+      ctx.font = `400 13px ${EXPORT_FONT}`;
+      ctx.fillText(`距門檻 ${s.t.margin_points} 分`, levelX, cy + 11);
+    }
+    // 穩定度標籤
+    const pill = (label, x) => {
+      if (!label) return;
+      const col = EXPORT_STABILITY_COLORS[label] || '#9aabc6';
+      ctx.font = `700 14px ${EXPORT_FONT}`;
+      const tw = ctx.measureText(label).width + 22;
+      ctx.fillStyle = col + '26';
+      ctx.fillRect(x, cy - 12, tw, 24);
+      ctx.strokeStyle = col + '88';
+      ctx.strokeRect(x + 0.5, cy - 11.5, tw - 1, 23);
+      ctx.fillStyle = col;
+      ctx.fillText(label, x + 11, cy);
+    };
+    pill(s.w && s.w.stability, wStabX);
+    pill(s.t && s.t.stability, tStabX);
   });
 
   // 頁尾
   let fy = HEAD_H + rated.length * ROW_H + 24;
   ctx.font = `400 13px ${EXPORT_FONT}`;
+  ctx.fillStyle = '#9aabc6';
   if (unrated.length) {
-    ctx.fillStyle = '#9aabc6';
     ctx.fillText('不可評分（資料不足，依規不予補分）：' + unrated.map(i => i.industry_name).join('、'), PAD, fy);
     fy += 28;
   }
-  ctx.fillStyle = '#9aabc6';
+  if (hasSens) {
+    const ws = STATE.weight_sensitivity || {}, ts = STATE.threshold_sensitivity || {};
+    ctx.fillText(`敏感度：權重 ±${ws.delta_pct}%（${ws.scenario_count} 種情境）後的最佳~最差名次；門檻 ±${ts.delta_points} 分（${ts.scenario_count} 種情境）後預警等級的變動機率。` +
+      '穩定 = 變動機率低於 10%，不穩定 = 30% 以上。', PAD, fy);
+    fy += 24;
+    ctx.fillText('名次與預警等級落在「中等／不穩定」的產業，其結論主要取決於權重或門檻的主觀設定，解讀時應更保守。', PAD, fy);
+    fy += 24;
+  }
   ctx.fillText('資料來源：證交所 TWSE / 櫃買中心 TPEx / 公開資訊觀測站 MOPS 官方 OpenAPI。', PAD, fy);
   ctx.fillText('部分子分數（成長性、基本面等）含內建種子參考資料，並非全部即時更新。本圖僅供研究參考，不構成投資建議。', PAD, fy + 24);
 

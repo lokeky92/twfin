@@ -189,6 +189,98 @@ class TestProposalStateMachineParity(unittest.TestCase):
                     self.assertEqual(js[f"{status}|{decision}"], expected, f"{status} + {decision}")
 
 
+SENS_DRIVER = r"""
+const fs = require('fs'), vm = require('vm');
+const code = fs.readFileSync(process.argv[1], 'utf8');
+
+const WS = { available: true, delta_pct: 5.0, scenario_count: 510, industries: [
+  { industry_id: 'A', base_rank: 2, min_rank: 1, max_rank: 3, top3_pct: 80.5, level_change_pct: 12.5, stability: '中等' }] };
+const TS = { available: true, delta_points: 2.0, scenario_count: 508,
+  by_threshold: [{ threshold_key: 'lvl4_min', label: 'LEVEL 4 總分門檻' }],
+  industries: [{ industry_id: 'A', base_level: 'LEVEL 4', margin_points: 0.35, nearest_threshold: 'lvl4_min',
+    level_change_pct: 41.1, stability: '不穩定' }] };
+const IND_A = { industry_id: 'A', industry_name: '產業A', major_category: '科技', rotation_state: 'B', total_weighted_score: 80.5 };
+const IND_U = { industry_id: 'U', industry_name: '不可評分', major_category: '其他', rotation_state: 'INSUFFICIENT_DATA', total_weighted_score: null };
+
+async function run(state) {
+  let cap = null;
+  const ctx = { console, Blob, STATE: state, alert: () => {},
+    document: { getElementById: () => ({ value: 'ALL' }) },
+    getVisibleIndustries: () => [IND_A, IND_U] };
+  vm.createContext(ctx);
+  vm.runInContext(code, ctx);
+  vm.runInContext('downloadBlob = function (n, b) { __cap = { n: n, b: b }; }', ctx);
+  vm.runInContext('exportIndustriesCsv()', ctx);
+  const c = vm.runInContext('__cap', ctx);
+  return { name: c.n, text: await c.b.text(), join: vm.runInContext('joinSensitivity(STATE)', ctx) };
+}
+
+(async () => {
+  const base = { generated_at: '2026-11-26 10:00:00', active_model: { version_id: 'v1' } };
+  const out = {};
+  out.full = await run({ ...base, weight_sensitivity: WS, threshold_sensitivity: TS });
+  out.none = await run({ ...base });
+  console.log(JSON.stringify(out));
+})();
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過敏感度匯出測試")
+class TestSensitivityInExports(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", SENS_DRIVER, os.path.join(JS_DIR, "20-export.js")],
+                           capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    @staticmethod
+    def _rows(text):
+        import csv
+        import io
+        return list(csv.DictReader(io.StringIO(text.lstrip("﻿"))))
+
+    def test_join_merges_weight_and_threshold_by_industry(self):
+        j = self.o["full"]["join"]
+        self.assertEqual(set(j), {"A"})
+        self.assertEqual(j["A"]["w"]["base_rank"], 2)
+        self.assertEqual(j["A"]["t"]["base_level"], "LEVEL 4")
+
+    def test_csv_has_sensitivity_columns_with_values(self):
+        rows = {r["產業"]: r for r in self._rows(self.o["full"]["text"])}
+        a = rows["產業A"]
+        self.assertEqual(a["基準名次(全部產業)"], "2")
+        self.assertEqual((a["權重擾動最佳名次"], a["權重擾動最差名次"]), ("1", "3"))
+        self.assertEqual(a["權重擾動進入前三名機率(%)"], "80.5")
+        self.assertEqual(a["權重敏感度穩定度"], "中等")
+        self.assertEqual(a["目前預警等級"], "LEVEL 4")
+        self.assertEqual(a["距最近預警門檻(分)"], "0.35")
+        self.assertEqual(a["最近預警門檻"], "LEVEL 4 總分門檻")      # 顯示名稱而不是內部代號
+        self.assertEqual(a["門檻擾動預警等級變動機率(%)"], "41.1")
+        self.assertEqual(a["門檻敏感度穩定度"], "不穩定")
+        self.assertEqual(a["敏感度設定"], "權重±5%(510種情境)；門檻±2分(508種情境)")
+
+    def test_unrated_industry_has_empty_sensitivity_cells(self):
+        u = {r["產業"]: r for r in self._rows(self.o["full"]["text"])}["不可評分"]
+        for col in ("基準名次(全部產業)", "權重敏感度穩定度", "距最近預警門檻(分)", "門檻敏感度穩定度"):
+            self.assertEqual(u[col], "", col)
+
+    def test_export_still_works_without_sensitivity_payload(self):
+        rows = self._rows(self.o["none"]["text"])
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["權重敏感度穩定度"], "")
+        self.assertEqual(rows[0]["敏感度設定"], "")
+        self.assertEqual(rows[0]["資料基準時間"], "2026-11-26 10:00:00")
+        self.assertEqual(self.o["none"]["join"], {})
+
+    def test_existing_columns_unchanged_and_meta_columns_stay_last(self):
+        header = list(self._rows(self.o["full"]["text"])[0].keys())
+        self.assertEqual(header[0], "排名")
+        self.assertEqual(header[-2:], ["資料基準時間", "模型版本"])
+        self.assertEqual(len(header), len(set(header)))
+
+
 class TestInlineHandlersDefined(unittest.TestCase):
     ALLOWED = {"alert", "confirm", "parseInt", "parseFloat", "String", "Number", "Boolean"}
 
