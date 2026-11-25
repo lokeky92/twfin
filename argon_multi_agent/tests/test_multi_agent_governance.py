@@ -221,7 +221,9 @@ class TestArgonMultiAgentGovernance(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)), "提案編號重複")
         pending_dir = os.path.join(os.environ["TWFIN_MA_ROOT"], "proposals", "pending")
         impl_dir = os.path.join(os.environ["TWFIN_MA_ROOT"], "proposals", "implemented")
-        both = {f for f in os.listdir(pending_dir) if f.endswith(".json")} &                {f for f in os.listdir(impl_dir) if f.endswith(".json")}
+        pending_files = {f for f in os.listdir(pending_dir) if f.endswith(".json")}
+        impl_files = {f for f in os.listdir(impl_dir) if f.endswith(".json")}
+        both = pending_files & impl_files
         by_id = {p["proposal_id"]: p for p in proposals}
         for fname in both:
             self.assertEqual(by_id[fname[:-5]]["status"], "IMPLEMENTED_ON_BRANCH")

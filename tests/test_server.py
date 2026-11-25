@@ -68,7 +68,16 @@ class TestServerAPI(unittest.TestCase):
         self.assertFalse(data["data_provenance"]["live_data_available"])
 
     def test_static_assets_served(self):
-        status, _ = self._get("/assets/app.js")
+        # index.html 引用的每一支腳本都必須能被伺服器取得 (拆檔後漏列或打錯檔名會在這裡失敗)
+        import re
+        _, html = self._get("/")
+        scripts = re.findall(r'<script src="([^"]+)"></script>', html.decode("utf-8"))
+        self.assertGreater(len(scripts), 1)
+        for rel in scripts:
+            status, body = self._get("/" + rel)
+            self.assertEqual(status, 200, rel)
+            self.assertGreater(len(body), 0, rel)
+        status, _ = self._get("/assets/app.css")
         self.assertEqual(status, 200)
 
     def test_write_requires_token(self):
@@ -119,7 +128,7 @@ class TestServerAPI(unittest.TestCase):
         payload["injection_probe"] = "</script><script>alert(1)</script>"
         html = build_bundle(payload)
         self.assertNotIn('href="assets/app.css"', html)
-        self.assertNotIn('src="assets/app.js"', html)
+        self.assertNotIn('src="assets/', html)
         self.assertIn('id="twfin-snapshot"', html)
         self.assertNotIn("</script><script>alert(1)", html)
 
