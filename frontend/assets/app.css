@@ -1519,3 +1519,10 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
   /* 表格一律可橫向捲動，不撐破版面 */
   table { max-width: 100%; }
 }
+
+/* 匯出列 */
+.export-bar {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  margin: 0 0 12px 0; font-size: 12.5px; color: var(--text-secondary);
+}
+.export-btn { white-space: nowrap; }

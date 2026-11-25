@@ -351,6 +351,7 @@
             </p>
           </div>
         </div>
+        <div class="export-bar" role="group" aria-label="匯出產業排行"><span>匯出目前畫面（含篩選與排序）：</span><button class="btn btn-outline btn-sm export-btn" onclick="exportIndustriesCsv()" title="匯出產業排行與五維分數、證據為 CSV">⬇ CSV (Excel)</button><button class="btn btn-outline btn-sm export-btn" onclick="exportIndustriesPng()" title="產生可分享的排行榜圖片">🖼 排行榜圖片 (PNG)</button></div>
         <div id="weightSensitivityCard" class="card" style="display:none; margin-bottom:12px;"></div>
         <div id="industryRotationTableWrap" class="card" style="overflow-x:auto;">
           <table>
@@ -416,7 +417,7 @@
         <div class="card" style="margin-top: 18px; overflow-x:auto;">
           <div class="card-title" style="margin-bottom: 10px;">全市場上市櫃公司 Live OpenAPI 營收、估值(P/E、P/B、殖利率)與三大法人買賣超檢索表</div>
           <div style="margin-bottom: 10px;">
-            <input type="text" id="liveCompanySearch" aria-label="搜尋上市櫃公司" placeholder="輸入股票代號、公司名稱或產業關鍵字即時篩選..." style="width:360px;" oninput="renderLiveTopCompanies()" />
+            <input type="text" id="liveCompanySearch" aria-label="搜尋上市櫃公司" placeholder="輸入股票代號、公司名稱或產業關鍵字即時篩選..." style="width:360px;" oninput="renderLiveTopCompanies()" /> <button class="btn btn-outline btn-sm export-btn" onclick="exportLiveCompaniesCsv()" title="匯出目前搜尋結果 (營收前段班公司)">⬇ CSV</button>
           </div>
           <table>
             <thead>
@@ -461,7 +462,7 @@
             <option value="LEVEL 2">LEVEL 2：多項指標改善 / 市場尚未反映</option>
             <option value="LEVEL 1">LEVEL 1：初步觀察</option>
             <option value="LEVEL R">LEVEL R：資金撤退或基本面惡化風險</option>
-          </select>
+          </select> <button class="btn btn-outline btn-sm export-btn" onclick="exportWarningsCsv()" title="匯出目前篩選的預警清單">⬇ CSV</button>
         </div>
         <div id="warningsContainer"></div>
       </section>
@@ -476,7 +477,7 @@
             <option value="WEEKLY">每週變化 (Weekly)</option>
             <option value="MONTHLY">每月變化 (Monthly)</option>
             <option value="QUARTERLY">每季變化 (Quarterly)</option>
-          </select>
+          </select> <button class="btn btn-outline btn-sm export-btn" onclick="exportInstiCsv()" title="匯出目前週期的三大法人買賣超">⬇ CSV</button>
         </div>
         <div class="card" style="overflow-x:auto;">
           <table>
@@ -926,5 +927,6 @@
   <script src="assets/js/17-main.js"></script>
   <script src="assets/js/18-weight-sensitivity.js"></script>
   <script src="assets/js/19-a11y.js"></script>
+  <script src="assets/js/20-export.js"></script>
 </body>
 </html>

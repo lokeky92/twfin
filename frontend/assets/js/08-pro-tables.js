@@ -89,18 +89,23 @@ function renderAssetFlows() {
   `).join('');
 }
 
-function renderIndustryTable() {
+// 畫面目前顯示的產業清單 (依「排序基準」與「產業大類」篩選)；匯出功能也使用同一份，確保所見即所得
+function getVisibleIndustries() {
   const sortKey = document.getElementById('rotationSortMode').value;
   const catFilter = document.getElementById('rotationCatFilter').value;
-  const tbody = document.getElementById('industryRotationBody');
-
-  let list = STATE.industries.filter(ind => catFilter === 'ALL' || ind.major_category === catFilter);
+  const list = STATE.industries.filter(ind => catFilter === 'ALL' || ind.major_category === catFilter);
   list.sort((a, b) => {
     if (a.total_weighted_score === null && b.total_weighted_score === null) return 0;
     if (a.total_weighted_score === null) return 1;
     if (b.total_weighted_score === null) return -1;
     return (b[sortKey] || 0) - (a[sortKey] || 0);
   });
+  return list;
+}
+
+function renderIndustryTable() {
+  const tbody = document.getElementById('industryRotationBody');
+  const list = getVisibleIndustries();
 
   let rankCounter = 1;
   tbody.innerHTML = list.map(ind => {
