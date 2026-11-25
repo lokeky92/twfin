@@ -213,6 +213,19 @@ class TestArgonMultiAgentGovernance(unittest.TestCase):
             self.assertEqual(tot, 28)
             self.assertEqual(rows_len, 28)
 
+    def test_09_proposal_ids_unique_and_final_state_wins(self):
+        """同一提案編號同時存在於 pending 與 implemented 時，只能出現一次，且以 implemented 為準"""
+        from argon_multi_agent.engine.multi_agent_orchestrator import get_multi_agent_state
+        proposals = get_multi_agent_state()["phase6_proposals"]
+        ids = [p["proposal_id"] for p in proposals]
+        self.assertEqual(len(ids), len(set(ids)), "提案編號重複")
+        pending_dir = os.path.join(os.environ["TWFIN_MA_ROOT"], "proposals", "pending")
+        impl_dir = os.path.join(os.environ["TWFIN_MA_ROOT"], "proposals", "implemented")
+        both = {f for f in os.listdir(pending_dir) if f.endswith(".json")} &                {f for f in os.listdir(impl_dir) if f.endswith(".json")}
+        by_id = {p["proposal_id"]: p for p in proposals}
+        for fname in both:
+            self.assertEqual(by_id[fname[:-5]]["status"], "IMPLEMENTED_ON_BRANCH")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

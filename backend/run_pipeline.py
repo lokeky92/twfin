@@ -18,6 +18,18 @@ from live_api_connector import run_live_ingestion
 from etf_engine import build_and_compute_etf_center
 from server import get_dashboard_payload, probe_live_sources
 from export_standalone import export_standalone
+from history import snapshot_industry_scores
+
+def report_ingestion_health(statuses, critical):
+    """把各來源狀態輸出成 GitHub Actions annotation；關鍵來源失敗回傳 1，讓排程失敗而不發佈過期資料。"""
+    for key, status in sorted(statuses.items()):
+        if status != "OK":
+            print(f"::warning title=資料來源 {key} 狀態 {status}::請查看儀表板「資料新鮮度」面板或 data_source_status 表")
+    if critical:
+        print(f"::error title=關鍵資料來源失敗::{', '.join(critical)} 擷取失敗或沒有資料，已中止發佈以避免公佈過期數據")
+        return 1
+    return 0
+
 
 def print_health_summary():
     d = get_dashboard_payload()
@@ -52,10 +64,13 @@ def main():
         populate_phase2_to_phase6()
         live_res = run_live_ingestion()
         shared_map = live_res.pop("shared_insti_map", None) if isinstance(live_res, dict) else None
+        critical = live_res.get("critical_failures", []) if isinstance(live_res, dict) else []
         print("Live OpenAPI Ingestion:", live_res)
         build_and_compute_etf_center(shared_insti_map=shared_map)
+        print(f"Industry score snapshot rows: {snapshot_industry_scores()}")
         export_standalone()
         print_health_summary()
+        sys.exit(report_ingestion_health(live_res.get("health", {}) if isinstance(live_res, dict) else {}, critical))
     elif args.probe:
         res = probe_live_sources()
         for r in res:

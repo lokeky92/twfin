@@ -17,6 +17,8 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse
 from common import logger, now_iso, now_tw
 from db import DB_PATH, get_connection
+from data_health import SOURCES, age_status
+from history import history_summary
 from scoring import (
     DEFAULT_THRESHOLDS,
     classify_alert_level,
@@ -105,9 +107,23 @@ def _data_provenance(cur):
         WHERE substr(task_name, 1, 5) = 'LIVE_' AND task_name != 'LIVE_CONNECTOR_CHECK' AND status = 'SUCCESS'
     """)
     last_live = cur.fetchone()["ts"]
+    try:
+        cur.execute("SELECT * FROM data_source_status ORDER BY source_key")
+        source_status = [dict(r) for r in cur.fetchall()]
+    except Exception:  # noqa: BLE001 — 舊資料庫尚未建表
+        source_status = []
+    today = now_tw().date()
+    for item in source_status:
+        # 靜態網站可能在擷取後很多天才被開啟，所以以「顯示當下」重新判斷資料是否過期
+        daily = SOURCES.get(item["source_key"], (None, True, False))[1]
+        if item["status"] == "OK" and age_status(item.get("data_date"), today, daily=daily) == "STALE":
+            item["status"] = "STALE"
+            item["message"] = "資料日期已落後超過 4 個營業日"
     return {
         "live_data_available": bool(live_rows and last_live),
         "last_live_ingestion": last_live,
+        "source_status": source_status,
+        "score_history": history_summary(),
         "live_sections": LIVE_SECTIONS,
         "seed_sections": SEED_SECTIONS,
         "note": "「種子」區塊的數值為程式內建的參考資料 (seed_and_engine.py / phase2_to_6_engine.py / etf_engine.py)，"

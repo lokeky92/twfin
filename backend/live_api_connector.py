@@ -11,19 +11,21 @@
 7. 櫃買中心上櫃三大法人買賣明細：https://www.tpex.org.tw/openapi/v1/tpex_3insti_daily_trading
 8. 證交所每日收盤指數與各產業類股指數 (MI_INDEX)：https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX
 
-將全市場 1,989+ 家上市櫃公司之真實營收、估值與法人籌碼寫入 SQLite，並自動彙整各產業真實基本面與法人數據。
+將全市場上市櫃公司之真實營收、估值與法人籌碼寫入 SQLite，並自動彙整各產業真實基本面與法人數據。
+
+設計原則：
+- 每個來源獨立失敗：單一來源出錯只標記該來源，並沿用上一次的資料，不寫入假日期或 NULL 覆蓋好資料。
+- 每次擷取都把各來源的狀態 (OK/DEGRADED/STALE/FAILED/EMPTY) 寫入 data_source_status，供前端顯示與排程健康閘門使用。
 """
 import json
-import ssl
-import urllib.request
-from datetime import datetime
 from db import get_connection, init_database
-from common import fetch_json, now_iso
+from common import fetch_json, now_iso, now_tw
+from data_health import SOURCES, classify, critical_failures, minguo_ym_to_iso, parse_date
 
-SSL_CTX = ssl.create_default_context()
 
 def _fetch_json(url, timeout=15):
     return fetch_json(url, timeout=timeout)
+
 
 def _to_float(val):
     if val is None:
@@ -36,9 +38,11 @@ def _to_float(val):
     except Exception:
         return None
 
+
 def _to_int(val):
     f = _to_float(val)
     return int(f) if f is not None else None
+
 
 def map_official_industry_to_id(official_ind, code, name):
     """將證交所/櫃買中心官方產業別與重點供應鏈公司映射至本系統 14 大產業分類"""
@@ -84,137 +88,257 @@ def map_official_industry_to_id(official_ind, code, name):
         return "IND_MACH_AUTO"
     return "IND_BIO_RETAIL"
 
+
+# ---------------------------------------------------------------------------
+# 純解析函式 (不連網、不碰資料庫)：官方一旦改欄位，tests/test_live_parsers.py 會先失敗
+# ---------------------------------------------------------------------------
+URL_TWSE_PE = "https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL"
+URL_TPEX_PE = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_peratio_analysis"
+URL_T86 = "https://www.twse.com.tw/rwd/zh/fund/T86?selectType=ALLBUT0999&response=json"
+URL_TPEX_3I = "https://www.tpex.org.tw/openapi/v1/tpex_3insti_daily_trading"
+URL_TWSE_REV = "https://openapi.twse.com.tw/v1/opendata/t187ap05_L"
+URL_TPEX_REV = "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap05_O"
+URL_MI_INDEX = "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+URL_BFI82U = "https://www.twse.com.tw/rwd/zh/fund/BFI82U?response=json"
+
+
+def parse_twse_pe(rows):
+    out = {}
+    for r in rows:
+        code = str(r.get("Code", "")).strip()
+        if code:
+            out[code] = {"pe": _to_float(r.get("PEratio")), "pb": _to_float(r.get("PBratio")),
+                         "dy": _to_float(r.get("DividendYield"))}
+    return out
+
+
+def parse_tpex_pe(rows):
+    out = {}
+    for r in rows:
+        code = str(r.get("SecuritiesCompanyCode", "")).strip()
+        if code:
+            out[code] = {"pe": _to_float(r.get("PriceEarningRatio")), "pb": _to_float(r.get("PriceBookRatio")),
+                         "dy": _to_float(r.get("YieldRatio"))}
+    return out
+
+
+def parse_twse_t86(payload):
+    """回傳 (insti_map, 資料日期字串或 None)。欄位索引依證交所 T86：0 代號、4/7 外資、10 投信、11 自營商、18 合計。"""
+    date = str(payload.get("date", "")).strip() or None
+    out = {}
+    for row in payload.get("data", []):
+        if len(row) >= 19:
+            code = str(row[0]).strip()
+            out[code] = {
+                "f": (_to_int(row[4]) or 0) + (_to_int(row[7]) or 0),
+                "i": _to_int(row[10]) or 0,
+                "d": _to_int(row[11]) or 0,
+                "tot": _to_int(row[18]) or 0,
+                "date": date,
+            }
+    return out, date
+
+
+def parse_tpex_3insti(rows, fallback_date=None):
+    """回傳 (insti_map, 資料日期字串或 None)。上櫃資料有自己的 Date 欄位 (民國日期)，缺少時才用 fallback_date。"""
+    out = {}
+    date = None
+    for r in rows:
+        code = str(r.get("SecuritiesCompanyCode", "")).strip()
+        if not code:
+            continue
+        parsed = parse_date(r.get("Date"))
+        row_date = parsed.strftime("%Y%m%d") if parsed else fallback_date
+        date = date or row_date
+        f_net = _to_int(r.get("ForeignInvestorsInclude MainlandAreaInvestors-Difference")
+                        or r.get("Foreign Investors include Mainland Area Investors (Foreign Dealers excluded)-Difference")) or 0
+        i_net = _to_int(r.get("SecuritiesInvestmentTrustCompanies-Difference")) or 0
+        d_net = _to_int(r.get("Dealers-Difference")) or 0
+        tot_net = _to_int(r.get("TotalDifference")) or (f_net + i_net + d_net)
+        out[code] = {"f": f_net, "i": i_net, "d": d_net, "tot": tot_net, "date": row_date}
+    return out, date
+
+
+def parse_revenue_rows(rows, market, source_url, pe_map, insti_map, now_str, insti_fallback_date=None):
+    """把 MOPS 月營收 JSON 與估值、法人資料合併成 live_company_fundamentals 的資料列。"""
+    out = []
+    for r in rows:
+        code = str(r.get("公司代號", "")).strip()
+        name = str(r.get("公司名稱", "")).strip()
+        ind = str(r.get("產業別", "")).strip()
+        val = pe_map.get(code, {})
+        ins = insti_map.get(code, {})
+        out.append((
+            code, name, market, ind, map_official_industry_to_id(ind, code, name),
+            str(r.get("資料年月", "")).strip(), str(r.get("出表日期", "")).strip(),
+            _to_float(r.get("營業收入-當月營收")),
+            _to_float(r.get("營業收入-上月營收")),
+            _to_float(r.get("營業收入-去年當月營收")),
+            _to_float(r.get("營業收入-上月比較增減(%)")),
+            _to_float(r.get("營業收入-去年同月增減(%)")),
+            _to_float(r.get("累計營業收入-當月累計營收")),
+            _to_float(r.get("累計營業收入-去年累計營收")),
+            _to_float(r.get("累計營業收入-前期比較增減(%)")),
+            val.get("pe"), val.get("pb"), val.get("dy"),
+            ins.get("f"), ins.get("i"), ins.get("d"), ins.get("tot"),
+            ins.get("date") or insti_fallback_date,
+            now_str, source_url, str(r.get("備註", "")),
+        ))
+    return out
+
+
+def parse_bfi82u(payload):
+    """回傳 dict(date, foreign, itc, dealer_prop, dealer_hedge, total, title)；非 OK、無資料或無日期回傳 None。"""
+    if payload.get("stat") != "OK" or not payload.get("data"):
+        return None
+    d = parse_date(payload.get("date"))
+    if d is None:
+        return None
+    d_prop = d_hedge = itc = fini = tot = 0.0
+    for row in payload["data"]:
+        title = str(row[0]).strip()
+        net_bil = round((_to_float(row[3]) or 0.0) / 1e8, 2)
+        if "自行買賣" in title:
+            d_prop = net_bil
+        elif "避險" in title:
+            d_hedge = net_bil
+        elif "投信" in title:
+            itc = net_bil
+        elif "外資及陸資" in title:
+            fini += net_bil
+        elif "合計" in title:
+            tot = net_bil
+    return {"date": d.isoformat(), "foreign": round(fini, 2), "itc": itc, "dealer_prop": d_prop,
+            "dealer_hedge": d_hedge, "total": tot, "title": payload.get("title")}
+
+
+def parse_mi_index(rows, now_str):
+    out = []
+    for r in rows:
+        iname = str(r.get("指數", "")).strip()
+        tdate = str(r.get("日期", "")).strip()
+        if iname and tdate:
+            out.append((iname, tdate, _to_float(r.get("收盤指數")), str(r.get("漲跌", "")).strip(),
+                        _to_float(r.get("漲跌點數")), _to_float(r.get("漲跌百分比")), now_str, URL_MI_INDEX))
+    return out
+
+
+# ---------------------------------------------------------------------------
+# 來源狀態記錄與沿用舊資料
+# ---------------------------------------------------------------------------
+def _record_status(cur, key, ok, count, data_date, now_str, today, error=None):
+    label, daily, _critical = SOURCES[key]
+    cur.execute("SELECT * FROM data_source_status WHERE source_key = ?", (key,))
+    prev = cur.fetchone()
+    prev_count = prev["record_count"] if prev else None
+    status, message = classify(ok, count, prev_count, data_date, today, daily=daily)
+    if error:
+        message = f"{message}：{error}"[:300]
+    if status in ("FAILED", "EMPTY") and prev:
+        # 失敗時保留上一次成功的筆數與資料日期，下次才有基準可比較
+        count, data_date, last_success = prev["record_count"], prev["data_date"], prev["last_success_at"]
+    elif status in ("FAILED", "EMPTY"):
+        last_success = None
+    else:
+        last_success = now_str
+    cur.execute("""
+        INSERT OR REPLACE INTO data_source_status
+        (source_key, label, status, last_attempt_at, last_success_at, data_date, record_count, prev_record_count, message)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (key, label, status, now_str, last_success, data_date, count or 0, prev_count, message))
+    if status != "OK":
+        source_id = "SRC_TWSE" if key.startswith(("twse", "mi", "bfi")) else "SRC_TPEX"
+        cur.execute("""
+            INSERT INTO ingestion_audit_logs (run_timestamp, task_name, source_id, status, records_affected, message)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (now_str, f"LIVE_SRC_{key.upper()}", source_id,
+              "FAILED" if status in ("FAILED", "EMPTY") else "STALE_WARNING", count or 0, f"{label}：{message}"))
+    return status
+
+
+def _load_previous_rows(cur):
+    """每家公司最近一次寫入的估值與法人欄位；來源失敗時沿用，避免用 NULL 蓋掉好資料。"""
+    cur.execute("""
+        SELECT company_code, pe_ratio, pb_ratio, dividend_yield, foreign_net_shares, itc_net_shares,
+               dealer_net_shares, total_3insti_net_shares, insti_trade_date
+        FROM live_company_fundamentals ORDER BY data_ym ASC
+    """)
+    pe, insti = {}, {}
+    for r in cur.fetchall():
+        pe[r["company_code"]] = {"pe": r["pe_ratio"], "pb": r["pb_ratio"], "dy": r["dividend_yield"]}
+        if r["insti_trade_date"]:
+            insti[r["company_code"]] = {"f": r["foreign_net_shares"], "i": r["itc_net_shares"],
+                                        "d": r["dealer_net_shares"], "tot": r["total_3insti_net_shares"],
+                                        "date": r["insti_trade_date"]}
+    return pe, insti
+
+
 def run_live_ingestion():
     init_database()
     conn = get_connection()
     cur = conn.cursor()
     now_str = now_iso()
+    today = now_tw().date()
     summary = {}
+    results = {}   # source_key -> dict(ok, count, date, error)
 
-    # 1. 抓取 TWSE 與 TPEx 估值表 (BWIBBU_ALL & tpex_mainboard_peratio_analysis)
+    def attempt(key, url, parser):
+        """執行單一來源；任何例外都只標記該來源失敗，不影響其他來源。parser(raw) -> (資料, 筆數, 資料日期)。"""
+        try:
+            parsed, count, date = parser(_fetch_json(url))
+            results[key] = {"ok": True, "count": count, "date": date}
+            summary[f"{key}_count"] = count
+            return parsed
+        except Exception as e:  # noqa: BLE001
+            results[key] = {"ok": False, "count": 0, "date": None, "error": f"{type(e).__name__}: {e}"}
+            summary[f"{key}_error"] = str(e)
+            return None
+
+    first_date = lambda raw: raw[0].get("Date") if raw else None  # noqa: E731
+
+    # 1. 估值
+    twse_pe = attempt("twse_pe", URL_TWSE_PE, lambda raw: (parse_twse_pe(raw), len(raw), first_date(raw)))
+    tpex_pe = attempt("tpex_pe", URL_TPEX_PE, lambda raw: (parse_tpex_pe(raw), len(raw), first_date(raw)))
+
+    # 2. 三大法人個股
+    def _parse_t86(raw):
+        m, d = parse_twse_t86(raw)
+        return m, len(raw.get("data", [])), d
+
+    def _parse_3i(raw):
+        m, d = parse_tpex_3insti(raw)
+        return m, len(raw), d
+
+    t86 = attempt("twse_t86", URL_T86, _parse_t86)
+    tpex_3i = attempt("tpex_3i", URL_TPEX_3I, _parse_3i)
+    t86_date = results["twse_t86"]["date"]
+
+    # 失敗的一側沿用上一次寫入的值；成功的一側用新值覆蓋
+    prev_pe, prev_insti = _load_previous_rows(cur)
     pe_map = {}
-    try:
-        twse_pe = _fetch_json("https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL")
-        for r in twse_pe:
-            code = str(r.get("Code", "")).strip()
-            if code:
-                pe_map[code] = {
-                    "pe": _to_float(r.get("PEratio")),
-                    "pb": _to_float(r.get("PBratio")),
-                    "dy": _to_float(r.get("DividendYield"))
-                }
-        summary["twse_pe_count"] = len(twse_pe)
-    except Exception as e:
-        summary["twse_pe_error"] = str(e)
-
-    try:
-        tpex_pe = _fetch_json("https://www.tpex.org.tw/openapi/v1/tpex_mainboard_peratio_analysis")
-        for r in tpex_pe:
-            code = str(r.get("SecuritiesCompanyCode", "")).strip()
-            if code:
-                pe_map[code] = {
-                    "pe": _to_float(r.get("PriceEarningRatio")),
-                    "pb": _to_float(r.get("PriceBookRatio")),
-                    "dy": _to_float(r.get("YieldRatio"))
-                }
-        summary["tpex_pe_count"] = len(tpex_pe)
-    except Exception as e:
-        summary["tpex_pe_error"] = str(e)
-
-    # 2. 抓取 TWSE T86 與 TPEx 三大法人個股買賣超
+    if not (twse_pe and tpex_pe):
+        pe_map.update(prev_pe)
+    for src in (twse_pe, tpex_pe):
+        if src:
+            pe_map.update(src)
     insti_map = {}
-    t86_date = "20261120"
-    try:
-        t86 = _fetch_json("https://www.twse.com.tw/rwd/zh/fund/T86?selectType=ALLBUT0999&response=json")
-        t86_date = str(t86.get("date", "20261120"))
-        for row in t86.get("data", []):
-            if len(row) >= 19:
-                code = str(row[0]).strip()
-                f_net = (_to_int(row[4]) or 0) + (_to_int(row[7]) or 0)
-                i_net = _to_int(row[10]) or 0
-                d_net = _to_int(row[11]) or 0
-                tot_net = _to_int(row[18]) or 0
-                insti_map[code] = {"f": f_net, "i": i_net, "d": d_net, "tot": tot_net, "date": t86_date}
-        summary["twse_t86_count"] = len(t86.get("data", []))
-    except Exception as e:
-        summary["twse_t86_error"] = str(e)
+    if not (t86 and tpex_3i):
+        insti_map.update(prev_insti)
+    fresh_insti = {}
+    for src in (t86, tpex_3i):
+        if src:
+            fresh_insti.update(src)
+    insti_map.update(fresh_insti)
 
-    try:
-        tpex_3i = _fetch_json("https://www.tpex.org.tw/openapi/v1/tpex_3insti_daily_trading")
-        for r in tpex_3i:
-            code = str(r.get("SecuritiesCompanyCode", "")).strip()
-            if not code:
-                continue
-            f_net = _to_int(r.get("ForeignInvestorsInclude MainlandAreaInvestors-Difference") or r.get("Foreign Investors include Mainland Area Investors (Foreign Dealers excluded)-Difference")) or 0
-            i_net = _to_int(r.get("SecuritiesInvestmentTrustCompanies-Difference")) or 0
-            d_net = _to_int(r.get("Dealers-Difference")) or 0
-            tot_net = _to_int(r.get("TotalDifference")) or (f_net + i_net + d_net)
-            insti_map[code] = {"f": f_net, "i": i_net, "d": d_net, "tot": tot_net, "date": t86_date}
-        summary["tpex_3i_count"] = len(tpex_3i)
-    except Exception as e:
-        summary["tpex_3i_error"] = str(e)
-
-    # 3. 抓取 MOPS 上市 (t187ap05_L) 與上櫃 (mopsfin_t187ap05_O) 全市場最新月營收
+    # 3. 月營收
     company_rows = []
-    try:
-        twse_rev = _fetch_json("https://openapi.twse.com.tw/v1/opendata/t187ap05_L")
-        for r in twse_rev:
-            code = str(r.get("公司代號", "")).strip()
-            name = str(r.get("公司名稱", "")).strip()
-            ind = str(r.get("產業別", "")).strip()
-            ym = str(r.get("資料年月", "")).strip()
-            rdate = str(r.get("出表日期", "")).strip()
-            mapped_id = map_official_industry_to_id(ind, code, name)
-            val_info = pe_map.get(code, {})
-            ins_info = insti_map.get(code, {})
-            company_rows.append((
-                code, name, "TWSE", ind, mapped_id, ym, rdate,
-                _to_float(r.get("營業收入-當月營收")),
-                _to_float(r.get("營業收入-上月營收")),
-                _to_float(r.get("營業收入-去年當月營收")),
-                _to_float(r.get("營業收入-上月比較增減(%)")),
-                _to_float(r.get("營業收入-去年同月增減(%)")),
-                _to_float(r.get("累計營業收入-當月累計營收")),
-                _to_float(r.get("累計營業收入-去年累計營收")),
-                _to_float(r.get("累計營業收入-前期比較增減(%)")),
-                val_info.get("pe"), val_info.get("pb"), val_info.get("dy"),
-                ins_info.get("f"), ins_info.get("i"), ins_info.get("d"), ins_info.get("tot"),
-                ins_info.get("date", t86_date),
-                now_str, "https://openapi.twse.com.tw/v1/opendata/t187ap05_L", str(r.get("備註", ""))
-            ))
-        summary["twse_rev_count"] = len(twse_rev)
-    except Exception as e:
-        summary["twse_rev_error"] = str(e)
-
-    try:
-        tpex_rev = _fetch_json("https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap05_O")
-        for r in tpex_rev:
-            code = str(r.get("公司代號", "")).strip()
-            name = str(r.get("公司名稱", "")).strip()
-            ind = str(r.get("產業別", "")).strip()
-            ym = str(r.get("資料年月", "")).strip()
-            rdate = str(r.get("出表日期", "")).strip()
-            mapped_id = map_official_industry_to_id(ind, code, name)
-            val_info = pe_map.get(code, {})
-            ins_info = insti_map.get(code, {})
-            company_rows.append((
-                code, name, "TPEx", ind, mapped_id, ym, rdate,
-                _to_float(r.get("營業收入-當月營收")),
-                _to_float(r.get("營業收入-上月營收")),
-                _to_float(r.get("營業收入-去年當月營收")),
-                _to_float(r.get("營業收入-上月比較增減(%)")),
-                _to_float(r.get("營業收入-去年同月增減(%)")),
-                _to_float(r.get("累計營業收入-當月累計營收")),
-                _to_float(r.get("累計營業收入-去年累計營收")),
-                _to_float(r.get("累計營業收入-前期比較增減(%)")),
-                val_info.get("pe"), val_info.get("pb"), val_info.get("dy"),
-                ins_info.get("f"), ins_info.get("i"), ins_info.get("d"), ins_info.get("tot"),
-                ins_info.get("date", t86_date),
-                now_str, "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap05_O", str(r.get("備註", ""))
-            ))
-        summary["tpex_rev_count"] = len(tpex_rev)
-    except Exception as e:
-        summary["tpex_rev_error"] = str(e)
+    for key, url, market in (("twse_rev", URL_TWSE_REV, "TWSE"), ("tpex_rev", URL_TPEX_REV, "TPEx")):
+        def _parse_rev(raw, market=market, url=url):
+            rows = parse_revenue_rows(raw, market, url, pe_map, insti_map, now_str, t86_date)
+            return rows, len(raw), minguo_ym_to_iso(raw[0].get("資料年月")) if raw else None
+        rows = attempt(key, url, _parse_rev)
+        if rows:
+            company_rows.extend(rows)
 
     if company_rows:
         cur.executemany("""
@@ -227,129 +351,101 @@ def run_live_ingestion():
              insti_trade_date, fetched_at, source_url, notes)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, company_rows)
-
+        period = minguo_ym_to_iso(company_rows[0][5])
         cur.execute("""
             INSERT INTO ingestion_audit_logs
             (run_timestamp, task_name, source_id, status, records_affected, message)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (
             now_str, "LIVE_MOPS_PE_T86_FULL_INGEST", "SRC_MOPS", "SUCCESS", len(company_rows),
-            f"真實連線成功：已寫入上市({summary.get('twse_rev_count',0)}家)＋上櫃({summary.get('tpex_rev_count',0)}家)共 {len(company_rows)} 家公司之115年10月(2026-10)真實月營收、本益比/股價淨值比與三大法人個股買賣超明細"
+            f"已寫入上市({summary.get('twse_rev_count', 0)}家)＋上櫃({summary.get('tpex_rev_count', 0)}家)共 "
+            f"{len(company_rows)} 家公司之 {period} 月營收、估值與三大法人個股買賣超 (法人資料日期 {t86_date or '沿用舊值'})"
         ))
 
-    # 4. 抓取證交所每日收盤指數與各產業類股指數 (MI_INDEX)
-    idx_rows = []
-    try:
-        mi_list = _fetch_json("https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX")
-        for r in mi_list:
-            iname = str(r.get("指數", "")).strip()
-            tdate = str(r.get("日期", "")).strip()
-            if iname and tdate:
-                idx_rows.append((
-                    iname, tdate,
-                    _to_float(r.get("收盤指數")),
-                    str(r.get("漲跌", "")).strip(),
-                    _to_float(r.get("漲跌點數")),
-                    _to_float(r.get("漲跌百分比")),
-                    now_str, "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-                ))
-        if idx_rows:
-            cur.executemany("""
-                INSERT OR REPLACE INTO live_market_indices
-                (index_name, trade_date, close_index, change_dir, change_points, change_pct, fetched_at, source_url)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, idx_rows)
-            cur.execute("""
-                INSERT INTO ingestion_audit_logs
-                (run_timestamp, task_name, source_id, status, records_affected, message)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                now_str, "LIVE_TWSE_MI_INDEX_INGEST", "SRC_TWSE", "SUCCESS", len(idx_rows),
-                f"真實連線成功：已寫入證交所 MI_INDEX 共 {len(idx_rows)} 項指數與產業類股收盤行情 (日期:{idx_rows[0][1]})"
-            ))
-        summary["mi_index_count"] = len(idx_rows)
-    except Exception as e:
-        summary["mi_index_error"] = str(e)
+    # 4. 大盤與類股指數
+    def _parse_mi(raw):
+        rows = parse_mi_index(raw, now_str)
+        return rows, len(rows), rows[0][1] if rows else None
 
-    # 5. 抓取證交所 BFI82U 三大法人當日買賣超精確金額並更新至 institutional_flows
-    try:
-        bfi = _fetch_json("https://www.twse.com.tw/rwd/zh/fund/BFI82U?response=json")
-        if bfi.get("stat") == "OK" and bfi.get("data"):
-            bdate = bfi.get("date", "20261120")
-            fmt_date = f"{bdate[:4]}-{bdate[4:6]}-{bdate[6:8]}"
-            d_prop = d_hedge = itc = fini = tot = 0.0
-            for row in bfi["data"]:
-                title = str(row[0]).strip()
-                net_ntd = _to_float(row[3]) or 0.0
-                net_bil = round(net_ntd / 1e8, 2)
-                if "自行買賣" in title:
-                    d_prop = net_bil
-                elif "避險" in title:
-                    d_hedge = net_bil
-                elif "投信" in title:
-                    itc = net_bil
-                elif "外資及陸資" in title:
-                    fini += net_bil
-                elif "合計" in title:
-                    tot = net_bil
+    idx_rows = attempt("mi_index", URL_MI_INDEX, _parse_mi)
+    if idx_rows:
+        cur.executemany("""
+            INSERT OR REPLACE INTO live_market_indices
+            (index_name, trade_date, close_index, change_dir, change_points, change_pct, fetched_at, source_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, idx_rows)
+        cur.execute("""
+            INSERT INTO ingestion_audit_logs (run_timestamp, task_name, source_id, status, records_affected, message)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (now_str, "LIVE_TWSE_MI_INDEX_INGEST", "SRC_TWSE", "SUCCESS", len(idx_rows),
+              f"已寫入證交所 MI_INDEX 共 {len(idx_rows)} 項指數與產業類股收盤行情 (日期:{idx_rows[0][1]})"))
 
-            cur.execute("""
-                INSERT OR REPLACE INTO institutional_flows
-                (period_type, period_label, release_date, market_scope,
-                 foreign_net_billion, itc_net_billion, dealer_prop_billion, dealer_hedge_billion,
-                 total_3insti_billion, foreign_futures_oi_contracts, margin_balance_billion,
-                 top_buy_industries, top_sell_industries, source_id, notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                "DAILY", f"{fmt_date} (TWSE BFI82U 官方API直連)", fmt_date, "TWSE 上市官方精確統計",
-                fini, itc, d_prop, d_hedge, tot, -98650, 8343.0,
-                "依T86個股買賣超自動統計：面板/金控/晶圓代工權值", "依T86個股買賣超自動統計：高Beta設備與回檔科技股",
-                "SRC_TWSE",
-                f"由證交所 BFI82U API 即時拉取 ({bfi.get('title')})：外資 {fini}億、投信 {itc}億、自營商自行 {d_prop}億、自營商避險 {d_hedge}億、合計 {tot}億元"
-            ))
-            summary["bfi82u_date"] = fmt_date
-            summary["bfi82u_total_billion"] = tot
-    except Exception as e:
-        summary["bfi82u_error"] = str(e)
+    # 5. BFI82U 三大法人金額 (期貨未平倉與融資餘額此 API 不提供，寫入 NULL 而非假數字)
+    def _parse_bfi(raw):
+        b = parse_bfi82u(raw)
+        if b is None:
+            raise ValueError("BFI82U 回傳非 OK、無資料或缺少日期")
+        return b, len(raw.get("data", [])), b["date"]
 
-    # 6. 將 live_company_fundamentals 的官方 API 精確數值同步更新至 company_research_watchlist
+    bfi = attempt("bfi82u", URL_BFI82U, _parse_bfi)
+    if bfi:
+        cur.execute("""
+            INSERT OR REPLACE INTO institutional_flows
+            (period_type, period_label, release_date, market_scope,
+             foreign_net_billion, itc_net_billion, dealer_prop_billion, dealer_hedge_billion,
+             total_3insti_billion, foreign_futures_oi_contracts, margin_balance_billion,
+             top_buy_industries, top_sell_industries, source_id, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            "DAILY", f"{bfi['date']} (TWSE BFI82U 官方API直連)", bfi["date"], "TWSE 上市官方精確統計",
+            bfi["foreign"], bfi["itc"], bfi["dealer_prop"], bfi["dealer_hedge"], bfi["total"], None, None,
+            "此 API 不提供產業別買賣超", "此 API 不提供產業別買賣超", "SRC_TWSE",
+            f"證交所 BFI82U ({bfi['title']})：外資 {bfi['foreign']}億、投信 {bfi['itc']}億、"
+            f"自營商自行 {bfi['dealer_prop']}億、自營商避險 {bfi['dealer_hedge']}億、合計 {bfi['total']}億元"
+        ))
+        summary["bfi82u_date"] = bfi["date"]
+        summary["bfi82u_total_billion"] = bfi["total"]
+
+    # 6. 將官方 API 數值同步更新至 company_research_watchlist
     cur.execute("SELECT ticker FROM company_research_watchlist")
     watchlist_tickers = [r["ticker"] for r in cur.fetchall()]
     for tk in watchlist_tickers:
-        cur.execute("""
-            SELECT * FROM live_company_fundamentals WHERE company_code = ? ORDER BY data_ym DESC LIMIT 1
-        """, (tk,))
+        cur.execute("SELECT * FROM live_company_fundamentals WHERE company_code = ? ORDER BY data_ym DESC LIMIT 1", (tk,))
         live_row = cur.fetchone()
-        if live_row:
-            lr = dict(live_row)
-            rev_bil = round((lr["rev_current_thousand"] or 0.0) / 1e5, 2)
-            mom = round(lr["rev_mom_pct"] or 0.0, 2)
-            yoy = round(lr["rev_yoy_pct"] or 0.0, 2)
-            pe_str = f"P/E {lr['pe_ratio']}x" if lr["pe_ratio"] is not None else "P/E N/A(虧損或極高)"
-            pb_str = f"P/B {lr['pb_ratio']}x" if lr["pb_ratio"] is not None else "P/B N/A"
-            dy_str = f"殖利率 {lr['dividend_yield']}%" if lr["dividend_yield"] is not None else ""
-            val_status = f"【TWSE/TPEx官方API】{pe_str}｜{pb_str}｜{dy_str}"
-            f_sh = lr["foreign_net_shares"] or 0
-            i_sh = lr["itc_net_shares"] or 0
-            d_sh = lr["dealer_net_shares"] or 0
-            insti_str = f"【{lr['insti_trade_date']} T86/TPEx官方API】外資 {f_sh:+,}股｜投信 {i_sh:+,}股｜自營商 {d_sh:+,}股"
-            cur.execute("""
-                UPDATE company_research_watchlist
-                SET latest_rev_period = ?,
-                    latest_rev_billion_twd = ?,
-                    rev_mom_pct = ?,
-                    rev_yoy_pct = ?,
-                    pe_ratio_status = ?,
-                    institutional_ownership_trend = ?,
-                    as_of_date = ?
-                WHERE ticker = ?
-            """, (f"2026-10 (民國{lr['data_ym']})", rev_bil, mom, yoy, val_status, insti_str, lr["insti_trade_date"], tk))
+        if not live_row:
+            continue
+        lr = dict(live_row)
+        rev_bil = round((lr["rev_current_thousand"] or 0.0) / 1e5, 2)
+        pe_str = f"P/E {lr['pe_ratio']}x" if lr["pe_ratio"] is not None else "P/E N/A(虧損或極高)"
+        pb_str = f"P/B {lr['pb_ratio']}x" if lr["pb_ratio"] is not None else "P/B N/A"
+        dy_str = f"殖利率 {lr['dividend_yield']}%" if lr["dividend_yield"] is not None else ""
+        val_status = f"【TWSE/TPEx官方API】{pe_str}｜{pb_str}｜{dy_str}"
+        insti_date = lr["insti_trade_date"] or "日期未知"
+        insti_str = (f"【{insti_date} T86/TPEx官方API】外資 {(lr['foreign_net_shares'] or 0):+,}股｜"
+                     f"投信 {(lr['itc_net_shares'] or 0):+,}股｜自營商 {(lr['dealer_net_shares'] or 0):+,}股")
+        cur.execute("""
+            UPDATE company_research_watchlist
+            SET latest_rev_period = ?, latest_rev_billion_twd = ?, rev_mom_pct = ?, rev_yoy_pct = ?,
+                pe_ratio_status = ?, institutional_ownership_trend = ?, as_of_date = ?
+            WHERE ticker = ?
+        """, (f"{minguo_ym_to_iso(lr['data_ym'])} (民國{lr['data_ym']})", rev_bil,
+              round(lr["rev_mom_pct"] or 0.0, 2), round(lr["rev_yoy_pct"] or 0.0, 2),
+              val_status, insti_str, lr["insti_trade_date"] or today.isoformat(), tk))
+
+    # 7. 記錄各來源狀態並判定健康度
+    statuses = {}
+    for key, res in results.items():
+        statuses[key] = _record_status(cur, key, res["ok"], res["count"], res["date"], now_str, today, res.get("error"))
+    summary["health"] = statuses
+    summary["critical_failures"] = critical_failures(statuses)
 
     conn.commit()
     conn.close()
-    summary["shared_insti_map"] = insti_map
+    summary["shared_insti_map"] = fresh_insti
     return summary
+
 
 if __name__ == "__main__":
     res = run_live_ingestion()
+    res.pop("shared_insti_map", None)
     print("Live Ingestion Summary:", json.dumps(res, ensure_ascii=False, indent=2))

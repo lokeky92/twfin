@@ -929,7 +929,9 @@ def get_multi_agent_state():
         bundle = json.load(f)
 
     # 動態掃描 pending / approved / rejected / implemented 資料夾以同步最新核准狀態
-    all_proposals = []
+    # 同一個提案編號若同時存在於多個資料夾 (例如舊的 pending 殘留 + 已 implemented)，
+    # 以「較後面的狀態」為準：folder 掃描順序即優先順序，後者覆蓋前者，避免畫面出現重複提案。
+    by_id = {}
     for folder, status_name in [
         ("pending", "PENDING_APPROVAL"),
         ("approved", "APPROVED_BY_USER"),
@@ -943,9 +945,9 @@ def get_multi_agent_state():
                     with open(os.path.join(pdir, fname), "r", encoding="utf-8") as pf:
                         p_obj = json.load(pf)
                         p_obj["status"] = status_name
-                        all_proposals.append(p_obj)
+                        by_id[p_obj["proposal_id"]] = p_obj
 
-    all_proposals.sort(key=lambda x: x["proposal_id"])
+    all_proposals = sorted(by_id.values(), key=lambda x: x["proposal_id"])
     bundle["phase6_proposals"] = all_proposals
     return bundle
 
@@ -959,7 +961,8 @@ def update_proposal_approval_status(proposal_id, decision, user_note=""):
     ensure_ma_directories()
     found_path = None
     found_obj = None
-    for folder in ["pending", "approved", "rejected", "implemented"]:
+    # 由最終狀態往前找：若舊的 pending 殘留與 implemented 並存，應以 implemented 那份為準
+    for folder in ["implemented", "rejected", "approved", "pending"]:
         p = os.path.join(MA_ROOT, "proposals", folder, f"{proposal_id}.json")
         if os.path.exists(p):
             found_path = p

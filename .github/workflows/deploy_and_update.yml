@@ -82,6 +82,25 @@ jobs:
           fi
           gh release upload "$DB_RELEASE_TAG" "$DB_FILE" --clobber
 
+      - name: Weekly database backup (keep latest 8)
+        run: |
+          # 每個 ISO 週只保留第一份快照，存放在獨立的 data-backups Release；損毀時可從這裡回溯
+          tag=data-backups
+          asset="twfin_$(date -u +%G-W%V).db"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --title "Weekly database backups" \
+              --notes "每週一份的 SQLite 資料庫備份，自動保留最近 8 份。" --latest=false
+          fi
+          if gh release view "$tag" --json assets -q '.assets[].name' | grep -qx "$asset"; then
+            echo "Backup $asset already exists."
+          else
+            cp "$DB_FILE" "$RUNNER_TEMP/$asset"
+            gh release upload "$tag" "$RUNNER_TEMP/$asset"
+          fi
+          gh release view "$tag" --json assets -q '.assets[].name' | sort -r | tail -n +9 | while read -r old; do
+            gh release delete-asset "$tag" "$old" --yes
+          done
+
       - name: Commit and push updated website
         run: |
           git config user.name "github-actions[bot]"

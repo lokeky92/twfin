@@ -546,6 +546,34 @@ CREATE TABLE IF NOT EXISTS etf_research_reports (
     version_tag TEXT NOT NULL
 );
 
+-- 24. 各官方資料來源最近一次擷取狀態 (資料新鮮度面板與排程健康閘門使用)
+CREATE TABLE IF NOT EXISTS data_source_status (
+    source_key TEXT PRIMARY KEY,
+    label TEXT NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('OK', 'DEGRADED', 'STALE', 'FAILED', 'EMPTY')),
+    last_attempt_at TEXT NOT NULL,
+    last_success_at TEXT,
+    data_date TEXT,                  -- 官方資料日期 (YYYYMMDD 或 YYYY-MM-DD)
+    record_count INTEGER NOT NULL DEFAULT 0,
+    prev_record_count INTEGER,
+    message TEXT NOT NULL
+);
+
+-- 25. 每次排程的產業評分快照 (累積後才能做預警命中率回測)
+CREATE TABLE IF NOT EXISTS industry_score_history (
+    snapshot_date TEXT NOT NULL,     -- 快照日 YYYY-MM-DD (台灣時間)
+    industry_id TEXT NOT NULL,
+    model_version TEXT NOT NULL,
+    total_weighted_score REAL,
+    score_capital_flow REAL,
+    score_fundamentals REAL,
+    score_future_growth REAL,
+    score_institutional REAL,
+    score_valuation REAL,
+    rotation_state TEXT,
+    PRIMARY KEY (snapshot_date, industry_id, model_version)
+);
+
 -- 查詢效能索引 (get_dashboard_payload 與權重重算的常用條件)
 CREATE INDEX IF NOT EXISTS idx_irs_model_version ON industry_rotation_scores(model_version);
 CREATE INDEX IF NOT EXISTS idx_tew_industry ON trend_early_warnings(industry_id);
