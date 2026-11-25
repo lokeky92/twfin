@@ -146,6 +146,49 @@ class TestDashboardLoadFlow(unittest.TestCase):
         self.assertIn("retryLoadDashboard", down["banner"])
 
 
+PARITY_DRIVER = r"""
+const fs = require('fs'), vm = require('vm');
+const code = fs.readFileSync(process.argv[1], 'utf8');
+const ctx = { console, document: { getElementById: () => null }, localStorage: {}, STATE: null };
+vm.createContext(ctx);
+vm.runInContext(code + ';this.__f = nextProposalStatus;', ctx);
+const statuses = ['PENDING_APPROVAL', 'RE_RESEARCH_REQUESTED', 'APPROVED_BY_USER', 'REJECTED_BY_USER', 'IMPLEMENTED_ON_BRANCH'];
+const decisions = ['APPROVE', 'REJECT', 'RE_RESEARCH', 'MARK_IMPLEMENTED', 'BOGUS'];
+const out = {};
+for (const s of statuses) for (const d of decisions) out[s + '|' + d] = ctx.__f(s, d);
+console.log(JSON.stringify(out));
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過前端狀態機對照測試")
+class TestProposalStateMachineParity(unittest.TestCase):
+    """前端 (離線模式) 的提案狀態機必須與後端 PROPOSAL_TRANSITIONS 完全一致，否則兩邊會對同一操作給出不同結果"""
+
+    def test_frontend_matches_backend_transitions(self):
+        import sys
+        sys.path.insert(0, ROOT)
+        from argon_multi_agent.engine.multi_agent_orchestrator import FOLDER_STATUS, PROPOSAL_TRANSITIONS
+
+        r = subprocess.run(["node", "-e", PARITY_DRIVER, os.path.join(JS_DIR, "16-multi-agent.js")],
+                           capture_output=True, text=True, encoding="utf-8", timeout=30)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        js = json.loads(r.stdout)
+
+        # 前端以 status 為鍵；pending 資料夾對應兩種 status (一般待審 / 已要求重新研究)
+        statuses_of_folder = {
+            "pending": ["PENDING_APPROVAL", "RE_RESEARCH_REQUESTED"], "approved": ["APPROVED_BY_USER"],
+            "rejected": ["REJECTED_BY_USER"], "implemented": ["IMPLEMENTED_ON_BRANCH"],
+        }
+        decisions = ["APPROVE", "REJECT", "RE_RESEARCH", "MARK_IMPLEMENTED", "BOGUS"]
+        for folder, statuses in statuses_of_folder.items():
+            for status in statuses:
+                for decision in decisions:
+                    target = PROPOSAL_TRANSITIONS[folder].get(decision)
+                    expected = None if target is None else (
+                        "RE_RESEARCH_REQUESTED" if decision == "RE_RESEARCH" else FOLDER_STATUS[target])
+                    self.assertEqual(js[f"{status}|{decision}"], expected, f"{status} + {decision}")
+
+
 class TestInlineHandlersDefined(unittest.TestCase):
     ALLOWED = {"alert", "confirm", "parseInt", "parseFloat", "String", "Number", "Boolean"}
 

@@ -130,42 +130,73 @@ async function triggerNewMultiAgentSession() {
   }
 }
 
+/* 提案狀態機 (前端鏡像，規則必須與 argon_multi_agent/engine/multi_agent_orchestrator.py 的 PROPOSAL_TRANSITIONS 一致；
+   tests/test_frontend_js.py 會比對兩邊，避免漂移)。以 status 為鍵：
+   pending ─APPROVE→ approved ─MARK_IMPLEMENTED→ implemented (終態)；已實作的提案不可再被批准、拒絕或退回 */
+const PROPOSAL_STATUS_TRANSITIONS = {
+  PENDING_APPROVAL:      { APPROVE: 'APPROVED_BY_USER', REJECT: 'REJECTED_BY_USER', RE_RESEARCH: 'RE_RESEARCH_REQUESTED' },
+  RE_RESEARCH_REQUESTED: { APPROVE: 'APPROVED_BY_USER', REJECT: 'REJECTED_BY_USER', RE_RESEARCH: 'RE_RESEARCH_REQUESTED' },
+  APPROVED_BY_USER:      { REJECT: 'REJECTED_BY_USER', RE_RESEARCH: 'RE_RESEARCH_REQUESTED', MARK_IMPLEMENTED: 'IMPLEMENTED_ON_BRANCH' },
+  REJECTED_BY_USER:      { APPROVE: 'APPROVED_BY_USER', RE_RESEARCH: 'RE_RESEARCH_REQUESTED' },
+  IMPLEMENTED_ON_BRANCH: {},
+};
+
+// 回傳新狀態；此操作在目前狀態下不被允許時回傳 null
+function nextProposalStatus(status, decision) {
+  const row = PROPOSAL_STATUS_TRANSITIONS[status] || PROPOSAL_STATUS_TRANSITIONS.PENDING_APPROVAL;
+  return Object.prototype.hasOwnProperty.call(row, decision) ? row[decision] : null;
+}
+
 async function submitProposalDecision(proposalId, decision) {
   const noteMap = {
     'APPROVE': '使用者於 AI 研究團隊管理介面明確批准',
     'REJECT': '使用者於管理介面拒絕此提案',
     'RE_RESEARCH': '使用者要求團隊針對反方意見重新研究'
   };
+  const actionLabel = decision === 'APPROVE' ? '已批准' : (decision === 'REJECT' ? '已拒絕' : '已要求重新研究');
   try {
     const res = await apiPost('/api/multi_agent/proposal_decision', { proposal_id: proposalId, decision, note: noteMap[decision] || decision });
+    if (res.status === 400) {
+      // 伺服器明確拒絕 (例如已實作的提案不可再變更)：顯示原因，不可當成「離線」而在本機硬改狀態
+      const err = await res.json().catch(() => ({}));
+      alert('❌ ' + (err.message || '此操作在提案目前的狀態下不被允許。'));
+      return;
+    }
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (data.status === 'ok' && data.multi_agent_center) {
       STATE.multi_agent_center = data.multi_agent_center;
       saveMultiAgentLocalOverrides();
       renderArgonMultiAgentCenter();
+      const skipped = data.proposal && data.proposal.skipped;
+      if (skipped && skipped.length) {
+        alert(`ℹ️ ${actionLabel}完成：已套用 ${(data.proposal.applied || []).length} 筆，略過 ${skipped.length} 筆（目前狀態不允許此操作，例如已實作的提案）。`);
+      }
       return;
     }
     throw new Error('Unexpected payload');
   } catch (e) {
-    // 雲端/離線模式下同步更新前端狀態並持久化至瀏覽器 localStorage
+    // 雲端/離線模式 (沒有 API)：在前端依同一套狀態機更新，並持久化至瀏覽器 localStorage
     const ma = STATE && STATE.multi_agent_center;
     if (ma && ma.phase6_proposals) {
-      let touched = 0;
-      const newStatus = decision === 'APPROVE' ? 'APPROVED_BY_USER' : (decision === 'REJECT' ? 'REJECTED_BY_USER' : 'RE_RESEARCH_REQUESTED');
+      let touched = 0, skipped = 0;
       ma.phase6_proposals.forEach(p => {
-        if (proposalId === 'ALL' || p.proposal_id === proposalId) {
-          p.status = newStatus;
-          p.user_decision_note = noteMap[decision] || decision;
-          touched++;
-        }
+        if (proposalId !== 'ALL' && p.proposal_id !== proposalId) return;
+        const next = nextProposalStatus(p.status, decision);
+        if (next === null) { skipped++; return; }
+        p.status = next;
+        p.user_decision_note = noteMap[decision] || decision;
+        touched++;
       });
-      const actionLabel = decision === 'APPROVE' ? '已批准' : (decision === 'REJECT' ? '已拒絕' : '已要求重新研究');
+      if (!touched) {
+        alert('❌ 此操作在提案目前的狀態下不被允許（例如已實作的提案不可再批准、拒絕或退回）。');
+        return;
+      }
       const nowStr = new Date().toLocaleTimeString('zh-TW', { hour12: false });
       ma.last_decision_banner = `${actionLabel} ${proposalId === 'ALL' ? '全部提案' : proposalId}（${nowStr} 已儲存）`;
       saveMultiAgentLocalOverrides();
       renderArgonMultiAgentCenter();
-      alert(`✅ ${actionLabel}${proposalId === 'ALL' ? '全部提案' : ' ' + proposalId}！狀態已更新並儲存（重新整理頁面也不會遺失）。`);
+      alert(`✅ ${actionLabel}${proposalId === 'ALL' ? `（套用 ${touched} 筆${skipped ? `，略過 ${skipped} 筆不允許的` : ''}）` : ' ' + proposalId}！狀態已更新並儲存（重新整理頁面也不會遺失）。`);
     }
   }
 }

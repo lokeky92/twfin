@@ -849,6 +849,10 @@ def run_full_multi_agent_session(topic="台美 ETF 雙軌評分模型、跨時�
 
     for p in proposals:
         pid = p["proposal_id"]
+        # 提案編號已存在於任何資料夾 (含已批准 / 已實作 / 要求重新研究) 時不重建：
+        # 舊版每次重跑研究都會在 pending 再寫一份，造成同一提案同時出現在兩個資料夾，也會蓋掉「要求重新研究」的標記
+        if find_proposal_copies(pid):
+            continue
         safe_write_ma_file(f"proposals/pending/{pid}.json", p)
         md_p = (
             f"# 改善提案：{pid}｜{p['title']}\n\n"
@@ -896,6 +900,10 @@ def run_full_multi_agent_session(topic="台美 ETF 雙軌評分模型、跨時�
     post_checksums = compute_production_checksums()
     integrity_verified = (pre_checksums == post_checksums)
 
+    # 研究結果包裡的提案狀態以「實際所在資料夾」為準，而不是剛產生時的預設 PENDING_APPROVAL
+    current = {p["proposal_id"]: p for p in list_proposals()}
+    proposals = [current.get(p["proposal_id"], p) for p in proposals]
+
     # 儲存完整 Session 歷史索引
     session_bundle = {
         "session_id": session_id,
@@ -918,6 +926,111 @@ def run_full_multi_agent_session(topic="台美 ETF 雙軌評分模型、跨時�
     return session_bundle
 
 
+# ---------------------------------------------------------------------------
+# 提案狀態機
+#
+# 規則：「資料夾」是提案目前狀態的唯一真相；每個提案編號只能存在於一個資料夾，.json 與 .md 一起移動。
+#
+#   pending ─APPROVE→ approved ─MARK_IMPLEMENTED→ implemented (終態)
+#   pending ─REJECT→  rejected ─APPROVE→ approved
+#   approved ─REJECT→ rejected
+#   approved / rejected ─RE_RESEARCH→ pending (status = RE_RESEARCH_REQUESTED)
+#   pending ─RE_RESEARCH→ pending (標記為要求重新研究)
+#
+# implemented 為終態：已實作的提案不可再被批准、拒絕或退回，避免畫面與實際程式碼不一致。
+# 未知的 decision 一律拒絕 (舊版會默默當成「退回 pending」，打錯字就會讓提案丟失已批准狀態)。
+# JSON 內的 status 欄位只是寫入當下的快照，以資料夾為準 (見 list_proposals)。
+# ---------------------------------------------------------------------------
+PROPOSAL_FOLDERS = ("pending", "approved", "rejected", "implemented")
+FOLDER_STATUS = {
+    "pending": "PENDING_APPROVAL",
+    "approved": "APPROVED_BY_USER",
+    "rejected": "REJECTED_BY_USER",
+    "implemented": "IMPLEMENTED_ON_BRANCH",
+}
+PROPOSAL_TRANSITIONS = {
+    "pending": {"APPROVE": "approved", "REJECT": "rejected", "RE_RESEARCH": "pending"},
+    "approved": {"REJECT": "rejected", "RE_RESEARCH": "pending", "MARK_IMPLEMENTED": "implemented"},
+    "rejected": {"APPROVE": "approved", "RE_RESEARCH": "pending"},
+    "implemented": {},
+}
+
+
+class InvalidProposalTransition(ValueError):
+    """目前狀態不允許此操作 (或 decision 不存在)。"""
+
+
+def _proposal_path(folder, proposal_id, ext="json"):
+    return os.path.join(MA_ROOT, "proposals", folder, f"{proposal_id}.{ext}")
+
+
+def find_proposal_copies(proposal_id):
+    """回傳 [(folder, obj)]：此提案編號目前出現在哪些資料夾 (正常情況只會有一份)。"""
+    copies = []
+    for folder in PROPOSAL_FOLDERS:
+        path = _proposal_path(folder, proposal_id)
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                copies.append((folder, json.load(f)))
+    return copies
+
+
+def choose_proposal_winner(copies):
+    """
+    同一提案出現在多個資料夾 (例如舊 pending 殘留 + 已 implemented) 時，決定哪一份才算數：
+    implemented > 已做決定的 (approved / rejected，取最近的 user_decision_at) > pending。
+    """
+    def rank(copy):
+        folder, obj = copy
+        return (folder == "implemented", folder in ("approved", "rejected"), str(obj.get("user_decision_at") or ""))
+    return max(copies, key=rank)
+
+
+def _all_proposal_ids():
+    ids = set()
+    for folder in PROPOSAL_FOLDERS:
+        pdir = os.path.join(MA_ROOT, "proposals", folder)
+        if os.path.isdir(pdir):
+            ids.update(f[:-5] for f in os.listdir(pdir) if f.endswith(".json"))
+    return sorted(ids)
+
+
+def list_proposals():
+    """所有提案 (每個編號只出現一次，以 choose_proposal_winner 的結果為準)，status 由所在資料夾決定。"""
+    result = []
+    for pid in _all_proposal_ids():
+        folder, obj = choose_proposal_winner(find_proposal_copies(pid))
+        obj = dict(obj)
+        if folder == "pending" and obj.get("status") == "RE_RESEARCH_REQUESTED":
+            pass   # 保留「要求重新研究」標記
+        else:
+            obj["status"] = FOLDER_STATUS[folder]
+        result.append(obj)
+    return result
+
+
+def reconcile_proposals(dry_run=False):
+    """
+    清理歷史遺留的重複提案：每個編號只留下 choose_proposal_winner 選中的那一份，其餘 (.json 與 .md) 刪除。
+    回傳 [{proposal_id, kept, removed}]；dry_run=True 只報告不刪除。
+    """
+    report = []
+    for pid in _all_proposal_ids():
+        copies = find_proposal_copies(pid)
+        if len(copies) < 2:
+            continue
+        keep_folder, _ = choose_proposal_winner(copies)
+        removed = [folder for folder, _ in copies if folder != keep_folder]
+        if not dry_run:
+            for folder in removed:
+                for ext in ("json", "md"):
+                    path = _proposal_path(folder, pid, ext)
+                    if os.path.exists(path):
+                        os.remove(path)
+        report.append({"proposal_id": pid, "kept": keep_folder, "removed": removed})
+    return report
+
+
 def get_multi_agent_state():
     """讀取 argon_multi_agent/ 目錄下最新研究 Session、提案狀態與設定，供前端管理介面與 CLI 查詢"""
     ensure_ma_directories()
@@ -928,80 +1041,54 @@ def get_multi_agent_state():
     with open(hist_file, "r", encoding="utf-8") as f:
         bundle = json.load(f)
 
-    # 動態掃描 pending / approved / rejected / implemented 資料夾以同步最新核准狀態
-    # 同一個提案編號若同時存在於多個資料夾 (例如舊的 pending 殘留 + 已 implemented)，
-    # 以「較後面的狀態」為準：folder 掃描順序即優先順序，後者覆蓋前者，避免畫面出現重複提案。
-    by_id = {}
-    for folder, status_name in [
-        ("pending", "PENDING_APPROVAL"),
-        ("approved", "APPROVED_BY_USER"),
-        ("rejected", "REJECTED_BY_USER"),
-        ("implemented", "IMPLEMENTED_ON_BRANCH")
-    ]:
-        pdir = os.path.join(MA_ROOT, "proposals", folder)
-        if os.path.exists(pdir):
-            for fname in sorted(os.listdir(pdir)):
-                if fname.endswith(".json"):
-                    with open(os.path.join(pdir, fname), "r", encoding="utf-8") as pf:
-                        p_obj = json.load(pf)
-                        p_obj["status"] = status_name
-                        by_id[p_obj["proposal_id"]] = p_obj
-
-    all_proposals = sorted(by_id.values(), key=lambda x: x["proposal_id"])
-    bundle["phase6_proposals"] = all_proposals
+    bundle["phase6_proposals"] = list_proposals()
     return bundle
 
 
 def update_proposal_approval_status(proposal_id, decision, user_note=""):
     """
-    處理使用者對單一提案或全部提案的批准/拒絕/重研指令：
-    decision: 'APPROVE' | 'REJECT' | 'RE_RESEARCH'
+    處理使用者對單一提案的決定：APPROVE | REJECT | RE_RESEARCH | MARK_IMPLEMENTED。
+    只允許 PROPOSAL_TRANSITIONS 內的轉換，否則拋出 InvalidProposalTransition。
     只移動 argon_multi_agent/proposals/ 下的提案狀態檔並記錄審計日誌，不會自動偷改正式分支！
     """
     ensure_ma_directories()
-    found_path = None
-    found_obj = None
-    # 由最終狀態往前找：若舊的 pending 殘留與 implemented 並存，應以 implemented 那份為準
-    for folder in ["implemented", "rejected", "approved", "pending"]:
-        p = os.path.join(MA_ROOT, "proposals", folder, f"{proposal_id}.json")
-        if os.path.exists(p):
-            found_path = p
-            with open(p, "r", encoding="utf-8") as f:
-                found_obj = json.load(f)
-            break
-
-    if not found_obj:
+    copies = find_proposal_copies(proposal_id)
+    if not copies:
         raise ValueError(f"找不到提案編號: {proposal_id}")
+    folder, obj = choose_proposal_winner(copies)
 
-    target_folder = "pending"
-    new_status = "PENDING_APPROVAL"
-    if decision == "APPROVE":
-        target_folder = "approved"
-        new_status = "APPROVED_BY_USER"
-    elif decision == "REJECT":
-        target_folder = "rejected"
-        new_status = "REJECTED_BY_USER"
-    elif decision == "RE_RESEARCH":
-        target_folder = "pending"
-        new_status = "RE_RESEARCH_REQUESTED"
+    allowed = PROPOSAL_TRANSITIONS[folder]
+    if decision not in allowed:
+        choices = "、".join(allowed) if allowed else "無 (終態)"
+        raise InvalidProposalTransition(
+            f"提案 {proposal_id} 目前為 {FOLDER_STATUS[folder]}，不允許執行 {decision}；可用操作：{choices}")
+    target_folder = allowed[decision]
+    new_status = "RE_RESEARCH_REQUESTED" if decision == "RE_RESEARCH" else FOLDER_STATUS[target_folder]
 
-    found_obj["status"] = new_status
-    found_obj["user_decision_at"] = datetime.now(TW_TZ).strftime("%Y-%m-%dT%H:%M:%S+08:00")
-    found_obj["user_decision_note"] = user_note or f"使用者執行操作：{decision}"
+    obj["status"] = new_status
+    obj["user_decision_at"] = datetime.now(TW_TZ).strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    obj["user_decision_note"] = user_note or f"使用者執行操作：{decision}"
 
-    new_json_path = os.path.join(MA_ROOT, "proposals", target_folder, f"{proposal_id}.json")
-    if found_path and os.path.abspath(found_path) != os.path.abspath(new_json_path):
-        os.remove(found_path)
-        old_md = found_path.replace(".json", ".md")
-        if os.path.exists(old_md):
-            new_md = new_json_path.replace(".json", ".md")
-            os.replace(old_md, new_md)
-
+    # 先寫入新位置，再移除舊位置 (中途失敗時至少不會遺失提案)
+    new_json_path = _proposal_path(target_folder, proposal_id)
+    os.makedirs(os.path.dirname(new_json_path), exist_ok=True)
     with open(new_json_path, "w", encoding="utf-8") as f:
-        json.dump(found_obj, f, ensure_ascii=False, indent=2)
+        json.dump(obj, f, ensure_ascii=False, indent=2)
+
+    old_md = _proposal_path(folder, proposal_id, "md")
+    new_md = _proposal_path(target_folder, proposal_id, "md")
+    if folder != target_folder and os.path.exists(old_md):
+        os.replace(old_md, new_md)
+    for other_folder, _ in copies:
+        if other_folder == target_folder:
+            continue
+        for ext in ("json", "md"):
+            path = _proposal_path(other_folder, proposal_id, ext)
+            if os.path.exists(path):
+                os.remove(path)
 
     log_agent_activity("SESSION-20261122-001", "USER_APPROVER", "APPROVAL_GATE", f"提案 {proposal_id} 狀態更新為 {new_status} ({user_note})")
-    return found_obj
+    return obj
 
 
 if __name__ == "__main__":

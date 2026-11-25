@@ -41,7 +41,8 @@ if BASE_ROOT_DIR not in sys.path:
 from argon_multi_agent.engine.multi_agent_orchestrator import (
     get_multi_agent_state,
     run_full_multi_agent_session,
-    update_proposal_approval_status
+    update_proposal_approval_status,
+    InvalidProposalTransition,
 )
 
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
@@ -814,10 +815,16 @@ def _handle_proposal_decision(payload):
     decision = str(payload.get("decision", "APPROVE")).strip()
     note = str(payload.get("note", "")).strip()[:500]
     if pid == "ALL":
+        # 批次操作：只套用在「目前狀態允許此操作」的提案；其餘 (例如已實作的) 略過並回報，而不是讓整批失敗或被改壞
         st = get_multi_agent_state()
+        applied, skipped = [], []
         for p in st.get("phase6_proposals", []):
-            update_proposal_approval_status(p["proposal_id"], decision, note)
-        res_obj = {"batch": "ALL", "decision": decision}
+            try:
+                update_proposal_approval_status(p["proposal_id"], decision, note)
+                applied.append(p["proposal_id"])
+            except InvalidProposalTransition as e:
+                skipped.append({"proposal_id": p["proposal_id"], "reason": str(e)})
+        res_obj = {"batch": "ALL", "decision": decision, "applied": applied, "skipped": skipped}
     else:
         res_obj = update_proposal_approval_status(pid, decision, note)
     return {"status": "ok", "proposal": res_obj, "multi_agent_center": get_multi_agent_state()}

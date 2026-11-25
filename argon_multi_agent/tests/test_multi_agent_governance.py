@@ -57,7 +57,14 @@ from engine.multi_agent_orchestrator import (
     compute_production_checksums,
     safe_write_ma_file,
     update_proposal_approval_status,
-    extract_live_system_evidence
+    extract_live_system_evidence,
+    FOLDER_STATUS,
+    PROPOSAL_FOLDERS,
+    PROPOSAL_TRANSITIONS,
+    InvalidProposalTransition,
+    find_proposal_copies,
+    list_proposals,
+    reconcile_proposals,
 )
 
 
@@ -183,21 +190,19 @@ class TestArgonMultiAgentGovernance(unittest.TestCase):
 
     def test_07_failure_recovery_and_state_persistence(self):
         """測試 7：驗證提案審批狀態機切換 (PENDING -> APPROVED -> PENDING) 與持久化恢復能力"""
-        pid = "ETF-IMPROVE-20261122-001"
-        updated = update_proposal_approval_status(pid, "APPROVE", "單元測試模擬批准")
-        self.assertEqual(updated["status"], "APPROVED_BY_USER")
+        # repo 內的提案都已是 implemented (終態)，改用測試專用的待審提案，不依賴 repo 資料
+        pid = "ETF-IMPROVE-TEST-007"
+        _make_pending_proposal(pid)
+        try:
+            updated = update_proposal_approval_status(pid, "APPROVE", "單元測試模擬批准")
+            self.assertEqual(updated["status"], "APPROVED_BY_USER")
+            self.assertEqual(_folders_of(pid), ["approved"])
 
-        # 恢復為 PENDING_APPROVAL 等待真實使用者於 UI 裁決
-        restored = update_proposal_approval_status(pid, "RE_RESEARCH", "單元測試驗證完畢，重置為待使用者審核狀態")
-        self.assertIn(restored["status"], ("RE_RESEARCH_REQUESTED", "PENDING_APPROVAL"))
-        # 確保檔案回到 pending 目錄
-        pending_file = os.path.join(MA_ROOT, "proposals", "pending", f"{pid}.json")
-        self.assertTrue(os.path.exists(pending_file))
-        with open(pending_file, "r", encoding="utf-8") as f:
-            obj = json.load(f)
-        obj["status"] = "PENDING_APPROVAL"
-        with open(pending_file, "w", encoding="utf-8") as f:
-            json.dump(obj, f, ensure_ascii=False, indent=2)
+            restored = update_proposal_approval_status(pid, "RE_RESEARCH", "單元測試驗證完畢，重置為待使用者審核狀態")
+            self.assertEqual(restored["status"], "RE_RESEARCH_REQUESTED")
+            self.assertEqual(_folders_of(pid), ["pending"])     # 檔案回到 pending，且只有這一處
+        finally:
+            _remove_proposal(pid)
 
     def test_08_no_resource_conflict_across_agents(self):
         """測試 8：模擬 6 位 Agent 並行開啟 SQLite 唯讀連線執行實證查詢，驗證零鎖表與零資源衝突"""
@@ -214,19 +219,166 @@ class TestArgonMultiAgentGovernance(unittest.TestCase):
             self.assertEqual(rows_len, 28)
 
     def test_09_proposal_ids_unique_and_final_state_wins(self):
-        """同一提案編號同時存在於 pending 與 implemented 時，只能出現一次，且以 implemented 為準"""
-        from argon_multi_agent.engine.multi_agent_orchestrator import get_multi_agent_state
-        proposals = get_multi_agent_state()["phase6_proposals"]
-        ids = [p["proposal_id"] for p in proposals]
-        self.assertEqual(len(ids), len(set(ids)), "提案編號重複")
-        pending_dir = os.path.join(os.environ["TWFIN_MA_ROOT"], "proposals", "pending")
-        impl_dir = os.path.join(os.environ["TWFIN_MA_ROOT"], "proposals", "implemented")
-        pending_files = {f for f in os.listdir(pending_dir) if f.endswith(".json")}
-        impl_files = {f for f in os.listdir(impl_dir) if f.endswith(".json")}
-        both = pending_files & impl_files
-        by_id = {p["proposal_id"]: p for p in proposals}
-        for fname in both:
-            self.assertEqual(by_id[fname[:-5]]["status"], "IMPLEMENTED_ON_BRANCH")
+        """舊資料遺留：同一提案同時存在於 pending 與 implemented 時，只能出現一次，且以 implemented 為準"""
+        pid = "ETF-IMPROVE-TEST-009"
+        _make_pending_proposal(pid)
+        try:
+            update_proposal_approval_status(pid, "APPROVE")
+            update_proposal_approval_status(pid, "MARK_IMPLEMENTED")
+            _write_proposal("pending", pid, status="PENDING_APPROVAL")      # 模擬舊版重跑研究留下的殘留
+            self.assertEqual(sorted(_folders_of(pid)), ["implemented", "pending"])
+
+            proposals = get_multi_agent_state()["phase6_proposals"]
+            ids = [p["proposal_id"] for p in proposals]
+            self.assertEqual(len(ids), len(set(ids)), "提案編號重複")
+            self.assertEqual({p["proposal_id"]: p for p in proposals}[pid]["status"], "IMPLEMENTED_ON_BRANCH")
+        finally:
+            _remove_proposal(pid)
+
+
+# ---------------------------------------------------------------------------
+# 提案狀態機與資料一致性 (在暫存副本上執行，不影響 repo)
+# ---------------------------------------------------------------------------
+def _proposals_dir(folder):
+    return os.path.join(MA_ROOT, "proposals", folder)
+
+
+def _write_proposal(folder, pid, status="PENDING_APPROVAL"):
+    obj = {"proposal_id": pid, "title": "測試提案", "priority": "P2", "status": status,
+           "proposer_agents": ["TEST"], "score_breakdown": {"total_score": 50}}
+    os.makedirs(_proposals_dir(folder), exist_ok=True)
+    with open(os.path.join(_proposals_dir(folder), f"{pid}.json"), "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False)
+    with open(os.path.join(_proposals_dir(folder), f"{pid}.md"), "w", encoding="utf-8") as f:
+        f.write(f"# {pid}\n")
+
+
+def _make_pending_proposal(pid):
+    _write_proposal("pending", pid)
+
+
+def _folders_of(pid):
+    """提案的 .json 目前出現在哪些資料夾；同時確認 .md 一定跟 .json 在同一處。"""
+    folders = [f for f in PROPOSAL_FOLDERS if os.path.exists(os.path.join(_proposals_dir(f), f"{pid}.json"))]
+    md_folders = [f for f in PROPOSAL_FOLDERS if os.path.exists(os.path.join(_proposals_dir(f), f"{pid}.md"))]
+    assert sorted(md_folders) == sorted(folders), f"{pid} 的 .md 與 .json 不在同一個資料夾：{md_folders} vs {folders}"
+    return folders
+
+
+def _remove_proposal(pid):
+    for f in PROPOSAL_FOLDERS:
+        for ext in ("json", "md"):
+            path = os.path.join(_proposals_dir(f), f"{pid}.{ext}")
+            if os.path.exists(path):
+                os.remove(path)
+
+
+class TestProposalStateMachine(unittest.TestCase):
+    PID = "ETF-IMPROVE-TEST-100"
+
+    def setUp(self):
+        _remove_proposal(self.PID)
+
+    def tearDown(self):
+        _remove_proposal(self.PID)
+
+    def _put(self, folder):
+        _write_proposal(folder, self.PID, status=FOLDER_STATUS[folder])
+
+    def test_repo_data_each_proposal_lives_in_exactly_one_folder(self):
+        """已提交的研究紀錄：每個提案編號只能在一個資料夾，.md 與 .json 成對，沒有孤兒檔"""
+        problems = []
+        seen = {}
+        for folder in PROPOSAL_FOLDERS:
+            d = _proposals_dir(folder)
+            if not os.path.isdir(d):
+                continue
+            names = os.listdir(d)
+            jsons = {n[:-5] for n in names if n.endswith(".json")}
+            mds = {n[:-3] for n in names if n.endswith(".md")}
+            for orphan in jsons ^ mds:
+                problems.append(f"{folder}/{orphan} 的 .json / .md 不成對")
+            for pid in jsons:
+                if pid in seen:
+                    problems.append(f"{pid} 同時存在於 {seen[pid]} 與 {folder}")
+                seen[pid] = folder
+        self.assertEqual(problems, [])
+        self.assertEqual(len(list_proposals()), len(seen))
+
+    def test_every_allowed_transition_moves_files_to_exactly_one_folder(self):
+        for source, decisions in PROPOSAL_TRANSITIONS.items():
+            for decision, target in decisions.items():
+                with self.subTest(source=source, decision=decision):
+                    _remove_proposal(self.PID)
+                    self._put(source)
+                    obj = update_proposal_approval_status(self.PID, decision, "測試")
+                    self.assertEqual(_folders_of(self.PID), [target])
+                    expected = "RE_RESEARCH_REQUESTED" if decision == "RE_RESEARCH" else FOLDER_STATUS[target]
+                    self.assertEqual(obj["status"], expected)
+                    self.assertIn("user_decision_at", obj)
+
+    def test_every_disallowed_transition_is_rejected_and_changes_nothing(self):
+        all_decisions = {"APPROVE", "REJECT", "RE_RESEARCH", "MARK_IMPLEMENTED"}
+        for source, decisions in PROPOSAL_TRANSITIONS.items():
+            for decision in all_decisions - set(decisions):
+                with self.subTest(source=source, decision=decision):
+                    _remove_proposal(self.PID)
+                    self._put(source)
+                    with self.assertRaises(InvalidProposalTransition):
+                        update_proposal_approval_status(self.PID, decision)
+                    self.assertEqual(_folders_of(self.PID), [source])
+
+    def test_implemented_is_terminal(self):
+        self.assertEqual(PROPOSAL_TRANSITIONS["implemented"], {})
+        self._put("implemented")
+        for decision in ("APPROVE", "REJECT", "RE_RESEARCH", "MARK_IMPLEMENTED"):
+            with self.assertRaises(InvalidProposalTransition):
+                update_proposal_approval_status(self.PID, decision)
+
+    def test_unknown_decision_rejected_instead_of_silently_resetting(self):
+        # 舊版把未知 decision 當成「退回 pending」，打錯字就會讓已批准的提案丟失狀態
+        self._put("approved")
+        with self.assertRaises(InvalidProposalTransition):
+            update_proposal_approval_status(self.PID, "APROVE")
+        self.assertEqual(_folders_of(self.PID), ["approved"])
+
+    def test_unknown_proposal_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            update_proposal_approval_status("ETF-IMPROVE-DOES-NOT-EXIST", "APPROVE")
+
+    def test_transition_cleans_up_stale_duplicates(self):
+        self._put("pending")
+        self._put("approved")      # 殘留的重複
+        update_proposal_approval_status(self.PID, "MARK_IMPLEMENTED")
+        self.assertEqual(_folders_of(self.PID), ["implemented"])
+
+    def test_rerunning_a_research_session_does_not_recreate_or_overwrite_proposals(self):
+        proposals = list_proposals()
+        ids = [p["proposal_id"] for p in proposals if not p["proposal_id"].startswith("ETF-IMPROVE-TEST")]
+        before = {pid: _folders_of(pid) for pid in ids}
+        # 模擬使用者對其中一個提案要求重新研究 (pending 且帶有 RE_RESEARCH_REQUESTED)
+        self._put("approved")
+        update_proposal_approval_status(self.PID, "RE_RESEARCH", "請補充反方證據")
+        run_full_multi_agent_session()
+        self.assertEqual({pid: _folders_of(pid) for pid in ids}, before)        # 已實作的不會在 pending 再出現一份
+        self.assertEqual(_folders_of(self.PID), ["pending"])
+        self.assertEqual(find_proposal_copies(self.PID)[0][1]["status"], "RE_RESEARCH_REQUESTED")  # 標記沒被蓋掉
+
+    def test_reconcile_keeps_most_advanced_copy_and_dry_run_changes_nothing(self):
+        self._put("pending")
+        self._put("rejected")
+        report = [r for r in reconcile_proposals(dry_run=True) if r["proposal_id"] == self.PID]
+        self.assertEqual(report, [{"proposal_id": self.PID, "kept": "rejected", "removed": ["pending"]}])
+        self.assertEqual(sorted(_folders_of(self.PID)), ["pending", "rejected"])     # dry run 不動檔案
+        reconcile_proposals()
+        self.assertEqual(_folders_of(self.PID), ["rejected"])
+        self.assertEqual([r for r in reconcile_proposals() if r["proposal_id"] == self.PID], [])   # 冪等
+
+    def test_list_status_follows_folder_not_stale_json_field(self):
+        # JSON 內 status 只是寫入當下的快照；顯示的狀態以資料夾為準
+        _write_proposal("implemented", self.PID, status="APPROVED_BY_USER")
+        listed = {p["proposal_id"]: p for p in list_proposals()}
+        self.assertEqual(listed[self.PID]["status"], "IMPLEMENTED_ON_BRANCH")
 
 
 if __name__ == "__main__":

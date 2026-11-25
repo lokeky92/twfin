@@ -139,6 +139,38 @@ class TestServerAPI(unittest.TestCase):
         self.assertIn("uptime_sec", data)
         self.assertIn("dashboard_cache_ready", data)
 
+    def _seed_pending_proposal(self, pid):
+        root = os.path.join(os.environ["TWFIN_MA_ROOT"], "proposals", "pending")
+        os.makedirs(root, exist_ok=True)
+        with open(os.path.join(root, f"{pid}.json"), "w", encoding="utf-8") as f:
+            json.dump({"proposal_id": pid, "title": "t", "priority": "P2", "status": "PENDING_APPROVAL",
+                       "proposer_agents": ["T"], "score_breakdown": {"total_score": 1}}, f)
+        with open(os.path.join(root, f"{pid}.md"), "w", encoding="utf-8") as f:
+            f.write("# t\n")
+
+    def test_proposal_decision_rejects_invalid_transition_with_400(self):
+        # repo 內的提案都已 implemented (終態)，不可再被批准
+        status, body = self._post("/api/multi_agent/proposal_decision",
+                                  {"proposal_id": "ETF-IMPROVE-20261122-001", "decision": "APPROVE"})
+        self.assertEqual(status, 400)
+        self.assertIn("不允許", body["message"])
+        status, body = self._post("/api/multi_agent/proposal_decision",
+                                  {"proposal_id": "ETF-IMPROVE-20261122-001", "decision": "NOT_A_DECISION"})
+        self.assertEqual(status, 400)
+
+    def test_batch_decision_applies_where_allowed_and_reports_skipped(self):
+        pid = "ETF-IMPROVE-TEST-BATCH"
+        self._seed_pending_proposal(pid)
+        status, body = self._post("/api/multi_agent/proposal_decision", {"proposal_id": "ALL", "decision": "APPROVE"})
+        self.assertEqual(status, 200)
+        res = body["proposal"]
+        self.assertEqual(res["applied"], [pid])                       # 只有待審的那個被批准
+        skipped_ids = {s["proposal_id"] for s in res["skipped"]}
+        self.assertIn("ETF-IMPROVE-20261122-001", skipped_ids)        # 已實作的被略過，不會被改回 approved
+        by_id = {p["proposal_id"]: p["status"] for p in body["multi_agent_center"]["phase6_proposals"]}
+        self.assertEqual(by_id[pid], "APPROVED_BY_USER")
+        self.assertEqual(by_id["ETF-IMPROVE-20261122-001"], "IMPLEMENTED_ON_BRANCH")
+
     def test_head_requests_supported_without_body(self):
         # 保活監控 (UptimeRobot 等) 預設送 HEAD；必須回 200、有 Content-Length、且不能夾帶內容
         for path in ("/api/health", "/api/dashboard", "/"):
