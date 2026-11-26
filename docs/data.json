@@ -1,16 +1,16 @@
 {
- "generated_at": "2026-11-26 00:02:45 (UTC+8)",
+ "generated_at": "2026-11-26 17:49:09 (UTC+8)",
  "data_provenance": {
   "live_data_available": true,
-  "last_live_ingestion": "2026-11-26T00:02:22+08:00",
+  "last_live_ingestion": "2026-11-26T17:48:36+08:00",
   "source_status": [
    {
     "source_key": "bfi82u",
     "label": "三大法人買賣金額統計 (BFI82U)",
     "status": "OK",
-    "last_attempt_at": "2026-11-26T00:02:22+08:00",
-    "last_success_at": "2026-11-26T00:02:22+08:00",
-    "data_date": "2026-11-25",
+    "last_attempt_at": "2026-11-26T17:48:36+08:00",
+    "last_success_at": "2026-11-26T17:48:36+08:00",
+    "data_date": "2026-11-26",
     "record_count": 6,
     "prev_record_count": 6,
     "message": "正常"
@@ -19,9 +19,9 @@
     "source_key": "mi_index",
     "label": "大盤與類股指數 (MI_INDEX)",
     "status": "OK",
-    "last_attempt_at": "2026-11-26T00:02:22+08:00",
-    "last_success_at": "2026-11-26T00:02:22+08:00",
-    "data_date": "1151124",
+    "last_attempt_at": "2026-11-26T17:48:36+08:00",
+    "last_success_at": "2026-11-26T17:48:36+08:00",
+    "data_date": "1151125",
     "record_count": 267,
     "prev_record_count": 267,
     "message": "正常"
@@ -30,10 +30,10 @@
     "source_key": "tpex_3i",
     "label": "上櫃三大法人個股買賣超",
     "status": "OK",
-    "last_attempt_at": "2026-11-26T00:02:22+08:00",
-    "last_success_at": "2026-11-26T00:02:22+08:00",
-    "data_date": "20261125",
-    "record_count": 900,
+    "last_attempt_at": "2026-11-26T17:48:36+08:00",
+    "last_success_at": "2026-11-26T17:48:36+08:00",
+    "data_date": "20261126",
+    "record_count": 894,
     "prev_record_count": 900,
     "message": "正常"
    },
@@ -41,8 +41,8 @@
     "source_key": "tpex_pe",
     "label": "上櫃本益比/股價淨值比",
     "status": "OK",
-    "last_attempt_at": "2026-11-26T00:02:22+08:00",
-    "last_success_at": "2026-11-26T00:02:22+08:00",
+    "last_attempt_at": "2026-11-26T17:48:36+08:00",
+    "last_success_at": "2026-11-26T17:48:36+08:00",
     "data_date": "1151125",
     "record_count": 894,
     "prev_record_count": 894,
@@ -52,8 +52,8 @@
     "source_key": "tpex_rev",
     "label": "上櫃公司月營收 (MOPS t187ap05_O)",
     "status": "OK",
-    "last_attempt_at": "2026-11-26T00:02:22+08:00",
-    "last_success_at": "2026-11-26T00:02:22+08:00",
+    "last_attempt_at": "2026-11-26T17:48:36+08:00",
+    "last_success_at": "2026-11-26T17:48:36+08:00",
     "data_date": "2026-10",
     "record_count": 898,
     "prev_record_count": 898,
@@ -63,9 +63,9 @@
     "source_key": "twse_pe",
     "label": "上市本益比/股價淨值比 (BWIBBU_ALL)",
     "status": "OK",
-    "last_attempt_at": "2026-11-26T00:02:22+08:00",
-    "last_success_at": "2026-11-26T00:02:22+08:00",
-    "data_date": "1151124",
+    "last_attempt_at": "2026-11-26T17:48:36+08:00",
+    "last_success_at": "2026-11-26T17:48:36+08:00",
+    "data_date": "1151125",
     "record_count": 1088,
     "prev_record_count": 1088,
     "message": "正常"
@@ -74,8 +74,8 @@
     "source_key": "twse_rev",
     "label": "上市公司月營收 (MOPS t187ap05_L)",
     "status": "OK",
-    "last_attempt_at": "2026-11-26T00:02:22+08:00",
-    "last_success_at": "2026-11-26T00:02:22+08:00",
+    "last_attempt_at": "2026-11-26T17:48:36+08:00",
+    "last_success_at": "2026-11-26T17:48:36+08:00",
     "data_date": "2026-10",
     "record_count": 1091,
     "prev_record_count": 1091,
@@ -85,10 +85,10 @@
     "source_key": "twse_t86",
     "label": "上市三大法人個股買賣超 (T86)",
     "status": "OK",
-    "last_attempt_at": "2026-11-26T00:02:22+08:00",
-    "last_success_at": "2026-11-26T00:02:22+08:00",
-    "data_date": "20261125",
-    "record_count": 1361,
+    "last_attempt_at": "2026-11-26T17:48:36+08:00",
+    "last_success_at": "2026-11-26T17:48:36+08:00",
+    "data_date": "20261126",
+    "record_count": 1358,
     "prev_record_count": 1361,
     "message": "正常"
    }
@@ -164,7 +164,7 @@
   "snapshot_days": 2,
   "first_snapshot": "2026-11-25",
   "last_snapshot": "2026-11-26",
-  "index_last_date": "2026-11-24",
+  "index_last_date": "2026-11-25",
   "index_trading_days_after_first_snapshot": 0,
   "signal_count": 26,
   "horizon_results": [
@@ -212,72 +212,72 @@
    {
     "industry_id": "IND_SEMI_FOUNDRY",
     "index_name": "臺灣晶圓製造報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_SEMI_EQUIP",
     "index_name": "半導體類報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_IC_DESIGN",
     "index_name": "特選臺灣IC設計報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_AI_SERVER",
     "index_name": "電腦及週邊設備類報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_THERMAL",
     "index_name": "其他電子類報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_CPO_NET",
     "index_name": "通信網路類報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_PCB_ABF",
     "index_name": "電子零組件類報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_FIN_HOLDING",
     "index_name": "金融保險類報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_SHIPPING",
     "index_name": "航運類報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_POWER_GREEN",
     "index_name": "電機機械類報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_CONSTRUCTION",
     "index_name": "建材營造類報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_STEEL_PLASTIC",
     "index_name": "鋼鐵類報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_MACH_AUTO",
     "index_name": "汽車類報酬指數",
-    "index_points": 3
+    "index_points": 4
    },
    {
     "industry_id": "IND_BIO_RETAIL",
     "index_name": "生技醫療類報酬指數",
-    "index_points": 3
+    "index_points": 4
    }
   ],
   "any_matured": false
@@ -307,7 +307,7 @@
   "decision_dates": [],
   "current_week_pending": true,
   "first_entry": null,
-  "last_date": "2026-11-24",
+  "last_date": "2026-11-25",
   "strategies": [],
   "curve": null,
   "holdings_now": {}
@@ -752,7 +752,7 @@
  },
  "macro_latest": [
   {
-   "obs_id": 1063,
+   "obs_id": 1104,
    "metric_code": "INTL_DXY",
    "period_covered": "2026-11-20",
    "release_date": "2026-11-21",
@@ -776,7 +776,7 @@
    "source_url": "https://finance.yahoo.com/"
   },
   {
-   "obs_id": 1065,
+   "obs_id": 1106,
    "metric_code": "INTL_SOX_INDEX",
    "period_covered": "2026-11-20",
    "release_date": "2026-11-21",
@@ -800,7 +800,7 @@
    "source_url": "https://finance.yahoo.com/"
   },
   {
-   "obs_id": 1036,
+   "obs_id": 1077,
    "metric_code": "TW_BANK_LOAN_INV_YOY",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -824,7 +824,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1059,
+   "obs_id": 1100,
    "metric_code": "TW_CPI_YOY",
    "period_covered": "2026-10",
    "release_date": "2026-11-05",
@@ -848,7 +848,7 @@
    "source_url": "https://www.stat.gov.tw/"
   },
   {
-   "obs_id": 1055,
+   "obs_id": 1096,
    "metric_code": "TW_CUSTOMS_EXPORTS",
    "period_covered": "2026-10",
    "release_date": "2026-11-08",
@@ -872,7 +872,7 @@
    "source_url": "https://web02.mof.gov.tw/njswww/WebMain.aspx"
   },
   {
-   "obs_id": 1038,
+   "obs_id": 1079,
    "metric_code": "TW_DOM_BANK_DEPOSITS",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -896,7 +896,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1037,
+   "obs_id": 1078,
    "metric_code": "TW_DOM_BANK_LOANS",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -920,7 +920,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1053,
+   "obs_id": 1094,
    "metric_code": "TW_EXPORT_ORDERS",
    "period_covered": "2026-10",
    "release_date": "2026-11-20",
@@ -944,7 +944,7 @@
    "source_url": "https://www.moea.gov.tw/Mns/dos/home/Home.aspx"
   },
   {
-   "obs_id": 1045,
+   "obs_id": 1086,
    "metric_code": "TW_FIVE_BANK_MORTGAGE",
    "period_covered": "2026-10",
    "release_date": "2026-11-20",
@@ -968,7 +968,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1043,
+   "obs_id": 1084,
    "metric_code": "TW_FIVE_BANK_NEW_RATE",
    "period_covered": "2026-10",
    "release_date": "2026-11-20",
@@ -992,7 +992,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1041,
+   "obs_id": 1082,
    "metric_code": "TW_FX_DEPOSIT_BAL",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -1016,7 +1016,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1048,
+   "obs_id": 1089,
    "metric_code": "TW_FX_RESERVES",
    "period_covered": "2026-10",
    "release_date": "2026-11-05",
@@ -1040,7 +1040,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1057,
+   "obs_id": 1098,
    "metric_code": "TW_GDP_YOY",
    "period_covered": "2026-Q3",
    "release_date": "2026-10-30",
@@ -1064,7 +1064,7 @@
    "source_url": "https://www.stat.gov.tw/"
   },
   {
-   "obs_id": 1034,
+   "obs_id": 1075,
    "metric_code": "TW_M1B_M2_SPREAD",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -1088,7 +1088,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1028,
+   "obs_id": 1069,
    "metric_code": "TW_M1B_YOY",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -1112,7 +1112,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1031,
+   "obs_id": 1072,
    "metric_code": "TW_M2_YOY",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -1136,7 +1136,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1060,
+   "obs_id": 1101,
    "metric_code": "TW_MOPS_TOTAL_REV",
    "period_covered": "2026-10",
    "release_date": "2026-11-11",
@@ -1160,7 +1160,7 @@
    "source_url": "https://mops.twse.com.tw/"
   },
   {
-   "obs_id": 1051,
+   "obs_id": 1092,
    "metric_code": "TW_NDC_SCORE",
    "period_covered": "2026-09",
    "release_date": "2026-10-28",
@@ -1184,7 +1184,7 @@
    "source_url": "https://index.ndc.gov.tw/"
   },
   {
-   "obs_id": 1040,
+   "obs_id": 1081,
    "metric_code": "TW_SEC_GIRO_BAL",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -1208,7 +1208,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1066,
+   "obs_id": 1107,
    "metric_code": "TW_TAIEX_INDEX",
    "period_covered": "2026-11-20",
    "release_date": "2026-11-21",
@@ -1232,7 +1232,7 @@
    "source_url": "https://www.twse.com.tw/rwd/zh/fund/BFI82U"
   },
   {
-   "obs_id": 1064,
+   "obs_id": 1105,
    "metric_code": "TW_USD_TWD",
    "period_covered": "2026-11-20",
    "release_date": "2026-11-21",
@@ -1256,7 +1256,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1062,
+   "obs_id": 1103,
    "metric_code": "US_10Y_YIELD",
    "period_covered": "2026-11-20",
    "release_date": "2026-11-21",
@@ -1280,7 +1280,7 @@
    "source_url": "https://fred.stlouisfed.org/"
   },
   {
-   "obs_id": 1061,
+   "obs_id": 1102,
    "metric_code": "US_FED_RATE_UPPER",
    "period_covered": "2026-11",
    "release_date": "2026-11-20",
@@ -1307,7 +1307,7 @@
  "macro_series": {
   "INTL_DXY": [
    {
-    "obs_id": 1063,
+    "obs_id": 1104,
     "metric_code": "INTL_DXY",
     "period_covered": "2026-11-20",
     "release_date": "2026-11-21",
@@ -1333,7 +1333,7 @@
   ],
   "INTL_SOX_INDEX": [
    {
-    "obs_id": 1065,
+    "obs_id": 1106,
     "metric_code": "INTL_SOX_INDEX",
     "period_covered": "2026-11-20",
     "release_date": "2026-11-21",
@@ -1359,7 +1359,7 @@
   ],
   "TW_BANK_LOAN_INV_YOY": [
    {
-    "obs_id": 1035,
+    "obs_id": 1076,
     "metric_code": "TW_BANK_LOAN_INV_YOY",
     "period_covered": "2026-08",
     "release_date": "2026-09-24",
@@ -1383,7 +1383,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1036,
+    "obs_id": 1077,
     "metric_code": "TW_BANK_LOAN_INV_YOY",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -1409,7 +1409,7 @@
   ],
   "TW_CPI_YOY": [
    {
-    "obs_id": 1058,
+    "obs_id": 1099,
     "metric_code": "TW_CPI_YOY",
     "period_covered": "2026-09",
     "release_date": "2026-10-06",
@@ -1433,7 +1433,7 @@
     "source_url": "https://www.stat.gov.tw/"
    },
    {
-    "obs_id": 1059,
+    "obs_id": 1100,
     "metric_code": "TW_CPI_YOY",
     "period_covered": "2026-10",
     "release_date": "2026-11-05",
@@ -1459,7 +1459,7 @@
   ],
   "TW_CUSTOMS_EXPORTS": [
    {
-    "obs_id": 1054,
+    "obs_id": 1095,
     "metric_code": "TW_CUSTOMS_EXPORTS",
     "period_covered": "2026-09",
     "release_date": "2026-10-08",
@@ -1483,7 +1483,7 @@
     "source_url": "https://web02.mof.gov.tw/njswww/WebMain.aspx"
    },
    {
-    "obs_id": 1055,
+    "obs_id": 1096,
     "metric_code": "TW_CUSTOMS_EXPORTS",
     "period_covered": "2026-10",
     "release_date": "2026-11-08",
@@ -1509,7 +1509,7 @@
   ],
   "TW_DOM_BANK_DEPOSITS": [
    {
-    "obs_id": 1038,
+    "obs_id": 1079,
     "metric_code": "TW_DOM_BANK_DEPOSITS",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -1535,7 +1535,7 @@
   ],
   "TW_DOM_BANK_LOANS": [
    {
-    "obs_id": 1037,
+    "obs_id": 1078,
     "metric_code": "TW_DOM_BANK_LOANS",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -1561,7 +1561,7 @@
   ],
   "TW_EXPORT_ORDERS": [
    {
-    "obs_id": 1052,
+    "obs_id": 1093,
     "metric_code": "TW_EXPORT_ORDERS",
     "period_covered": "2026-09",
     "release_date": "2026-10-20",
@@ -1585,7 +1585,7 @@
     "source_url": "https://www.moea.gov.tw/Mns/dos/home/Home.aspx"
    },
    {
-    "obs_id": 1053,
+    "obs_id": 1094,
     "metric_code": "TW_EXPORT_ORDERS",
     "period_covered": "2026-10",
     "release_date": "2026-11-20",
@@ -1611,7 +1611,7 @@
   ],
   "TW_FIVE_BANK_MORTGAGE": [
    {
-    "obs_id": 1044,
+    "obs_id": 1085,
     "metric_code": "TW_FIVE_BANK_MORTGAGE",
     "period_covered": "2026-09",
     "release_date": "2026-10-22",
@@ -1635,7 +1635,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1045,
+    "obs_id": 1086,
     "metric_code": "TW_FIVE_BANK_MORTGAGE",
     "period_covered": "2026-10",
     "release_date": "2026-11-20",
@@ -1661,7 +1661,7 @@
   ],
   "TW_FIVE_BANK_NEW_RATE": [
    {
-    "obs_id": 1042,
+    "obs_id": 1083,
     "metric_code": "TW_FIVE_BANK_NEW_RATE",
     "period_covered": "2026-09",
     "release_date": "2026-10-22",
@@ -1685,7 +1685,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1043,
+    "obs_id": 1084,
     "metric_code": "TW_FIVE_BANK_NEW_RATE",
     "period_covered": "2026-10",
     "release_date": "2026-11-20",
@@ -1711,7 +1711,7 @@
   ],
   "TW_FX_DEPOSIT_BAL": [
    {
-    "obs_id": 1041,
+    "obs_id": 1082,
     "metric_code": "TW_FX_DEPOSIT_BAL",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -1737,7 +1737,7 @@
   ],
   "TW_FX_RESERVES": [
    {
-    "obs_id": 1046,
+    "obs_id": 1087,
     "metric_code": "TW_FX_RESERVES",
     "period_covered": "2026-08",
     "release_date": "2026-09-05",
@@ -1761,7 +1761,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1047,
+    "obs_id": 1088,
     "metric_code": "TW_FX_RESERVES",
     "period_covered": "2026-09",
     "release_date": "2026-10-05",
@@ -1785,7 +1785,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1048,
+    "obs_id": 1089,
     "metric_code": "TW_FX_RESERVES",
     "period_covered": "2026-10",
     "release_date": "2026-11-05",
@@ -1811,7 +1811,7 @@
   ],
   "TW_GDP_YOY": [
    {
-    "obs_id": 1056,
+    "obs_id": 1097,
     "metric_code": "TW_GDP_YOY",
     "period_covered": "2026-Q2",
     "release_date": "2026-08-15",
@@ -1835,7 +1835,7 @@
     "source_url": "https://www.stat.gov.tw/"
    },
    {
-    "obs_id": 1057,
+    "obs_id": 1098,
     "metric_code": "TW_GDP_YOY",
     "period_covered": "2026-Q3",
     "release_date": "2026-10-30",
@@ -1861,7 +1861,7 @@
   ],
   "TW_M1B_M2_SPREAD": [
    {
-    "obs_id": 1032,
+    "obs_id": 1073,
     "metric_code": "TW_M1B_M2_SPREAD",
     "period_covered": "2026-07",
     "release_date": "2026-08-24",
@@ -1885,7 +1885,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1033,
+    "obs_id": 1074,
     "metric_code": "TW_M1B_M2_SPREAD",
     "period_covered": "2026-08",
     "release_date": "2026-09-24",
@@ -1909,7 +1909,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1034,
+    "obs_id": 1075,
     "metric_code": "TW_M1B_M2_SPREAD",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -1935,7 +1935,7 @@
   ],
   "TW_M1B_YOY": [
    {
-    "obs_id": 1026,
+    "obs_id": 1067,
     "metric_code": "TW_M1B_YOY",
     "period_covered": "2026-07",
     "release_date": "2026-08-24",
@@ -1959,7 +1959,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1027,
+    "obs_id": 1068,
     "metric_code": "TW_M1B_YOY",
     "period_covered": "2026-08",
     "release_date": "2026-09-24",
@@ -1983,7 +1983,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1028,
+    "obs_id": 1069,
     "metric_code": "TW_M1B_YOY",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -2009,7 +2009,7 @@
   ],
   "TW_M2_YOY": [
    {
-    "obs_id": 1029,
+    "obs_id": 1070,
     "metric_code": "TW_M2_YOY",
     "period_covered": "2026-07",
     "release_date": "2026-08-24",
@@ -2033,7 +2033,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1030,
+    "obs_id": 1071,
     "metric_code": "TW_M2_YOY",
     "period_covered": "2026-08",
     "release_date": "2026-09-24",
@@ -2057,7 +2057,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1031,
+    "obs_id": 1072,
     "metric_code": "TW_M2_YOY",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -2083,7 +2083,7 @@
   ],
   "TW_MOPS_TOTAL_REV": [
    {
-    "obs_id": 1060,
+    "obs_id": 1101,
     "metric_code": "TW_MOPS_TOTAL_REV",
     "period_covered": "2026-10",
     "release_date": "2026-11-11",
@@ -2109,7 +2109,7 @@
   ],
   "TW_NDC_SCORE": [
    {
-    "obs_id": 1049,
+    "obs_id": 1090,
     "metric_code": "TW_NDC_SCORE",
     "period_covered": "2026-07",
     "release_date": "2026-08-27",
@@ -2133,7 +2133,7 @@
     "source_url": "https://index.ndc.gov.tw/"
    },
    {
-    "obs_id": 1050,
+    "obs_id": 1091,
     "metric_code": "TW_NDC_SCORE",
     "period_covered": "2026-08",
     "release_date": "2026-09-28",
@@ -2157,7 +2157,7 @@
     "source_url": "https://index.ndc.gov.tw/"
    },
    {
-    "obs_id": 1051,
+    "obs_id": 1092,
     "metric_code": "TW_NDC_SCORE",
     "period_covered": "2026-09",
     "release_date": "2026-10-28",
@@ -2183,7 +2183,7 @@
   ],
   "TW_SEC_GIRO_BAL": [
    {
-    "obs_id": 1039,
+    "obs_id": 1080,
     "metric_code": "TW_SEC_GIRO_BAL",
     "period_covered": "2026-08",
     "release_date": "2026-09-24",
@@ -2207,7 +2207,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1040,
+    "obs_id": 1081,
     "metric_code": "TW_SEC_GIRO_BAL",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -2233,7 +2233,7 @@
   ],
   "TW_TAIEX_INDEX": [
    {
-    "obs_id": 1066,
+    "obs_id": 1107,
     "metric_code": "TW_TAIEX_INDEX",
     "period_covered": "2026-11-20",
     "release_date": "2026-11-21",
@@ -2259,7 +2259,7 @@
   ],
   "TW_USD_TWD": [
    {
-    "obs_id": 1064,
+    "obs_id": 1105,
     "metric_code": "TW_USD_TWD",
     "period_covered": "2026-11-20",
     "release_date": "2026-11-21",
@@ -2285,7 +2285,7 @@
   ],
   "US_10Y_YIELD": [
    {
-    "obs_id": 1062,
+    "obs_id": 1103,
     "metric_code": "US_10Y_YIELD",
     "period_covered": "2026-11-20",
     "release_date": "2026-11-21",
@@ -2311,7 +2311,7 @@
   ],
   "US_FED_RATE_UPPER": [
    {
-    "obs_id": 1061,
+    "obs_id": 1102,
     "metric_code": "US_FED_RATE_UPPER",
     "period_covered": "2026-11",
     "release_date": "2026-11-20",
@@ -2521,10 +2521,10 @@
     "ind_rev_billion": 7207.19,
     "ind_ly_rev_billion": 4626.38,
     "agg_yoy_pct": 55.78,
-    "avg_pe": 19.78,
-    "avg_pb": 3.83,
-    "sum_foreign_shares": -121783985,
-    "sum_itc_shares": 33051187
+    "avg_pe": 18.76,
+    "avg_pb": 3.64,
+    "sum_foreign_shares": -27887973,
+    "sum_itc_shares": 15254691
    }
   },
   {
@@ -2599,10 +2599,10 @@
     "ind_rev_billion": 33206.64,
     "ind_ly_rev_billion": 21073.09,
     "agg_yoy_pct": 57.58,
-    "avg_pe": 40.43,
-    "avg_pb": 2.19,
-    "sum_foreign_shares": -83182465,
-    "sum_itc_shares": 11594952
+    "avg_pe": 39.44,
+    "avg_pb": 2.12,
+    "sum_foreign_shares": 51282774,
+    "sum_itc_shares": 8579025
    }
   },
   {
@@ -2667,10 +2667,10 @@
     "ind_rev_billion": 397.53,
     "ind_ly_rev_billion": 277.3,
     "agg_yoy_pct": 43.36,
-    "avg_pe": 28.32,
-    "avg_pb": 9.44,
-    "sum_foreign_shares": -1904534,
-    "sum_itc_shares": 2071074
+    "avg_pe": 28.25,
+    "avg_pb": 9.42,
+    "sum_foreign_shares": -256326,
+    "sum_itc_shares": 319417
    }
   },
   {
@@ -2740,10 +2740,10 @@
     "ind_rev_billion": 92.74,
     "ind_ly_rev_billion": 53.76,
     "agg_yoy_pct": 72.49,
-    "avg_pe": 32.66,
-    "avg_pb": 7.35,
-    "sum_foreign_shares": -757346,
-    "sum_itc_shares": 443367
+    "avg_pe": 32.07,
+    "avg_pb": 7.23,
+    "sum_foreign_shares": 645639,
+    "sum_itc_shares": -746284
    }
   },
   {
@@ -2813,10 +2813,10 @@
     "ind_rev_billion": 1516.85,
     "ind_ly_rev_billion": 3051.25,
     "agg_yoy_pct": -50.29,
-    "avg_pe": 10.96,
-    "avg_pb": 1.36,
-    "sum_foreign_shares": -166376804,
-    "sum_itc_shares": 61484585
+    "avg_pe": 10.47,
+    "avg_pb": 1.3,
+    "sum_foreign_shares": -77325901,
+    "sum_itc_shares": 35870515
    }
   },
   {
@@ -2881,10 +2881,10 @@
     "ind_rev_billion": 2792.63,
     "ind_ly_rev_billion": 2170.38,
     "agg_yoy_pct": 28.67,
-    "avg_pe": 55.2,
-    "avg_pb": 2.47,
-    "sum_foreign_shares": -38944529,
-    "sum_itc_shares": 19624457
+    "avg_pe": 52.8,
+    "avg_pb": 2.39,
+    "sum_foreign_shares": 43567999,
+    "sum_itc_shares": 22826228
    }
   },
   {
@@ -2949,10 +2949,10 @@
     "ind_rev_billion": 1592.43,
     "ind_ly_rev_billion": 1092.15,
     "agg_yoy_pct": 45.81,
-    "avg_pe": 38.45,
-    "avg_pb": 1.98,
-    "sum_foreign_shares": 5804059,
-    "sum_itc_shares": -1486758
+    "avg_pe": 37.26,
+    "avg_pb": 1.91,
+    "sum_foreign_shares": 6579330,
+    "sum_itc_shares": 1235018
    }
   },
   {
@@ -3017,10 +3017,10 @@
     "ind_rev_billion": 3571.6,
     "ind_ly_rev_billion": 1960.87,
     "agg_yoy_pct": 82.14,
-    "avg_pe": 99.72,
-    "avg_pb": 3.22,
-    "sum_foreign_shares": -17743739,
-    "sum_itc_shares": 4638163
+    "avg_pe": 98.37,
+    "avg_pb": 3.11,
+    "sum_foreign_shares": 36334460,
+    "sum_itc_shares": -6760964
    }
   },
   {
@@ -3090,10 +3090,10 @@
     "ind_rev_billion": 1841.01,
     "ind_ly_rev_billion": 1171.58,
     "agg_yoy_pct": 57.14,
-    "avg_pe": 18.15,
-    "avg_pb": 1.37,
-    "sum_foreign_shares": 36868092,
-    "sum_itc_shares": -14315450
+    "avg_pe": 17.5,
+    "avg_pb": 1.32,
+    "sum_foreign_shares": 9968950,
+    "sum_itc_shares": -17747000
    }
   },
   {
@@ -3158,10 +3158,10 @@
     "ind_rev_billion": 1135.23,
     "ind_ly_rev_billion": 644.09,
     "agg_yoy_pct": 76.25,
-    "avg_pe": 36.56,
-    "avg_pb": 7.26,
-    "sum_foreign_shares": -12929155,
-    "sum_itc_shares": 7065856
+    "avg_pe": 34.61,
+    "avg_pb": 7.01,
+    "sum_foreign_shares": 703810,
+    "sum_itc_shares": 3866585
    }
   },
   {
@@ -3231,10 +3231,10 @@
     "ind_rev_billion": 2881.25,
     "ind_ly_rev_billion": 2746.12,
     "agg_yoy_pct": 4.92,
-    "avg_pe": 27.84,
-    "avg_pb": 1.35,
-    "sum_foreign_shares": -2594792,
-    "sum_itc_shares": 5873862
+    "avg_pe": 27.23,
+    "avg_pb": 1.32,
+    "sum_foreign_shares": -4542136,
+    "sum_itc_shares": 7920365
    }
   },
   {
@@ -3299,10 +3299,10 @@
     "ind_rev_billion": 603.13,
     "ind_ly_rev_billion": 461.01,
     "agg_yoy_pct": 30.83,
-    "avg_pe": 64.08,
-    "avg_pb": 1.15,
-    "sum_foreign_shares": 2313455,
-    "sum_itc_shares": -424000
+    "avg_pe": 62.46,
+    "avg_pb": 1.13,
+    "sum_foreign_shares": 2562676,
+    "sum_itc_shares": 175250
    }
   },
   {
@@ -3372,10 +3372,10 @@
     "ind_rev_billion": 2991.39,
     "ind_ly_rev_billion": 2308.1,
     "agg_yoy_pct": 29.6,
-    "avg_pe": 37.82,
-    "avg_pb": 1.33,
-    "sum_foreign_shares": -27134045,
-    "sum_itc_shares": 6656474
+    "avg_pe": 36.61,
+    "avg_pb": 1.29,
+    "sum_foreign_shares": -52953739,
+    "sum_itc_shares": -18672244
    }
   },
   {
@@ -3440,10 +3440,10 @@
     "ind_rev_billion": 8805.68,
     "ind_ly_rev_billion": 5540.7,
     "agg_yoy_pct": 58.93,
-    "avg_pe": 33.42,
-    "avg_pb": 2.29,
-    "sum_foreign_shares": 7284562,
-    "sum_itc_shares": -9078694
+    "avg_pe": 32.89,
+    "avg_pb": 2.25,
+    "sum_foreign_shares": 16985057,
+    "sum_itc_shares": -8059347
    }
   }
  ],
@@ -3594,13 +3594,13 @@
    "rev_mom_pct": 8.59,
    "rev_yoy_pct": 103.96,
    "eps_ttm_or_est": "AI伺服器佔伺服器營收比重突破高檔",
-   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 11.53x｜P/B 3.37x｜殖利率 5.52%",
-   "institutional_ownership_trend": "【20261125 T86/TPEx官方API】外資 -1,194,250股｜投信 +1,625,521股｜自營商 +938,616股",
+   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 10.65x｜P/B 3.11x｜殖利率 5.98%",
+   "institutional_ownership_trend": "【20261126 T86/TPEx官方API】外資 +2,824,850股｜投信 +2,237股｜自營商 +68,444股",
    "bull_case": "10月合併營收達3,532.5億元，年增率高達104.0%，受惠美系CSP新一代AI伺服器機櫃與新機放量。",
    "bear_case": "高單價AI伺服器需要龐大營運週轉金(反映於國銀企業放款利率升至2.254%)，利息費用與存貨跌價風險需密切監控。",
    "valuation_risk": "若CSP客戶拉貨節奏因資料中心電力取得延遲而放緩，高營收基期將帶來評價修正。",
    "invalidation_condition": "單月營收年增率大幅收斂至30%以下，或存貨週轉天數異常飆升。",
-   "as_of_date": "20261125",
+   "as_of_date": "20261126",
    "source_id": "SRC_MOPS",
    "industry_name": "AI伺服器、機櫃系統與高速連接",
    "major_category": "科技",
@@ -3618,12 +3618,12 @@
    "rev_yoy_pct": 92.73,
    "eps_ttm_or_est": "高階探針卡滿載推升毛利率與EPS創高",
    "pe_ratio_status": "【TWSE/TPEx官方API】P/E 66.21x｜P/B 20.32x｜殖利率 0.58%",
-   "institutional_ownership_trend": "【20261125 T86/TPEx官方API】外資 -392,561股｜投信 +319,967股｜自營商 -91,498股",
+   "institutional_ownership_trend": "【20261126 T86/TPEx官方API】外資 -139,433股｜投信 +313,766股｜自營商 -21,836股",
    "bull_case": "10月營收達22.32億元，首度跨越22億門檻創歷史新高，直接受惠美系CSP自研AI ASIC與HPC晶片測試介面強勁需求。",
    "bear_case": "探針卡新產能開出進度受限於精密設備交期；11月下旬費半重挫引發半導體設備測試股短線獲利了結賣壓。",
    "valuation_risk": "高本益比在美債殖利率近5%環境下容錯率較低。",
    "invalidation_condition": "CSP自研ASIC晶片開案量減少，或月營收連續兩個月低於19億元。",
-   "as_of_date": "20261125",
+   "as_of_date": "20261126",
    "source_id": "SRC_MOPS",
    "industry_name": "半導體－設備、材料與測試介面",
    "major_category": "科技",
@@ -3640,13 +3640,13 @@
    "rev_mom_pct": 26.94,
    "rev_yoy_pct": 79.99,
    "eps_ttm_or_est": "高毛利HPC/AI線束佔比快速攀升",
-   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 25.5x｜P/B 4.68x｜殖利率 0.97%",
-   "institutional_ownership_trend": "【20261125 T86/TPEx官方API】外資 -3,620,946股｜投信 +3,701,738股｜自營商 -45,002股",
+   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 26.47x｜P/B 4.86x｜殖利率 0.93%",
+   "institutional_ownership_trend": "【20261126 T86/TPEx官方API】外資 -946,718股｜投信 +1,140,000股｜自營商 +56,543股",
    "bull_case": "10月營收達118.46億元(月增26.94%、年增79.99%)，單月首度突破百億大關創歷史新高，受惠AI機櫃內高速互連AEC需求爆發。",
    "bear_case": "車用與工業用線束終端市場復甦仍相對溫和，若AI線束出現第二供應商競爭可能影響遠期毛利。",
    "valuation_risk": "股價創高後對大盤系統性回檔較敏感。",
    "invalidation_condition": "月營收跌破95億元或HPC部門毛利率停止擴張。",
-   "as_of_date": "20261125",
+   "as_of_date": "20261126",
    "source_id": "SRC_MOPS",
    "industry_name": "AI伺服器、機櫃系統與高速連接",
    "major_category": "科技",
@@ -3663,13 +3663,13 @@
    "rev_mom_pct": 14.66,
    "rev_yoy_pct": 59.71,
    "eps_ttm_or_est": "2026E EPS隨Q4財測上修強勁成長",
-   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 22.7x｜P/B 8.26x｜殖利率 0.99%",
-   "institutional_ownership_trend": "【20261125 T86/TPEx官方API】外資 -26,971,651股｜投信 +4,791,400股｜自營商 -438,896股",
+   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 21.88x｜P/B 7.97x｜殖利率 1.02%",
+   "institutional_ownership_trend": "【20261126 T86/TPEx官方API】外資 -18,134,229股｜投信 +1,119,315股｜自營商 +1,461,291股",
    "bull_case": "10月合併營收達5,868.9億元(月增14.7%、年增59.7%)刷新歷史單月新高；2奈米放量與CoWoS產能倍增，護城河無可取代。",
    "bear_case": "11/20~21費城半導體指數重挫逾10%，美國海外資料中心稅收政策與晶片出口管制升級帶來短期外部評價壓力。",
    "valuation_risk": "若美債10年期殖利率持續突破5.2%，外資被動提款可能壓抑短期P/E倍數擴張。",
    "invalidation_condition": "單月營收年增率跌破30%，或主要HPC/AI客戶下修2奈米與CoWoS投片量。",
-   "as_of_date": "20261125",
+   "as_of_date": "20261126",
    "source_id": "SRC_MOPS",
    "industry_name": "半導體－晶圓代工與先進封裝",
    "major_category": "科技",
@@ -3686,13 +3686,13 @@
    "rev_mom_pct": 12.66,
    "rev_yoy_pct": 45.73,
    "eps_ttm_or_est": "AI伺服器整機櫃出貨放量推升獲利結構",
-   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 13.7x｜P/B 1.61x｜殖利率 3.17%",
-   "institutional_ownership_trend": "【20261125 T86/TPEx官方API】外資 -36,578,450股｜投信 +103,129股｜自營商 -1,809,812股",
+   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 12.49x｜P/B 1.47x｜殖利率 3.47%",
+   "institutional_ownership_trend": "【20261126 T86/TPEx官方API】外資 +12,690,916股｜投信 +736,818股｜自營商 +1,508,674股",
    "bull_case": "10月合併營收達1.305兆元(月增12.66%、年增45.73%)，單月首度突破1.3兆元創歷史新高；具備液冷機櫃、基板與高速連接垂直整合優勢。",
    "bear_case": "AI伺服器整機櫃單價極高，組裝毛利率易受高價GPU成本占比拉高而稀釋；全球關稅與地緣政治對海外廠區調度構成考驗。",
    "valuation_risk": "市場若對AI硬體資本支出持續性產生疑慮，系統組裝廠評價倍數易受壓抑。",
    "invalidation_condition": "AI伺服器機櫃出貨市佔率下滑，或營業利益率連續兩季未能隨營收創高而改善。",
-   "as_of_date": "20261125",
+   "as_of_date": "20261126",
    "source_id": "SRC_MOPS",
    "industry_name": "AI伺服器、機櫃系統與高速連接",
    "major_category": "科技",
@@ -3709,13 +3709,13 @@
    "rev_mom_pct": 10.56,
    "rev_yoy_pct": 91.16,
    "eps_ttm_or_est": "800G交換器放量帶動2026Q4~2027獲利成長",
-   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 20.33x｜P/B 10.12x｜殖利率 1.01%",
-   "institutional_ownership_trend": "【20261125 T86/TPEx官方API】外資 -1,343,818股｜投信 +1,507,326股｜自營商 -18,579股",
+   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 20.19x｜P/B 10.05x｜殖利率 1.02%",
+   "institutional_ownership_trend": "【20261126 T86/TPEx官方API】外資 -1,041,779股｜投信 +922,679股｜自營商 -11,252股",
    "bull_case": "10月營收達成率與第四季展望優於預期，受惠美系CSP資料中心網路頻寬由400G升級至800G。",
    "bear_case": "零組件供應鏈交期與客戶拉貨季度波動。",
    "valuation_risk": "若高階交換器白牌市場價格競爭加劇。",
    "invalidation_condition": "800G交換器出貨佔比提升速度低於預期，或月營收年增率跌破20%。",
-   "as_of_date": "20261125",
+   "as_of_date": "20261126",
    "source_id": "SRC_MOPS",
    "industry_name": "CPO光通訊與高階網通",
    "major_category": "科技",
@@ -3732,13 +3732,13 @@
    "rev_mom_pct": -17.34,
    "rev_yoy_pct": -35.41,
    "eps_ttm_or_est": "銀行淨利息收入(NII)與手續費強勁，股息殖利率具保護",
-   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 16.97x｜P/B 1.93x｜殖利率 3.58%",
-   "institutional_ownership_trend": "【20261125 T86/TPEx官方API】外資 -4,259,395股｜投信 -511,956股｜自營商 +3,352,605股",
+   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 16.0x｜P/B 1.82x｜殖利率 3.79%",
+   "institutional_ownership_trend": "【20261126 T86/TPEx官方API】外資 +13,288,602股｜投信 -9,961,000股｜自營商 +1,508,331股",
    "bull_case": "受惠國內企業放款需求創28年新高(年增9.79%)與放款利率走升，銀行核心獲利穩健；在科技股劇烈震盪時發揮極佳資產配置防禦效果。",
    "bear_case": "旗下壽險部位仍受美債殖利率高檔震盪與匯率避險成本影響。",
    "valuation_risk": "若全球進入急速降息循環或國內景氣反轉導致呆帳提列增加。",
    "invalidation_condition": "金控逾放比上升超過0.3%或現金股利配發率低於預期。",
-   "as_of_date": "20261125",
+   "as_of_date": "20261126",
    "source_id": "SRC_MOPS",
    "industry_name": "金融－金控、銀行、保險與證券",
    "major_category": "金融",
@@ -3756,12 +3756,12 @@
    "rev_yoy_pct": 70.35,
    "eps_ttm_or_est": "處於CPO商轉前夕研發與小量試產期，目前實質EPS仍低",
    "pe_ratio_status": "【TWSE/TPEx官方API】P/E N/A(虧損或極高)｜P/B 4.87x｜殖利率 0.0%",
-   "institutional_ownership_trend": "【20261125 T86/TPEx官方API】外資 -241,156股｜投信 +0股｜自營商 -99,849股",
+   "institutional_ownership_trend": "【20261126 T86/TPEx官方API】外資 -187,723股｜投信 +0股｜自營商 -4,267股",
    "bull_case": "與晶圓代工龍頭於CPO矽光子光學封裝領域緊密合作，10月營收達成率與Q4展望穩健，卡位次世代AI光互連核心咽喉。",
    "bear_case": "目前營收規模仍小，CPO大規模量產貢獻預計落在2027年後，現階段股價高度由題材與資金動能驅動，基本面EPS尚未跟上。",
    "valuation_risk": "在聯準會鷹派與台股限空令震盪期，高本益比題材股面臨劇烈估值修正風險。",
    "invalidation_condition": "CPO封裝認證未通過或客戶改採其他光學封裝架構。",
-   "as_of_date": "20261125",
+   "as_of_date": "20261126",
    "source_id": "SRC_MOPS",
    "industry_name": "CPO光通訊與高階網通",
    "major_category": "科技",
@@ -3778,13 +3778,13 @@
    "rev_mom_pct": 5.16,
    "rev_yoy_pct": 34.35,
    "eps_ttm_or_est": "水冷散熱出貨倍增，基本面極為強勁",
-   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 28.74x｜P/B 15.25x｜殖利率 0.8%",
-   "institutional_ownership_trend": "【20261125 T86/TPEx官方API】外資 -1,286,724股｜投信 +1,511,034股｜自營商 -183,838股",
+   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 28.13x｜P/B 14.92x｜殖利率 0.82%",
+   "institutional_ownership_trend": "【20261126 T86/TPEx官方API】外資 +53,113股｜投信 +475,786股｜自營商 -26,069股",
    "bull_case": "10月營收達221.03億元續創歷史新高，在CSP與Nvidia水冷散熱供應鏈居絕對領先地位。",
    "bear_case": "散熱族群於11月大盤四萬點攻防戰中籌碼較為擁擠，當美債殖利率逼近5%且費半單日重挫10%時，高估值股易遭法人優先調節降Beta。",
    "valuation_risk": "目前評價已反映2027年水冷高滲透率預期，安全邊際需待回檔測試支撐。",
    "invalidation_condition": "水冷板良率出包或主要CSP客戶大幅轉單二線散熱廠。",
-   "as_of_date": "20261125",
+   "as_of_date": "20261126",
    "source_id": "SRC_MOPS",
    "industry_name": "散熱與伺服器機構件",
    "major_category": "科技",
@@ -3801,13 +3801,13 @@
    "rev_mom_pct": -13.81,
    "rev_yoy_pct": 31.68,
    "eps_ttm_or_est": "視完工交屋時點而定，惟新案去化放緩",
-   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 7.79x｜P/B 1.57x｜殖利率 10.31%",
-   "institutional_ownership_trend": "【20261125 T86/TPEx官方API】外資 +1,180,750股｜投信 -418,000股｜自營商 -21,131股",
+   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 7.48x｜P/B 1.5x｜殖利率 10.74%",
+   "institutional_ownership_trend": "【20261126 T86/TPEx官方API】外資 -154,750股｜投信 +11,000股｜自營商 +73,883股",
    "bull_case": "在手仍有商辦與已售建案待未來完工交屋認列。",
    "bear_case": "央行第七波信用管制與銀行房貸排撥緊縮，10月五大銀行新承做放款平均利率升至2.254%創2009年來新高，全台全年買賣移轉棟數面臨26萬棟保衛戰，房市轉為買方市場，建商土建融資金成本與餘屋去化壓力攀升。",
    "valuation_risk": "政策面與資金面雙重逆風，低P/E可能為景氣高峰過後之價值陷阱。",
    "invalidation_condition": "唯有央行鬆綁房市信用管制且六都買賣移轉棟數連續3個月年增轉正，方重新檢視。",
-   "as_of_date": "20261125",
+   "as_of_date": "20261126",
    "source_id": "SRC_MOPS",
    "industry_name": "營建與不動產代銷",
    "major_category": "其他",
@@ -3824,13 +3824,13 @@
    "rev_mom_pct": 3.77,
    "rev_yoy_pct": 16.21,
    "eps_ttm_or_est": "本業獲利仍受石化利差低迷壓抑",
-   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 23.07x｜P/B 0.57x｜殖利率 0.82%",
-   "institutional_ownership_trend": "【20261125 T86/TPEx官方API】外資 +339,825股｜投信 +16,000股｜自營商 +593,411股",
+   "pe_ratio_status": "【TWSE/TPEx官方API】P/E 21.52x｜P/B 0.53x｜殖利率 0.88%",
+   "institutional_ownership_trend": "【20261126 T86/TPEx官方API】外資 +5,884,326股｜投信 +0股｜自營商 +937,332股",
    "bull_case": "財務體質穩健，積極推動高值化與醫療/綠能材料轉型。",
    "bear_case": "中國石化新產能持續開出導致亞洲大宗塑化原料供過於求；2026年10月台灣進口礦產物價大漲推升成本，但終端需求無法足額轉嫁，與AI科技股形成強烈基本面分化。",
    "valuation_risk": "屬於典型『低股價淨值比但基本面尚未落底轉折』，資金機會成本高。",
    "invalidation_condition": "亞洲乙烯/PVC/PP利差連續兩季顯著轉正且月營收年增率重回10%以上。",
-   "as_of_date": "20261125",
+   "as_of_date": "20261126",
    "source_id": "SRC_MOPS",
    "industry_name": "鋼鐵、塑化、水泥與化工",
    "major_category": "傳統產業",
@@ -4497,6 +4497,87 @@
  ],
  "audit_logs": [
   {
+   "log_id": 259,
+   "run_timestamp": "2026-11-22T11:15:00+08:00",
+   "task_name": "ETF_DECISION_CENTER_SYNC",
+   "source_id": "SRC_TWSE",
+   "status": "SUCCESS",
+   "records_affected": 28,
+   "message": "已完成台美 28 檔核心ETF主檔、TWSE 0099P/ETFRank/T86即時行情串接、MOPS 1,989家底層成分股穿透估值、雙軌獨立評分(模型A長期+模型B短中期)、雙軌回測與4份7問研究報告入庫"
+  },
+  {
+   "log_id": 258,
+   "run_timestamp": "2026-11-26T17:48:36+08:00",
+   "task_name": "LIVE_TWSE_MI_INDEX_INGEST",
+   "source_id": "SRC_TWSE",
+   "status": "SUCCESS",
+   "records_affected": 267,
+   "message": "已寫入證交所 MI_INDEX 共 267 項指數與產業類股收盤行情 (日期:1151125)"
+  },
+  {
+   "log_id": 257,
+   "run_timestamp": "2026-11-26T17:48:36+08:00",
+   "task_name": "LIVE_MOPS_PE_T86_FULL_INGEST",
+   "source_id": "SRC_MOPS",
+   "status": "SUCCESS",
+   "records_affected": 1989,
+   "message": "已寫入上市(1091家)＋上櫃(898家)共 1989 家公司之 2026-10 月營收、估值與三大法人個股買賣超 (法人資料日期 20261126)"
+  },
+  {
+   "log_id": 256,
+   "run_timestamp": "2026-11-22T01:12:00+08:00",
+   "task_name": "FULL_SYSTEM_P2_TO_P6_DEPLOY",
+   "source_id": "SRC_TWSE",
+   "status": "SUCCESS",
+   "records_affected": 31,
+   "message": "已完成階段二(資料品質SLA與Z-Score檢查7項)、階段三(三大法人日/週/月/季籌碼追蹤13筆)、階段五(2025~2026樣本外回測91樣本與8大歷史驗證事件)、階段六(每日/每週/每月/每季固定研究報告4份)全量入庫"
+  },
+  {
+   "log_id": 255,
+   "run_timestamp": "2026-11-22T00:55:00+08:00",
+   "task_name": "EARLY_WARNING_ENGINE_M07",
+   "source_id": "SRC_TWSE",
+   "status": "SUCCESS",
+   "records_affected": 7,
+   "message": "多因子預警引擎觸發7項預警訊號 (含LEVEL 4晶圓代工、LEVEL 3 AI伺服器/金控/散熱、LEVEL 2 CPO網通、LEVEL R 營建/塑化鋼鐵)"
+  },
+  {
+   "log_id": 254,
+   "run_timestamp": "2026-11-22T00:55:00+08:00",
+   "task_name": "INDUSTRY_ROTATION_SCORE_M04",
+   "source_id": "SRC_MOPS",
+   "status": "SUCCESS",
+   "records_affected": 14,
+   "message": "完成14大產業分類與2026年10~11月資金輪動評分；其中1項(生技/電信/觀光綜合類)因異質與缺失比例42%自動觸發防呆標示為『不可評分』"
+  },
+  {
+   "log_id": 253,
+   "run_timestamp": "2026-11-22T00:55:00+08:00",
+   "task_name": "ASSET_FLOW_MATRIX_M02",
+   "source_id": "SRC_SITCA_TDCC",
+   "status": "SUCCESS",
+   "records_affected": 6,
+   "message": "成功建立六大資產配置流向矩陣，包含11月0050單月淨申購破2,200億、外資匯出與房市買賣移轉26萬棟保衛戰，並寫入防重複計算規則"
+  },
+  {
+   "log_id": 252,
+   "run_timestamp": "2026-11-22T00:55:00+08:00",
+   "task_name": "MACRO_EXPORT_GDP_CPI_INGEST",
+   "source_id": "SRC_MOEA",
+   "status": "SUCCESS",
+   "records_affected": 12,
+   "message": "成功載入2026年10月外銷訂單(1,238.2億美元,+78.3%)、海關出口(967.6億美元,+58.9%)、CPI(+2.33%)、Q3 GDP(+14.36%)及9月景氣燈號(41分紅燈)真實數據"
+  },
+  {
+   "log_id": 251,
+   "run_timestamp": "2026-11-22T00:55:00+08:00",
+   "task_name": "MACRO_M01_M03_INGEST",
+   "source_id": "SRC_CBC",
+   "status": "SUCCESS",
+   "records_affected": 22,
+   "message": "成功載入央行2026年9月M1B(7.20%)、M2(7.24%)、放款與投資(+9.79%)、證券劃撥存款(4.6981兆)及10月外匯存底(5,964.37億美元)、五大銀行放款利率(2.254%)真實數據"
+  },
+  {
    "log_id": 250,
    "run_timestamp": "2026-11-22T11:15:00+08:00",
    "task_name": "ETF_DECISION_CENTER_SYNC",
@@ -4639,87 +4720,6 @@
    "status": "SUCCESS",
    "records_affected": 6,
    "message": "成功建立六大資產配置流向矩陣，包含11月0050單月淨申購破2,200億、外資匯出與房市買賣移轉26萬棟保衛戰，並寫入防重複計算規則"
-  },
-  {
-   "log_id": 234,
-   "run_timestamp": "2026-11-22T00:55:00+08:00",
-   "task_name": "MACRO_EXPORT_GDP_CPI_INGEST",
-   "source_id": "SRC_MOEA",
-   "status": "SUCCESS",
-   "records_affected": 12,
-   "message": "成功載入2026年10月外銷訂單(1,238.2億美元,+78.3%)、海關出口(967.6億美元,+58.9%)、CPI(+2.33%)、Q3 GDP(+14.36%)及9月景氣燈號(41分紅燈)真實數據"
-  },
-  {
-   "log_id": 233,
-   "run_timestamp": "2026-11-22T00:55:00+08:00",
-   "task_name": "MACRO_M01_M03_INGEST",
-   "source_id": "SRC_CBC",
-   "status": "SUCCESS",
-   "records_affected": 22,
-   "message": "成功載入央行2026年9月M1B(7.20%)、M2(7.24%)、放款與投資(+9.79%)、證券劃撥存款(4.6981兆)及10月外匯存底(5,964.37億美元)、五大銀行放款利率(2.254%)真實數據"
-  },
-  {
-   "log_id": 232,
-   "run_timestamp": "2026-11-22T11:15:00+08:00",
-   "task_name": "ETF_DECISION_CENTER_SYNC",
-   "source_id": "SRC_TWSE",
-   "status": "SUCCESS",
-   "records_affected": 28,
-   "message": "已完成台美 28 檔核心ETF主檔、TWSE 0099P/ETFRank/T86即時行情串接、MOPS 1,989家底層成分股穿透估值、雙軌獨立評分(模型A長期+模型B短中期)、雙軌回測與4份7問研究報告入庫"
-  },
-  {
-   "log_id": 231,
-   "run_timestamp": "2026-11-25T23:24:02+08:00",
-   "task_name": "LIVE_TWSE_MI_INDEX_INGEST",
-   "source_id": "SRC_TWSE",
-   "status": "SUCCESS",
-   "records_affected": 267,
-   "message": "已寫入證交所 MI_INDEX 共 267 項指數與產業類股收盤行情 (日期:1151124)"
-  },
-  {
-   "log_id": 230,
-   "run_timestamp": "2026-11-25T23:24:02+08:00",
-   "task_name": "LIVE_MOPS_PE_T86_FULL_INGEST",
-   "source_id": "SRC_MOPS",
-   "status": "SUCCESS",
-   "records_affected": 1989,
-   "message": "已寫入上市(1091家)＋上櫃(898家)共 1989 家公司之 2026-10 月營收、估值與三大法人個股買賣超 (法人資料日期 20261125)"
-  },
-  {
-   "log_id": 229,
-   "run_timestamp": "2026-11-22T01:12:00+08:00",
-   "task_name": "FULL_SYSTEM_P2_TO_P6_DEPLOY",
-   "source_id": "SRC_TWSE",
-   "status": "SUCCESS",
-   "records_affected": 31,
-   "message": "已完成階段二(資料品質SLA與Z-Score檢查7項)、階段三(三大法人日/週/月/季籌碼追蹤13筆)、階段五(2025~2026樣本外回測91樣本與8大歷史驗證事件)、階段六(每日/每週/每月/每季固定研究報告4份)全量入庫"
-  },
-  {
-   "log_id": 228,
-   "run_timestamp": "2026-11-22T00:55:00+08:00",
-   "task_name": "EARLY_WARNING_ENGINE_M07",
-   "source_id": "SRC_TWSE",
-   "status": "SUCCESS",
-   "records_affected": 7,
-   "message": "多因子預警引擎觸發7項預警訊號 (含LEVEL 4晶圓代工、LEVEL 3 AI伺服器/金控/散熱、LEVEL 2 CPO網通、LEVEL R 營建/塑化鋼鐵)"
-  },
-  {
-   "log_id": 227,
-   "run_timestamp": "2026-11-22T00:55:00+08:00",
-   "task_name": "INDUSTRY_ROTATION_SCORE_M04",
-   "source_id": "SRC_MOPS",
-   "status": "SUCCESS",
-   "records_affected": 14,
-   "message": "完成14大產業分類與2026年10~11月資金輪動評分；其中1項(生技/電信/觀光綜合類)因異質與缺失比例42%自動觸發防呆標示為『不可評分』"
-  },
-  {
-   "log_id": 226,
-   "run_timestamp": "2026-11-22T00:55:00+08:00",
-   "task_name": "ASSET_FLOW_MATRIX_M02",
-   "source_id": "SRC_SITCA_TDCC",
-   "status": "SUCCESS",
-   "records_affected": 6,
-   "message": "成功建立六大資產配置流向矩陣，包含11月0050單月淨申購破2,200億、外資匯出與房市買賣移轉26萬棟保衛戰，並寫入防重複計算規則"
   }
  ],
  "institutional_flows": [
@@ -4781,7 +4781,26 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 354,
+   "flow_record_id": 367,
+   "period_type": "DAILY",
+   "period_label": "2026-11-25 (TWSE BFI82U 官方API直連)",
+   "release_date": "2026-11-25",
+   "market_scope": "TWSE 上市官方精確統計",
+   "foreign_net_billion": -1236.55,
+   "itc_net_billion": 550.35,
+   "dealer_prop_billion": -73.63,
+   "dealer_hedge_billion": -54.7,
+   "total_3insti_billion": -814.53,
+   "foreign_futures_oi_contracts": null,
+   "margin_balance_billion": null,
+   "top_buy_industries": "此 API 不提供產業別買賣超",
+   "top_sell_industries": "此 API 不提供產業別買賣超",
+   "source_id": "SRC_TWSE",
+   "notes": "證交所 BFI82U (115年11月25日 三大法人買賣金額統計表)：外資 -1236.55億、投信 550.35億、自營商自行 -73.63億、自營商避險 -54.7億、合計 -814.53億元",
+   "publisher": "臺灣證券交易所 (TWSE)"
+  },
+  {
+   "flow_record_id": 368,
    "period_type": "DAILY",
    "period_label": "2026-11-16",
    "release_date": "2026-11-16",
@@ -4800,7 +4819,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 355,
+   "flow_record_id": 369,
    "period_type": "DAILY",
    "period_label": "2026-11-17",
    "release_date": "2026-11-17",
@@ -4819,7 +4838,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 356,
+   "flow_record_id": 370,
    "period_type": "DAILY",
    "period_label": "2026-11-18",
    "release_date": "2026-11-18",
@@ -4838,7 +4857,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 357,
+   "flow_record_id": 371,
    "period_type": "DAILY",
    "period_label": "2026-11-19",
    "release_date": "2026-11-19",
@@ -4857,7 +4876,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 358,
+   "flow_record_id": 372,
    "period_type": "DAILY",
    "period_label": "2026-11-20",
    "release_date": "2026-11-20",
@@ -4876,7 +4895,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 359,
+   "flow_record_id": 373,
    "period_type": "WEEKLY",
    "period_label": "2026-W45 (11/02~11/06)",
    "release_date": "2026-11-06",
@@ -4895,7 +4914,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 360,
+   "flow_record_id": 374,
    "period_type": "WEEKLY",
    "period_label": "2026-W46 (11/09~11/13)",
    "release_date": "2026-11-13",
@@ -4914,7 +4933,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 361,
+   "flow_record_id": 375,
    "period_type": "WEEKLY",
    "period_label": "2026-W47 (11/16~11/20)",
    "release_date": "2026-11-20",
@@ -4933,7 +4952,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 362,
+   "flow_record_id": 376,
    "period_type": "MONTHLY",
    "period_label": "2026-09",
    "release_date": "2026-09-30",
@@ -4952,7 +4971,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 363,
+   "flow_record_id": 377,
    "period_type": "MONTHLY",
    "period_label": "2026-10",
    "release_date": "2026-10-30",
@@ -4971,7 +4990,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 364,
+   "flow_record_id": 378,
    "period_type": "MONTHLY",
    "period_label": "2026-11 (截至11/20)",
    "release_date": "2026-11-20",
@@ -4990,7 +5009,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 365,
+   "flow_record_id": 379,
    "period_type": "QUARTERLY",
    "period_label": "2026-Q3",
    "release_date": "2026-09-30",
@@ -5009,7 +5028,7 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 366,
+   "flow_record_id": 380,
    "period_type": "QUARTERLY",
    "period_label": "2026-Q4 (截至11/20)",
    "release_date": "2026-11-20",
@@ -5028,22 +5047,22 @@
    "publisher": "臺灣證券交易所 (TWSE)"
   },
   {
-   "flow_record_id": 367,
+   "flow_record_id": 381,
    "period_type": "DAILY",
-   "period_label": "2026-11-25 (TWSE BFI82U 官方API直連)",
-   "release_date": "2026-11-25",
+   "period_label": "2026-11-26 (TWSE BFI82U 官方API直連)",
+   "release_date": "2026-11-26",
    "market_scope": "TWSE 上市官方精確統計",
-   "foreign_net_billion": -1236.55,
-   "itc_net_billion": 550.35,
-   "dealer_prop_billion": -73.63,
-   "dealer_hedge_billion": -54.7,
-   "total_3insti_billion": -814.53,
+   "foreign_net_billion": -491.81,
+   "itc_net_billion": 230.51,
+   "dealer_prop_billion": 40.03,
+   "dealer_hedge_billion": 88.62,
+   "total_3insti_billion": -132.65,
    "foreign_futures_oi_contracts": null,
    "margin_balance_billion": null,
    "top_buy_industries": "此 API 不提供產業別買賣超",
    "top_sell_industries": "此 API 不提供產業別買賣超",
    "source_id": "SRC_TWSE",
-   "notes": "證交所 BFI82U (115年11月25日 三大法人買賣金額統計表)：外資 -1236.55億、投信 550.35億、自營商自行 -73.63億、自營商避險 -54.7億、合計 -814.53億元",
+   "notes": "證交所 BFI82U (115年11月26日 三大法人買賣金額統計表)：外資 -491.81億、投信 230.51億、自營商自行 40.03億、自營商避險 88.62億、合計 -132.65億元",
    "publisher": "臺灣證券交易所 (TWSE)"
   }
  ],
@@ -5404,14 +5423,14 @@
    "rev_mom_pct": 12.66,
    "rev_yoy_pct": 45.73,
    "cum_rev_yoy_pct": 40.4,
-   "pe_ratio": 13.7,
-   "pb_ratio": 1.61,
-   "dividend_yield": 3.17,
-   "foreign_net_shares": -36578450,
-   "itc_net_shares": 103129,
-   "dealer_net_shares": -1809812,
-   "total_3insti_net_shares": -38285133,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 12.49,
+   "pb_ratio": 1.47,
+   "dividend_yield": 3.47,
+   "foreign_net_shares": 12690916,
+   "itc_net_shares": 736818,
+   "dealer_net_shares": 1508674,
+   "total_3insti_net_shares": 14936408,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2330",
@@ -5425,14 +5444,14 @@
    "rev_mom_pct": 14.66,
    "rev_yoy_pct": 59.71,
    "cum_rev_yoy_pct": 43.29,
-   "pe_ratio": 22.7,
-   "pb_ratio": 8.26,
-   "dividend_yield": 0.99,
-   "foreign_net_shares": -26971651,
-   "itc_net_shares": 4791400,
-   "dealer_net_shares": -438896,
-   "total_3insti_net_shares": -22619147,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 21.88,
+   "pb_ratio": 7.97,
+   "dividend_yield": 1.02,
+   "foreign_net_shares": -18134229,
+   "itc_net_shares": 1119315,
+   "dealer_net_shares": 1461291,
+   "total_3insti_net_shares": -15553623,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3231",
@@ -5446,14 +5465,14 @@
    "rev_mom_pct": 5.73,
    "rev_yoy_pct": 117.56,
    "cum_rev_yoy_pct": 99.53,
-   "pe_ratio": 10.95,
-   "pb_ratio": 2.1,
-   "dividend_yield": 3.37,
-   "foreign_net_shares": -3507594,
-   "itc_net_shares": 310712,
-   "dealer_net_shares": 380880,
-   "total_3insti_net_shares": -2816002,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 10.22,
+   "pb_ratio": 1.95,
+   "dividend_yield": 3.62,
+   "foreign_net_shares": -3251294,
+   "itc_net_shares": 3275037,
+   "dealer_net_shares": 820618,
+   "total_3insti_net_shares": 844361,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2382",
@@ -5467,14 +5486,14 @@
    "rev_mom_pct": 8.59,
    "rev_yoy_pct": 103.96,
    "cum_rev_yoy_pct": 99.89,
-   "pe_ratio": 11.53,
-   "pb_ratio": 3.37,
-   "dividend_yield": 5.52,
-   "foreign_net_shares": -1194250,
-   "itc_net_shares": 1625521,
-   "dealer_net_shares": 938616,
-   "total_3insti_net_shares": 1369887,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 10.65,
+   "pb_ratio": 3.11,
+   "dividend_yield": 5.98,
+   "foreign_net_shares": 2824850,
+   "itc_net_shares": 2237,
+   "dealer_net_shares": 68444,
+   "total_3insti_net_shares": 2895531,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3036",
@@ -5488,14 +5507,14 @@
    "rev_mom_pct": 25.08,
    "rev_yoy_pct": 112.86,
    "cum_rev_yoy_pct": 102.79,
-   "pe_ratio": 7.44,
-   "pb_ratio": 1.56,
-   "dividend_yield": 4.52,
-   "foreign_net_shares": 69150,
-   "itc_net_shares": 47742,
-   "dealer_net_shares": 244559,
-   "total_3insti_net_shares": 361451,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 6.85,
+   "pb_ratio": 1.44,
+   "dividend_yield": 4.91,
+   "foreign_net_shares": -697955,
+   "itc_net_shares": 811000,
+   "dealer_net_shares": 182807,
+   "total_3insti_net_shares": 295852,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "4938",
@@ -5509,14 +5528,14 @@
    "rev_mom_pct": -12.42,
    "rev_yoy_pct": 59.62,
    "cum_rev_yoy_pct": 19.69,
-   "pe_ratio": 14.83,
-   "pb_ratio": 1.03,
-   "dividend_yield": 4.73,
-   "foreign_net_shares": -717498,
-   "itc_net_shares": -108861,
-   "dealer_net_shares": 612543,
-   "total_3insti_net_shares": -213816,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 13.92,
+   "pb_ratio": 0.96,
+   "dividend_yield": 5.04,
+   "foreign_net_shares": -1087745,
+   "itc_net_shares": 3783690,
+   "dealer_net_shares": 417861,
+   "total_3insti_net_shares": 3113806,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "6669",
@@ -5530,14 +5549,14 @@
    "rev_mom_pct": -4.34,
    "rev_yoy_pct": 80.94,
    "cum_rev_yoy_pct": 54.03,
-   "pe_ratio": 13.32,
-   "pb_ratio": 4.69,
-   "dividend_yield": 10.88,
-   "foreign_net_shares": -600287,
-   "itc_net_shares": 844006,
-   "dealer_net_shares": -128442,
-   "total_3insti_net_shares": 115277,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 12.61,
+   "pb_ratio": 4.44,
+   "dividend_yield": 11.48,
+   "foreign_net_shares": -599099,
+   "itc_net_shares": 723811,
+   "dealer_net_shares": 71400,
+   "total_3insti_net_shares": 196112,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3702",
@@ -5551,14 +5570,14 @@
    "rev_mom_pct": -32.01,
    "rev_yoy_pct": 79.04,
    "cum_rev_yoy_pct": 73.13,
-   "pe_ratio": 4.96,
-   "pb_ratio": 1.25,
-   "dividend_yield": 4.68,
-   "foreign_net_shares": -1261816,
+   "pe_ratio": 4.72,
+   "pb_ratio": 1.19,
+   "dividend_yield": 4.93,
+   "foreign_net_shares": 813396,
    "itc_net_shares": -55000,
-   "dealer_net_shares": 275314,
-   "total_3insti_net_shares": -1041502,
-   "insti_trade_date": "20261125"
+   "dealer_net_shares": 385822,
+   "total_3insti_net_shares": 1144218,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2357",
@@ -5572,14 +5591,14 @@
    "rev_mom_pct": 10.67,
    "rev_yoy_pct": 62.25,
    "cum_rev_yoy_pct": 41.13,
-   "pe_ratio": 9.85,
-   "pb_ratio": 1.74,
-   "dividend_yield": 5.12,
-   "foreign_net_shares": -42852,
-   "itc_net_shares": -485098,
-   "dealer_net_shares": 282788,
-   "total_3insti_net_shares": -245162,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 9.23,
+   "pb_ratio": 1.63,
+   "dividend_yield": 5.46,
+   "foreign_net_shares": 1138683,
+   "itc_net_shares": -748449,
+   "dealer_net_shares": 48272,
+   "total_3insti_net_shares": 438506,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3711",
@@ -5593,14 +5612,14 @@
    "rev_mom_pct": 0.55,
    "rev_yoy_pct": 47.13,
    "cum_rev_yoy_pct": 32.18,
-   "pe_ratio": 30.42,
-   "pb_ratio": 5.53,
-   "dividend_yield": 1.24,
-   "foreign_net_shares": -6232485,
-   "itc_net_shares": 6070601,
-   "dealer_net_shares": -446893,
-   "total_3insti_net_shares": -608777,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 28.01,
+   "pb_ratio": 5.1,
+   "dividend_yield": 1.35,
+   "foreign_net_shares": -6782258,
+   "itc_net_shares": 4663994,
+   "dealer_net_shares": 352282,
+   "total_3insti_net_shares": -1765982,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2324",
@@ -5614,14 +5633,14 @@
    "rev_mom_pct": -7.71,
    "rev_yoy_pct": 40.75,
    "cum_rev_yoy_pct": 22.42,
-   "pe_ratio": 13.21,
-   "pb_ratio": 0.86,
-   "dividend_yield": 3.99,
-   "foreign_net_shares": -18747627,
-   "itc_net_shares": 8714,
-   "dealer_net_shares": 1195125,
-   "total_3insti_net_shares": -17543788,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 11.99,
+   "pb_ratio": 0.78,
+   "dividend_yield": 4.39,
+   "foreign_net_shares": 7151990,
+   "itc_net_shares": 29000,
+   "dealer_net_shares": 369073,
+   "total_3insti_net_shares": 7550063,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2356",
@@ -5635,14 +5654,14 @@
    "rev_mom_pct": -18.93,
    "rev_yoy_pct": 46.02,
    "cum_rev_yoy_pct": 43.08,
-   "pe_ratio": 13.84,
-   "pb_ratio": 1.87,
-   "dividend_yield": 4.74,
-   "foreign_net_shares": -424550,
-   "itc_net_shares": -2825155,
-   "dealer_net_shares": 625911,
-   "total_3insti_net_shares": -2623794,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 12.89,
+   "pb_ratio": 1.75,
+   "dividend_yield": 5.09,
+   "foreign_net_shares": 7735026,
+   "itc_net_shares": -4475000,
+   "dealer_net_shares": 742197,
+   "total_3insti_net_shares": 4002223,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "6505",
@@ -5656,14 +5675,14 @@
    "rev_mom_pct": -10.79,
    "rev_yoy_pct": 76.0,
    "cum_rev_yoy_pct": 26.55,
-   "pe_ratio": 10.54,
+   "pe_ratio": 10.58,
    "pb_ratio": 1.39,
    "dividend_yield": 1.49,
-   "foreign_net_shares": 7746750,
-   "itc_net_shares": -1802040,
-   "dealer_net_shares": -297054,
-   "total_3insti_net_shares": 5647656,
-   "insti_trade_date": "20261125"
+   "foreign_net_shares": 5157608,
+   "itc_net_shares": 51000,
+   "dealer_net_shares": 1226671,
+   "total_3insti_net_shares": 6435279,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2308",
@@ -5677,14 +5696,14 @@
    "rev_mom_pct": 14.17,
    "rev_yoy_pct": 30.12,
    "cum_rev_yoy_pct": 36.32,
-   "pe_ratio": 32.58,
-   "pb_ratio": 8.86,
-   "dividend_yield": 1.07,
-   "foreign_net_shares": -1423063,
-   "itc_net_shares": 1803591,
-   "dealer_net_shares": -139620,
-   "total_3insti_net_shares": 240908,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 31.68,
+   "pb_ratio": 8.61,
+   "dividend_yield": 1.1,
+   "foreign_net_shares": -4413134,
+   "itc_net_shares": 1193397,
+   "dealer_net_shares": 101888,
+   "total_3insti_net_shares": -3117849,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2376",
@@ -5698,14 +5717,14 @@
    "rev_mom_pct": 6.24,
    "rev_yoy_pct": 136.72,
    "cum_rev_yoy_pct": 70.72,
-   "pe_ratio": 7.95,
-   "pb_ratio": 2.53,
-   "dividend_yield": 4.32,
-   "foreign_net_shares": 968951,
-   "itc_net_shares": -995099,
-   "dealer_net_shares": 174718,
-   "total_3insti_net_shares": 148570,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 7.47,
+   "pb_ratio": 2.37,
+   "dividend_yield": 4.6,
+   "foreign_net_shares": 399602,
+   "itc_net_shares": -377000,
+   "dealer_net_shares": 215981,
+   "total_3insti_net_shares": 238583,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2347",
@@ -5719,14 +5738,14 @@
    "rev_mom_pct": -34.45,
    "rev_yoy_pct": 59.51,
    "cum_rev_yoy_pct": 93.5,
-   "pe_ratio": 8.61,
-   "pb_ratio": 1.35,
-   "dividend_yield": 5.61,
-   "foreign_net_shares": -1939155,
-   "itc_net_shares": 32000,
-   "dealer_net_shares": 450193,
-   "total_3insti_net_shares": -1456962,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 8.05,
+   "pb_ratio": 1.26,
+   "dividend_yield": 6.0,
+   "foreign_net_shares": -432383,
+   "itc_net_shares": -311000,
+   "dealer_net_shares": 168268,
+   "total_3insti_net_shares": -575115,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "1216",
@@ -5740,14 +5759,14 @@
    "rev_mom_pct": -7.61,
    "rev_yoy_pct": 5.3,
    "cum_rev_yoy_pct": 4.35,
-   "pe_ratio": 18.34,
-   "pb_ratio": 3.04,
-   "dividend_yield": 3.88,
-   "foreign_net_shares": -1665991,
-   "itc_net_shares": 6493521,
-   "dealer_net_shares": -39562,
-   "total_3insti_net_shares": 4787968,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 18.65,
+   "pb_ratio": 3.09,
+   "dividend_yield": 3.81,
+   "foreign_net_shares": -8934196,
+   "itc_net_shares": 8476000,
+   "dealer_net_shares": 386129,
+   "total_3insti_net_shares": -72067,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2454",
@@ -5761,14 +5780,14 @@
    "rev_mom_pct": -0.67,
    "rev_yoy_pct": 5.77,
    "cum_rev_yoy_pct": 5.35,
-   "pe_ratio": 65.14,
-   "pb_ratio": 13.9,
-   "dividend_yield": 1.32,
-   "foreign_net_shares": -3752773,
-   "itc_net_shares": 690151,
-   "dealer_net_shares": -298263,
-   "total_3insti_net_shares": -3360885,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 58.63,
+   "pb_ratio": 12.51,
+   "dividend_yield": 1.47,
+   "foreign_net_shares": -644263,
+   "itc_net_shares": 573631,
+   "dealer_net_shares": 97633,
+   "total_3insti_net_shares": 27001,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "8112",
@@ -5782,14 +5801,14 @@
    "rev_mom_pct": -18.6,
    "rev_yoy_pct": 204.31,
    "cum_rev_yoy_pct": 186.54,
-   "pe_ratio": 4.39,
-   "pb_ratio": 1.64,
-   "dividend_yield": 4.63,
-   "foreign_net_shares": -847443,
-   "itc_net_shares": 133000,
-   "dealer_net_shares": -33387,
-   "total_3insti_net_shares": -747830,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 4.2,
+   "pb_ratio": 1.57,
+   "dividend_yield": 4.85,
+   "foreign_net_shares": 225115,
+   "itc_net_shares": -120000,
+   "dealer_net_shares": -7993,
+   "total_3insti_net_shares": 97122,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2603",
@@ -5803,14 +5822,14 @@
    "rev_mom_pct": 7.83,
    "rev_yoy_pct": 96.13,
    "cum_rev_yoy_pct": 22.25,
-   "pe_ratio": 7.0,
-   "pb_ratio": 0.91,
-   "dividend_yield": 6.23,
-   "foreign_net_shares": 11464665,
-   "itc_net_shares": -10921359,
-   "dealer_net_shares": 437507,
-   "total_3insti_net_shares": 980813,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 6.88,
+   "pb_ratio": 0.9,
+   "dividend_yield": 6.34,
+   "foreign_net_shares": 13006812,
+   "itc_net_shares": -13284000,
+   "dealer_net_shares": 353894,
+   "total_3insti_net_shares": 76706,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2408",
@@ -5824,14 +5843,14 @@
    "rev_mom_pct": 3.07,
    "rev_yoy_pct": 487.73,
    "cum_rev_yoy_pct": 602.15,
-   "pe_ratio": 6.09,
-   "pb_ratio": 2.6,
-   "dividend_yield": 0.44,
-   "foreign_net_shares": -1877341,
-   "itc_net_shares": 49356,
-   "dealer_net_shares": -330617,
-   "total_3insti_net_shares": -2158602,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 5.49,
+   "pb_ratio": 2.34,
+   "dividend_yield": 0.48,
+   "foreign_net_shares": 7051625,
+   "itc_net_shares": 439092,
+   "dealer_net_shares": 1080927,
+   "total_3insti_net_shares": 8571644,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2345",
@@ -5845,14 +5864,14 @@
    "rev_mom_pct": 10.56,
    "rev_yoy_pct": 91.16,
    "cum_rev_yoy_pct": 65.81,
-   "pe_ratio": 20.33,
-   "pb_ratio": 10.12,
-   "dividend_yield": 1.01,
-   "foreign_net_shares": -1343818,
-   "itc_net_shares": 1507326,
-   "dealer_net_shares": -18579,
-   "total_3insti_net_shares": 144929,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 20.19,
+   "pb_ratio": 10.05,
+   "dividend_yield": 1.02,
+   "foreign_net_shares": -1041779,
+   "itc_net_shares": 922679,
+   "dealer_net_shares": -11252,
+   "total_3insti_net_shares": -130352,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "1326",
@@ -5866,14 +5885,14 @@
    "rev_mom_pct": 7.28,
    "rev_yoy_pct": 61.79,
    "cum_rev_yoy_pct": 22.84,
-   "pe_ratio": 21.58,
-   "pb_ratio": 0.63,
-   "dividend_yield": 0.93,
-   "foreign_net_shares": -4583244,
-   "itc_net_shares": 39000,
-   "dealer_net_shares": -229273,
-   "total_3insti_net_shares": -4773517,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 19.83,
+   "pb_ratio": 0.57,
+   "dividend_yield": 1.02,
+   "foreign_net_shares": 3231174,
+   "itc_net_shares": 90000,
+   "dealer_net_shares": 536880,
+   "total_3insti_net_shares": 3858054,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "1303",
@@ -5887,14 +5906,14 @@
    "rev_mom_pct": 1.51,
    "rev_yoy_pct": 64.6,
    "cum_rev_yoy_pct": 30.51,
-   "pe_ratio": 23.29,
-   "pb_ratio": 3.7,
-   "dividend_yield": 0.32,
-   "foreign_net_shares": -11818073,
-   "itc_net_shares": 6565935,
-   "dealer_net_shares": 1808446,
-   "total_3insti_net_shares": -3443692,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 21.19,
+   "pb_ratio": 3.37,
+   "dividend_yield": 0.35,
+   "foreign_net_shares": -3326772,
+   "itc_net_shares": 6256000,
+   "dealer_net_shares": 1213281,
+   "total_3insti_net_shares": 4142509,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2912",
@@ -5911,11 +5930,11 @@
    "pe_ratio": 18.55,
    "pb_ratio": 4.86,
    "dividend_yield": 4.35,
-   "foreign_net_shares": 846338,
-   "itc_net_shares": -1296267,
-   "dealer_net_shares": 30756,
-   "total_3insti_net_shares": -419173,
-   "insti_trade_date": "20261125"
+   "foreign_net_shares": 1362334,
+   "itc_net_shares": -1301000,
+   "dealer_net_shares": 58905,
+   "total_3insti_net_shares": 120239,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2002",
@@ -5929,14 +5948,14 @@
    "rev_mom_pct": 3.35,
    "rev_yoy_pct": 30.98,
    "cum_rev_yoy_pct": 8.44,
-   "pe_ratio": 438.75,
-   "pb_ratio": 0.89,
-   "dividend_yield": 0.85,
-   "foreign_net_shares": -575023,
-   "itc_net_shares": 8000,
-   "dealer_net_shares": -1221960,
-   "total_3insti_net_shares": -1788983,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 427.5,
+   "pb_ratio": 0.87,
+   "dividend_yield": 0.88,
+   "foreign_net_shares": 5430918,
+   "itc_net_shares": -3646000,
+   "dealer_net_shares": 1011462,
+   "total_3insti_net_shares": 2796380,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "8299",
@@ -5953,11 +5972,11 @@
    "pe_ratio": 4.29,
    "pb_ratio": 2.75,
    "dividend_yield": 1.56,
-   "foreign_net_shares": -1958955,
-   "itc_net_shares": 2451432,
-   "dealer_net_shares": -329040,
-   "total_3insti_net_shares": 163437,
-   "insti_trade_date": "20261125"
+   "foreign_net_shares": -1236631,
+   "itc_net_shares": 1692000,
+   "dealer_net_shares": 38234,
+   "total_3insti_net_shares": 493603,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2344",
@@ -5971,14 +5990,14 @@
    "rev_mom_pct": 3.94,
    "rev_yoy_pct": 256.96,
    "cum_rev_yoy_pct": 195.45,
-   "pe_ratio": 6.77,
-   "pb_ratio": 2.28,
-   "dividend_yield": 0.48,
-   "foreign_net_shares": -7136184,
-   "itc_net_shares": 352591,
-   "dealer_net_shares": -1195657,
-   "total_3insti_net_shares": -7979250,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 6.09,
+   "pb_ratio": 2.05,
+   "dividend_yield": 0.53,
+   "foreign_net_shares": 10796505,
+   "itc_net_shares": 22004,
+   "dealer_net_shares": 1013714,
+   "total_3insti_net_shares": 11832223,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "4958",
@@ -5992,14 +6011,14 @@
    "rev_mom_pct": 3.18,
    "rev_yoy_pct": 39.99,
    "cum_rev_yoy_pct": 24.75,
-   "pe_ratio": 35.98,
-   "pb_ratio": 2.46,
-   "dividend_yield": 0.94,
-   "foreign_net_shares": -5844501,
-   "itc_net_shares": 2728839,
-   "dealer_net_shares": -587142,
-   "total_3insti_net_shares": -3702804,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 32.43,
+   "pb_ratio": 2.22,
+   "dividend_yield": 1.04,
+   "foreign_net_shares": 89930,
+   "itc_net_shares": 1944000,
+   "dealer_net_shares": 316159,
+   "total_3insti_net_shares": 2350089,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2353",
@@ -6013,14 +6032,14 @@
    "rev_mom_pct": -24.03,
    "rev_yoy_pct": 24.3,
    "cum_rev_yoy_pct": 24.02,
-   "pe_ratio": 14.18,
-   "pb_ratio": 1.08,
-   "dividend_yield": 4.54,
-   "foreign_net_shares": -551152,
-   "itc_net_shares": -151491,
-   "dealer_net_shares": 273745,
-   "total_3insti_net_shares": -428898,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 13.49,
+   "pb_ratio": 1.02,
+   "dividend_yield": 4.77,
+   "foreign_net_shares": 1264881,
+   "itc_net_shares": -39000,
+   "dealer_net_shares": 411752,
+   "total_3insti_net_shares": 1637633,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2207",
@@ -6034,14 +6053,14 @@
    "rev_mom_pct": -2.92,
    "rev_yoy_pct": 4.77,
    "cum_rev_yoy_pct": 13.42,
-   "pe_ratio": 13.02,
-   "pb_ratio": 3.2,
-   "dividend_yield": 3.75,
-   "foreign_net_shares": 44105,
-   "itc_net_shares": -3553,
-   "dealer_net_shares": -34037,
-   "total_3insti_net_shares": 6515,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 12.7,
+   "pb_ratio": 3.12,
+   "dividend_yield": 3.85,
+   "foreign_net_shares": -39208,
+   "itc_net_shares": -5000,
+   "dealer_net_shares": 37691,
+   "total_3insti_net_shares": -6517,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2303",
@@ -6055,14 +6074,14 @@
    "rev_mom_pct": -0.6,
    "rev_yoy_pct": 18.33,
    "cum_rev_yoy_pct": 16.33,
-   "pe_ratio": 14.34,
-   "pb_ratio": 2.59,
-   "dividend_yield": 2.69,
-   "foreign_net_shares": -60988342,
-   "itc_net_shares": 20197485,
-   "dealer_net_shares": -1865343,
-   "total_3insti_net_shares": -42656200,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 12.91,
+   "pb_ratio": 2.33,
+   "dividend_yield": 2.99,
+   "foreign_net_shares": -21903796,
+   "itc_net_shares": 10498482,
+   "dealer_net_shares": 1149740,
+   "total_3insti_net_shares": -10255574,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "1402",
@@ -6076,14 +6095,14 @@
    "rev_mom_pct": 6.14,
    "rev_yoy_pct": 8.64,
    "cum_rev_yoy_pct": 8.21,
-   "pe_ratio": 12.72,
-   "pb_ratio": 0.61,
-   "dividend_yield": 4.61,
-   "foreign_net_shares": -1474003,
-   "itc_net_shares": -105074,
-   "dealer_net_shares": -411415,
-   "total_3insti_net_shares": -1990492,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 12.18,
+   "pb_ratio": 0.59,
+   "dividend_yield": 4.82,
+   "foreign_net_shares": 128895,
+   "itc_net_shares": -29000,
+   "dealer_net_shares": 297216,
+   "total_3insti_net_shares": 397111,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2383",
@@ -6097,14 +6116,14 @@
    "rev_mom_pct": 13.66,
    "rev_yoy_pct": 203.08,
    "cum_rev_yoy_pct": 114.06,
-   "pe_ratio": 36.37,
-   "pb_ratio": 16.56,
-   "dividend_yield": 0.74,
-   "foreign_net_shares": -2361784,
-   "itc_net_shares": 1777985,
-   "dealer_net_shares": -165515,
-   "total_3insti_net_shares": -749314,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 35.94,
+   "pb_ratio": 16.36,
+   "dividend_yield": 0.75,
+   "foreign_net_shares": -2289447,
+   "itc_net_shares": 783790,
+   "dealer_net_shares": 109957,
+   "total_3insti_net_shares": -1395700,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2412",
@@ -6118,14 +6137,14 @@
    "rev_mom_pct": -2.67,
    "rev_yoy_pct": 13.45,
    "cum_rev_yoy_pct": 11.13,
-   "pe_ratio": 30.18,
-   "pb_ratio": 3.37,
-   "dividend_yield": 3.16,
-   "foreign_net_shares": -11621417,
-   "itc_net_shares": 16356431,
-   "dealer_net_shares": 239060,
-   "total_3insti_net_shares": 4974074,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 30.0,
+   "pb_ratio": 3.35,
+   "dividend_yield": 3.18,
+   "foreign_net_shares": -14539694,
+   "itc_net_shares": 20673000,
+   "dealer_net_shares": 1042091,
+   "total_3insti_net_shares": 7175397,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2615",
@@ -6139,14 +6158,14 @@
    "rev_mom_pct": 7.65,
    "rev_yoy_pct": 124.36,
    "cum_rev_yoy_pct": 35.92,
-   "pe_ratio": 5.34,
-   "pb_ratio": 0.88,
-   "dividend_yield": 3.09,
-   "foreign_net_shares": 9267947,
-   "itc_net_shares": -421022,
-   "dealer_net_shares": 116229,
-   "total_3insti_net_shares": 8963154,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 5.53,
+   "pb_ratio": 0.91,
+   "dividend_yield": 2.99,
+   "foreign_net_shares": -2082661,
+   "itc_net_shares": 3000,
+   "dealer_net_shares": 53852,
+   "total_3insti_net_shares": -2025809,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2618",
@@ -6160,14 +6179,14 @@
    "rev_mom_pct": 11.72,
    "rev_yoy_pct": 22.63,
    "cum_rev_yoy_pct": 19.81,
-   "pe_ratio": 9.88,
-   "pb_ratio": 1.78,
-   "dividend_yield": 4.12,
-   "foreign_net_shares": -3537232,
-   "itc_net_shares": -2852925,
-   "dealer_net_shares": 1293394,
-   "total_3insti_net_shares": -5096763,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 9.29,
+   "pb_ratio": 1.68,
+   "dividend_yield": 4.38,
+   "foreign_net_shares": 6030862,
+   "itc_net_shares": -4263000,
+   "dealer_net_shares": 89142,
+   "total_3insti_net_shares": 1857004,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2882",
@@ -6181,14 +6200,14 @@
    "rev_mom_pct": 12.38,
    "rev_yoy_pct": -61.4,
    "cum_rev_yoy_pct": 12.01,
-   "pe_ratio": 12.32,
-   "pb_ratio": 1.51,
-   "dividend_yield": 3.35,
-   "foreign_net_shares": 10923915,
-   "itc_net_shares": -13309958,
-   "dealer_net_shares": 172162,
-   "total_3insti_net_shares": -2213881,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 11.85,
+   "pb_ratio": 1.45,
+   "dividend_yield": 3.48,
+   "foreign_net_shares": 20170811,
+   "itc_net_shares": -19517000,
+   "dealer_net_shares": 1050006,
+   "total_3insti_net_shares": 1703817,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "9904",
@@ -6202,14 +6221,14 @@
    "rev_mom_pct": 3.82,
    "rev_yoy_pct": 3.01,
    "cum_rev_yoy_pct": -0.15,
-   "pe_ratio": 5.4,
+   "pe_ratio": 5.3,
    "pb_ratio": 0.36,
-   "dividend_yield": 5.1,
-   "foreign_net_shares": 2965678,
-   "itc_net_shares": -91174,
-   "dealer_net_shares": 347944,
-   "total_3insti_net_shares": 3222448,
-   "insti_trade_date": "20261125"
+   "dividend_yield": 5.2,
+   "foreign_net_shares": -1433870,
+   "itc_net_shares": -123000,
+   "dealer_net_shares": 133719,
+   "total_3insti_net_shares": -1423151,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2610",
@@ -6223,14 +6242,14 @@
    "rev_mom_pct": 5.84,
    "rev_yoy_pct": 22.36,
    "cum_rev_yoy_pct": 20.25,
-   "pe_ratio": 9.41,
-   "pb_ratio": 1.32,
-   "dividend_yield": 3.6,
-   "foreign_net_shares": 12063005,
-   "itc_net_shares": 237500,
-   "dealer_net_shares": -201604,
-   "total_3insti_net_shares": 12098901,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 9.21,
+   "pb_ratio": 1.29,
+   "dividend_yield": 3.68,
+   "foreign_net_shares": -5689216,
+   "itc_net_shares": -72000,
+   "dealer_net_shares": 382032,
+   "total_3insti_net_shares": -5379184,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3017",
@@ -6244,14 +6263,14 @@
    "rev_mom_pct": 5.16,
    "rev_yoy_pct": 34.35,
    "cum_rev_yoy_pct": 65.58,
-   "pe_ratio": 28.74,
-   "pb_ratio": 15.25,
-   "dividend_yield": 0.8,
-   "foreign_net_shares": -1286724,
-   "itc_net_shares": 1511034,
-   "dealer_net_shares": -183838,
-   "total_3insti_net_shares": 40472,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 28.13,
+   "pb_ratio": 14.92,
+   "dividend_yield": 0.82,
+   "foreign_net_shares": 53113,
+   "itc_net_shares": 475786,
+   "dealer_net_shares": -26069,
+   "total_3insti_net_shares": 502830,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2609",
@@ -6265,14 +6284,14 @@
    "rev_mom_pct": -3.02,
    "rev_yoy_pct": 82.45,
    "cum_rev_yoy_pct": 23.2,
-   "pe_ratio": 7.02,
-   "pb_ratio": 0.57,
-   "dividend_yield": 3.55,
-   "foreign_net_shares": 4724732,
-   "itc_net_shares": -33644,
-   "dealer_net_shares": -90545,
-   "total_3insti_net_shares": 4600543,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 6.96,
+   "pb_ratio": 0.56,
+   "dividend_yield": 3.58,
+   "foreign_net_shares": 250190,
+   "itc_net_shares": -18000,
+   "dealer_net_shares": 85201,
+   "total_3insti_net_shares": 317391,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2409",
@@ -6286,14 +6305,14 @@
    "rev_mom_pct": -11.22,
    "rev_yoy_pct": -0.65,
    "cum_rev_yoy_pct": -1.97,
-   "pe_ratio": 331.25,
-   "pb_ratio": 1.32,
-   "dividend_yield": 1.51,
-   "foreign_net_shares": -14119955,
-   "itc_net_shares": 254232,
-   "dealer_net_shares": -3084133,
-   "total_3insti_net_shares": -16949856,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 301.88,
+   "pb_ratio": 1.2,
+   "dividend_yield": 1.66,
+   "foreign_net_shares": 15027213,
+   "itc_net_shares": -82463,
+   "dealer_net_shares": 2054235,
+   "total_3insti_net_shares": 16998985,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2301",
@@ -6307,14 +6326,14 @@
    "rev_mom_pct": 6.49,
    "rev_yoy_pct": 32.01,
    "cum_rev_yoy_pct": 26.8,
-   "pe_ratio": 20.86,
-   "pb_ratio": 4.75,
-   "dividend_yield": 2.45,
-   "foreign_net_shares": -5490299,
-   "itc_net_shares": 4504840,
-   "dealer_net_shares": 364580,
-   "total_3insti_net_shares": -620879,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 19.33,
+   "pb_ratio": 4.4,
+   "dividend_yield": 2.65,
+   "foreign_net_shares": -2863438,
+   "itc_net_shares": 3292645,
+   "dealer_net_shares": 298574,
+   "total_3insti_net_shares": 727781,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2377",
@@ -6328,14 +6347,14 @@
    "rev_mom_pct": -2.26,
    "rev_yoy_pct": -5.64,
    "cum_rev_yoy_pct": -5.51,
-   "pe_ratio": 9.3,
-   "pb_ratio": 1.8,
-   "dividend_yield": 3.16,
-   "foreign_net_shares": -1002775,
-   "itc_net_shares": 955714,
-   "dealer_net_shares": 104279,
-   "total_3insti_net_shares": 57218,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 8.67,
+   "pb_ratio": 1.68,
+   "dividend_yield": 3.39,
+   "foreign_net_shares": 374677,
+   "itc_net_shares": -167434,
+   "dealer_net_shares": 204172,
+   "total_3insti_net_shares": 411415,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2352",
@@ -6349,14 +6368,14 @@
    "rev_mom_pct": -1.85,
    "rev_yoy_pct": 13.47,
    "cum_rev_yoy_pct": 4.39,
-   "pe_ratio": 27.14,
-   "pb_ratio": 0.95,
-   "dividend_yield": 3.84,
-   "foreign_net_shares": -747249,
-   "itc_net_shares": -8800,
-   "dealer_net_shares": -155852,
-   "total_3insti_net_shares": -911901,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 25.21,
+   "pb_ratio": 0.88,
+   "dividend_yield": 4.13,
+   "foreign_net_shares": -1140930,
+   "itc_net_shares": 1000,
+   "dealer_net_shares": 96797,
+   "total_3insti_net_shares": -1043133,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3037",
@@ -6370,14 +6389,14 @@
    "rev_mom_pct": 1.8,
    "rev_yoy_pct": 67.62,
    "cum_rev_yoy_pct": 40.88,
-   "pe_ratio": 31.73,
-   "pb_ratio": 5.66,
-   "dividend_yield": 0.32,
-   "foreign_net_shares": 644132,
-   "itc_net_shares": 546332,
-   "dealer_net_shares": -758852,
-   "total_3insti_net_shares": 431612,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 30.28,
+   "pb_ratio": 5.4,
+   "dividend_yield": 0.34,
+   "foreign_net_shares": -1555598,
+   "itc_net_shares": 1571149,
+   "dealer_net_shares": 440382,
+   "total_3insti_net_shares": 455933,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3481",
@@ -6391,14 +6410,14 @@
    "rev_mom_pct": -7.65,
    "rev_yoy_pct": 1.41,
    "cum_rev_yoy_pct": 9.67,
-   "pe_ratio": 19.22,
-   "pb_ratio": 1.14,
-   "dividend_yield": 3.01,
-   "foreign_net_shares": -3886179,
-   "itc_net_shares": 106556,
-   "dealer_net_shares": 1291369,
-   "total_3insti_net_shares": -2488254,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 17.66,
+   "pb_ratio": 1.04,
+   "dividend_yield": 3.27,
+   "foreign_net_shares": 24423076,
+   "itc_net_shares": 3865,
+   "dealer_net_shares": 2228124,
+   "total_3insti_net_shares": 26655065,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2891",
@@ -6412,14 +6431,14 @@
    "rev_mom_pct": -17.34,
    "rev_yoy_pct": -35.41,
    "cum_rev_yoy_pct": 21.81,
-   "pe_ratio": 16.97,
-   "pb_ratio": 1.93,
-   "dividend_yield": 3.58,
-   "foreign_net_shares": -4259395,
-   "itc_net_shares": -511956,
-   "dealer_net_shares": 3352605,
-   "total_3insti_net_shares": -1418746,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 16.0,
+   "pb_ratio": 1.82,
+   "dividend_yield": 3.79,
+   "foreign_net_shares": 13288602,
+   "itc_net_shares": -9961000,
+   "dealer_net_shares": 1508331,
+   "total_3insti_net_shares": 4835933,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2327",
@@ -6433,14 +6452,14 @@
    "rev_mom_pct": 3.1,
    "rev_yoy_pct": 55.01,
    "cum_rev_yoy_pct": 38.26,
-   "pe_ratio": 19.42,
-   "pb_ratio": 3.7,
-   "dividend_yield": 1.76,
-   "foreign_net_shares": 5270303,
-   "itc_net_shares": -1140814,
-   "dealer_net_shares": -183239,
-   "total_3insti_net_shares": 3946250,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 17.6,
+   "pb_ratio": 3.35,
+   "dividend_yield": 1.94,
+   "foreign_net_shares": 8776861,
+   "itc_net_shares": -179225,
+   "dealer_net_shares": 167457,
+   "total_3insti_net_shares": 8765093,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3045",
@@ -6454,14 +6473,14 @@
    "rev_mom_pct": -1.99,
    "rev_yoy_pct": 9.22,
    "cum_rev_yoy_pct": 5.73,
-   "pe_ratio": 22.82,
-   "pb_ratio": 4.32,
-   "dividend_yield": 3.78,
-   "foreign_net_shares": -4340271,
-   "itc_net_shares": 3215689,
-   "dealer_net_shares": 1083555,
-   "total_3insti_net_shares": -41027,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 22.36,
+   "pb_ratio": 4.24,
+   "dividend_yield": 3.85,
+   "foreign_net_shares": -2488542,
+   "itc_net_shares": 2823000,
+   "dealer_net_shares": 135959,
+   "total_3insti_net_shares": 470417,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3260",
@@ -6478,11 +6497,11 @@
    "pe_ratio": 2.24,
    "pb_ratio": 1.66,
    "dividend_yield": 6.97,
-   "foreign_net_shares": 104318,
-   "itc_net_shares": 189876,
-   "dealer_net_shares": -43390,
-   "total_3insti_net_shares": 250804,
-   "insti_trade_date": "20261125"
+   "foreign_net_shares": 2294012,
+   "itc_net_shares": -17988,
+   "dealer_net_shares": 179762,
+   "total_3insti_net_shares": 2455786,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2312",
@@ -6496,14 +6515,14 @@
    "rev_mom_pct": -23.64,
    "rev_yoy_pct": 8.28,
    "cum_rev_yoy_pct": 5.49,
-   "pe_ratio": 19.42,
-   "pb_ratio": 1.4,
-   "dividend_yield": 2.58,
-   "foreign_net_shares": -606039,
-   "itc_net_shares": -47000,
-   "dealer_net_shares": -143294,
-   "total_3insti_net_shares": -796333,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 17.71,
+   "pb_ratio": 1.28,
+   "dividend_yield": 2.82,
+   "foreign_net_shares": 491790,
+   "itc_net_shares": 0,
+   "dealer_net_shares": 135888,
+   "total_3insti_net_shares": 627678,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "6285",
@@ -6517,14 +6536,14 @@
    "rev_mom_pct": 4.85,
    "rev_yoy_pct": 77.78,
    "cum_rev_yoy_pct": 44.69,
-   "pe_ratio": 16.1,
-   "pb_ratio": 2.43,
-   "dividend_yield": 2.21,
-   "foreign_net_shares": -1798792,
-   "itc_net_shares": 170845,
-   "dealer_net_shares": -162454,
-   "total_3insti_net_shares": -1790401,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 14.53,
+   "pb_ratio": 2.19,
+   "dividend_yield": 2.45,
+   "foreign_net_shares": 4441347,
+   "itc_net_shares": 22764,
+   "dealer_net_shares": 43093,
+   "total_3insti_net_shares": 4507204,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3706",
@@ -6538,14 +6557,14 @@
    "rev_mom_pct": -12.4,
    "rev_yoy_pct": 36.35,
    "cum_rev_yoy_pct": 54.46,
-   "pe_ratio": 11.45,
+   "pe_ratio": 11.37,
    "pb_ratio": 1.08,
-   "dividend_yield": 6.85,
-   "foreign_net_shares": 1658856,
-   "itc_net_shares": 1840200,
-   "dealer_net_shares": -286060,
-   "total_3insti_net_shares": 3212996,
-   "insti_trade_date": "20261125"
+   "dividend_yield": 6.9,
+   "foreign_net_shares": 1261007,
+   "itc_net_shares": -2000,
+   "dealer_net_shares": 309934,
+   "total_3insti_net_shares": 1568941,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "1101",
@@ -6559,14 +6578,14 @@
    "rev_mom_pct": 14.21,
    "rev_yoy_pct": 17.83,
    "cum_rev_yoy_pct": 4.93,
-   "pe_ratio": 72.0,
-   "pb_ratio": 0.81,
-   "dividend_yield": 3.17,
-   "foreign_net_shares": -2251719,
-   "itc_net_shares": -4000,
-   "dealer_net_shares": 63993,
-   "total_3insti_net_shares": -2191726,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 69.71,
+   "pb_ratio": 0.78,
+   "dividend_yield": 3.28,
+   "foreign_net_shares": 4522823,
+   "itc_net_shares": 30000,
+   "dealer_net_shares": -445514,
+   "total_3insti_net_shares": 4107309,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "6414",
@@ -6580,14 +6599,14 @@
    "rev_mom_pct": -8.65,
    "rev_yoy_pct": 39.3,
    "cum_rev_yoy_pct": 32.11,
-   "pe_ratio": 12.72,
-   "pb_ratio": 1.89,
-   "dividend_yield": 4.36,
-   "foreign_net_shares": 141174,
+   "pe_ratio": 12.17,
+   "pb_ratio": 1.81,
+   "dividend_yield": 4.56,
+   "foreign_net_shares": 113328,
    "itc_net_shares": -10000,
-   "dealer_net_shares": 13075,
-   "total_3insti_net_shares": 144249,
-   "insti_trade_date": "20261125"
+   "dealer_net_shares": 5014,
+   "total_3insti_net_shares": 108342,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "1605",
@@ -6601,14 +6620,14 @@
    "rev_mom_pct": 1.27,
    "rev_yoy_pct": 18.46,
    "cum_rev_yoy_pct": 4.73,
-   "pe_ratio": 6.36,
-   "pb_ratio": 0.66,
-   "dividend_yield": 1.62,
-   "foreign_net_shares": -9825252,
-   "itc_net_shares": 73352,
-   "dealer_net_shares": 350997,
-   "total_3insti_net_shares": -9400903,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 5.76,
+   "pb_ratio": 0.6,
+   "dividend_yield": 1.79,
+   "foreign_net_shares": 2931147,
+   "itc_net_shares": 3547493,
+   "dealer_net_shares": 668271,
+   "total_3insti_net_shares": 7146911,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "1301",
@@ -6622,14 +6641,14 @@
    "rev_mom_pct": 3.77,
    "rev_yoy_pct": 16.21,
    "cum_rev_yoy_pct": 0.95,
-   "pe_ratio": 23.07,
-   "pb_ratio": 0.57,
-   "dividend_yield": 0.82,
-   "foreign_net_shares": 339825,
-   "itc_net_shares": 16000,
-   "dealer_net_shares": 593411,
-   "total_3insti_net_shares": 949236,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 21.52,
+   "pb_ratio": 0.53,
+   "dividend_yield": 0.88,
+   "foreign_net_shares": 5884326,
+   "itc_net_shares": 0,
+   "dealer_net_shares": 937332,
+   "total_3insti_net_shares": 6821658,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2887",
@@ -6643,14 +6662,14 @@
    "rev_mom_pct": 10.75,
    "rev_yoy_pct": -56.12,
    "cum_rev_yoy_pct": 29.85,
-   "pe_ratio": 13.44,
-   "pb_ratio": 1.34,
-   "dividend_yield": 3.03,
-   "foreign_net_shares": -7360494,
-   "itc_net_shares": -4932402,
-   "dealer_net_shares": 6079668,
-   "total_3insti_net_shares": -6213228,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 12.59,
+   "pb_ratio": 1.25,
+   "dividend_yield": 3.24,
+   "foreign_net_shares": 20603531,
+   "itc_net_shares": -15426000,
+   "dealer_net_shares": 1569329,
+   "total_3insti_net_shares": 6746860,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "9105",
@@ -6667,11 +6686,11 @@
    "pe_ratio": null,
    "pb_ratio": null,
    "dividend_yield": null,
-   "foreign_net_shares": -223863,
+   "foreign_net_shares": 1731000,
    "itc_net_shares": 0,
-   "dealer_net_shares": -103874,
-   "total_3insti_net_shares": -327737,
-   "insti_trade_date": "20261125"
+   "dealer_net_shares": -3590,
+   "total_3insti_net_shares": 1727410,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3209",
@@ -6685,14 +6704,14 @@
    "rev_mom_pct": 145.49,
    "rev_yoy_pct": 169.43,
    "cum_rev_yoy_pct": 62.37,
-   "pe_ratio": 6.98,
-   "pb_ratio": 1.8,
-   "dividend_yield": 5.61,
-   "foreign_net_shares": -440951,
+   "pe_ratio": 6.42,
+   "pb_ratio": 1.66,
+   "dividend_yield": 6.1,
+   "foreign_net_shares": 80000,
    "itc_net_shares": 0,
-   "dealer_net_shares": -10133,
-   "total_3insti_net_shares": -451084,
-   "insti_trade_date": "20261125"
+   "dealer_net_shares": 23723,
+   "total_3insti_net_shares": 103723,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3048",
@@ -6706,14 +6725,14 @@
    "rev_mom_pct": -7.72,
    "rev_yoy_pct": 28.06,
    "cum_rev_yoy_pct": 35.95,
-   "pe_ratio": 6.9,
-   "pb_ratio": 1.4,
-   "dividend_yield": 2.51,
-   "foreign_net_shares": -530489,
+   "pe_ratio": 6.34,
+   "pb_ratio": 1.29,
+   "dividend_yield": 2.73,
+   "foreign_net_shares": 165101,
    "itc_net_shares": 0,
-   "dealer_net_shares": 3096,
-   "total_3insti_net_shares": -527393,
-   "insti_trade_date": "20261125"
+   "dealer_net_shares": 13264,
+   "total_3insti_net_shares": 178365,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2027",
@@ -6727,14 +6746,14 @@
    "rev_mom_pct": 7.37,
    "rev_yoy_pct": 44.8,
    "cum_rev_yoy_pct": 36.04,
-   "pe_ratio": 8.34,
-   "pb_ratio": 1.35,
-   "dividend_yield": 3.12,
-   "foreign_net_shares": -10267856,
-   "itc_net_shares": 689423,
-   "dealer_net_shares": 285895,
-   "total_3insti_net_shares": -9292538,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 7.57,
+   "pb_ratio": 1.22,
+   "dividend_yield": 3.43,
+   "foreign_net_shares": 2785337,
+   "itc_net_shares": -7142000,
+   "dealer_net_shares": 247359,
+   "total_3insti_net_shares": -4109304,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "6456",
@@ -6749,13 +6768,13 @@
    "rev_yoy_pct": 167.49,
    "cum_rev_yoy_pct": -1.81,
    "pe_ratio": null,
-   "pb_ratio": 0.75,
+   "pb_ratio": 0.67,
    "dividend_yield": null,
-   "foreign_net_shares": 1838049,
+   "foreign_net_shares": 1639100,
    "itc_net_shares": 0,
-   "dealer_net_shares": -198014,
-   "total_3insti_net_shares": 1640035,
-   "insti_trade_date": "20261125"
+   "dealer_net_shares": -25925,
+   "total_3insti_net_shares": 1613175,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3033",
@@ -6769,14 +6788,14 @@
    "rev_mom_pct": -30.89,
    "rev_yoy_pct": 48.78,
    "cum_rev_yoy_pct": 42.13,
-   "pe_ratio": 6.33,
-   "pb_ratio": 1.39,
-   "dividend_yield": 5.24,
-   "foreign_net_shares": -714856,
+   "pe_ratio": 5.85,
+   "pb_ratio": 1.29,
+   "dividend_yield": 5.66,
+   "foreign_net_shares": 572932,
    "itc_net_shares": 0,
-   "dealer_net_shares": 66787,
-   "total_3insti_net_shares": -648069,
-   "insti_trade_date": "20261125"
+   "dealer_net_shares": -24668,
+   "total_3insti_net_shares": 548264,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2885",
@@ -6790,14 +6809,14 @@
    "rev_mom_pct": -13.72,
    "rev_yoy_pct": 3.03,
    "cum_rev_yoy_pct": 90.56,
-   "pe_ratio": 13.75,
-   "pb_ratio": 2.18,
-   "dividend_yield": 3.43,
-   "foreign_net_shares": -9570473,
-   "itc_net_shares": 6895675,
-   "dealer_net_shares": 2204716,
-   "total_3insti_net_shares": -470082,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 13.17,
+   "pb_ratio": 2.09,
+   "dividend_yield": 3.58,
+   "foreign_net_shares": -6919581,
+   "itc_net_shares": 2516000,
+   "dealer_net_shares": 1090622,
+   "total_3insti_net_shares": -3312959,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2881",
@@ -6811,14 +6830,14 @@
    "rev_mom_pct": -36.56,
    "rev_yoy_pct": -83.38,
    "cum_rev_yoy_pct": 21.54,
-   "pe_ratio": 13.41,
-   "pb_ratio": 1.77,
-   "dividend_yield": 2.96,
-   "foreign_net_shares": -5551460,
-   "itc_net_shares": 115086,
-   "dealer_net_shares": -105412,
-   "total_3insti_net_shares": -5541786,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 12.38,
+   "pb_ratio": 1.63,
+   "dividend_yield": 3.21,
+   "foreign_net_shares": 1715712,
+   "itc_net_shares": -2739000,
+   "dealer_net_shares": 1870512,
+   "total_3insti_net_shares": 847224,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2354",
@@ -6832,14 +6851,14 @@
    "rev_mom_pct": -16.5,
    "rev_yoy_pct": -19.31,
    "cum_rev_yoy_pct": -2.43,
-   "pe_ratio": 24.21,
-   "pb_ratio": 0.6,
-   "dividend_yield": 3.07,
-   "foreign_net_shares": -1796200,
-   "itc_net_shares": -43000,
-   "dealer_net_shares": -107078,
-   "total_3insti_net_shares": -1946278,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 22.18,
+   "pb_ratio": 0.55,
+   "dividend_yield": 3.35,
+   "foreign_net_shares": 241062,
+   "itc_net_shares": 2000,
+   "dealer_net_shares": 119672,
+   "total_3insti_net_shares": 362734,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2379",
@@ -6853,14 +6872,14 @@
    "rev_mom_pct": -3.26,
    "rev_yoy_pct": 32.11,
    "cum_rev_yoy_pct": 17.24,
-   "pe_ratio": 23.99,
-   "pb_ratio": 6.54,
-   "dividend_yield": 3.6,
-   "foreign_net_shares": 1520708,
-   "itc_net_shares": -421080,
-   "dealer_net_shares": 84520,
-   "total_3insti_net_shares": 1184148,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 24.16,
+   "pb_ratio": 6.59,
+   "dividend_yield": 3.58,
+   "foreign_net_shares": 855225,
+   "itc_net_shares": -685000,
+   "dealer_net_shares": 196667,
+   "total_3insti_net_shares": 366892,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3665",
@@ -6874,14 +6893,14 @@
    "rev_mom_pct": 26.94,
    "rev_yoy_pct": 79.99,
    "cum_rev_yoy_pct": 44.44,
-   "pe_ratio": 25.5,
-   "pb_ratio": 4.68,
-   "dividend_yield": 0.97,
-   "foreign_net_shares": -3620946,
-   "itc_net_shares": 3701738,
-   "dealer_net_shares": -45002,
-   "total_3insti_net_shares": 35790,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 26.47,
+   "pb_ratio": 4.86,
+   "dividend_yield": 0.93,
+   "foreign_net_shares": -946718,
+   "itc_net_shares": 1140000,
+   "dealer_net_shares": 56543,
+   "total_3insti_net_shares": 249825,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "4904",
@@ -6895,14 +6914,14 @@
    "rev_mom_pct": 5.98,
    "rev_yoy_pct": 5.32,
    "cum_rev_yoy_pct": 10.32,
-   "pe_ratio": 25.6,
-   "pb_ratio": 4.3,
-   "dividend_yield": 3.56,
-   "foreign_net_shares": -1607402,
-   "itc_net_shares": 331392,
-   "dealer_net_shares": 1051284,
-   "total_3insti_net_shares": -224726,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 24.76,
+   "pb_ratio": 4.15,
+   "dividend_yield": 3.68,
+   "foreign_net_shares": 1809324,
+   "itc_net_shares": 9000,
+   "dealer_net_shares": -643384,
+   "total_3insti_net_shares": 1174940,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "6139",
@@ -6916,14 +6935,14 @@
    "rev_mom_pct": 7.47,
    "rev_yoy_pct": 62.59,
    "cum_rev_yoy_pct": 53.41,
-   "pe_ratio": 11.15,
-   "pb_ratio": 5.91,
-   "dividend_yield": 3.8,
-   "foreign_net_shares": -512052,
-   "itc_net_shares": 91933,
-   "dealer_net_shares": -18259,
-   "total_3insti_net_shares": -438378,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 10.21,
+   "pb_ratio": 5.41,
+   "dividend_yield": 4.14,
+   "foreign_net_shares": 316230,
+   "itc_net_shares": -1101,
+   "dealer_net_shares": 36398,
+   "total_3insti_net_shares": 351527,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2395",
@@ -6937,14 +6956,14 @@
    "rev_mom_pct": 5.46,
    "rev_yoy_pct": 88.42,
    "cum_rev_yoy_pct": 53.09,
-   "pe_ratio": 29.82,
-   "pb_ratio": 8.17,
-   "dividend_yield": 1.89,
-   "foreign_net_shares": -340776,
-   "itc_net_shares": 121582,
-   "dealer_net_shares": -62059,
-   "total_3insti_net_shares": -281253,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 28.1,
+   "pb_ratio": 7.7,
+   "dividend_yield": 2.01,
+   "foreign_net_shares": -677665,
+   "itc_net_shares": 380000,
+   "dealer_net_shares": 96480,
+   "total_3insti_net_shares": -201185,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3044",
@@ -6958,14 +6977,14 @@
    "rev_mom_pct": -0.1,
    "rev_yoy_pct": 70.33,
    "cum_rev_yoy_pct": 43.66,
-   "pe_ratio": 16.4,
-   "pb_ratio": 4.1,
-   "dividend_yield": 2.61,
-   "foreign_net_shares": -654297,
-   "itc_net_shares": 601000,
-   "dealer_net_shares": 32753,
-   "total_3insti_net_shares": -20544,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 15.24,
+   "pb_ratio": 3.81,
+   "dividend_yield": 2.81,
+   "foreign_net_shares": -1103487,
+   "itc_net_shares": 1441000,
+   "dealer_net_shares": 51079,
+   "total_3insti_net_shares": 388592,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "8096",
@@ -6982,11 +7001,11 @@
    "pe_ratio": 6.2,
    "pb_ratio": 2.02,
    "dividend_yield": 0.91,
-   "foreign_net_shares": -203834,
+   "foreign_net_shares": 499236,
    "itc_net_shares": 0,
-   "dealer_net_shares": -6395,
-   "total_3insti_net_shares": -210229,
-   "insti_trade_date": "20261125"
+   "dealer_net_shares": 23319,
+   "total_3insti_net_shares": 522555,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3661",
@@ -7000,14 +7019,14 @@
    "rev_mom_pct": 2.82,
    "rev_yoy_pct": 515.81,
    "cum_rev_yoy_pct": 72.62,
-   "pe_ratio": 43.34,
-   "pb_ratio": 5.3,
-   "dividend_yield": 0.83,
-   "foreign_net_shares": -278585,
-   "itc_net_shares": 403600,
-   "dealer_net_shares": -46269,
-   "total_3insti_net_shares": 78746,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 39.9,
+   "pb_ratio": 4.88,
+   "dividend_yield": 0.9,
+   "foreign_net_shares": -665871,
+   "itc_net_shares": 124500,
+   "dealer_net_shares": 40067,
+   "total_3insti_net_shares": -501304,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3034",
@@ -7021,14 +7040,14 @@
    "rev_mom_pct": -2.85,
    "rev_yoy_pct": 27.59,
    "cum_rev_yoy_pct": 8.29,
-   "pe_ratio": 13.41,
-   "pb_ratio": 3.54,
-   "dividend_yield": 5.28,
-   "foreign_net_shares": 673435,
-   "itc_net_shares": -323501,
-   "dealer_net_shares": 195950,
-   "total_3insti_net_shares": 545884,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 13.16,
+   "pb_ratio": 3.48,
+   "dividend_yield": 5.38,
+   "foreign_net_shares": 1388089,
+   "itc_net_shares": -778000,
+   "dealer_net_shares": 87650,
+   "total_3insti_net_shares": 697739,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2368",
@@ -7042,14 +7061,14 @@
    "rev_mom_pct": 6.36,
    "rev_yoy_pct": 76.18,
    "cum_rev_yoy_pct": 69.88,
-   "pe_ratio": 25.79,
-   "pb_ratio": 8.49,
-   "dividend_yield": 1.14,
-   "foreign_net_shares": -2860547,
-   "itc_net_shares": 2010534,
-   "dealer_net_shares": -88830,
-   "total_3insti_net_shares": -938843,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 27.14,
+   "pb_ratio": 8.93,
+   "dividend_yield": 1.08,
+   "foreign_net_shares": -2668666,
+   "itc_net_shares": 2821784,
+   "dealer_net_shares": 69678,
+   "total_3insti_net_shares": 222796,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2404",
@@ -7063,14 +7082,14 @@
    "rev_mom_pct": 19.68,
    "rev_yoy_pct": 56.0,
    "cum_rev_yoy_pct": 61.54,
-   "pe_ratio": 12.58,
-   "pb_ratio": 7.84,
-   "dividend_yield": 4.27,
-   "foreign_net_shares": -109095,
-   "itc_net_shares": -45072,
-   "dealer_net_shares": -29685,
-   "total_3insti_net_shares": -183852,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 11.76,
+   "pb_ratio": 7.33,
+   "dividend_yield": 4.57,
+   "foreign_net_shares": 100943,
+   "itc_net_shares": -6109,
+   "dealer_net_shares": 26333,
+   "total_3insti_net_shares": 121167,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "5903",
@@ -7087,11 +7106,11 @@
    "pe_ratio": 23.13,
    "pb_ratio": 4.52,
    "dividend_yield": 3.45,
-   "foreign_net_shares": 10290,
+   "foreign_net_shares": 21072,
    "itc_net_shares": 0,
    "dealer_net_shares": 0,
-   "total_3insti_net_shares": 10290,
-   "insti_trade_date": "20261125"
+   "total_3insti_net_shares": 21072,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "1210",
@@ -7105,14 +7124,14 @@
    "rev_mom_pct": -2.2,
    "rev_yoy_pct": 14.58,
    "cum_rev_yoy_pct": 10.03,
-   "pe_ratio": 12.29,
-   "pb_ratio": 1.62,
-   "dividend_yield": 5.77,
-   "foreign_net_shares": 810297,
-   "itc_net_shares": 2000,
-   "dealer_net_shares": 10884,
-   "total_3insti_net_shares": 823181,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 12.27,
+   "pb_ratio": 1.61,
+   "dividend_yield": 5.78,
+   "foreign_net_shares": 462578,
+   "itc_net_shares": 0,
+   "dealer_net_shares": 93000,
+   "total_3insti_net_shares": 555578,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "9933",
@@ -7126,14 +7145,14 @@
    "rev_mom_pct": 7.97,
    "rev_yoy_pct": 53.86,
    "cum_rev_yoy_pct": -6.7,
-   "pe_ratio": 8.07,
-   "pb_ratio": 1.98,
-   "dividend_yield": 1.76,
-   "foreign_net_shares": 3092996,
-   "itc_net_shares": 1000,
-   "dealer_net_shares": -49490,
-   "total_3insti_net_shares": 3044506,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 7.85,
+   "pb_ratio": 1.93,
+   "dividend_yield": 1.81,
+   "foreign_net_shares": 1146723,
+   "itc_net_shares": 3000,
+   "dealer_net_shares": 19993,
+   "total_3insti_net_shares": 1169716,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2313",
@@ -7147,14 +7166,14 @@
    "rev_mom_pct": 1.92,
    "rev_yoy_pct": 24.74,
    "cum_rev_yoy_pct": 14.33,
-   "pe_ratio": 28.06,
-   "pb_ratio": 3.5,
-   "dividend_yield": 1.65,
-   "foreign_net_shares": -76860,
-   "itc_net_shares": -346432,
-   "dealer_net_shares": -125064,
-   "total_3insti_net_shares": -548356,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 25.33,
+   "pb_ratio": 3.16,
+   "dividend_yield": 1.83,
+   "foreign_net_shares": 12315518,
+   "itc_net_shares": -3437000,
+   "dealer_net_shares": 307986,
+   "total_3insti_net_shares": 9186504,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "6239",
@@ -7168,14 +7187,14 @@
    "rev_mom_pct": 2.59,
    "rev_yoy_pct": 25.2,
    "cum_rev_yoy_pct": 29.75,
-   "pe_ratio": 17.92,
-   "pb_ratio": 2.69,
-   "dividend_yield": 2.14,
-   "foreign_net_shares": -231680,
-   "itc_net_shares": 126792,
-   "dealer_net_shares": 114126,
-   "total_3insti_net_shares": 9238,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 16.51,
+   "pb_ratio": 2.48,
+   "dividend_yield": 2.33,
+   "foreign_net_shares": 719993,
+   "itc_net_shares": 4000,
+   "dealer_net_shares": -29868,
+   "total_3insti_net_shares": 694125,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3709",
@@ -7192,11 +7211,11 @@
    "pe_ratio": 3.78,
    "pb_ratio": 1.09,
    "dividend_yield": 4.58,
-   "foreign_net_shares": -152000,
+   "foreign_net_shares": 207611,
    "itc_net_shares": 0,
-   "dealer_net_shares": -13345,
-   "total_3insti_net_shares": -165345,
-   "insti_trade_date": "20261125"
+   "dealer_net_shares": 2000,
+   "total_3insti_net_shares": 209611,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3443",
@@ -7210,14 +7229,14 @@
    "rev_mom_pct": 18.02,
    "rev_yoy_pct": 126.96,
    "cum_rev_yoy_pct": 106.36,
-   "pe_ratio": 113.74,
-   "pb_ratio": 47.96,
-   "dividend_yield": 0.36,
-   "foreign_net_shares": 18061,
-   "itc_net_shares": 12122,
-   "dealer_net_shares": -26448,
-   "total_3insti_net_shares": 3735,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 102.42,
+   "pb_ratio": 43.19,
+   "dividend_yield": 0.39,
+   "foreign_net_shares": 308137,
+   "itc_net_shares": -329854,
+   "dealer_net_shares": 5211,
+   "total_3insti_net_shares": -16506,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2337",
@@ -7231,14 +7250,14 @@
    "rev_mom_pct": 0.55,
    "rev_yoy_pct": 217.19,
    "cum_rev_yoy_pct": 161.49,
-   "pe_ratio": 6.69,
-   "pb_ratio": 1.84,
+   "pe_ratio": 6.02,
+   "pb_ratio": 1.66,
    "dividend_yield": null,
-   "foreign_net_shares": -4349690,
-   "itc_net_shares": 0,
-   "dealer_net_shares": -413197,
-   "total_3insti_net_shares": -4762887,
-   "insti_trade_date": "20261125"
+   "foreign_net_shares": -154083,
+   "itc_net_shares": 19000,
+   "dealer_net_shares": 271482,
+   "total_3insti_net_shares": 136399,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "5871",
@@ -7252,14 +7271,14 @@
    "rev_mom_pct": 2.36,
    "rev_yoy_pct": 3.62,
    "cum_rev_yoy_pct": -0.01,
-   "pe_ratio": 9.5,
-   "pb_ratio": 1.02,
-   "dividend_yield": 5.8,
-   "foreign_net_shares": 12824477,
-   "itc_net_shares": -7955138,
-   "dealer_net_shares": -30514,
-   "total_3insti_net_shares": 4838825,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 9.37,
+   "pb_ratio": 1.01,
+   "dividend_yield": 5.88,
+   "foreign_net_shares": 11485380,
+   "itc_net_shares": -10544000,
+   "dealer_net_shares": 44402,
+   "total_3insti_net_shares": 985782,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "5469",
@@ -7273,14 +7292,14 @@
    "rev_mom_pct": 17.65,
    "rev_yoy_pct": 65.24,
    "cum_rev_yoy_pct": 30.39,
-   "pe_ratio": 13.67,
-   "pb_ratio": 0.71,
-   "dividend_yield": 3.54,
-   "foreign_net_shares": -63721,
+   "pe_ratio": 13.4,
+   "pb_ratio": 0.69,
+   "dividend_yield": 3.61,
+   "foreign_net_shares": 602072,
    "itc_net_shares": 0,
-   "dealer_net_shares": -2021,
-   "total_3insti_net_shares": -65742,
-   "insti_trade_date": "20261125"
+   "dealer_net_shares": 15313,
+   "total_3insti_net_shares": 617385,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "5434",
@@ -7294,14 +7313,14 @@
    "rev_mom_pct": 6.3,
    "rev_yoy_pct": 61.18,
    "cum_rev_yoy_pct": 28.63,
-   "pe_ratio": 14.13,
-   "pb_ratio": 3.63,
-   "dividend_yield": 3.02,
-   "foreign_net_shares": 15629,
-   "itc_net_shares": -5000,
-   "dealer_net_shares": -4726,
-   "total_3insti_net_shares": 5903,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 13.01,
+   "pb_ratio": 3.34,
+   "dividend_yield": 3.28,
+   "foreign_net_shares": 91518,
+   "itc_net_shares": -18000,
+   "dealer_net_shares": 6916,
+   "total_3insti_net_shares": 80434,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "8454",
@@ -7315,14 +7334,14 @@
    "rev_mom_pct": -5.81,
    "rev_yoy_pct": 3.77,
    "cum_rev_yoy_pct": 3.87,
-   "pe_ratio": 20.11,
-   "pb_ratio": 6.28,
-   "dividend_yield": 4.74,
-   "foreign_net_shares": 27710,
-   "itc_net_shares": -97,
-   "dealer_net_shares": -8881,
-   "total_3insti_net_shares": 18732,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 18.88,
+   "pb_ratio": 5.89,
+   "dividend_yield": 5.05,
+   "foreign_net_shares": 17587,
+   "itc_net_shares": 0,
+   "dealer_net_shares": -1567,
+   "total_3insti_net_shares": 16020,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "6770",
@@ -7336,14 +7355,14 @@
    "rev_mom_pct": 4.73,
    "rev_yoy_pct": 94.19,
    "cum_rev_yoy_pct": 56.98,
-   "pe_ratio": 10.77,
-   "pb_ratio": 1.87,
+   "pe_ratio": 9.7,
+   "pb_ratio": 1.68,
    "dividend_yield": null,
-   "foreign_net_shares": -33264104,
-   "itc_net_shares": 128744,
-   "dealer_net_shares": -1404461,
-   "total_3insti_net_shares": -34539821,
-   "insti_trade_date": "20261125"
+   "foreign_net_shares": 16394537,
+   "itc_net_shares": 121900,
+   "dealer_net_shares": 3255017,
+   "total_3insti_net_shares": 19771454,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3010",
@@ -7357,14 +7376,14 @@
    "rev_mom_pct": -12.02,
    "rev_yoy_pct": 24.71,
    "cum_rev_yoy_pct": 22.68,
-   "pe_ratio": 9.28,
-   "pb_ratio": 1.0,
-   "dividend_yield": 4.77,
-   "foreign_net_shares": 24401,
-   "itc_net_shares": -4000,
-   "dealer_net_shares": -67011,
-   "total_3insti_net_shares": -46610,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 8.7,
+   "pb_ratio": 0.94,
+   "dividend_yield": 5.1,
+   "foreign_net_shares": -295322,
+   "itc_net_shares": 0,
+   "dealer_net_shares": 21000,
+   "total_3insti_net_shares": -274322,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "5289",
@@ -7381,11 +7400,11 @@
    "pe_ratio": 2.93,
    "pb_ratio": 2.27,
    "dividend_yield": 2.22,
-   "foreign_net_shares": -495292,
-   "itc_net_shares": 24000,
-   "dealer_net_shares": -102553,
-   "total_3insti_net_shares": -573845,
-   "insti_trade_date": "20261125"
+   "foreign_net_shares": 119153,
+   "itc_net_shares": -51000,
+   "dealer_net_shares": 8658,
+   "total_3insti_net_shares": 76811,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2105",
@@ -7399,14 +7418,14 @@
    "rev_mom_pct": -14.28,
    "rev_yoy_pct": 10.43,
    "cum_rev_yoy_pct": 6.93,
-   "pe_ratio": 17.34,
-   "pb_ratio": 1.05,
-   "dividend_yield": 6.22,
-   "foreign_net_shares": -5654426,
-   "itc_net_shares": -87052,
-   "dealer_net_shares": 799472,
-   "total_3insti_net_shares": -4942006,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 16.89,
+   "pb_ratio": 1.03,
+   "dividend_yield": 6.38,
+   "foreign_net_shares": -72953,
+   "itc_net_shares": 70854,
+   "dealer_net_shares": 218804,
+   "total_3insti_net_shares": 216705,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2392",
@@ -7420,14 +7439,14 @@
    "rev_mom_pct": 14.9,
    "rev_yoy_pct": -24.87,
    "cum_rev_yoy_pct": -27.9,
-   "pe_ratio": 3.11,
-   "pb_ratio": 0.5,
-   "dividend_yield": 3.27,
-   "foreign_net_shares": -170000,
-   "itc_net_shares": 0,
-   "dealer_net_shares": -33284,
-   "total_3insti_net_shares": -203284,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 2.87,
+   "pb_ratio": 0.46,
+   "dividend_yield": 3.55,
+   "foreign_net_shares": 154598,
+   "itc_net_shares": 1000,
+   "dealer_net_shares": -5011,
+   "total_3insti_net_shares": 150587,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "5388",
@@ -7441,14 +7460,14 @@
    "rev_mom_pct": 10.27,
    "rev_yoy_pct": 63.6,
    "cum_rev_yoy_pct": 55.23,
-   "pe_ratio": 13.65,
-   "pb_ratio": 1.28,
-   "dividend_yield": 3.5,
-   "foreign_net_shares": -175155,
-   "itc_net_shares": -10000,
-   "dealer_net_shares": -96983,
-   "total_3insti_net_shares": -282138,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 12.58,
+   "pb_ratio": 1.18,
+   "dividend_yield": 3.8,
+   "foreign_net_shares": 331821,
+   "itc_net_shares": 0,
+   "dealer_net_shares": 60375,
+   "total_3insti_net_shares": 392196,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2890",
@@ -7462,14 +7481,14 @@
    "rev_mom_pct": -12.52,
    "rev_yoy_pct": 4.02,
    "cum_rev_yoy_pct": 45.75,
-   "pe_ratio": 13.91,
-   "pb_ratio": 2.13,
-   "dividend_yield": 3.22,
-   "foreign_net_shares": -47363536,
-   "itc_net_shares": 28324557,
-   "dealer_net_shares": 6635792,
-   "total_3insti_net_shares": -12403187,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 12.53,
+   "pb_ratio": 1.92,
+   "dividend_yield": 3.58,
+   "foreign_net_shares": -52703085,
+   "itc_net_shares": 34151000,
+   "dealer_net_shares": -248211,
+   "total_3insti_net_shares": -18800296,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "6196",
@@ -7483,14 +7502,14 @@
    "rev_mom_pct": 2.22,
    "rev_yoy_pct": 77.14,
    "cum_rev_yoy_pct": 57.69,
-   "pe_ratio": 15.36,
-   "pb_ratio": 3.9,
-   "dividend_yield": 1.91,
-   "foreign_net_shares": -73364,
-   "itc_net_shares": 5000,
-   "dealer_net_shares": -14764,
-   "total_3insti_net_shares": -83128,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 14.18,
+   "pb_ratio": 3.6,
+   "dividend_yield": 2.07,
+   "foreign_net_shares": -189868,
+   "itc_net_shares": -1000,
+   "dealer_net_shares": 17462,
+   "total_3insti_net_shares": -173406,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "9910",
@@ -7504,14 +7523,14 @@
    "rev_mom_pct": 11.85,
    "rev_yoy_pct": 4.42,
    "cum_rev_yoy_pct": -2.39,
-   "pe_ratio": 13.86,
-   "pb_ratio": 2.32,
-   "dividend_yield": 7.09,
-   "foreign_net_shares": 624434,
-   "itc_net_shares": -34000,
-   "dealer_net_shares": -67308,
-   "total_3insti_net_shares": 523126,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 13.36,
+   "pb_ratio": 2.23,
+   "dividend_yield": 7.36,
+   "foreign_net_shares": -150607,
+   "itc_net_shares": -28000,
+   "dealer_net_shares": 6740,
+   "total_3insti_net_shares": -171867,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2884",
@@ -7525,14 +7544,14 @@
    "rev_mom_pct": -20.31,
    "rev_yoy_pct": -16.03,
    "cum_rev_yoy_pct": 15.77,
-   "pe_ratio": 17.1,
-   "pb_ratio": 2.37,
-   "dividend_yield": 3.4,
-   "foreign_net_shares": -12694688,
-   "itc_net_shares": 37713,
-   "dealer_net_shares": 3491205,
-   "total_3insti_net_shares": -9165770,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 16.16,
+   "pb_ratio": 2.24,
+   "dividend_yield": 3.59,
+   "foreign_net_shares": -3165021,
+   "itc_net_shares": 965000,
+   "dealer_net_shares": 1689072,
+   "total_3insti_net_shares": -510949,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "5483",
@@ -7549,11 +7568,11 @@
    "pe_ratio": 15.1,
    "pb_ratio": 1.21,
    "dividend_yield": 2.62,
-   "foreign_net_shares": -1032889,
-   "itc_net_shares": 823753,
-   "dealer_net_shares": -210372,
-   "total_3insti_net_shares": -419508,
-   "insti_trade_date": "20261125"
+   "foreign_net_shares": -533842,
+   "itc_net_shares": 2625,
+   "dealer_net_shares": -31489,
+   "total_3insti_net_shares": -562706,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3006",
@@ -7567,14 +7586,14 @@
    "rev_mom_pct": -12.26,
    "rev_yoy_pct": 430.06,
    "cum_rev_yoy_pct": 353.58,
-   "pe_ratio": 2.58,
-   "pb_ratio": 1.71,
-   "dividend_yield": 0.54,
-   "foreign_net_shares": 5052345,
-   "itc_net_shares": -44000,
-   "dealer_net_shares": 89128,
-   "total_3insti_net_shares": 5097473,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 2.41,
+   "pb_ratio": 1.6,
+   "dividend_yield": 0.58,
+   "foreign_net_shares": 1438493,
+   "itc_net_shares": 1000,
+   "dealer_net_shares": 82313,
+   "total_3insti_net_shares": 1521806,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "6274",
@@ -7591,11 +7610,11 @@
    "pe_ratio": 25.91,
    "pb_ratio": 7.87,
    "dividend_yield": 1.02,
-   "foreign_net_shares": -2946649,
-   "itc_net_shares": 63000,
-   "dealer_net_shares": -107918,
-   "total_3insti_net_shares": -2991567,
-   "insti_trade_date": "20261125"
+   "foreign_net_shares": -998092,
+   "itc_net_shares": -200000,
+   "dealer_net_shares": 120887,
+   "total_3insti_net_shares": -1077205,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2880",
@@ -7609,14 +7628,14 @@
    "rev_mom_pct": 1.73,
    "rev_yoy_pct": 5.0,
    "cum_rev_yoy_pct": 23.0,
-   "pe_ratio": 20.56,
-   "pb_ratio": 2.73,
-   "dividend_yield": 3.05,
-   "foreign_net_shares": -7300709,
-   "itc_net_shares": -5553416,
-   "dealer_net_shares": 4260263,
-   "total_3insti_net_shares": -8593862,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 18.51,
+   "pb_ratio": 2.46,
+   "dividend_yield": 3.39,
+   "foreign_net_shares": 10234271,
+   "itc_net_shares": -9665000,
+   "dealer_net_shares": 2687791,
+   "total_3insti_net_shares": 3257062,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "8046",
@@ -7630,14 +7649,14 @@
    "rev_mom_pct": 12.59,
    "rev_yoy_pct": 69.67,
    "cum_rev_yoy_pct": 44.95,
-   "pe_ratio": 59.01,
-   "pb_ratio": 9.01,
-   "dividend_yield": 0.27,
-   "foreign_net_shares": 1649934,
-   "itc_net_shares": -1700267,
-   "dealer_net_shares": -388679,
-   "total_3insti_net_shares": -439012,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 53.24,
+   "pb_ratio": 8.13,
+   "dividend_yield": 0.3,
+   "foreign_net_shares": 1481464,
+   "itc_net_shares": 11863,
+   "dealer_net_shares": -214561,
+   "total_3insti_net_shares": 1278766,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2360",
@@ -7651,14 +7670,14 @@
    "rev_mom_pct": -8.82,
    "rev_yoy_pct": 163.26,
    "cum_rev_yoy_pct": 124.23,
-   "pe_ratio": 25.02,
-   "pb_ratio": 11.15,
-   "dividend_yield": 1.92,
-   "foreign_net_shares": 167204,
-   "itc_net_shares": 60458,
-   "dealer_net_shares": -97544,
-   "total_3insti_net_shares": 130118,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 24.9,
+   "pb_ratio": 11.09,
+   "dividend_yield": 1.93,
+   "foreign_net_shares": -558707,
+   "itc_net_shares": -14249,
+   "dealer_net_shares": 885,
+   "total_3insti_net_shares": -572071,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2892",
@@ -7672,14 +7691,14 @@
    "rev_mom_pct": 2.24,
    "rev_yoy_pct": 0.39,
    "cum_rev_yoy_pct": 14.19,
-   "pe_ratio": 18.6,
-   "pb_ratio": 1.9,
-   "dividend_yield": 3.27,
-   "foreign_net_shares": -22014432,
-   "itc_net_shares": 21780543,
-   "dealer_net_shares": 536689,
-   "total_3insti_net_shares": 302800,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 17.27,
+   "pb_ratio": 1.76,
+   "dividend_yield": 3.52,
+   "foreign_net_shares": -33653775,
+   "itc_net_shares": 29799000,
+   "dealer_net_shares": 1933632,
+   "total_3insti_net_shares": -1921143,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "1907",
@@ -7693,14 +7712,14 @@
    "rev_mom_pct": -6.71,
    "rev_yoy_pct": -0.68,
    "cum_rev_yoy_pct": 4.3,
-   "pe_ratio": 15.61,
-   "pb_ratio": 0.44,
-   "dividend_yield": 3.88,
-   "foreign_net_shares": 66263,
-   "itc_net_shares": 3000,
-   "dealer_net_shares": -126000,
-   "total_3insti_net_shares": -56737,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 15.27,
+   "pb_ratio": 0.43,
+   "dividend_yield": 3.97,
+   "foreign_net_shares": -74538,
+   "itc_net_shares": 0,
+   "dealer_net_shares": 42000,
+   "total_3insti_net_shares": -32538,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "4915",
@@ -7714,14 +7733,14 @@
    "rev_mom_pct": -1.59,
    "rev_yoy_pct": 11.12,
    "cum_rev_yoy_pct": 13.27,
-   "pe_ratio": 10.41,
-   "pb_ratio": 1.0,
-   "dividend_yield": 10.3,
-   "foreign_net_shares": 213052,
-   "itc_net_shares": -21000,
-   "dealer_net_shares": 27894,
-   "total_3insti_net_shares": 219946,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 10.14,
+   "pb_ratio": 0.97,
+   "dividend_yield": 10.58,
+   "foreign_net_shares": -92997,
+   "itc_net_shares": 2000,
+   "dealer_net_shares": 89,
+   "total_3insti_net_shares": -90908,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2886",
@@ -7735,14 +7754,14 @@
    "rev_mom_pct": -26.33,
    "rev_yoy_pct": -9.56,
    "cum_rev_yoy_pct": 13.94,
-   "pe_ratio": 20.6,
-   "pb_ratio": 2.0,
-   "dividend_yield": 3.18,
-   "foreign_net_shares": -44166512,
-   "itc_net_shares": 33660483,
-   "dealer_net_shares": 4665412,
-   "total_3insti_net_shares": -5840617,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 18.61,
+   "pb_ratio": 1.81,
+   "dividend_yield": 3.52,
+   "foreign_net_shares": -46479265,
+   "itc_net_shares": 30606000,
+   "dealer_net_shares": 1802865,
+   "total_3insti_net_shares": -14070400,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "6213",
@@ -7756,14 +7775,14 @@
    "rev_mom_pct": 3.63,
    "rev_yoy_pct": 119.53,
    "cum_rev_yoy_pct": 57.17,
-   "pe_ratio": 30.78,
-   "pb_ratio": 6.04,
-   "dividend_yield": 0.7,
-   "foreign_net_shares": -3398935,
-   "itc_net_shares": 1578000,
-   "dealer_net_shares": -81248,
-   "total_3insti_net_shares": -1902183,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 27.92,
+   "pb_ratio": 5.48,
+   "dividend_yield": 0.77,
+   "foreign_net_shares": 461014,
+   "itc_net_shares": 125000,
+   "dealer_net_shares": 58584,
+   "total_3insti_net_shares": 644598,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2646",
@@ -7778,13 +7797,13 @@
    "rev_yoy_pct": 59.47,
    "cum_rev_yoy_pct": 39.39,
    "pe_ratio": null,
-   "pb_ratio": 1.9,
+   "pb_ratio": 1.83,
    "dividend_yield": null,
-   "foreign_net_shares": -170000,
-   "itc_net_shares": 2000,
-   "dealer_net_shares": 5877,
-   "total_3insti_net_shares": -162123,
-   "insti_trade_date": "20261125"
+   "foreign_net_shares": -301000,
+   "itc_net_shares": 0,
+   "dealer_net_shares": 75000,
+   "total_3insti_net_shares": -226000,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2201",
@@ -7798,14 +7817,14 @@
    "rev_mom_pct": -1.75,
    "rev_yoy_pct": -7.96,
    "cum_rev_yoy_pct": -3.37,
-   "pe_ratio": 28.39,
-   "pb_ratio": 0.4,
-   "dividend_yield": 2.27,
-   "foreign_net_shares": 108135,
-   "itc_net_shares": 1000,
-   "dealer_net_shares": -64325,
-   "total_3insti_net_shares": 44810,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 27.53,
+   "pb_ratio": 0.39,
+   "dividend_yield": 2.34,
+   "foreign_net_shares": 301511,
+   "itc_net_shares": 0,
+   "dealer_net_shares": 33069,
+   "total_3insti_net_shares": 334580,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2023",
@@ -7820,13 +7839,13 @@
    "rev_yoy_pct": 7.14,
    "cum_rev_yoy_pct": -4.8,
    "pe_ratio": null,
-   "pb_ratio": 0.83,
+   "pb_ratio": 0.82,
    "dividend_yield": null,
-   "foreign_net_shares": -384183,
-   "itc_net_shares": 2000,
-   "dealer_net_shares": 139000,
-   "total_3insti_net_shares": -243183,
-   "insti_trade_date": "20261125"
+   "foreign_net_shares": -157160,
+   "itc_net_shares": 0,
+   "dealer_net_shares": -19000,
+   "total_3insti_net_shares": -176160,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3008",
@@ -7840,14 +7859,14 @@
    "rev_mom_pct": 1.15,
    "rev_yoy_pct": -7.05,
    "cum_rev_yoy_pct": 0.97,
-   "pe_ratio": 22.94,
-   "pb_ratio": 2.72,
-   "dividend_yield": 2.01,
-   "foreign_net_shares": 90191,
-   "itc_net_shares": 292070,
-   "dealer_net_shares": -58889,
-   "total_3insti_net_shares": 323372,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 23.2,
+   "pb_ratio": 2.75,
+   "dividend_yield": 1.99,
+   "foreign_net_shares": -54822,
+   "itc_net_shares": -7068,
+   "dealer_net_shares": 35192,
+   "total_3insti_net_shares": -26698,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "3673",
@@ -7861,14 +7880,14 @@
    "rev_mom_pct": -11.61,
    "rev_yoy_pct": 35.37,
    "cum_rev_yoy_pct": 18.13,
-   "pe_ratio": 12.58,
-   "pb_ratio": 0.53,
-   "dividend_yield": 3.39,
-   "foreign_net_shares": -407868,
+   "pe_ratio": 11.42,
+   "pb_ratio": 0.48,
+   "dividend_yield": 3.73,
+   "foreign_net_shares": 192901,
    "itc_net_shares": 0,
-   "dealer_net_shares": -61389,
-   "total_3insti_net_shares": -469257,
-   "insti_trade_date": "20261125"
+   "dealer_net_shares": 50872,
+   "total_3insti_net_shares": 243773,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "1504",
@@ -7882,14 +7901,14 @@
    "rev_mom_pct": -2.43,
    "rev_yoy_pct": 16.14,
    "cum_rev_yoy_pct": 9.61,
-   "pe_ratio": 20.74,
-   "pb_ratio": 1.42,
-   "dividend_yield": 3.41,
-   "foreign_net_shares": 343310,
-   "itc_net_shares": -48956,
-   "dealer_net_shares": -183806,
-   "total_3insti_net_shares": 110548,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 19.22,
+   "pb_ratio": 1.32,
+   "dividend_yield": 3.68,
+   "foreign_net_shares": 1846271,
+   "itc_net_shares": -1008,
+   "dealer_net_shares": 207544,
+   "total_3insti_net_shares": 2052807,
+   "insti_trade_date": "20261126"
   },
   {
    "company_code": "2385",
@@ -7903,14 +7922,14 @@
    "rev_mom_pct": -9.12,
    "rev_yoy_pct": -24.0,
    "cum_rev_yoy_pct": -11.64,
-   "pe_ratio": 11.44,
-   "pb_ratio": 1.46,
-   "dividend_yield": 7.74,
-   "foreign_net_shares": -77120,
-   "itc_net_shares": -55532,
-   "dealer_net_shares": 197617,
-   "total_3insti_net_shares": 64965,
-   "insti_trade_date": "20261125"
+   "pe_ratio": 11.01,
+   "pb_ratio": 1.41,
+   "dividend_yield": 8.04,
+   "foreign_net_shares": 544575,
+   "itc_net_shares": -7000,
+   "dealer_net_shares": 87012,
+   "total_3insti_net_shares": 624587,
+   "insti_trade_date": "20261126"
   }
  ],
  "live_indices": [
@@ -7922,6 +7941,16 @@
    "change_points": 40207.67,
    "change_pct": 18.97,
    "fetched_at": "2026-11-26T00:02:22+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
+   "index_name": "電子類兩倍槓桿指數",
+   "trade_date": "1151125",
+   "close_index": 228382.18,
+   "change_dir": "-",
+   "change_points": 23730.55,
+   "change_pct": -9.41,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -7966,6 +7995,16 @@
   },
   {
    "index_name": "臺灣資訊科技股報酬指數",
+   "trade_date": "1151125",
+   "close_index": 161214.73,
+   "change_dir": "-",
+   "change_points": 8003.48,
+   "change_pct": -4.73,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
+   "index_name": "臺灣資訊科技股報酬指數",
    "trade_date": "1151123",
    "close_index": 154178.81,
    "change_dir": "+",
@@ -7982,6 +8021,16 @@
    "change_points": 9444.5,
    "change_pct": -5.91,
    "fetched_at": "2026-11-23T23:48:44+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
+   "index_name": "臺指日報酬兩倍指數",
+   "trade_date": "1151125",
+   "close_index": 147205.21,
+   "change_dir": "-",
+   "change_points": 15641.82,
+   "change_pct": -9.61,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -8035,6 +8084,26 @@
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
+   "index_name": "特選大蘋果報酬正向兩倍指數",
+   "trade_date": "1151125",
+   "close_index": 99025.12,
+   "change_dir": "-",
+   "change_points": 15289.61,
+   "change_pct": -13.38,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
+   "index_name": "金融類日報酬兩倍指數",
+   "trade_date": "1151125",
+   "close_index": 98864.71,
+   "change_dir": "-",
+   "change_points": 14290.68,
+   "change_pct": -12.63,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
    "index_name": "金融類日報酬兩倍指數",
    "trade_date": "1151123",
    "close_index": 96312.02,
@@ -8075,6 +8144,16 @@
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
+   "index_name": "發行量加權股價報酬指數",
+   "trade_date": "1151125",
+   "close_index": 88329.61,
+   "change_dir": "-",
+   "change_points": 4456.13,
+   "change_pct": -4.8,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
    "index_name": "臺灣50報酬指數",
    "trade_date": "1151124",
    "close_index": 87604.06,
@@ -8092,6 +8171,16 @@
    "change_points": 1800.56,
    "change_pct": 2.16,
    "fetched_at": "2026-11-24T20:59:33+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
+   "index_name": "臺灣50報酬指數",
+   "trade_date": "1151125",
+   "close_index": 83515.18,
+   "change_dir": "-",
+   "change_points": 4088.88,
+   "change_pct": -4.67,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -8135,6 +8224,16 @@
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
+   "index_name": "臺灣資訊科技指數",
+   "trade_date": "1151125",
+   "close_index": 74791.2,
+   "change_dir": "-",
+   "change_points": 3713.0,
+   "change_pct": -4.73,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
    "index_name": "臺灣50權重上限30%報酬指數",
    "trade_date": "1151124",
    "close_index": 73866.88,
@@ -8152,6 +8251,16 @@
    "change_points": 1780.82,
    "change_pct": 2.55,
    "fetched_at": "2026-11-24T20:59:33+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
+   "index_name": "臺灣50權重上限30%報酬指數",
+   "trade_date": "1151125",
+   "close_index": 69877.25,
+   "change_dir": "-",
+   "change_points": 3989.63,
+   "change_pct": -5.4,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -8195,6 +8304,16 @@
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
+   "index_name": "寶島股價報酬指數",
+   "trade_date": "1151125",
+   "close_index": 65149.23,
+   "change_dir": "-",
+   "change_points": 3332.62,
+   "change_pct": -4.87,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
    "index_name": "臺灣中型100報酬指數",
    "trade_date": "1151124",
    "close_index": 65100.34,
@@ -8222,6 +8341,16 @@
    "change_points": 4147.83,
    "change_pct": -6.32,
    "fetched_at": "2026-11-23T23:48:44+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
+   "index_name": "臺灣中型100報酬指數",
+   "trade_date": "1151125",
+   "close_index": 61469.29,
+   "change_dir": "-",
+   "change_points": 3631.05,
+   "change_pct": -5.58,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -8276,6 +8405,16 @@
   },
   {
    "index_name": "臺灣高股息報酬指數",
+   "trade_date": "1151125",
+   "close_index": 44006.02,
+   "change_dir": "-",
+   "change_points": 2994.52,
+   "change_pct": -6.37,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
+   "index_name": "臺灣高股息報酬指數",
    "trade_date": "1151123",
    "close_index": 43483.48,
    "change_dir": "+",
@@ -8296,12 +8435,32 @@
   },
   {
    "index_name": "臺灣就業99報酬指數",
+   "trade_date": "1151125",
+   "close_index": 42868.06,
+   "change_dir": "-",
+   "change_points": 2764.29,
+   "change_pct": -6.06,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
+   "index_name": "臺灣就業99報酬指數",
    "trade_date": "1151123",
    "close_index": 41985.6,
    "change_dir": "+",
    "change_points": 747.82,
    "change_pct": 1.81,
    "fetched_at": "2026-11-24T20:59:33+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
+   "index_name": "寶島股價指數",
+   "trade_date": "1151125",
+   "close_index": 41872.55,
+   "change_dir": "-",
+   "change_points": 2141.94,
+   "change_pct": -4.87,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -8355,6 +8514,16 @@
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
+   "index_name": "發行量加權股價指數",
+   "trade_date": "1151125",
+   "close_index": 38195.43,
+   "change_dir": "-",
+   "change_points": 1926.92,
+   "change_pct": -4.8,
+   "fetched_at": "2026-11-26T17:48:36+08:00",
+   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
+  },
+  {
    "index_name": "臺灣50指數",
    "trade_date": "1151124",
    "close_index": 37863.95,
@@ -8362,156 +8531,6 @@
    "change_points": 3314.06,
    "change_pct": 9.59,
    "fetched_at": "2026-11-26T00:02:22+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "未含金融電子報酬指數",
-   "trade_date": "1151124",
-   "close_index": 37662.43,
-   "change_dir": "+",
-   "change_points": 2122.81,
-   "change_pct": 5.97,
-   "fetched_at": "2026-11-26T00:02:22+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "臺灣高薪100報酬指數",
-   "trade_date": "1151124",
-   "close_index": 37526.92,
-   "change_dir": "+",
-   "change_points": 2867.46,
-   "change_pct": 8.27,
-   "fetched_at": "2026-11-26T00:02:22+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "發行量加權股價指數",
-   "trade_date": "1151123",
-   "close_index": 36811.89,
-   "change_dir": "+",
-   "change_points": 778.6,
-   "change_pct": 2.16,
-   "fetched_at": "2026-11-24T20:59:33+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "臺灣公司治理100報酬指數",
-   "trade_date": "1151123",
-   "close_index": 36036.01,
-   "change_dir": "+",
-   "change_points": 738.69,
-   "change_pct": 2.09,
-   "fetched_at": "2026-11-24T20:59:33+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "發行量加權股價指數",
-   "trade_date": "1151120",
-   "close_index": 36033.29,
-   "change_dir": "-",
-   "change_points": 2393.6,
-   "change_pct": -6.23,
-   "fetched_at": "2026-11-23T23:48:44+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "未含金融電子報酬指數",
-   "trade_date": "1151123",
-   "close_index": 35539.62,
-   "change_dir": "+",
-   "change_points": 609.11,
-   "change_pct": 1.74,
-   "fetched_at": "2026-11-24T20:59:33+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "未含金融指數",
-   "trade_date": "1151124",
-   "close_index": 35349.28,
-   "change_dir": "+",
-   "change_points": 2924.5,
-   "change_pct": 9.02,
-   "fetched_at": "2026-11-26T00:02:22+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "臺灣公司治理100報酬指數",
-   "trade_date": "1151120",
-   "close_index": 35297.32,
-   "change_dir": "-",
-   "change_points": 2231.59,
-   "change_pct": -5.95,
-   "fetched_at": "2026-11-23T23:48:44+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "未含金融電子報酬指數",
-   "trade_date": "1151120",
-   "close_index": 34930.51,
-   "change_dir": "-",
-   "change_points": 2372.28,
-   "change_pct": -6.36,
-   "fetched_at": "2026-11-23T23:48:44+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "臺灣高薪100報酬指數",
-   "trade_date": "1151120",
-   "close_index": 34697.79,
-   "change_dir": "-",
-   "change_points": 2173.71,
-   "change_pct": -5.9,
-   "fetched_at": "2026-11-23T23:48:44+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "臺灣高薪100報酬指數",
-   "trade_date": "1151123",
-   "close_index": 34659.46,
-   "change_dir": "-",
-   "change_points": 38.33,
-   "change_pct": -0.11,
-   "fetched_at": "2026-11-24T20:59:33+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "臺灣50指數",
-   "trade_date": "1151123",
-   "close_index": 34549.89,
-   "change_dir": "+",
-   "change_points": 759.67,
-   "change_pct": 2.25,
-   "fetched_at": "2026-11-24T20:59:33+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "臺灣50指數",
-   "trade_date": "1151120",
-   "close_index": 33790.22,
-   "change_dir": "-",
-   "change_points": 2145.45,
-   "change_pct": -5.97,
-   "fetched_at": "2026-11-23T23:48:44+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "藍籌30報酬指數",
-   "trade_date": "1151124",
-   "close_index": 32485.21,
-   "change_dir": "+",
-   "change_points": 2733.61,
-   "change_pct": 9.19,
-   "fetched_at": "2026-11-26T00:02:22+08:00",
-   "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-  },
-  {
-   "index_name": "未含金融指數",
-   "trade_date": "1151123",
-   "close_index": 32424.78,
-   "change_dir": "+",
-   "change_points": 852.31,
-   "change_pct": 2.7,
-   "fetched_at": "2026-11-24T20:59:33+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   }
  ],
@@ -8624,7 +8643,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3219,
+      "holding_id": 3344,
       "etf_code": "VTI",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -8638,7 +8657,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3220,
+      "holding_id": 3345,
       "etf_code": "VTI",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -8652,7 +8671,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3221,
+      "holding_id": 3346,
       "etf_code": "VTI",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -8666,7 +8685,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3222,
+      "holding_id": 3347,
       "etf_code": "VTI",
       "constituent_code": "AMZN",
       "constituent_name": "Amazon.com",
@@ -8680,7 +8699,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3224,
+      "holding_id": 3349,
       "etf_code": "VTI",
       "constituent_code": "GOOGL",
       "constituent_name": "Alphabet Inc",
@@ -8694,7 +8713,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3223,
+      "holding_id": 3348,
       "etf_code": "VTI",
       "constituent_code": "META",
       "constituent_name": "Meta Platforms",
@@ -8708,7 +8727,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3225,
+      "holding_id": 3350,
       "etf_code": "VTI",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -8767,8 +8786,8 @@
     "itc_net_shares": 0,
     "dealer_net_shares": 0,
     "regular_saving_accounts": null,
-    "weighted_pe": 32.5,
-    "weighted_pb": 25.96,
+    "weighted_pe": 32.43,
+    "weighted_pb": 25.94,
     "weighted_rev_yoy_pct": 36.82,
     "weighted_roe_pct": 18.5,
     "dividend_yield_pct": 1.85,
@@ -8835,7 +8854,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3242,
+      "holding_id": 3367,
       "etf_code": "VT",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -8849,7 +8868,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3243,
+      "holding_id": 3368,
       "etf_code": "VT",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -8863,7 +8882,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3244,
+      "holding_id": 3369,
       "etf_code": "VT",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -8877,7 +8896,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3245,
+      "holding_id": 3370,
       "etf_code": "VT",
       "constituent_code": "2330",
       "constituent_name": "台積電 (TSMC)",
@@ -8887,8 +8906,8 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 59.709757600700904,
-      "live_pe": 22.7,
-      "live_pb": 8.26
+      "live_pe": 21.88,
+      "live_pb": 7.97
      }
     ],
     "dividend_breakdown": null
@@ -9001,7 +9020,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3204,
+      "holding_id": 3329,
       "etf_code": "VOO",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -9015,7 +9034,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3205,
+      "holding_id": 3330,
       "etf_code": "VOO",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -9029,7 +9048,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3206,
+      "holding_id": 3331,
       "etf_code": "VOO",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -9043,7 +9062,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3207,
+      "holding_id": 3332,
       "etf_code": "VOO",
       "constituent_code": "AMZN",
       "constituent_name": "Amazon.com",
@@ -9057,7 +9076,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3209,
+      "holding_id": 3334,
       "etf_code": "VOO",
       "constituent_code": "GOOGL",
       "constituent_name": "Alphabet Inc",
@@ -9071,7 +9090,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3208,
+      "holding_id": 3333,
       "etf_code": "VOO",
       "constituent_code": "META",
       "constituent_name": "Meta Platforms",
@@ -9085,7 +9104,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3210,
+      "holding_id": 3335,
       "etf_code": "VOO",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -9099,7 +9118,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3211,
+      "holding_id": 3336,
       "etf_code": "VOO",
       "constituent_code": "BRK.B",
       "constituent_name": "Berkshire Hathaway",
@@ -9223,7 +9242,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3226,
+      "holding_id": 3351,
       "etf_code": "SCHD",
       "constituent_code": "LCID_VAL_FIN",
       "constituent_name": "BlackRock / U.S. Bancorp / 美國高息金融龍頭",
@@ -9237,7 +9256,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3227,
+      "holding_id": 3352,
       "etf_code": "SCHD",
       "constituent_code": "HC_DIV_CORE",
       "constituent_name": "Amgen / AbbVie / Pfizer 美國高息醫療龍頭",
@@ -9251,7 +9270,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3228,
+      "holding_id": 3353,
       "etf_code": "SCHD",
       "constituent_code": "CONS_DIV_CORE",
       "constituent_name": "Coca-Cola / PepsiCo / Home Depot 必需與內需龍頭",
@@ -9383,7 +9402,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3241,
+      "holding_id": 3366,
       "etf_code": "LQD",
       "constituent_code": "USD_IG_CORP_20Y",
       "constituent_name": "美元投資等級公司債組合",
@@ -9503,7 +9522,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3239,
+      "holding_id": 3364,
       "etf_code": "TLT",
       "constituent_code": "US_TREASURY_20Y",
       "constituent_name": "美國財政部20年以上長期公債組合",
@@ -9558,9 +9577,9 @@
     "ask_price": 15.69,
     "bid_ask_spread_bps": 12.8,
     "primary_net_flow_value": 185.0,
-    "foreign_net_shares": 3093000,
+    "foreign_net_shares": 5965000,
     "itc_net_shares": 0,
-    "dealer_net_shares": 25969629,
+    "dealer_net_shares": 911388,
     "regular_saving_accounts": null,
     "weighted_pe": null,
     "weighted_pb": null,
@@ -9625,7 +9644,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3200,
+      "holding_id": 3325,
       "etf_code": "00937B",
       "constituent_code": "USD_IG_CORP_20Y",
       "constituent_name": "20年期以上BBB級美元公司債組合(微軟/康卡斯特/甲骨文等)",
@@ -9756,7 +9775,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3240,
+      "holding_id": 3365,
       "etf_code": "SGOV",
       "constituent_code": "US_TBILL_0_3M",
       "constituent_name": "美國財政部0-3個月超短期國庫券",
@@ -9811,9 +9830,9 @@
     "ask_price": 28.16,
     "bid_ask_spread_bps": 7.1,
     "primary_net_flow_value": 142.0,
-    "foreign_net_shares": -112815,
-    "itc_net_shares": 0,
-    "dealer_net_shares": 21326875,
+    "foreign_net_shares": 927050,
+    "itc_net_shares": -80000,
+    "dealer_net_shares": 8286260,
     "regular_saving_accounts": null,
     "weighted_pe": null,
     "weighted_pb": null,
@@ -9877,7 +9896,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3201,
+      "holding_id": 3326,
       "etf_code": "00679B",
       "constituent_code": "US_TREASURY_20Y",
       "constituent_name": "美國財政部20年以上長期公債組合",
@@ -9922,22 +9941,22 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 203.15,
-    "change_pct": -5.56,
-    "nav_price": 203.01,
+    "close_price": 208.75,
+    "change_pct": 2.76,
+    "nav_price": 208.6,
     "premium_discount_pct": 0.07,
-    "volume_shares": 8804963,
-    "turnover_value": 1769839902.0,
-    "bid_price": 203.05,
-    "ask_price": 203.15,
-    "bid_ask_spread_bps": 4.9,
+    "volume_shares": 4777381,
+    "turnover_value": 990822133.0,
+    "bid_price": 208.6,
+    "ask_price": 208.75,
+    "bid_ask_spread_bps": 7.2,
     "primary_net_flow_value": 385.0,
-    "foreign_net_shares": -396988,
+    "foreign_net_shares": 171816,
     "itc_net_shares": 0,
-    "dealer_net_shares": -1727263,
+    "dealer_net_shares": 264963,
     "regular_saving_accounts": 241824,
-    "weighted_pe": 23.8,
-    "weighted_pb": 7.54,
+    "weighted_pe": 22.63,
+    "weighted_pb": 7.22,
     "weighted_rev_yoy_pct": 49.05,
     "weighted_roe_pct": 24.5,
     "dividend_yield_pct": 2.9,
@@ -10000,7 +10019,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3136,
+      "holding_id": 3261,
       "etf_code": "006208",
       "constituent_code": "2330",
       "constituent_name": "台積電",
@@ -10010,11 +10029,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 59.709757600700904,
-      "live_pe": 22.7,
-      "live_pb": 8.26
+      "live_pe": 21.88,
+      "live_pb": 7.97
      },
      {
-      "holding_id": 3137,
+      "holding_id": 3262,
       "etf_code": "006208",
       "constituent_code": "2317",
       "constituent_name": "鴻海",
@@ -10024,11 +10043,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 45.730399518079835,
-      "live_pe": 13.7,
-      "live_pb": 1.61
+      "live_pe": 12.49,
+      "live_pb": 1.47
      },
      {
-      "holding_id": 3138,
+      "holding_id": 3263,
       "etf_code": "006208",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -10038,11 +10057,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 5.765176122338701,
-      "live_pe": 65.14,
-      "live_pb": 13.9
+      "live_pe": 58.63,
+      "live_pb": 12.51
      },
      {
-      "holding_id": 3139,
+      "holding_id": 3264,
       "etf_code": "006208",
       "constituent_code": "2382",
       "constituent_name": "廣達",
@@ -10052,11 +10071,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 103.9601585472691,
-      "live_pe": 11.53,
-      "live_pb": 3.37
+      "live_pe": 10.65,
+      "live_pb": 3.11
      },
      {
-      "holding_id": 3140,
+      "holding_id": 3265,
       "etf_code": "006208",
       "constituent_code": "2308",
       "constituent_name": "台達電",
@@ -10066,11 +10085,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 30.11771317738272,
-      "live_pe": 32.58,
-      "live_pb": 8.86
+      "live_pe": 31.68,
+      "live_pb": 8.61
      },
      {
-      "holding_id": 3141,
+      "holding_id": 3266,
       "etf_code": "006208",
       "constituent_code": "2881",
       "constituent_name": "富邦金",
@@ -10080,11 +10099,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -83.3790388478706,
-      "live_pe": 13.41,
-      "live_pb": 1.77
+      "live_pe": 12.38,
+      "live_pb": 1.63
      },
      {
-      "holding_id": 3142,
+      "holding_id": 3267,
       "etf_code": "006208",
       "constituent_code": "2882",
       "constituent_name": "國泰金",
@@ -10094,11 +10113,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -61.40426826304281,
-      "live_pe": 12.32,
-      "live_pb": 1.51
+      "live_pe": 11.85,
+      "live_pb": 1.45
      },
      {
-      "holding_id": 3143,
+      "holding_id": 3268,
       "etf_code": "006208",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -10108,11 +10127,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -35.41036572201124,
-      "live_pe": 16.97,
-      "live_pb": 1.93
+      "live_pe": 16.0,
+      "live_pb": 1.82
      },
      {
-      "holding_id": 3144,
+      "holding_id": 3269,
       "etf_code": "006208",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -10122,11 +10141,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 47.12520138680502,
-      "live_pe": 30.42,
-      "live_pb": 5.53
+      "live_pe": 28.01,
+      "live_pb": 5.1
      },
      {
-      "holding_id": 3145,
+      "holding_id": 3270,
       "etf_code": "006208",
       "constituent_code": "2345",
       "constituent_name": "智邦",
@@ -10136,8 +10155,8 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 91.15506140307477,
-      "live_pe": 20.33,
-      "live_pb": 10.12
+      "live_pe": 20.19,
+      "live_pb": 10.05
      }
     ],
     "dividend_breakdown": null
@@ -10171,22 +10190,22 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 90.3,
-    "change_pct": -5.64,
-    "nav_price": 90.23,
+    "close_price": 92.85,
+    "change_pct": 2.82,
+    "nav_price": 92.78,
     "premium_discount_pct": 0.08,
-    "volume_shares": 464126099,
-    "turnover_value": 41445394719.0,
-    "bid_price": 90.25,
-    "ask_price": 90.3,
-    "bid_ask_spread_bps": 5.5,
+    "volume_shares": 242920377,
+    "turnover_value": 22386539785.0,
+    "bid_price": 92.8,
+    "ask_price": 92.85,
+    "bid_ask_spread_bps": 5.4,
     "primary_net_flow_value": 2200.0,
-    "foreign_net_shares": -116905380,
-    "itc_net_shares": 22520000,
-    "dealer_net_shares": -43984033,
+    "foreign_net_shares": -19873644,
+    "itc_net_shares": 15000000,
+    "dealer_net_shares": 25209308,
     "regular_saving_accounts": 1309883,
-    "weighted_pe": 23.8,
-    "weighted_pb": 7.54,
+    "weighted_pe": 22.63,
+    "weighted_pb": 7.22,
     "weighted_rev_yoy_pct": 49.03,
     "weighted_roe_pct": 24.5,
     "dividend_yield_pct": 2.8,
@@ -10249,7 +10268,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3126,
+      "holding_id": 3251,
       "etf_code": "0050",
       "constituent_code": "2330",
       "constituent_name": "台積電",
@@ -10259,11 +10278,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 59.709757600700904,
-      "live_pe": 22.7,
-      "live_pb": 8.26
+      "live_pe": 21.88,
+      "live_pb": 7.97
      },
      {
-      "holding_id": 3127,
+      "holding_id": 3252,
       "etf_code": "0050",
       "constituent_code": "2317",
       "constituent_name": "鴻海",
@@ -10273,11 +10292,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 45.730399518079835,
-      "live_pe": 13.7,
-      "live_pb": 1.61
+      "live_pe": 12.49,
+      "live_pb": 1.47
      },
      {
-      "holding_id": 3128,
+      "holding_id": 3253,
       "etf_code": "0050",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -10287,11 +10306,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 5.765176122338701,
-      "live_pe": 65.14,
-      "live_pb": 13.9
+      "live_pe": 58.63,
+      "live_pb": 12.51
      },
      {
-      "holding_id": 3129,
+      "holding_id": 3254,
       "etf_code": "0050",
       "constituent_code": "2382",
       "constituent_name": "廣達",
@@ -10301,11 +10320,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 103.9601585472691,
-      "live_pe": 11.53,
-      "live_pb": 3.37
+      "live_pe": 10.65,
+      "live_pb": 3.11
      },
      {
-      "holding_id": 3130,
+      "holding_id": 3255,
       "etf_code": "0050",
       "constituent_code": "2308",
       "constituent_name": "台達電",
@@ -10315,11 +10334,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 30.11771317738272,
-      "live_pe": 32.58,
-      "live_pb": 8.86
+      "live_pe": 31.68,
+      "live_pb": 8.61
      },
      {
-      "holding_id": 3131,
+      "holding_id": 3256,
       "etf_code": "0050",
       "constituent_code": "2881",
       "constituent_name": "富邦金",
@@ -10329,11 +10348,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -83.3790388478706,
-      "live_pe": 13.41,
-      "live_pb": 1.77
+      "live_pe": 12.38,
+      "live_pb": 1.63
      },
      {
-      "holding_id": 3132,
+      "holding_id": 3257,
       "etf_code": "0050",
       "constituent_code": "2882",
       "constituent_name": "國泰金",
@@ -10343,11 +10362,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -61.40426826304281,
-      "live_pe": 12.32,
-      "live_pb": 1.51
+      "live_pe": 11.85,
+      "live_pb": 1.45
      },
      {
-      "holding_id": 3133,
+      "holding_id": 3258,
       "etf_code": "0050",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -10357,11 +10376,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -35.41036572201124,
-      "live_pe": 16.97,
-      "live_pb": 1.93
+      "live_pe": 16.0,
+      "live_pb": 1.82
      },
      {
-      "holding_id": 3134,
+      "holding_id": 3259,
       "etf_code": "0050",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -10371,11 +10390,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 47.12520138680502,
-      "live_pe": 30.42,
-      "live_pb": 5.53
+      "live_pe": 28.01,
+      "live_pb": 5.1
      },
      {
-      "holding_id": 3135,
+      "holding_id": 3260,
       "etf_code": "0050",
       "constituent_code": "2345",
       "constituent_name": "智邦",
@@ -10385,8 +10404,8 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 91.15506140307477,
-      "live_pe": 20.33,
-      "live_pb": 10.12
+      "live_pe": 20.19,
+      "live_pb": 10.05
      }
     ],
     "dividend_breakdown": null
@@ -10499,7 +10518,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3212,
+      "holding_id": 3337,
       "etf_code": "QQQ",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -10513,7 +10532,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3213,
+      "holding_id": 3338,
       "etf_code": "QQQ",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -10527,7 +10546,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3214,
+      "holding_id": 3339,
       "etf_code": "QQQ",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -10541,7 +10560,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3215,
+      "holding_id": 3340,
       "etf_code": "QQQ",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -10555,7 +10574,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3216,
+      "holding_id": 3341,
       "etf_code": "QQQ",
       "constituent_code": "AMZN",
       "constituent_name": "Amazon.com",
@@ -10569,7 +10588,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3217,
+      "holding_id": 3342,
       "etf_code": "QQQ",
       "constituent_code": "META",
       "constituent_name": "Meta Platforms",
@@ -10583,7 +10602,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3218,
+      "holding_id": 3343,
       "etf_code": "QQQ",
       "constituent_code": "GOOGL",
       "constituent_name": "Alphabet Inc",
@@ -10703,7 +10722,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3246,
+      "holding_id": 3371,
       "etf_code": "GLD",
       "constituent_code": "LBMA_PHYSICAL_GOLD",
       "constituent_name": "倫敦金庫100%實體黃金條塊",
@@ -10748,22 +10767,22 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 59.0,
-    "change_pct": -3.91,
-    "nav_price": 59.02,
+    "close_price": 60.0,
+    "change_pct": 1.69,
+    "nav_price": 60.02,
     "premium_discount_pct": -0.04,
-    "volume_shares": 8795812,
-    "turnover_value": 518384884.0,
-    "bid_price": 58.95,
-    "ask_price": 59.0,
-    "bid_ask_spread_bps": 8.5,
+    "volume_shares": 8676246,
+    "turnover_value": 517337667.0,
+    "bid_price": 59.95,
+    "ask_price": 60.0,
+    "bid_ask_spread_bps": 8.3,
     "primary_net_flow_value": 28.0,
-    "foreign_net_shares": 692476,
-    "itc_net_shares": 1490000,
-    "dealer_net_shares": -2220974,
+    "foreign_net_shares": -1877402,
+    "itc_net_shares": 3256000,
+    "dealer_net_shares": -2431989,
     "regular_saving_accounts": 60216,
-    "weighted_pe": 19.52,
-    "weighted_pb": 2.62,
+    "weighted_pe": 18.96,
+    "weighted_pb": 2.54,
     "weighted_rev_yoy_pct": -14.03,
     "weighted_roe_pct": 16.5,
     "dividend_yield_pct": 7.8,
@@ -10826,7 +10845,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3167,
+      "holding_id": 3292,
       "etf_code": "00713",
       "constituent_code": "2412",
       "constituent_name": "中華電",
@@ -10836,11 +10855,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 13.447801238423756,
-      "live_pe": 30.18,
-      "live_pb": 3.37
+      "live_pe": 30.0,
+      "live_pb": 3.35
      },
      {
-      "holding_id": 3168,
+      "holding_id": 3293,
       "etf_code": "00713",
       "constituent_code": "1216",
       "constituent_name": "統一",
@@ -10850,11 +10869,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 5.296872130966274,
-      "live_pe": 18.34,
-      "live_pb": 3.04
+      "live_pe": 18.65,
+      "live_pb": 3.09
      },
      {
-      "holding_id": 3169,
+      "holding_id": 3294,
       "etf_code": "00713",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -10864,11 +10883,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -35.41036572201124,
-      "live_pe": 16.97,
-      "live_pb": 1.93
+      "live_pe": 16.0,
+      "live_pb": 1.82
      },
      {
-      "holding_id": 3170,
+      "holding_id": 3295,
       "etf_code": "00713",
       "constituent_code": "2881",
       "constituent_name": "富邦金",
@@ -10878,11 +10897,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -83.3790388478706,
-      "live_pe": 13.41,
-      "live_pb": 1.77
+      "live_pe": 12.38,
+      "live_pb": 1.63
      },
      {
-      "holding_id": 3171,
+      "holding_id": 3296,
       "etf_code": "00713",
       "constituent_code": "2303",
       "constituent_name": "聯電",
@@ -10892,8 +10911,8 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 18.32619283780295,
-      "live_pe": 14.34,
-      "live_pb": 2.59
+      "live_pe": 12.91,
+      "live_pb": 2.33
      }
     ],
     "dividend_breakdown": {
@@ -11015,7 +11034,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3235,
+      "holding_id": 3360,
       "etf_code": "XLK",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -11029,7 +11048,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3236,
+      "holding_id": 3361,
       "etf_code": "XLK",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -11043,7 +11062,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3237,
+      "holding_id": 3362,
       "etf_code": "XLK",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -11057,7 +11076,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3238,
+      "holding_id": 3363,
       "etf_code": "XLK",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -11102,22 +11121,22 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 28.6,
-    "change_pct": -7.17,
-    "nav_price": 28.64,
+    "close_price": 29.52,
+    "change_pct": 3.22,
+    "nav_price": 29.56,
     "premium_discount_pct": -0.14,
-    "volume_shares": 102222768,
-    "turnover_value": 2926992087.0,
-    "bid_price": 28.59,
-    "ask_price": 28.6,
-    "bid_ask_spread_bps": 3.5,
+    "volume_shares": 43633558,
+    "turnover_value": 1276995230.0,
+    "bid_price": 29.51,
+    "ask_price": 29.52,
+    "bid_ask_spread_bps": 3.4,
     "primary_net_flow_value": 55.0,
-    "foreign_net_shares": -3740517,
-    "itc_net_shares": 0,
-    "dealer_net_shares": -40939211,
+    "foreign_net_shares": 3254445,
+    "itc_net_shares": -2000000,
+    "dealer_net_shares": -2102637,
     "regular_saving_accounts": 333543,
-    "weighted_pe": 26.76,
-    "weighted_pb": 4.85,
+    "weighted_pe": 24.75,
+    "weighted_pb": 4.45,
     "weighted_rev_yoy_pct": 10.46,
     "weighted_roe_pct": 17.2,
     "dividend_yield_pct": 8.4,
@@ -11180,7 +11199,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3154,
+      "holding_id": 3279,
       "etf_code": "00878",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -11190,11 +11209,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 5.765176122338701,
-      "live_pe": 65.14,
-      "live_pb": 13.9
+      "live_pe": 58.63,
+      "live_pb": 12.51
      },
      {
-      "holding_id": 3155,
+      "holding_id": 3280,
       "etf_code": "00878",
       "constituent_code": "2303",
       "constituent_name": "聯電",
@@ -11204,11 +11223,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 18.32619283780295,
-      "live_pe": 14.34,
-      "live_pb": 2.59
+      "live_pe": 12.91,
+      "live_pb": 2.33
      },
      {
-      "holding_id": 3156,
+      "holding_id": 3281,
       "etf_code": "00878",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -11218,11 +11237,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -35.41036572201124,
-      "live_pe": 16.97,
-      "live_pb": 1.93
+      "live_pe": 16.0,
+      "live_pb": 1.82
      },
      {
-      "holding_id": 3157,
+      "holding_id": 3282,
       "etf_code": "00878",
       "constituent_code": "2882",
       "constituent_name": "國泰金",
@@ -11232,11 +11251,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -61.40426826304281,
-      "live_pe": 12.32,
-      "live_pb": 1.51
+      "live_pe": 11.85,
+      "live_pb": 1.45
      },
      {
-      "holding_id": 3158,
+      "holding_id": 3283,
       "etf_code": "00878",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -11246,11 +11265,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 47.12520138680502,
-      "live_pe": 30.42,
-      "live_pb": 5.53
+      "live_pe": 28.01,
+      "live_pb": 5.1
      },
      {
-      "holding_id": 3159,
+      "holding_id": 3284,
       "etf_code": "00878",
       "constituent_code": "2382",
       "constituent_name": "廣達",
@@ -11260,11 +11279,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 103.9601585472691,
-      "live_pe": 11.53,
-      "live_pb": 3.37
+      "live_pe": 10.65,
+      "live_pb": 3.11
      },
      {
-      "holding_id": 3160,
+      "holding_id": 3285,
       "etf_code": "00878",
       "constituent_code": "2412",
       "constituent_name": "中華電",
@@ -11274,8 +11293,8 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 13.447801238423756,
-      "live_pe": 30.18,
-      "live_pb": 3.37
+      "live_pe": 30.0,
+      "live_pb": 3.35
      }
     ],
     "dividend_breakdown": {
@@ -11320,22 +11339,22 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 41.71,
-    "change_pct": -6.69,
-    "nav_price": 41.68,
+    "close_price": 42.51,
+    "change_pct": 1.92,
+    "nav_price": 42.48,
     "premium_discount_pct": 0.07,
-    "volume_shares": 8450846,
-    "turnover_value": 351282181.0,
-    "bid_price": 41.65,
-    "ask_price": 41.71,
-    "bid_ask_spread_bps": 14.4,
+    "volume_shares": 3538107,
+    "turnover_value": 149458953.0,
+    "bid_price": 42.51,
+    "ask_price": 42.55,
+    "bid_ask_spread_bps": 9.4,
     "primary_net_flow_value": 19.5,
-    "foreign_net_shares": -361976,
+    "foreign_net_shares": 42208,
     "itc_net_shares": 0,
-    "dealer_net_shares": -6417029,
+    "dealer_net_shares": -2005021,
     "regular_saving_accounts": null,
-    "weighted_pe": 13.89,
-    "weighted_pb": 1.66,
+    "weighted_pe": 13.06,
+    "weighted_pb": 1.56,
     "weighted_rev_yoy_pct": -63.2,
     "weighted_roe_pct": 13.8,
     "dividend_yield_pct": 4.1,
@@ -11395,7 +11414,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3185,
+      "holding_id": 3310,
       "etf_code": "0055",
       "constituent_code": "2881",
       "constituent_name": "富邦金",
@@ -11405,11 +11424,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -83.3790388478706,
-      "live_pe": 13.41,
-      "live_pb": 1.77
+      "live_pe": 12.38,
+      "live_pb": 1.63
      },
      {
-      "holding_id": 3186,
+      "holding_id": 3311,
       "etf_code": "0055",
       "constituent_code": "2882",
       "constituent_name": "國泰金",
@@ -11419,11 +11438,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -61.40426826304281,
-      "live_pe": 12.32,
-      "live_pb": 1.51
+      "live_pe": 11.85,
+      "live_pb": 1.45
      },
      {
-      "holding_id": 3187,
+      "holding_id": 3312,
       "etf_code": "0055",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -11433,11 +11452,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -35.41036572201124,
-      "live_pe": 16.97,
-      "live_pb": 1.93
+      "live_pe": 16.0,
+      "live_pb": 1.82
      },
      {
-      "holding_id": 3188,
+      "holding_id": 3313,
       "etf_code": "0055",
       "constituent_code": "2883",
       "constituent_name": "凱基金",
@@ -11447,8 +11466,8 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -77.4857282401559,
-      "live_pe": 11.99,
-      "live_pb": 1.19
+      "live_pe": 11.17,
+      "live_pb": 1.11
      }
     ],
     "dividend_breakdown": null
@@ -11482,22 +11501,22 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 26.12,
-    "change_pct": -7.34,
-    "nav_price": 26.16,
+    "close_price": 27.13,
+    "change_pct": 3.87,
+    "nav_price": 27.17,
     "premium_discount_pct": -0.16,
-    "volume_shares": 35797493,
-    "turnover_value": 936282310.0,
-    "bid_price": 26.12,
-    "ask_price": 26.13,
-    "bid_ask_spread_bps": 3.8,
+    "volume_shares": 21648262,
+    "turnover_value": 585085259.0,
+    "bid_price": 27.12,
+    "ask_price": 27.13,
+    "bid_ask_spread_bps": 3.7,
     "primary_net_flow_value": 12.0,
-    "foreign_net_shares": -7089525,
+    "foreign_net_shares": 2611480,
     "itc_net_shares": 0,
-    "dealer_net_shares": 2744760,
+    "dealer_net_shares": -1887180,
     "regular_saving_accounts": null,
-    "weighted_pe": 39.71,
-    "weighted_pb": 9.46,
+    "weighted_pe": 36.79,
+    "weighted_pb": 8.84,
     "weighted_rev_yoy_pct": 75.76,
     "weighted_roe_pct": 23.0,
     "dividend_yield_pct": 6.2,
@@ -11559,7 +11578,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3179,
+      "holding_id": 3304,
       "etf_code": "00891",
       "constituent_code": "2330",
       "constituent_name": "台積電",
@@ -11569,11 +11588,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 59.709757600700904,
-      "live_pe": 22.7,
-      "live_pb": 8.26
+      "live_pe": 21.88,
+      "live_pb": 7.97
      },
      {
-      "holding_id": 3180,
+      "holding_id": 3305,
       "etf_code": "00891",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -11583,11 +11602,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 5.765176122338701,
-      "live_pe": 65.14,
-      "live_pb": 13.9
+      "live_pe": 58.63,
+      "live_pb": 12.51
      },
      {
-      "holding_id": 3181,
+      "holding_id": 3306,
       "etf_code": "00891",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -11597,11 +11616,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 47.12520138680502,
-      "live_pe": 30.42,
-      "live_pb": 5.53
+      "live_pe": 28.01,
+      "live_pb": 5.1
      },
      {
-      "holding_id": 3182,
+      "holding_id": 3307,
       "etf_code": "00891",
       "constituent_code": "2303",
       "constituent_name": "聯電",
@@ -11611,11 +11630,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 18.32619283780295,
-      "live_pe": 14.34,
-      "live_pb": 2.59
+      "live_pe": 12.91,
+      "live_pb": 2.33
      },
      {
-      "holding_id": 3183,
+      "holding_id": 3308,
       "etf_code": "00891",
       "constituent_code": "3661",
       "constituent_name": "世芯-KY",
@@ -11625,11 +11644,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 515.8077034803464,
-      "live_pe": 43.34,
-      "live_pb": 5.3
+      "live_pe": 39.9,
+      "live_pb": 4.88
      },
      {
-      "holding_id": 3184,
+      "holding_id": 3309,
       "etf_code": "00891",
       "constituent_code": "6223",
       "constituent_name": "旺矽",
@@ -11751,7 +11770,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3247,
+      "holding_id": 3372,
       "etf_code": "VNQ",
       "constituent_code": "US_REITS_DC",
       "constituent_name": "Prologis / Equinix / American Tower / Digital Realty",
@@ -11796,22 +11815,22 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 45.66,
-    "change_pct": -8.57,
-    "nav_price": 45.72,
+    "close_price": 47.49,
+    "change_pct": 4.01,
+    "nav_price": 47.55,
     "premium_discount_pct": -0.13,
-    "volume_shares": 141598411,
-    "turnover_value": 6480736853.0,
-    "bid_price": 45.66,
-    "ask_price": 45.67,
-    "bid_ask_spread_bps": 2.2,
+    "volume_shares": 53293485,
+    "turnover_value": 2502757915.0,
+    "bid_price": 47.49,
+    "ask_price": 47.5,
+    "bid_ask_spread_bps": 2.1,
     "primary_net_flow_value": 42.0,
-    "foreign_net_shares": -17864567,
-    "itc_net_shares": 2836000,
-    "dealer_net_shares": -74368917,
+    "foreign_net_shares": 874434,
+    "itc_net_shares": 2434000,
+    "dealer_net_shares": -289704,
     "regular_saving_accounts": 344256,
-    "weighted_pe": 22.17,
-    "weighted_pb": 4.28,
+    "weighted_pe": 20.49,
+    "weighted_pb": 3.95,
     "weighted_rev_yoy_pct": 35.81,
     "weighted_roe_pct": 16.8,
     "dividend_yield_pct": 8.85,
@@ -11874,7 +11893,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3146,
+      "holding_id": 3271,
       "etf_code": "0056",
       "constituent_code": "2382",
       "constituent_name": "廣達",
@@ -11884,11 +11903,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 103.9601585472691,
-      "live_pe": 11.53,
-      "live_pb": 3.37
+      "live_pe": 10.65,
+      "live_pb": 3.11
      },
      {
-      "holding_id": 3147,
+      "holding_id": 3272,
       "etf_code": "0056",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -11898,11 +11917,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 5.765176122338701,
-      "live_pe": 65.14,
-      "live_pb": 13.9
+      "live_pe": 58.63,
+      "live_pb": 12.51
      },
      {
-      "holding_id": 3148,
+      "holding_id": 3273,
       "etf_code": "0056",
       "constituent_code": "2603",
       "constituent_name": "長榮",
@@ -11912,11 +11931,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 96.13406373417418,
-      "live_pe": 7.0,
-      "live_pb": 0.91
+      "live_pe": 6.88,
+      "live_pb": 0.9
      },
      {
-      "holding_id": 3149,
+      "holding_id": 3274,
       "etf_code": "0056",
       "constituent_code": "2303",
       "constituent_name": "聯電",
@@ -11926,11 +11945,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 18.32619283780295,
-      "live_pe": 14.34,
-      "live_pb": 2.59
+      "live_pe": 12.91,
+      "live_pb": 2.33
      },
      {
-      "holding_id": 3150,
+      "holding_id": 3275,
       "etf_code": "0056",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -11940,11 +11959,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -35.41036572201124,
-      "live_pe": 16.97,
-      "live_pb": 1.93
+      "live_pe": 16.0,
+      "live_pb": 1.82
      },
      {
-      "holding_id": 3151,
+      "holding_id": 3276,
       "etf_code": "0056",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -11954,11 +11973,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 47.12520138680502,
-      "live_pe": 30.42,
-      "live_pb": 5.53
+      "live_pe": 28.01,
+      "live_pb": 5.1
      },
      {
-      "holding_id": 3152,
+      "holding_id": 3277,
       "etf_code": "0056",
       "constituent_code": "2618",
       "constituent_name": "長榮航",
@@ -11968,11 +11987,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 22.628099873042743,
-      "live_pe": 9.88,
-      "live_pb": 1.78
+      "live_pe": 9.29,
+      "live_pb": 1.68
      },
      {
-      "holding_id": 3153,
+      "holding_id": 3278,
       "etf_code": "0056",
       "constituent_code": "1216",
       "constituent_name": "統一",
@@ -11982,8 +12001,8 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 5.296872130966274,
-      "live_pe": 18.34,
-      "live_pb": 3.04
+      "live_pe": 18.65,
+      "live_pb": 3.09
      }
     ],
     "dividend_breakdown": {
@@ -12028,22 +12047,22 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 52.15,
-    "change_pct": -5.44,
-    "nav_price": 52.1,
+    "close_price": 53.45,
+    "change_pct": 2.49,
+    "nav_price": 53.4,
     "premium_discount_pct": 0.1,
-    "volume_shares": 34471861,
-    "turnover_value": 1780644384.0,
-    "bid_price": 52.15,
-    "ask_price": 52.2,
-    "bid_ask_spread_bps": 9.6,
+    "volume_shares": 30312490,
+    "turnover_value": 1610729080.0,
+    "bid_price": 53.4,
+    "ask_price": 53.45,
+    "bid_ask_spread_bps": 9.4,
     "primary_net_flow_value": 45.0,
-    "foreign_net_shares": 155047,
-    "itc_net_shares": -50000,
-    "dealer_net_shares": -3185036,
+    "foreign_net_shares": -681999,
+    "itc_net_shares": -3126000,
+    "dealer_net_shares": 11683483,
     "regular_saving_accounts": 77450,
-    "weighted_pe": 25.9,
-    "weighted_pb": 8.6,
+    "weighted_pe": 24.64,
+    "weighted_pb": 8.24,
     "weighted_rev_yoy_pct": 56.52,
     "weighted_roe_pct": 26.4,
     "dividend_yield_pct": 1.85,
@@ -12105,7 +12124,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3172,
+      "holding_id": 3297,
       "etf_code": "0052",
       "constituent_code": "2330",
       "constituent_name": "台積電",
@@ -12115,11 +12134,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 59.709757600700904,
-      "live_pe": 22.7,
-      "live_pb": 8.26
+      "live_pe": 21.88,
+      "live_pb": 7.97
      },
      {
-      "holding_id": 3173,
+      "holding_id": 3298,
       "etf_code": "0052",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -12129,11 +12148,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 5.765176122338701,
-      "live_pe": 65.14,
-      "live_pb": 13.9
+      "live_pe": 58.63,
+      "live_pb": 12.51
      },
      {
-      "holding_id": 3174,
+      "holding_id": 3299,
       "etf_code": "0052",
       "constituent_code": "2382",
       "constituent_name": "廣達",
@@ -12143,11 +12162,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 103.9601585472691,
-      "live_pe": 11.53,
-      "live_pb": 3.37
+      "live_pe": 10.65,
+      "live_pb": 3.11
      },
      {
-      "holding_id": 3175,
+      "holding_id": 3300,
       "etf_code": "0052",
       "constituent_code": "2308",
       "constituent_name": "台達電",
@@ -12157,11 +12176,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 30.11771317738272,
-      "live_pe": 32.58,
-      "live_pb": 8.86
+      "live_pe": 31.68,
+      "live_pb": 8.61
      },
      {
-      "holding_id": 3176,
+      "holding_id": 3301,
       "etf_code": "0052",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -12171,11 +12190,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 47.12520138680502,
-      "live_pe": 30.42,
-      "live_pb": 5.53
+      "live_pe": 28.01,
+      "live_pb": 5.1
      },
      {
-      "holding_id": 3177,
+      "holding_id": 3302,
       "etf_code": "0052",
       "constituent_code": "2345",
       "constituent_name": "智邦",
@@ -12185,11 +12204,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 91.15506140307477,
-      "live_pe": 20.33,
-      "live_pb": 10.12
+      "live_pe": 20.19,
+      "live_pb": 10.05
      },
      {
-      "holding_id": 3178,
+      "holding_id": 3303,
       "etf_code": "0052",
       "constituent_code": "3017",
       "constituent_name": "奇鋐",
@@ -12199,8 +12218,8 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 34.351109495316805,
-      "live_pe": 28.74,
-      "live_pb": 15.25
+      "live_pe": 28.13,
+      "live_pb": 14.92
      }
     ],
     "dividend_breakdown": null
@@ -12248,8 +12267,8 @@
     "itc_net_shares": 0,
     "dealer_net_shares": 0,
     "regular_saving_accounts": null,
-    "weighted_pe": 31.43,
-    "weighted_pb": 17.23,
+    "weighted_pe": 31.25,
+    "weighted_pb": 17.17,
     "weighted_rev_yoy_pct": 53.4,
     "weighted_roe_pct": 31.0,
     "dividend_yield_pct": 0.42,
@@ -12314,7 +12333,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3229,
+      "holding_id": 3354,
       "etf_code": "SMH",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -12328,7 +12347,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3230,
+      "holding_id": 3355,
       "etf_code": "SMH",
       "constituent_code": "2330",
       "constituent_name": "台積電 (TSMC ADR)",
@@ -12338,11 +12357,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 59.709757600700904,
-      "live_pe": 22.7,
-      "live_pb": 8.26
+      "live_pe": 21.88,
+      "live_pb": 7.97
      },
      {
-      "holding_id": 3231,
+      "holding_id": 3356,
       "etf_code": "SMH",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -12356,7 +12375,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3232,
+      "holding_id": 3357,
       "etf_code": "SMH",
       "constituent_code": "AMD",
       "constituent_name": "Advanced Micro Devices",
@@ -12370,7 +12389,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3233,
+      "holding_id": 3358,
       "etf_code": "SMH",
       "constituent_code": "ASML",
       "constituent_name": "ASML Holding NV",
@@ -12384,7 +12403,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3234,
+      "holding_id": 3359,
       "etf_code": "SMH",
       "constituent_code": "AMAT",
       "constituent_name": "Applied Materials",
@@ -12429,22 +12448,22 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 27.87,
-    "change_pct": -5.53,
-    "nav_price": 27.9,
+    "close_price": 28.82,
+    "change_pct": 3.41,
+    "nav_price": 28.85,
     "premium_discount_pct": -0.09,
-    "volume_shares": 119853268,
-    "turnover_value": 3326408437.0,
-    "bid_price": 27.87,
-    "ask_price": 27.88,
-    "bid_ask_spread_bps": 3.6,
+    "volume_shares": 52885299,
+    "turnover_value": 1507358319.0,
+    "bid_price": 28.82,
+    "ask_price": 28.83,
+    "bid_ask_spread_bps": 3.5,
     "primary_net_flow_value": 38.0,
-    "foreign_net_shares": -16023689,
+    "foreign_net_shares": 572689,
     "itc_net_shares": 0,
-    "dealer_net_shares": -24018863,
+    "dealer_net_shares": 45588,
     "regular_saving_accounts": 197217,
-    "weighted_pe": 26.2,
-    "weighted_pb": 5.53,
+    "weighted_pe": 24.42,
+    "weighted_pb": 5.18,
     "weighted_rev_yoy_pct": 30.54,
     "weighted_roe_pct": 18.5,
     "dividend_yield_pct": 9.6,
@@ -12507,7 +12526,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3161,
+      "holding_id": 3286,
       "etf_code": "00919",
       "constituent_code": "2603",
       "constituent_name": "長榮",
@@ -12517,11 +12536,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 96.13406373417418,
-      "live_pe": 7.0,
-      "live_pb": 0.91
+      "live_pe": 6.88,
+      "live_pb": 0.9
      },
      {
-      "holding_id": 3162,
+      "holding_id": 3287,
       "etf_code": "00919",
       "constituent_code": "2303",
       "constituent_name": "聯電",
@@ -12531,11 +12550,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 18.32619283780295,
-      "live_pe": 14.34,
-      "live_pb": 2.59
+      "live_pe": 12.91,
+      "live_pb": 2.33
      },
      {
-      "holding_id": 3163,
+      "holding_id": 3288,
       "etf_code": "00919",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -12545,11 +12564,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 5.765176122338701,
-      "live_pe": 65.14,
-      "live_pb": 13.9
+      "live_pe": 58.63,
+      "live_pb": 12.51
      },
      {
-      "holding_id": 3164,
+      "holding_id": 3289,
       "etf_code": "00919",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -12559,11 +12578,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -35.41036572201124,
-      "live_pe": 16.97,
-      "live_pb": 1.93
+      "live_pe": 16.0,
+      "live_pb": 1.82
      },
      {
-      "holding_id": 3165,
+      "holding_id": 3290,
       "etf_code": "00919",
       "constituent_code": "2618",
       "constituent_name": "長榮航",
@@ -12573,11 +12592,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 22.628099873042743,
-      "live_pe": 9.88,
-      "live_pb": 1.78
+      "live_pe": 9.29,
+      "live_pb": 1.68
      },
      {
-      "holding_id": 3166,
+      "holding_id": 3291,
       "etf_code": "00919",
       "constituent_code": "6223",
       "constituent_name": "旺矽",
@@ -12633,19 +12652,19 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 123.75,
-    "change_pct": -3.32,
-    "nav_price": 123.55,
+    "close_price": 126.2,
+    "change_pct": 1.98,
+    "nav_price": 126.0,
     "premium_discount_pct": 0.16,
-    "volume_shares": 1174623,
-    "turnover_value": 145938145.0,
-    "bid_price": 123.7,
-    "ask_price": 123.75,
-    "bid_ask_spread_bps": 4.0,
+    "volume_shares": 1078489,
+    "turnover_value": 135773498.0,
+    "bid_price": 126.1,
+    "ask_price": 126.2,
+    "bid_ask_spread_bps": 7.9,
     "primary_net_flow_value": 16.0,
-    "foreign_net_shares": -87675,
+    "foreign_net_shares": 53110,
     "itc_net_shares": 0,
-    "dealer_net_shares": -280488,
+    "dealer_net_shares": -560794,
     "regular_saving_accounts": null,
     "weighted_pe": 31.41,
     "weighted_pb": 17.98,
@@ -12709,7 +12728,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3189,
+      "holding_id": 3314,
       "etf_code": "00757",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -12723,7 +12742,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3190,
+      "holding_id": 3315,
       "etf_code": "00757",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -12737,7 +12756,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3191,
+      "holding_id": 3316,
       "etf_code": "00757",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -12751,7 +12770,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3192,
+      "holding_id": 3317,
       "etf_code": "00757",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -12765,7 +12784,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3194,
+      "holding_id": 3319,
       "etf_code": "00757",
       "constituent_code": "AMZN",
       "constituent_name": "Amazon.com",
@@ -12779,7 +12798,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3193,
+      "holding_id": 3318,
       "etf_code": "00757",
       "constituent_code": "META",
       "constituent_name": "Meta Platforms",
@@ -12793,7 +12812,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3195,
+      "holding_id": 3320,
       "etf_code": "00757",
       "constituent_code": "GOOGL",
       "constituent_name": "Alphabet Inc",
@@ -12838,19 +12857,19 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 36.32,
-    "change_pct": -2.5,
-    "nav_price": 36.28,
+    "close_price": 36.85,
+    "change_pct": 1.46,
+    "nav_price": 36.81,
     "premium_discount_pct": 0.1,
-    "volume_shares": 1974936,
-    "turnover_value": 71838804.0,
-    "bid_price": 36.31,
-    "ask_price": 36.32,
-    "bid_ask_spread_bps": 2.8,
+    "volume_shares": 2117160,
+    "turnover_value": 77596469.0,
+    "bid_price": 36.85,
+    "ask_price": 36.87,
+    "bid_ask_spread_bps": 5.4,
     "primary_net_flow_value": 3.5,
-    "foreign_net_shares": -315851,
+    "foreign_net_shares": -190920,
     "itc_net_shares": 0,
-    "dealer_net_shares": 689557,
+    "dealer_net_shares": 625012,
     "regular_saving_accounts": null,
     "weighted_pe": null,
     "weighted_pb": null,
@@ -12914,7 +12933,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3202,
+      "holding_id": 3327,
       "etf_code": "00635U",
       "constituent_code": "COMEX_GOLD_FUT",
       "constituent_name": "COMEX黃金期貨契約",
@@ -12959,22 +12978,22 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 10.5,
-    "change_pct": -5.32,
-    "nav_price": 10.54,
+    "close_price": 11.17,
+    "change_pct": 6.38,
+    "nav_price": 11.22,
     "premium_discount_pct": -0.41,
-    "volume_shares": 84313111,
-    "turnover_value": 885666530.0,
-    "bid_price": 10.5,
-    "ask_price": 10.51,
-    "bid_ask_spread_bps": 9.5,
+    "volume_shares": 47211651,
+    "turnover_value": 522458291.0,
+    "bid_price": 11.16,
+    "ask_price": 11.17,
+    "bid_ask_spread_bps": 9.0,
     "primary_net_flow_value": -68.0,
-    "foreign_net_shares": 21850171,
+    "foreign_net_shares": 17998970,
     "itc_net_shares": 0,
-    "dealer_net_shares": 2014059,
+    "dealer_net_shares": -2819307,
     "regular_saving_accounts": null,
-    "weighted_pe": 15.99,
-    "weighted_pb": 3.72,
+    "weighted_pe": 15.19,
+    "weighted_pb": 3.56,
     "weighted_rev_yoy_pct": 42.66,
     "weighted_roe_pct": 19.5,
     "dividend_yield_pct": 6.5,
@@ -13036,7 +13055,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3196,
+      "holding_id": 3321,
       "etf_code": "00400A",
       "constituent_code": "2330",
       "constituent_name": "台積電",
@@ -13046,11 +13065,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 59.709757600700904,
-      "live_pe": 22.7,
-      "live_pb": 8.26
+      "live_pe": 21.88,
+      "live_pb": 7.97
      },
      {
-      "holding_id": 3197,
+      "holding_id": 3322,
       "etf_code": "00400A",
       "constituent_code": "2317",
       "constituent_name": "鴻海",
@@ -13060,11 +13079,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 45.730399518079835,
-      "live_pe": 13.7,
-      "live_pb": 1.61
+      "live_pe": 12.49,
+      "live_pb": 1.47
      },
      {
-      "holding_id": 3198,
+      "holding_id": 3323,
       "etf_code": "00400A",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -13074,11 +13093,11 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": -35.41036572201124,
-      "live_pe": 16.97,
-      "live_pb": 1.93
+      "live_pe": 16.0,
+      "live_pb": 1.82
      },
      {
-      "holding_id": 3199,
+      "holding_id": 3324,
       "etf_code": "00400A",
       "constituent_code": "2603",
       "constituent_name": "長榮",
@@ -13088,8 +13107,8 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 96.13406373417418,
-      "live_pe": 7.0,
-      "live_pb": 0.91
+      "live_pe": 6.88,
+      "live_pb": 0.9
      }
     ],
     "dividend_breakdown": null
@@ -13123,22 +13142,22 @@
     "source_url": "https://www.twse.com.tw/",
     "as_of_date": "2026-11-20",
     "trade_date": "2026-11-20",
-    "close_price": 23.78,
-    "change_pct": -11.93,
-    "nav_price": 23.74,
+    "close_price": 25.5,
+    "change_pct": 7.23,
+    "nav_price": 25.46,
     "premium_discount_pct": 0.16,
-    "volume_shares": 1315560426,
-    "turnover_value": 31074221017.0,
-    "bid_price": 23.78,
-    "ask_price": 23.79,
-    "bid_ask_spread_bps": 4.2,
+    "volume_shares": 685206400,
+    "turnover_value": 17199889646.0,
+    "bid_price": 25.49,
+    "ask_price": 25.5,
+    "bid_ask_spread_bps": 3.9,
     "primary_net_flow_value": -25.0,
-    "foreign_net_shares": -22686301,
-    "itc_net_shares": 0,
-    "dealer_net_shares": -29285066,
+    "foreign_net_shares": 11146412,
+    "itc_net_shares": 520000,
+    "dealer_net_shares": 4035550,
     "regular_saving_accounts": null,
-    "weighted_pe": 22.7,
-    "weighted_pb": 8.26,
+    "weighted_pe": 21.88,
+    "weighted_pb": 7.97,
     "weighted_rev_yoy_pct": 59.71,
     "weighted_roe_pct": 24.5,
     "dividend_yield_pct": 0.0,
@@ -13198,7 +13217,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3203,
+      "holding_id": 3328,
       "etf_code": "00631L",
       "constituent_code": "2330",
       "constituent_name": "台積電(透過台指期/臺灣50期貨200%曝險穿透)",
@@ -13208,8 +13227,8 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 59.709757600700904,
-      "live_pe": 22.7,
-      "live_pb": 8.26
+      "live_pe": 21.88,
+      "live_pb": 7.97
      }
     ],
     "dividend_breakdown": null
@@ -13257,8 +13276,8 @@
     "itc_net_shares": 0,
     "dealer_net_shares": 0,
     "regular_saving_accounts": null,
-    "weighted_pe": 32.59,
-    "weighted_pb": 20.24,
+    "weighted_pe": 32.41,
+    "weighted_pb": 20.18,
     "weighted_rev_yoy_pct": 63.28,
     "weighted_roe_pct": 31.0,
     "dividend_yield_pct": 0.25,
@@ -13319,7 +13338,7 @@
     },
     "holdings": [
      {
-      "holding_id": 3248,
+      "holding_id": 3373,
       "etf_code": "SOXL",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp (300%槓桿Swap曝險)",
@@ -13333,7 +13352,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3249,
+      "holding_id": 3374,
       "etf_code": "SOXL",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc (300%槓桿Swap曝險)",
@@ -13347,7 +13366,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 3250,
+      "holding_id": 3375,
       "etf_code": "SOXL",
       "constituent_code": "2330",
       "constituent_name": "台積電 TSMC ADR (300%槓桿曝險)",
@@ -13357,8 +13376,8 @@
       "as_of_date": "2026-11-20",
       "source_note": "投信/發行商公開月報與MOPS穿透對齊",
       "live_rev_yoy": 59.709757600700904,
-      "live_pe": 22.7,
-      "live_pb": 8.26
+      "live_pe": 21.88,
+      "live_pb": 7.97
      }
     ],
     "dividend_breakdown": null
