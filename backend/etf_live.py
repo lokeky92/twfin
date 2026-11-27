@@ -387,6 +387,10 @@ def apply_live_etf(conn=None, today=None, backfill_requests=None):
             full = dict(m, beta=beta, corr_taiex=corr_taiex, corr_0050=corr_core, insti_billion=None if insti_val is None else round(insti_val, 3),
                         insti_ratio_pct=etf["insti_ratio_pct"], facts=facts, missing=sc["missing"])
             cur.execute("INSERT OR REPLACE INTO etf_live_metrics VALUES (?,?,?)", (code, m["last_date"], json.dumps(full, ensure_ascii=False)))
+            # 每次排程 ETF 引擎都會以寫死的日期重新插入一列 (本次抓到的最新行情與法人資料)，而上次即時更新已把舊列改成真實日期，
+            # 所以同一檔 ETF 會有兩列；唯一鍵是 (代號, 日期)，兩列同時改成同一天就會撞鍵 (實際在雲端遇過)。只留最新插入的一列。
+            cur.execute("""DELETE FROM etf_daily_metrics WHERE etf_code = ?
+                           AND rowid NOT IN (SELECT MAX(rowid) FROM etf_daily_metrics WHERE etf_code = ?)""", (code, code))
             cur.execute("""
                 UPDATE etf_daily_metrics SET trade_date = ?, close_price = ?, change_pct = ?, volume_shares = ?, turnover_value = ?,
                     nav_price = NULL, premium_discount_pct = NULL, primary_net_flow_value = NULL, dividend_yield_pct = NULL,

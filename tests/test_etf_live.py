@@ -420,6 +420,23 @@ class TestDatabaseIntegration(unittest.TestCase):
         self.assertEqual(lev["divergence_tag"], "槓桿耗損僅供極短線交易")
         conn.close()
 
+    def test_second_scheduled_run_after_engine_reseed_does_not_collide_or_duplicate(self):
+        """排程每次都會先重跑 ETF 引擎 (以寫死日期重新插入一列)，再做即時更新；連跑兩次不可撞唯一鍵、每檔只能有一列 (雲端實際發生過)。"""
+        import etf_engine
+        conn = self.conn()
+        tw = ed.tw_etf_codes(conn)
+        self._history(conn, tw)
+        el.apply_live_etf(conn, backfill_requests=0)
+        etf_engine.build_and_compute_etf_center()                              # 第二次排程：引擎重新插入寫死日期的列
+        conn2 = self.conn()
+        self.assertGreater(conn2.execute("SELECT COUNT(*) FROM etf_daily_metrics WHERE etf_code = '0050'").fetchone()[0], 1)
+        res = el.apply_live_etf(conn2, backfill_requests=0)                   # 不可丟出 IntegrityError
+        self.assertTrue(res["applied"])
+        per = conn2.execute("SELECT etf_code, COUNT(*) c FROM etf_daily_metrics GROUP BY etf_code").fetchall()
+        self.assertTrue(per and all(r["c"] == 1 for r in per if r["etf_code"] in tw))
+        live = conn2.execute("SELECT COUNT(*) FROM etf_daily_metrics WHERE metrics_source = 'live'").fetchone()[0]
+        self.assertEqual(live, len(tw))
+
     def test_us_etfs_keep_seed_scores_and_are_labelled(self):
         conn = self.conn()
         self._history(conn, ed.tw_etf_codes(conn))
