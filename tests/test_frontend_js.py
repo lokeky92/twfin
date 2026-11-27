@@ -556,6 +556,62 @@ class TestLiveHeatmapBoardsAndSankey(unittest.TestCase):
         self.assertEqual(n["macro"], "block")
 
 
+WARNINGS_DRIVER = r"""
+const fs = require('fs'), vm = require('vm'), path = require('path');
+const dir = process.argv[1];
+const stubs = {};
+function el(id) {
+  return stubs[id] || (stubs[id] = { id, innerHTML: '', textContent: '', style: {}, value: 'ALL',
+    parentNode: { insertBefore(n) { stubs[n.id] = n; } } });
+}
+const ctx = { console, window: {}, document: { getElementById: el, createElement: () => ({ style: {} }) } };
+vm.createContext(ctx);
+for (const f of ['01-core.js', '08-pro-tables.js']) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), ctx, { filename: f });
+const w = (id, lvl, src, text) => ({ warning_id: id, industry_name: '<b>產業</b>', alert_level: lvl, signal_category: '基本面居前', horizon: '中期',
+  credibility_grade: 'A級', triggered_at: '2026-11-27', trigger_reason: text, raw_data_evidence: text, publisher: 'MOPS',
+  counter_evidence: text, invalidation_conditions: text, missing_data_notes: text, text_source: src });
+const out = {};
+ctx.__live = [w('LIVE_A', 'LEVEL 3', 'live', '<img src=x onerror=alert(1)>'), w('LIVE_B', 'LEVEL R', 'live', '一般文字')];
+vm.runInContext("STATE = { warnings: __live }; renderWarnings()", ctx);
+out.live = el('warningsContainer').innerHTML; out.liveNote = el('warningsSourceNote').textContent;
+ctx.__seed = [w('WARN_1', 'LEVEL 1', 'seed', '手寫')];
+vm.runInContext("STATE = { warnings: __seed }; renderWarnings()", ctx);
+out.seed = el('warningsContainer').innerHTML; out.seedNote = el('warningsSourceNote').textContent;
+el('warningLevelFilter').value = 'LEVEL R';
+vm.runInContext("STATE = { warnings: __live }; renderWarnings()", ctx);
+out.filtered = el('warningsContainer').innerHTML;
+console.log(JSON.stringify(out));
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過預警渲染測試")
+class TestWarningsRender(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", WARNINGS_DRIVER, JS_DIR], capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    def test_every_dynamic_field_is_escaped(self):
+        h = self.o["live"]
+        self.assertNotIn("<img", h)
+        self.assertNotIn("<b>產業", h)
+        self.assertIn("&lt;img", h)
+        self.assertIn("&lt;b&gt;產業&lt;/b&gt;", h)
+
+    def test_source_banner_distinguishes_live_from_handwritten(self):
+        self.assertIn("2 則預警", self.o["liveNote"])
+        self.assertIn("自動產生", self.o["liveNote"])
+        self.assertIn("手寫", self.o["seedNote"])
+        self.assertIn("不會隨資料更新", self.o["seedNote"])
+
+    def test_level_filter_still_works(self):
+        self.assertEqual(self.o["live"].count('class="card"'), 2)
+        self.assertEqual(self.o["filtered"].count('class="card"'), 1)
+        self.assertIn("LEVEL R", self.o["filtered"])
+
+
 class TestInlineHandlersDefined(unittest.TestCase):
     ALLOWED = {"alert", "confirm", "parseInt", "parseFloat", "String", "Number", "Boolean"}
 

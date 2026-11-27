@@ -413,17 +413,37 @@ def apply_live_scoring(conn=None):
                 ind, version,
             ))
             n += cur.rowcount
-        # 預警中心的等級跟著分數走 (治理頁調整門檻時本來就是這樣重算的)；預警的說明文字仍是手寫，不在這裡改
-        cur.execute("SELECT thresholds_json FROM model_governance_configs WHERE version_id = ?", (version,))
-        th = effective_thresholds(json.loads(cur.fetchone()["thresholds_json"]))
+        # 預警中心：每個已評分產業由即時分數產生一則預警 (等級 + 全部說明文字)，取代手寫的種子預警。
+        # 種子預警每次排程都會被重灌，所以這裡先刪掉該產業的舊預警 (手寫或上次產生的) 再寫入新的。
+        from live_warnings import build_warning
+        th = effective_thresholds(json.loads(cur.execute("SELECT thresholds_json FROM model_governance_configs WHERE version_id = ?",
+                                                         (version,)).fetchone()["thresholds_json"]))
+        totals = {}
+        for ind in results:
+            row = cur.execute("SELECT total_weighted_score FROM industry_rotation_scores WHERE industry_id = ? AND model_version = ?",
+                              (ind, version)).fetchone()
+            totals[ind] = row["total_weighted_score"] if row else None
+        valid = sorted(t for t in totals.values() if t is not None)
+        median = valid[len(valid) // 2] if valid else None
+        now = _now_iso()
         synced = 0
         for ind, res in results.items():
-            cur.execute("SELECT total_weighted_score FROM industry_rotation_scores WHERE industry_id = ? AND model_version = ?", (ind, version))
-            row = cur.fetchone()
-            level = classify_alert_level(row["total_weighted_score"] if row else None, res["scores"]["capital_flow"], th)
-            if level:
-                cur.execute("UPDATE trend_early_warnings SET alert_level = ? WHERE industry_id = ?", (level, ind))
-                synced += cur.rowcount
+            total = totals[ind]
+            level = classify_alert_level(total, res["scores"]["capital_flow"], th)
+            if level is None:
+                continue
+            w = build_warning(ind, names.get(ind, ind), metrics[ind], res, total, level, len(results),
+                              median is not None and total >= median, SUB_LABELS, LIMITATIONS, now)
+            cur.execute("DELETE FROM trend_early_warnings WHERE industry_id = ?", (ind,))
+            cur.execute("""
+                INSERT INTO trend_early_warnings
+                (warning_id, industry_id, alert_level, signal_category, horizon, trigger_reason, raw_data_evidence,
+                 triggered_at, source_id, credibility_grade, missing_data_notes, counter_evidence, invalidation_conditions, text_source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'live')
+            """, (w["warning_id"], w["industry_id"], w["alert_level"], w["signal_category"], w["horizon"], w["trigger_reason"],
+                  w["raw_data_evidence"], w["triggered_at"], w["source_id"], w["credibility_grade"], w["missing_data_notes"],
+                  w["counter_evidence"], w["invalidation_conditions"]))
+            synced += 1
         if n:
             cur.execute("""
                 INSERT INTO ingestion_audit_logs (run_timestamp, task_name, source_id, status, records_affected, message)

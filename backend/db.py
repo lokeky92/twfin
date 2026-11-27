@@ -609,6 +609,10 @@ def _migrate(conn):
     cols = {r[1] for r in conn.execute("PRAGMA table_info(industry_score_history)")}
     if cols and "alert_level" not in cols:
         conn.execute("ALTER TABLE industry_score_history ADD COLUMN alert_level TEXT")
+    tew_cols = {r[1] for r in conn.execute("PRAGMA table_info(trend_early_warnings)")}
+    if tew_cols and "text_source" not in tew_cols:
+        # 'seed' = 手寫說明文字；'live' = 由即時評分機械式產生 (live_warnings.py)
+        conn.execute("ALTER TABLE trend_early_warnings ADD COLUMN text_source TEXT NOT NULL DEFAULT 'seed'")
     irs_cols = {r[1] for r in conn.execute("PRAGMA table_info(industry_rotation_scores)")}
     if irs_cols and "score_source" not in irs_cols:
         conn.execute("ALTER TABLE industry_rotation_scores ADD COLUMN score_source TEXT NOT NULL DEFAULT 'seed'")

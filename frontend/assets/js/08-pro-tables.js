@@ -308,6 +308,18 @@ function renderWarnings() {
   const lvl = document.getElementById('warningLevelFilter').value;
   const container = document.getElementById('warningsContainer');
   const list = STATE.warnings.filter(w => lvl === 'ALL' || w.alert_level === lvl);
+  // 說明文字的來源：即時評分自動產生 / 2026-11-22 前後手寫 (沒有即時資料的舊快照)
+  const liveCount = STATE.warnings.filter(w => w.text_source === 'live').length;
+  let srcNote = document.getElementById('warningsSourceNote');
+  if (!srcNote) {
+    srcNote = document.createElement('div');
+    srcNote.id = 'warningsSourceNote';
+    srcNote.style.cssText = 'font-size:12.5px; margin:4px 2px 12px; color:var(--text-muted);';
+    container.parentNode.insertBefore(srcNote, container);
+  }
+  srcNote.textContent = liveCount
+    ? `✅ ${liveCount} 則預警的等級與說明文字由官方即時資料自動產生（機械式規則，非分析師撰寫；每個交易日收盤後重算）。`
+    : '⚠️ 此快照的預警說明為 2026-11-22 前後手寫的文字，不會隨資料更新。';
   const lvlBadge = (l) => {
     if (l === 'LEVEL 4') return '<span class="badge badge-lvl4">LEVEL 4｜趨勢明確（須檢視估值與擁擠度）</span>';
     if (l === 'LEVEL 3') return '<span class="badge badge-lvl3">LEVEL 3｜資金與基本面同時轉強</span>';
@@ -320,23 +332,23 @@ function renderWarnings() {
       <div class="card-header">
         <div>
           ${lvlBadge(w.alert_level)}
-          <span style="font-size:16px; font-weight:700; margin-left:8px;">${w.industry_name}</span>
-          <span style="font-size:12px; color:var(--accent-blue); margin-left:8px;">[${w.signal_category}｜期間：${w.horizon}]</span>
+          <span style="font-size:16px; font-weight:700; margin-left:8px;">${esc(w.industry_name)}</span>
+          <span style="font-size:12px; color:var(--accent-blue); margin-left:8px;">[${esc(w.signal_category)}｜期間：${esc(w.horizon)}]</span>
         </div>
         <div style="font-size:12px; color:var(--text-secondary);">
-          可信度：<strong>${w.credibility_grade}</strong> ｜ 觸發時間：${w.triggered_at}
+          可信度：<strong>${esc(w.credibility_grade)}</strong> ｜ 觸發時間：${esc(w.triggered_at)}
         </div>
       </div>
       <div class="evidence-box">
         <strong>觸發原因：</strong> ${esc(w.trigger_reason)}<br/>
-        <strong>原始數據證據：</strong> ${w.raw_data_evidence} （來源：${w.publisher}）
+        <strong>原始數據證據：</strong> ${esc(w.raw_data_evidence)} （來源：${esc(w.publisher)}）
       </div>
       <div class="evidence-box counter">
-        <strong>反方證據：</strong> ${w.counter_evidence}
+        <strong>反方證據：</strong> ${esc(w.counter_evidence)}
       </div>
       <div class="evidence-box invalid">
-        <strong>結論失效條件：</strong> ${w.invalidation_conditions}<br/>
-        <strong>缺失資料與統計限制：</strong> ${w.missing_data_notes}
+        <strong>結論失效條件：</strong> ${esc(w.invalidation_conditions)}<br/>
+        <strong>缺失資料與統計限制：</strong> ${esc(w.missing_data_notes)}
       </div>
     </div>
   `).join('');
