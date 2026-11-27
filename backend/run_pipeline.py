@@ -72,16 +72,18 @@ def main():
         print("Live OpenAPI Ingestion:", live_res)
         build_and_compute_etf_center(shared_insti_map=shared_map)
         print("Live ETF (TW):", apply_live_etf())
-        try:      # 多代理即時稽核 (唯讀資料庫)；失敗只記錄，不讓整個同步失敗
+        print("Live industry scoring:", apply_live_scoring())
+        print(f"Industry score snapshot rows: {snapshot_industry_scores()}")
+        print("Live watchlist:", apply_live_watchlist())
+        print("Live research reports:", apply_live_reports())
+        # 多代理即時稽核 (唯讀資料庫)：必須在所有即時化步驟之後、匯出之前，才看得到「即將發布」的最終狀態
+        # (每次排程一開始都會重灌手寫種子列，太早稽核會把中途狀態誤判成重複／手寫)；失敗只記錄，不讓整個同步失敗
+        try:
             from argon_multi_agent.engine.live_audit_session import run_live_audit_session
             _b = run_live_audit_session()
             print("Live audit session:", _b["session_id"], "integrity:", _b["production_integrity_verified"], "proposals:", len(_b["phase6_proposals"]))
         except Exception as _e:  # noqa: BLE001
             print(f"::warning title=多代理即時稽核失敗::{type(_e).__name__}: {_e}")
-        print("Live industry scoring:", apply_live_scoring())
-        print(f"Industry score snapshot rows: {snapshot_industry_scores()}")
-        print("Live watchlist:", apply_live_watchlist())
-        print("Live research reports:", apply_live_reports())
         export_standalone()
         print_health_summary()
         sys.exit(report_ingestion_health(live_res.get("health", {}) if isinstance(live_res, dict) else {}, critical))
