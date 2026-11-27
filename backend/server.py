@@ -24,6 +24,7 @@ from data_health import SOURCES, age_status
 from history import history_summary
 from backtest import compute_live_backtest
 from strategy_sim import compute_strategy_sim
+from live_pulse import compute_home_pulse
 from snapshot_bundle import inline_snapshot
 from scoring import (
     DEFAULT_THRESHOLDS,
@@ -418,7 +419,7 @@ def _build_dashboard_base():
     live_backtest = compute_live_backtest(conn)
     strategy_sim = compute_strategy_sim(conn)
     conn.close()
-    return {
+    payload = {
         "generated_at": now_tw().strftime("%Y-%m-%d %H:%M:%S (UTC+8)"),
         "data_provenance": provenance,
         "active_model": active_model,
@@ -447,6 +448,9 @@ def _build_dashboard_base():
         "live_indices": live_indices,
         "etf_center": etf_center,
     }
+    # 首頁 Q1~Q6 摘要卡：由上面的即時欄位機械式產生 (不含手寫敘事)，一併進快照
+    payload["home_pulse"] = compute_home_pulse(payload)
+    return payload
 
 def _next_model_version(cur):
     """以既有最大序號 +1 產生版本號 (不用 COUNT，避免刪除或並行時重號)。"""

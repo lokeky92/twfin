@@ -3,7 +3,8 @@
    ========================================================================= */
 function renderTenSecPulse() {
   const s = STATE.live_summary || { total_companies: 1989, total_rev_trillion: 6.8635, total_yoy_pct: 45.49 };
-  const pulses = [
+  // 靜態備援：只有拿不到 STATE.home_pulse 的舊快照才會用到 (內容為 2026-11-21 前後手寫，不會更新)
+  const staticPulses = [
     {
       q: "Q1. 現在台灣整體資金是增加還是減少？",
       a: "🟢 總量充沛創高、但借貸利率微緊",
@@ -90,7 +91,22 @@ function renderTenSecPulse() {
     }
   ];
 
-  document.getElementById('tenSecPulseGrid').innerHTML = pulses.map((p, idx) => `
+  // 正常情況：六張卡由後端用官方 OpenAPI 即時資料產生 (backend/live_pulse.py)，隨每次同步更新
+  const live = STATE.home_pulse && Array.isArray(STATE.home_pulse.items) && STATE.home_pulse.items.length === 6 ? STATE.home_pulse : null;
+  const pulses = live ? live.items : staticPulses;
+  const grid = document.getElementById('tenSecPulseGrid');
+  let note = document.getElementById('pulseLiveNote');
+  if (!note) {
+    note = document.createElement('div');
+    note.id = 'pulseLiveNote';
+    note.style.cssText = 'font-size:12.5px; margin:8px 2px 0; color:var(--text-muted);';
+    grid.parentNode.insertBefore(note, grid.nextSibling);
+  }
+  note.textContent = live
+    ? `✅ 以上六張卡由官方即時資料自動產生（三大法人資料至 ${live.flows_through || '—'}；資料基準 ${STATE.generated_at || ''}）。點開可看算法、數字與資料日期。`
+    : '⚠️ 此快照沒有即時摘要，以下為 2026-11-21 前後手寫的靜態內容，不會隨資料更新。';
+
+  grid.innerHTML = pulses.map((p, idx) => `
     <div class="pulse-pill" onclick="openPulseDrawer(${idx})" style="border-left: 4px solid ${p.color};">
       <div class="pulse-q">${p.q}</div>
       <div class="pulse-a">${p.a}</div>
@@ -103,7 +119,7 @@ function renderTenSecPulse() {
 function openPulseDrawer(idx) {
   const p = window.__PULSE_DATA__[idx];
   const html = buildSixQuestionsHtml(p.q6[0], p.q6[1], p.q6[2], p.q6[3], p.q6[4], p.q6[5],
-    "資料來源：中央銀行(2026-09/10)、經濟部外銷訂單(2026-10)、公開資訊觀測站MOPS(1,989家10月營收)、臺灣證券交易所(2026-11-20)");
+    p.basis || "資料來源：中央銀行(2026-09/10)、經濟部外銷訂單(2026-10)、公開資訊觀測站MOPS(1,989家10月營收)、臺灣證券交易所(2026-11-20)（靜態內容，不隨資料更新）");
   openDrawer('<span class="badge badge-lvl4">10秒全局結論解讀</span>', p.a, p.q, html);
 }
 

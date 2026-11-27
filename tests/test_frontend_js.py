@@ -312,6 +312,75 @@ class TestSensitivityInExports(unittest.TestCase):
         self.assertEqual(len(header), len(set(header)))
 
 
+PULSE_DRIVER = r"""
+const fs = require('fs'), vm = require('vm');
+const code = fs.readFileSync(process.argv[1], 'utf8');
+function el() { return { innerHTML: '', textContent: '', style: {}, parentNode: { insertBefore(n) { els[n.id] = n; } }, nextSibling: null }; }
+const els = { tenSecPulseGrid: el() };
+const ctx = {
+  console, window: {},
+  document: { getElementById: id => els[id] || null, createElement: () => el() },
+  openDrawer(badge, title, sub, html) { ctx.__drawer = { badge, title, sub, html }; },
+  buildSixQuestionsHtml: (a, b, c, d, e, f, meta) => [a, b, c, d, e, f, meta].join('|'),
+  STATE: null,
+};
+vm.createContext(ctx);
+vm.runInContext(code + ';this.__f = { renderTenSecPulse, openPulseDrawer };', ctx);
+const mk = (n, tag) => ({ q: `Q${n}`, a: `A${n}${tag}`, sub: `S${n}`, color: '#fff', q6: ['a', 'b', 'c', 'd', 'e', 'f'], basis: `BASIS${n}` });
+const out = {};
+// 1. 有 home_pulse：用即時卡片，並顯示資料日期；抽屜頁尾用該卡的 basis
+ctx.STATE = { generated_at: 'G', home_pulse: { flows_through: '2026-11-27', items: [1, 2, 3, 4, 5, 6].map(n => mk(n, 'LIVE')) } };
+ctx.__f.renderTenSecPulse();
+out.liveGrid = els.tenSecPulseGrid.innerHTML;
+out.liveNote = els.pulseLiveNote.textContent;
+ctx.__f.openPulseDrawer(2);
+out.liveDrawer = ctx.__drawer.html;
+// 2. 沒有 home_pulse (舊快照)：退回靜態卡片，並明確警告不會更新
+ctx.STATE = { generated_at: 'G' };
+ctx.__f.renderTenSecPulse();
+out.staticGrid = els.tenSecPulseGrid.innerHTML;
+out.staticNote = els.pulseLiveNote.textContent;
+ctx.__f.openPulseDrawer(0);
+out.staticDrawer = ctx.__drawer.html;
+// 3. home_pulse 張數不對 (壞資料)：不採用，退回靜態
+ctx.STATE = { generated_at: 'G', home_pulse: { items: [mk(1, 'BAD')] } };
+ctx.__f.renderTenSecPulse();
+out.badGrid = els.tenSecPulseGrid.innerHTML;
+console.log(JSON.stringify(out));
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過首頁摘要渲染測試")
+class TestHomePulseRender(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", PULSE_DRIVER, os.path.join(JS_DIR, "04-overview.js")],
+                           capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    def test_live_cards_rendered_with_date_note(self):
+        self.assertEqual(self.o["liveGrid"].count("pulse-pill"), 6)
+        self.assertIn("A3LIVE", self.o["liveGrid"])
+        self.assertIn("2026-11-27", self.o["liveNote"])
+        self.assertIn("自動產生", self.o["liveNote"])
+
+    def test_live_drawer_uses_card_basis_not_static_sources(self):
+        self.assertIn("BASIS3", self.o["liveDrawer"])
+        self.assertNotIn("中央銀行(2026-09/10)", self.o["liveDrawer"])
+
+    def test_old_snapshot_falls_back_to_static_with_warning(self):
+        self.assertEqual(self.o["staticGrid"].count("pulse-pill"), 6)
+        self.assertNotIn("LIVE", self.o["staticGrid"])
+        self.assertIn("不會隨資料更新", self.o["staticNote"])
+        self.assertIn("不隨資料更新", self.o["staticDrawer"])
+
+    def test_malformed_home_pulse_is_ignored(self):
+        self.assertNotIn("BAD", self.o["badGrid"])
+        self.assertEqual(self.o["badGrid"].count("pulse-pill"), 6)
+
+
 class TestInlineHandlersDefined(unittest.TestCase):
     ALLOWED = {"alert", "confirm", "parseInt", "parseFloat", "String", "Number", "Boolean"}
 

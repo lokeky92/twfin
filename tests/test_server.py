@@ -67,6 +67,17 @@ class TestServerAPI(unittest.TestCase):
         # 只有種子資料、沒有即時擷取紀錄時必須明確標示
         self.assertFalse(data["data_provenance"]["live_data_available"])
 
+    def test_dashboard_has_live_home_pulse_that_degrades_without_live_data(self):
+        """首頁 Q1~Q6 由即時資料產生；只有種子資料時每張卡都要降級成「資料不足」，不可沿用手寫敘事。"""
+        _, body = self._get("/api/dashboard")
+        pulse = json.loads(body)["home_pulse"]
+        self.assertEqual(len(pulse["items"]), 6)
+        for item in pulse["items"]:
+            for key in ("q", "a", "sub", "color", "q6", "basis"):
+                self.assertIn(key, item)
+            self.assertEqual(len(item["q6"]), 6)
+        self.assertTrue(all("資料不足" in it["a"] for it in pulse["items"]))
+
     def test_static_assets_served(self):
         # index.html 引用的每一支腳本都必須能被伺服器取得 (拆檔後漏列或打錯檔名會在這裡失敗)
         import re
