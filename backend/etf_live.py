@@ -92,6 +92,13 @@ def compute_metrics(series):
     m["dd_from_high"] = round((last / hi - 1) * 100, 2)
     m["pos_1y"] = round((last - lo) / (hi - lo), 3) if hi > lo and len(win) >= MIN_DAYS_FOR_VOL else None
     m["window_days"] = len(win)
+    # 畫圖用的降採樣價格曲線：最近 (最多) 一年，約 52 個點 (含最後一天)；日期與收盤皆為官方逐日行情
+    tail = series[-TRADING_DAYS:]
+    step = max(1, -(-len(tail) // 52))            # 向上取整，使點數 ≤ 約 52
+    pts = tail[::step]
+    if pts[-1][0] != tail[-1][0]:
+        pts = pts + [tail[-1]]
+    m["curve"] = [[d, c] for d, c, _v, _t in pts]
     m["ma20"] = round(sum(closes[-20:]) / 20, 3) if n >= 20 else None
     m["ma60"] = round(sum(closes[-60:]) / 60, 3) if n >= 60 else None
     m["vs_ma60_pct"] = round((last / m["ma60"] - 1) * 100, 2) if m["ma60"] else None

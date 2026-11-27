@@ -185,6 +185,18 @@ class TestMetrics(unittest.TestCase):
         self.assertAlmostEqual(m["dd_from_high"], -20.0, places=2)
         self.assertAlmostEqual(m["pos_1y"], 0.0, places=3)
 
+    def test_curve_is_a_downsampled_copy_of_the_real_closes(self):
+        s = make_series(300, daily=0.001)
+        m = el.compute_metrics(s)
+        curve = m["curve"]
+        real = {d: c for d, c, _v, _t in s}
+        self.assertLessEqual(len(curve), 60)
+        self.assertGreaterEqual(len(curve), 40)
+        self.assertEqual(curve[-1][0], s[-1][0])                                   # 一定包含最後一個交易日
+        self.assertTrue(all(real[d] == c for d, c in curve))                       # 每個點都是真實的 (日期, 收盤)，不是內插值
+        self.assertEqual([d for d, _ in curve], sorted(d for d, _ in curve))
+        self.assertEqual(el.compute_metrics(make_series(10))["curve"][-1][0], make_series(10)[-1][0])   # 短歷史也不會出錯
+
     def test_short_history_returns_none_instead_of_guessing(self):
         m = el.compute_metrics(make_series(30))
         self.assertIsNone(m["ret_3m"])

@@ -319,7 +319,7 @@ function buildEtfCardHtml(e) {
           <!-- 3. 歷史績效曲線、波動與最大回撤、估值、資金流向、費用率、折溢價、追蹤誤差 -->
           <div style="background:#111a2e; padding:14px 16px; border-radius:10px; border:1px solid #2a3b5c;">
             <div style="font-size:15.5px; font-weight:800; color:#f8fafc; margin-bottom:6px;">
-              📈 歷史績效曲線（2021～2026 基期=100）與風險指標
+              ${e.live ? '📈 近 1 年價格走勢與風險指標' : '📈 績效示意曲線（由單一報酬數字內插，非實際走勢）與風險指標'}
             </div>
             ${e.live ? '' : buildInlinePerfMiniSvg(e)}
             ${etfLiveMetricsHtml(e)}

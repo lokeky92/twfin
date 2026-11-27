@@ -13,6 +13,19 @@ function etfLiveBadge(e) {
     ? '<span class="badge badge-grade-A" title="雙軌評分由官方逐日行情用公式即時計算">即時評分</span>'
     : '<span class="badge badge-grade-C" title="評分為 2026-11-21 前後手寫，不會隨資料更新">手寫評分</span>';
 }
+// 官方逐日收盤價的迷你走勢圖 (curve: [[日期, 收盤], ...]；正規化為起點 = 100)
+function etfSparkline(curve, w, h) {
+  if (!Array.isArray(curve) || curve.length < 2) return '';
+  w = w || 220; h = h || 44;
+  const base = curve[0][1];
+  const vals = curve.map(p => p[1] / base * 100);
+  const lo = Math.min(...vals), hi = Math.max(...vals), span = Math.max(1e-9, hi - lo);
+  const pts = vals.map((v, i) => `${(i / (vals.length - 1) * w).toFixed(1)},${(h - 3 - (v - lo) / span * (h - 6)).toFixed(1)}`).join(' ');
+  const up = vals[vals.length - 1] >= 100;
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:${w}px; height:${h}px; display:block; margin:4px 0;" role="img" aria-label="近 1 年價格走勢">
+    <polyline fill="none" stroke="${up ? '#34d399' : '#fb7185'}" stroke-width="2" points="${pts}"/></svg>`;
+}
+
 // 台股 ETF 由官方逐日行情算出的指標 (報酬為價格報酬，不含息)
 function etfLiveMetricsHtml(e) {
   const L = e.live;
@@ -21,6 +34,7 @@ function etfLiveMetricsHtml(e) {
   return `
     <div style="margin-top:10px; padding:10px 12px; border-radius:8px; background:rgba(6,78,59,0.22); border:1px solid rgba(52,211,153,0.35); font-size:13.5px; line-height:1.7;">
       <strong style="color:#34d399;">📡 即時指標（官方逐日行情，${esc(L.last_date)}；共 ${L.history_days} 個交易日資料）</strong><br/>
+      ${etfSparkline(L.curve)}<span style="font-size:12px; color:var(--text-secondary);">近 1 年實際價格走勢（官方逐日收盤，不含息；起點 = 100）</span><br/>
       價格報酬（不含息）：1 月 ${p(L.ret_1m)}｜3 月 ${p(L.ret_3m)}｜6 月 ${p(L.ret_6m)}｜1 年 ${p(L.ret_1y)}<br/>
       年化波動 ${fmtEtfPct(L.vol_ann, false, 1)}｜最大回撤 ${fmtEtfPct(L.mdd, false, 1)}｜距 1 年高點 ${fmtEtfPct(L.dd_from_high, true, 1)}｜Beta ${fmtEtfNum(L.beta, false, 2)}｜與加權指數相關 ${fmtEtfNum(L.corr_taiex, false, 2)}｜與 0050 相關 ${fmtEtfNum(L.corr_0050, false, 2)}<br/>
       外資+投信當日淨買賣 ${fmtEtfNum(L.insti_billion, true, 2)} 億元（占成交金額 ${fmtEtfPct(L.insti_ratio_pct, true, 2)}）｜20 日均成交值 ${fmtEtfNum(L.turnover_20d_billion, false, 2)} 億元
@@ -125,6 +139,7 @@ function renderEtfDecisionCenter() {
   // =====================================================================
   // 第一區：全球市場環境（台灣市場 / 美國市場 / 利率環境 / 全球資金流向）
   // =====================================================================
+  setSourceNote('etfSec1GlobalEnv', 'etfSec1Note', '⚠️ 下方「全球市場環境」四張卡是 2026-11-21 前後手寫的市場摘要（卡片標題已寫明資料基準日），沒有每日的官方來源，不會隨資料更新。');
   const sec1 = document.getElementById('etfSec1GlobalEnv');
   if (sec1) {
     sec1.innerHTML = `
@@ -191,52 +206,65 @@ function renderEtfDecisionCenter() {
   // =====================================================================
   const sec2 = document.getElementById('etfSec2DecisionSummary');
   if (sec2) {
-    const coreLong = etfs.filter(e => e.is_leveraged_or_inverse === 0 && e.total_score_a_long_term >= 84);
-    const dualFav = etfs.filter(e => e.is_leveraged_or_inverse === 0 && e.conclusion_b_short_mid === '條件相對有利' && e.total_score_a_long_term >= 78);
-    const divergeList = etfs.filter(e => e.is_leveraged_or_inverse === 0 && e.total_score_a_long_term >= 78 && e.conclusion_b_short_mid === '等待更佳條件');
-    const highRiskList = etfs.filter(e => e.is_leveraged_or_inverse === 1 || e.conclusion_b_short_mid === '風險偏高' || e.total_score_b_short_mid < 62);
+    // 台股 ETF 是官方逐日行情用公式即時計算 (score_source = 'live')，美股 ETF 是手寫評分：兩者尺度不同 (台股公式對大盤環境偏保守，
+    // 分數普遍較低)，混在同一個門檻下比較會讓美股全部「優先研究」、台股全部「高風險」，所以分來源各自呈現。
+    const isLive = e => e.score_source === 'live';
+    const nonLev = e => e.is_leveraged_or_inverse === 0;
+    const twAll = etfs.filter(isLive), usAll = etfs.filter(e => !isLive(e));
+    const twNon = twAll.filter(nonLev), usNon = usAll.filter(nonLev);
+    const byA = (a, b) => (b.total_score_a_long_term || 0) - (a.total_score_a_long_term || 0);
+    const byB = (a, b) => (b.total_score_b_short_mid || 0) - (a.total_score_b_short_mid || 0);
+
+    const twTopA = [...twNon].sort(byA).slice(0, 4);
+    const usCoreLong = usNon.filter(e => e.total_score_a_long_term >= 84);
+    const twTopB = [...twNon].sort(byB).slice(0, 4);
+    const twFav = twNon.filter(e => e.conclusion_b_short_mid === '條件相對有利');
+    const usFav = usNon.filter(e => e.conclusion_b_short_mid === '條件相對有利' && e.total_score_a_long_term >= 78);
+    const usDiverge = usNon.filter(e => e.total_score_a_long_term >= 78 && e.conclusion_b_short_mid === '等待更佳條件');
+    const twRisk = twAll.filter(e => e.is_leveraged_or_inverse === 1 || e.conclusion_b_short_mid === '風險偏高');
+    const usRisk = usAll.filter(e => e.is_leveraged_or_inverse === 1 || e.conclusion_b_short_mid === '風險偏高' || e.total_score_b_short_mid < 62);
 
     const makePill = (e, col) => `
-      <span class="etf-pill" style="--pill-col:${col};" onclick="jumpToEtfCard('${e.etf_code}')" title="${e.etf_code} ${e.etf_name}">
-        <b>${e.etf_code}</b><span>${e.etf_name}</span>
-      </span>
-    `;
+      <span class="etf-pill" style="--pill-col:${col};" onclick="jumpToEtfCard('${esc(e.etf_code)}')" title="${esc(e.etf_code)} ${esc(e.etf_name)}">
+        <b>${esc(e.etf_code)}</b><span>${esc(e.etf_name)}</span>
+      </span>`;
+    const row = (label, list, col, score) => `
+      <div style="margin-top:8px;">
+        <div style="font-size:13px; font-weight:700; color:#94a3b8; margin-bottom:4px;">${label}</div>
+        ${list.length ? list.map(e => makePill(e, col)).join('') : '<span style="font-size:13px; color:var(--text-secondary);">目前沒有符合條件的 ETF</span>'}
+      </div>`;
+    const TW = '🇹🇼 台股（即時公式評分）', US = '🇺🇸 美股（手寫評分，不會更新）';
+
+    setSourceNote('etfSec2DecisionSummary', 'etfSec2Note',
+      'ℹ️ 台股 ETF 的分數由官方逐日行情用公式即時計算，美股 ETF 是手寫評分；兩者的尺度與方法不同（台股公式的「大盤環境」子分數目前偏保守，整體分數較低），所以下方分開呈現，不用同一個門檻互相比較。');
 
     sec2.innerHTML = `
       <div class="etf-clean-card" style="border-left:5px solid #10b981;">
         <div style="font-size:16px; font-weight:800; color:#34d399;">【模型 A】長期配置環境（3～10年視角）</div>
-        <div class="etf-hero-num pos" style="margin:8px 0;">${coreLong.length} 檔核心配置首選</div>
-        <div style="font-size:15px; color:#cbd5e1; margin-bottom:10px;">
-          低費用率、高流動性、底層企業獲利穩健之台美大盤與高評級債券，長期配置價值（模型A &ge; 84分）最為突出：
-        </div>
-        <div>${coreLong.slice(0, 7).map(e => makePill(e, '#10b981')).join('')}</div>
+        <div class="etf-hero-num pos" style="margin:8px 0;">台股前 ${twTopA.length} 名・美股 ${usCoreLong.length} 檔高分</div>
+        ${row(TW + '：模型 A 分數最高', twTopA, '#10b981')}
+        ${row(US + '：模型 A ≥ 84 分', usCoreLong.slice(0, 7), '#10b981')}
       </div>
 
       <div class="etf-clean-card" style="border-left:5px solid #f59e0b;">
         <div style="font-size:16px; font-weight:800; color:#fbbf24;">【模型 B】短中期進場環境（長短線是否一致？）</div>
-        <div class="etf-hero-num" style="color:#fbbf24; margin:8px 0;">${dualFav.length} 檔一致順風 vs ${divergeList.length} 檔長短分歧</div>
-        <div style="font-size:15px; color:#cbd5e1; margin-bottom:8px;">
-          <strong>🟠 長短線分歧提醒：</strong>美股科技與半導體長期體質極佳，但受 11/20 費半重挫 -10.7% 與高估值影響，短期應等待止穩（分批布局優於單筆追高）：
-        </div>
-        <div>${divergeList.map(e => makePill(e, '#f59e0b')).join('')}</div>
+        <div class="etf-hero-num" style="color:#fbbf24; margin:8px 0;">台股 ${twFav.length} 檔順風・美股 ${usFav.length} 檔順風 / ${usDiverge.length} 檔分歧</div>
+        ${row(TW + '：模型 B 分數最高', twTopB, '#f59e0b')}
+        ${row(US + '：長期佳、短期等待', usDiverge, '#f59e0b')}
       </div>
 
       <div class="etf-clean-card" style="border-left:5px solid #10b981;">
-        <div style="font-size:16px; font-weight:800; color:#34d399;">🟢 目前值得優先研究的 ETF（長短線雙軌順風）</div>
-        <div class="etf-hero-num pos" style="margin:8px 0;">基本面＋資金流雙重支持</div>
-        <div style="font-size:15px; color:#cbd5e1; margin-bottom:10px;">
-          同時具備「模型 A 長期高分」與「模型 B 短中期條件相對有利」之台美核心市值、低波價值、金融與鎖利債券 ETF（點擊可跳轉卡片）：
-        </div>
-        <div>${dualFav.map(e => makePill(e, '#10b981')).join('')}</div>
+        <div style="font-size:16px; font-weight:800; color:#34d399;">🟢 短中期條件相對有利的 ETF</div>
+        <div class="etf-hero-num pos" style="margin:8px 0;">${twFav.length + usFav.length} 檔</div>
+        ${row(TW, twFav, '#10b981')}
+        ${row(US + '：長短線雙軌順風', usFav, '#10b981')}
       </div>
 
       <div class="etf-clean-card" style="border-left:5px solid #f43f5e;">
-        <div style="font-size:16px; font-weight:800; color:#fb7185;">🔴 目前需要注意風險的 ETF（高波動 / 折溢價 / 槓反）</div>
-        <div class="etf-hero-num neg" style="margin:8px 0;">${highRiskList.length} 檔高風險警示</div>
-        <div style="font-size:15px; color:#cbd5e1; margin-bottom:10px;">
-          包含單日暴跌 31% 之 3 倍槓桿 ETF、高利率受害之不動產 REITs、高費用主動式 ETF 與短期劇烈修正之半導體標的：
-        </div>
-        <div>${highRiskList.map(e => makePill(e, '#f43f5e')).join('')}</div>
+        <div style="font-size:16px; font-weight:800; color:#fb7185;">🔴 需要注意風險的 ETF（槓反 / 短中期環境偏弱）</div>
+        <div class="etf-hero-num neg" style="margin:8px 0;">台股 ${twRisk.length} 檔・美股 ${usRisk.length} 檔</div>
+        ${row(TW + '：槓桿型或模型 B 為「風險偏高」', twRisk, '#f43f5e')}
+        ${row(US, usRisk, '#f43f5e')}
       </div>
     `;
   }
@@ -244,6 +272,7 @@ function renderEtfDecisionCenter() {
   // =====================================================================
   // 第四區：AI 白話市場解讀（無艱深術語，一眼看懂四大核心問題）
   // =====================================================================
+  setSourceNote('etfSec4AiPlainGrid', 'etfSec4Note', '⚠️ 下方四則白話解讀是 2026-11-21 前後手寫的文章，引用當時的市場數字與美股手寫評分，不會隨資料更新。');
   const sec4 = document.getElementById('etfSec4AiPlainGrid');
   if (sec4) {
     sec4.innerHTML = `

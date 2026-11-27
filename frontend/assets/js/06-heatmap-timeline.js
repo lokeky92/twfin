@@ -100,7 +100,7 @@ function renderIndustryHeatmap(overrideMap = {}) {
     const compNames = sec.focusTicker || (sec.representative_companies || []).slice(0, 2).map(c => `${c.ticker} ${c.name}`).join('、');
 
     const lm = sec.live_metrics || null;
-    const isLive = sec.score_source === 'live' && lm;
+    const isLive = !!lm;      // 有即時指標就用 (未評分的產業仍有即時營收與相對強弱，不可顯示手寫的舊數字)
     const sgn = (v) => (v === null || v === undefined || Number.isNaN(v)) ? 'N/A' : (v >= 0 ? '+' : '') + v + '%';
     const cls = (v) => (v === null || v === undefined || v >= 0) ? 'pos' : 'neg';
     const yoyVal = isLive ? (lm.yoy === null ? null : Math.round(lm.yoy * 10) / 10) : sec.rev_yoy_pct;

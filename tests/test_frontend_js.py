@@ -852,6 +852,191 @@ console.log(JSON.stringify({
         self.assertNotIn("<b>", self.o["escaped"])
 
 
+ETF_CHARTS_DRIVER = r"""
+const fs = require('fs'), vm = require('vm'), path = require('path');
+const dir = process.argv[1];
+const stubs = {};
+function el(id) {
+  return stubs[id] || (stubs[id] = { id, innerHTML: '', textContent: '', style: {}, value: 'ALL', tagName: 'DIV', options: [], children: [], dataset: {},
+    classList: { add() {}, remove() {}, toggle() {}, contains: () => false }, appendChild() {}, addEventListener() {}, setAttribute() {}, getAttribute: () => null,
+    querySelectorAll: () => [], parentNode: { insertBefore(n) { stubs[n.id] = n; } } });
+}
+const ctx = { console, window: {}, localStorage: { getItem: () => null, setItem() {} }, alert() {},
+  document: { getElementById: el, createElement: () => ({ style: {}, classList: { add() {} } }), querySelectorAll: () => [], addEventListener() {} } };
+vm.createContext(ctx);
+for (const f of ['01-core.js', '09-etf-center.js', '10-etf-proposal-helpers.js', '11-etf-lists.js', '12-etf-charts.js', '13-etf-compare.js', '14-etf-portfolio.js', '15-etf-reports.js'])
+  vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), ctx, { filename: f });
+const run = c => vm.runInContext(c, ctx);
+
+const mk = (code, market, src, extra) => Object.assign({ etf_code: code, etf_name: code + '名<i>', listing_market: market, score_source: src, is_leveraged_or_inverse: 0,
+  total_score_a_long_term: 60, total_score_b_short_mid: 40, conclusion_a_long_term: '條件普通', conclusion_b_short_mid: '風險偏高',
+  primary_net_flow_value: null, return_1y_total_pct: null, twd_adjusted_1y_return_pct: null, annualized_volatility_pct: null, live: null }, extra || {});
+const curve = (start, n, step) => Array.from({ length: n }, (_, i) => [`2026-0${1 + Math.floor(i / 10)}-${String(1 + (i % 10) * 2).padStart(2, '0')}`, start + i * step]);
+ctx.__etfs = [
+  mk('0050', 'TW', 'live', { live: { curve: curve(100, 30, 1), history_days: 260 }, total_score_a_long_term: 63.1, total_score_b_short_mid: 43.7 }),
+  mk('0056', 'TW', 'live', { live: { curve: curve(50, 30, -0.5), history_days: 260 }, total_score_a_long_term: 69.2, total_score_b_short_mid: 37.8 }),
+  mk('00631L', 'TW', 'live', { is_leveraged_or_inverse: 1, live: { curve: curve(10, 30, 0.1), history_days: 260 } }),
+  mk('VOO', 'US', 'seed', { total_score_a_long_term: 91.9, total_score_b_short_mid: 68.8, conclusion_b_short_mid: '持續觀察', primary_net_flow_value: 68.5,
+    return_1y_total_pct: 28.4, annualized_volatility_pct: 14.6 }),
+  mk('SMH', 'US', 'seed', { total_score_a_long_term: 74.6, total_score_b_short_mid: 57, conclusion_b_short_mid: '等待更佳條件', primary_net_flow_value: -14.5,
+    return_1y_total_pct: 44.5, annualized_volatility_pct: 32.4 }),
+];
+const out = {};
+run("STATE = { etf_center: { etfs: __etfs } }");
+
+// 圖 4：只畫真實走勢
+run("ETF_PERF_HORIZON = '1Y'; renderChart4PerfCurve()");
+out.c4 = el('etfChart4PerfCurveBox').innerHTML;
+run("ETF_PERF_HORIZON = '3Y'; renderChart4PerfCurve()");
+out.c43y = el('etfChart4PerfCurveBox').innerHTML;
+run("ETF_PERF_HORIZON = '1Y'");
+
+// 圖 7：沒有數字的不可畫成 0
+run("renderChart7RiskReturn()");
+out.c7 = el('etfChart7ScatterBox').innerHTML; out.c7note = el('etfChart7Note').textContent;
+
+// 圖 1：沒有申贖數字的不可畫成 0
+run("renderChart1Flows()");
+out.c1 = el('etfChart1FlowsBox').innerHTML; out.c1note = el('etfChart1Note').textContent;
+
+// 圖 2 / 3：依分數來源分開排名
+run("renderChart2And3Scores()");
+out.c2 = el('etfChart2LongScoreBox').innerHTML; out.c3 = el('etfChart3ShortScoreBox').innerHTML;
+
+// 決策摘要：依來源分開 (其餘區塊的渲染函式換成空函式，只驗證這裡要測的部分；圖表函式上面已單獨執行過)
+for (const fn of ['renderEtfLists', 'renderChart1Flows', 'renderChart2And3Scores', 'renderChart4PerfCurve', 'renderChart5HoldingsDist',
+                  'renderEtfComparator', 'renderChart7RiskReturn', 'renderUserPortfolioAnalysis', 'renderEtfReportsAndBacktests', 'renderArgonMultiAgentCenter']) {
+  run(`${fn} = function () {}`);
+}
+run("renderEtfDecisionCenter()");
+out.sec2 = el('etfSec2DecisionSummary').innerHTML; out.sec2note = el('etfSec2Note').textContent;
+out.sec1note = el('etfSec1Note').textContent; out.sec4note = el('etfSec4Note').textContent;
+out.spark = run("etfSparkline([['2026-01-02', 100], ['2026-01-03', 110], ['2026-01-04', 105]])");
+out.sparkEmpty = run("etfSparkline([['2026-01-02', 100]])");
+console.log(JSON.stringify(out));
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過 ETF 圖表執行測試")
+class TestEtfChartsExecute(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", ETF_CHARTS_DRIVER, JS_DIR], capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    def test_performance_chart_draws_only_real_curves(self):
+        c4 = self.o["c4"]
+        self.assertEqual(c4.count("<polyline"), 2)                       # 0050、0056 有真實走勢；槓桿型不在比較清單；美股沒有官方歷史，不畫
+        self.assertNotIn("00631L", c4)
+        self.assertNotIn("VOO", c4)
+        self.assertNotIn("SMH", c4)
+        self.assertIn("自 01-01", c4)                                    # 標明走勢起點
+        self.assertIn("沒有 3 年或 5 年的實際走勢", self.o["c43y"])        # 3Y/5Y 不外推
+        self.assertNotIn("<polyline", self.o["c43y"])
+
+    def test_scatter_and_flow_charts_skip_missing_numbers(self):
+        for key in ("c7", "c1"):
+            self.assertNotIn("NaN", self.o[key])
+            self.assertNotIn("null", self.o[key])
+        self.assertIn("VOO", self.o["c7"])
+        self.assertNotIn("0050", self.o["c7"])                           # 台股沒有含息報酬 → 未畫入，而不是畫在 0%
+        self.assertIn("未畫入", self.o["c7note"])
+        self.assertIn("VOO", self.o["c1"])
+        self.assertNotIn("0050", self.o["c1"])
+        self.assertIn("未畫入", self.o["c1note"])
+
+    def test_rankings_are_split_by_score_source_and_escape_names(self):
+        for key in ("c2", "c3"):
+            h = self.o[key]
+            self.assertIn("台股（即時評分）", h)
+            self.assertIn("美股（手寫評分", h)
+            self.assertLess(h.index("台股（即時評分）"), h.index("美股（手寫評分"))
+            self.assertNotIn("<i>", h)
+            self.assertIn("&lt;i&gt;", h)
+        a = self.o["c2"]
+        tw, us = a.split("美股（手寫評分")[0], a.split("美股（手寫評分")[1]
+        self.assertIn("0056", tw)
+        self.assertNotIn("VOO", tw)                                      # 美股不會混進台股的排名
+        self.assertIn("VOO", us)
+        self.assertNotIn("00631L", a)                                    # 長期配置排名不含槓桿型
+
+    def test_decision_summary_never_compares_the_two_score_scales(self):
+        h = self.o["sec2"]
+        self.assertIn("台股（即時公式評分）", h)
+        self.assertIn("美股（手寫評分，不會更新）", h)
+        self.assertNotIn("11/20 費半", h)                                # 手寫的事件敘述已移除
+        self.assertNotIn("<i>", h)
+        self.assertIn("分開呈現", self.o["sec2note"])
+        self.assertIn("手寫", self.o["sec1note"])
+        self.assertIn("手寫", self.o["sec4note"])
+
+    def test_sparkline(self):
+        self.assertIn("<polyline", self.o["spark"])
+        self.assertEqual(self.o["sparkEmpty"], "")
+
+
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過桑基圖標籤與未評分方塊測試")
+class TestSankeyLabelsAndUnscoredTiles(unittest.TestCase):
+    DRIVER = r"""
+const fs = require('fs'), vm = require('vm'), path = require('path');
+const dir = process.argv[1];
+const stubs = {};
+function el(id) {
+  return stubs[id] || (stubs[id] = { id, innerHTML: '', textContent: '', style: {}, value: '5', classList: { toggle() {} }, parentNode: { insertBefore(n) { stubs[n.id] = n; } }, setAttribute() {} });
+}
+const ctx = { console, window: {}, sessionStorage: { getItem: () => null, setItem() {} },
+  document: { getElementById: el, createElement: () => ({ style: {} }), querySelectorAll: () => [] } };
+vm.createContext(ctx);
+for (const f of ['01-core.js', '06-heatmap-timeline.js', '23-live-sankey.js']) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), ctx, { filename: f });
+const run = c => vm.runInContext(c, ctx);
+const out = {};
+
+// 桑基圖：一個大產業 + 八個極小的產業 (節點很矮，標籤原本會疊在一起)
+const inds = [{ id: 'BIG', name: '大產業', flows: { foreign: -100, itc: 0, dealer: 0 }, net: -100, buy: 0, sell: 100, turnover: 1, coverage: 1, companies: 9 }];
+for (let k = 0; k < 8; k++) inds.unshift({ id: 'S' + k, name: '小' + k, flows: { foreign: 0.5 + k * 0.1, itc: 0, dealer: 0 }, net: 0.5, buy: 0.5, sell: 0, turnover: 1, coverage: 1, companies: 9 });
+ctx.__ls = { available: true, as_of: '2026-11-27', unit: '億元', note: 'n',
+  institutions: [{ key: 'foreign', label: '外資', buy: 6, sell: 100, net: -94 }, { key: 'itc', label: '投信', buy: 0, sell: 0, net: 0 }, { key: 'dealer', label: '自營商', buy: 0, sell: 0, net: 0 }], industries: inds };
+run("STATE = { live_sankey: __ls }; renderLiveSankey()");
+const svg = el('liveSankeyContainer').innerHTML;
+out.labelYs = [...svg.matchAll(/<text x="5\d\d(?:\.\d+)?" y="([\d.]+)" font-size="12.5"/g)].map(m => +m[1]);
+out.viewH = +svg.match(/viewBox="0 0 \d+ (\d+)"/)[1];
+
+// 熱度圖：未評分的產業 (score_source = seed) 仍有即時營收與相對強弱 → 不可顯示手寫的舊數字
+ctx.__inds = [{ industry_id: 'IND_BIO_RETAIL', industry_name: '生技', total_weighted_score: null, rotation_state: 'INSUFFICIENT_DATA', score_source: 'seed',
+  rev_yoy_pct: 8.4, rel_strength_20d: 0.5, rel_strength_60d: null, as_of_date: '2026-11-21', representative_companies: [], live_agg: {},
+  live_metrics: { yoy: 58.9, rs_pct: -6.62, rs_days: 6, foreign_billion: 0, itc_billion: 0, dealer_billion: 0, inst_net_billion: 0, inst_ratio_pct: 0, price_coverage: 1, companies: 497, turnover_billion: 1 } }];
+run("STATE = { industries: __inds, live_top_companies: [{ data_ym: '11510' }] }; renderIndustryHeatmap()");
+const tile = el('industryHeatmapGrid').innerHTML.split('class="heat-tile').find(t => t.includes('生技醫療')) || '';
+out.tile = tile;
+console.log(JSON.stringify(out));
+"""
+
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", cls.DRIVER, JS_DIR], capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    def test_industry_labels_never_overlap(self):
+        ys = self.o["labelYs"]
+        self.assertEqual(len(ys), 9)
+        for a, b in zip(ys, ys[1:]):
+            self.assertGreaterEqual(b - a, 14.9, "標籤垂直間距不足，會互相重疊")
+        self.assertGreater(self.o["viewH"], ys[-1])               # 畫布高度要容納被往下推的最後一個標籤
+
+    def test_unscored_tile_shows_live_numbers_not_handwritten_ones(self):
+        t = self.o["tile"]
+        self.assertIn("+58.9%", t)                                 # 即時營收年增，不是手寫的 +8.4%
+        self.assertNotIn("+8.4%", t)
+        self.assertIn("近 6 日相對大盤", t)
+        self.assertNotIn("20 日相對強弱", t)
+        self.assertNotIn("+0.5%", t)
+        self.assertIn("觀察中", t)                                  # 仍然不評分
+
+
 class TestInlineHandlersDefined(unittest.TestCase):
     ALLOWED = {"alert", "confirm", "parseInt", "parseFloat", "String", "Number", "Boolean"}
 

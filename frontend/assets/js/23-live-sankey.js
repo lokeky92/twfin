@@ -54,7 +54,7 @@ function renderLiveSankey() {
   const XL = 190, XM = 505, XR = 820;                  // 左／中／右欄節點的左緣
   const grossInd = inds.map(r => r.buy + r.sell);
   const colTotals = [inst.reduce((a, i) => a + i.buy, 0), grossInd.reduce((a, b) => a + b, 0), inst.reduce((a, i) => a + i.sell, 0)];
-  const H = Math.max(420, inds.length * 34 + PAD_T * 2);
+  let H = Math.max(420, inds.length * 34 + PAD_T * 2);
   const usable = H - PAD_T * 2 - GAP * Math.max(inds.length - 1, 0);
   const k = usable / Math.max(colTotals[1], 1e-9);     // 每 1 億元對應的像素高度 (以中欄為準，三欄共用同一比例)
 
@@ -119,10 +119,21 @@ function renderLiveSankey() {
     labels += `<text x="${XL - 8}" y="${L.y + L.h / 2 + 4}" text-anchor="end" font-size="13" font-weight="700" fill="#e2e8f0">${esc(i.label)} 買超 ${liveSankeyFmt(i.buy, 0)} 億</text>`;
     labels += `<text x="${XR + NODE_W + 8}" y="${R.y + R.h / 2 + 4}" text-anchor="start" font-size="13" font-weight="700" fill="#e2e8f0">${esc(i.label)} 賣超 ${liveSankeyFmt(-i.sell, 0)} 億</text>`;
   });
+  // 小產業的節點很矮，標籤會互相疊在一起：由上往下排，每個標籤與上一個至少相隔 LABEL_PITCH，偏離節點時畫細線連回節點
+  const LABEL_PITCH = 15;
+  let prevLabel = -Infinity;
+  indNodes.forEach(n => {
+    const center = n.y + Math.max(n.h, 14) / 2 + 4;
+    n.labelY = Math.max(center, prevLabel + LABEL_PITCH);
+    prevLabel = n.labelY;
+  });
+  H = Math.max(H, prevLabel + 14);
   indNodes.forEach(n => {
     const netCol = n.r.net >= 0 ? '#34d399' : '#fb7185';
     nodes += `<rect class="ls-node" data-ind="${esc(n.r.id)}" x="${XM}" y="${n.y}" width="${NODE_W}" height="${n.h}" rx="2" fill="${netCol}" style="cursor:pointer" onclick="openIndustryByCode('${esc(n.r.id)}')" onmouseenter="liveSankeyHighlight('${esc(n.r.id)}')" onmouseleave="liveSankeyHighlight(null)"><title>${esc(shortIndustryName(n.r.name))}：淨 ${liveSankeyFmt(n.r.net)} 億（買超 ${liveSankeyFmt(n.r.buy)}／賣超 ${liveSankeyFmt(-n.r.sell)}）｜成交值 ${n.r.turnover.toLocaleString()} 億｜收盤價覆蓋率 ${Math.round(n.r.coverage * 100)}%</title></rect>`;
-    labels += `<text x="${XM + NODE_W + 8}" y="${n.y + Math.max(n.h, 14) / 2 + 4}" font-size="12.5" fill="#cbd5e1" style="cursor:pointer" onclick="openIndustryByCode('${esc(n.r.id)}')">${esc(shortIndustryName(n.r.name))} <tspan fill="${netCol}" font-weight="700">${liveSankeyFmt(n.r.net)}</tspan></text>`;
+    const mid = n.y + n.h / 2;
+    if (Math.abs(n.labelY - 4 - mid) > 5) labels += `<line x1="${XM + NODE_W}" y1="${mid.toFixed(1)}" x2="${XM + NODE_W + 6}" y2="${(n.labelY - 4).toFixed(1)}" stroke="#64748b" stroke-width="0.7"/>`;
+    labels += `<text x="${XM + NODE_W + 8}" y="${n.labelY}" font-size="12.5" fill="#cbd5e1" style="cursor:pointer" onclick="openIndustryByCode('${esc(n.r.id)}')">${esc(shortIndustryName(n.r.name))} <tspan fill="${netCol}" font-weight="700">${liveSankeyFmt(n.r.net)}</tspan></text>`;
   });
 
   box.innerHTML = `
