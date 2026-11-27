@@ -6739,6 +6739,8 @@ function saveMultiAgentLocalOverrides() {
 }
 
 function runCloudClientMultiAgentSession(topic) {
+  // 後端已用即時資料產生真實稽核時，瀏覽器端不可再用 generated_at 拼出假的「即時研究」覆蓋它
+  if (STATE && STATE.multi_agent_center && STATE.multi_agent_center.origin === 'live_audit') return false;
   const prev = (STATE && STATE.multi_agent_center) ? JSON.parse(JSON.stringify(STATE.multi_agent_center)) : {};
   const now = new Date();
   const pad = (n) => String(n).padStart(2, '0');
@@ -6775,6 +6777,7 @@ function runCloudClientMultiAgentSession(topic) {
   prev.phase2_independent_reports = reports;
   STATE.multi_agent_center = prev;
   saveMultiAgentLocalOverrides();
+  return true;
 }
 
 async function triggerNewMultiAgentSession() {
@@ -6796,7 +6799,10 @@ async function triggerNewMultiAgentSession() {
     }
     throw new Error('Unexpected payload');
   } catch (e) {
-    runCloudClientMultiAgentSession(topic);
+    if (!runCloudClientMultiAgentSession(topic)) {
+      alert(`ℹ️ 目前顯示的是後端在每次同步時以即時資料產生的稽核（${STATE.multi_agent_center.session_id}）。此環境沒有後端 API，無法在瀏覽器內重新稽核；下一次排程同步 (台灣時間每個交易日約 16:30 與 20:00) 會自動產生新的稽核。`);
+      return;
+    }
     renderArgonMultiAgentCenter();
     switchMultiAgentTab('DEBATE');
     alert(`✅ 已於雲端互動模式完成新一輪 6 位 Agent 即時研究（${STATE.multi_agent_center.session_id}）！研究結果已自動保存並切換至「② 研究討論室」。`);
@@ -6891,24 +6897,27 @@ function renderArgonMultiAgentCenter() {
   const approvedCount = proposals.filter(p => p.status === 'APPROVED_BY_USER' || p.status === 'IMPLEMENTED_ON_BRANCH').length;
   const reportsObj = ma.phase2_independent_reports || {};
   const agentsMeta = [
-    { id: 'AGENT_01', icon: '🏛️', color: '#10b981', desc: '長期配置適配度、TER 費用、追蹤誤差、54C 配息拆解與美股 30% 稅損' },
-    { id: 'AGENT_02', icon: '🌊', color: '#38bdf8', desc: '初級市場申贖流向、價量背離、短期(1~3M) vs 中期(3~12M)時機分離' },
-    { id: 'AGENT_03', icon: '🔍', color: '#a855f7', desc: '資料過期 SLA、缺漏值禁止外推、TWSE/TPEx 一致性與台美跨時區校驗' },
-    { id: 'AGENT_04', icon: '🛡️', color: '#f59e0b', desc: '跨國持股重疊 (2330/TSM)、USD/TWD 匯率、長債存續期與流動性價差' },
-    { id: 'AGENT_05', icon: '⚡', color: '#f43f5e', desc: '專職反方審查：拆解隱含假設、找出推翻反例、防止過度擬合與盲目共識' },
-    { id: 'AGENT_06', icon: '⚙️', color: '#34d399', desc: '程式碼品質、消除重複 API 請求、UI/UX 可讀性與自動化單元測試套件' }
+    { id: 'AGENT_01', icon: '🏛️', color: '#10b981', desc: 'ETF 模型 A 的覆蓋與缺資料、持股集中度、分數區辨力、美股 ETF 是否仍為手寫評分' },
+    { id: 'AGENT_02', icon: '🌊', color: '#38bdf8', desc: '大盤狀態 (相對 60 日均線與波動)、價格與法人買賣背離、模型 B 的結構性限制' },
+    { id: 'AGENT_03', icon: '🔍', color: '#a855f7', desc: '七項法定稽核：來源新鮮度、歷史完整度、官方與彙總一致性、缺漏值不偽造、手寫比例、重複列' },
+    { id: 'AGENT_04', icon: '🛡️', color: '#f59e0b', desc: '槓桿型占成交值比重、與 0050 高度相關的重複配置、前十大持股重疊、買賣價差' },
+    { id: 'AGENT_05', icon: '⚡', color: '#f43f5e', desc: '專職反方：回測是否成熟、百分位評分的人為效應、分數與資金方向相反、畫面上仍有的手寫內容' },
+    { id: 'AGENT_06', icon: '⚙️', color: '#34d399', desc: '同步與擷取健康度、歷史回補進度、資料庫大小、後端程式規模' }
   ];
 
   // 1. 子頁面 ①：團隊總覽
   const ov = document.getElementById('maPanel_OVERVIEW');
   if (ov) {
-    ov.innerHTML = `
+    const origin = ma.origin === 'live_audit'
+      ? `<div class="callout" style="margin-bottom:14px; --callout-col:var(--accent-emerald);">✅ <strong>即時稽核</strong>：本頁研究由後端在每次同步時，以規則檢查目前真實的系統狀態（唯讀資料庫）產生，每個發現都附數字證據，稽核時間 ${esc(ma.started_at)}。這是「規則式稽核」，不是語言模型在思考：只能發現規則寫得出來的問題，各項門檻是人工設定的經驗值。提案需人工批准，系統不會自動修改任何程式。</div>`
+      : `<div class="callout" style="margin-bottom:14px; --callout-col:var(--accent-orange);">⚠️ <strong>手寫的研究記錄</strong>（${esc(ma.session_id)}）：這是 2026-11-22 前後預先寫好的報告，其中提到的程式缺陷多數後來已修正，內容已過時，不會隨資料更新。</div>`;
+    ov.innerHTML = origin + `
       <div class="etf-grid-4" style="margin-bottom:20px;">
         <div class="etf-clean-card" style="border-top:4px solid #a855f7;">
           <div style="font-size:15px; color:#94a3b8; font-weight:700;">👑 總指揮與研究狀態</div>
           <div class="etf-hero-num" style="color:#c084fc; margin:8px 0;">Argon 總指揮</div>
           <div style="font-size:15px; color:#f8fafc;">進度：<strong>Phase 1～6 全部完成</strong></div>
-          <div style="font-size:14px; color:#94a3b8; margin-top:4px;">Session：${ma.session_id}</div>
+          <div style="font-size:14px; color:#94a3b8; margin-top:4px;">Session：${esc(ma.session_id)}</div>
         </div>
         <div class="etf-clean-card" style="border-top:4px solid #38bdf8;">
           <div style="font-size:15px; color:#94a3b8; font-weight:700;">📋 目前研究主題</div>
@@ -6991,7 +7000,7 @@ function renderArgonMultiAgentCenter() {
             <div class="etf-clean-card" style="border-top:4px solid ${m.color};">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
                 <span style="font-size:19px; font-weight:700; color:#fff;">${m.icon} ${rpt.agent_name || m.id}</span>
-                <span class="badge badge-grade-B">${rpt.data_timestamp_used || '2026-11-20'}</span>
+                <span class="badge badge-grade-B">${esc(rpt.data_timestamp_used || '')}</span>
               </div>
 
               <div class="evidence-box" style="border-left-color:${m.color}; white-space:pre-line;">
@@ -7000,23 +7009,23 @@ function renderArgonMultiAgentCenter() {
 
               ${revByMe ? `
                 <div class="evidence-box invalid" style="white-space:pre-line;">
-                  <strong>【Phase 3 交叉審查 (${revByMe.target_agent_id})｜${revByMe.review_stance}】</strong><br/>${revByMe.comment}
+                  <strong>【Phase 3 交叉審查 (${esc(revByMe.target_agent_id)})｜${esc(revByMe.review_stance)}】</strong><br/>${esc(revByMe.comment)}
                 </div>
               ` : ''}
 
               ${criticBlocks ? `
                 <div class="evidence-box counter" style="white-space:pre-line;">
                   <strong>⚡ 反方四項強制標記：</strong><br/>
-                  • <strong>支持證據：</strong>${criticBlocks.supporting_evidence}<br/>
-                  • <strong>反對證據與反例：</strong>${criticBlocks.counter_evidence}<br/>
-                  • <strong>尚未驗證的假設：</strong>${criticBlocks.unverified_assumptions}<br/>
-                  • <strong>無法確認的部分：</strong>${criticBlocks.unverifiable_or_missing_data}
+                  • <strong>支持證據：</strong>${esc(criticBlocks.supporting_evidence)}<br/>
+                  • <strong>反對證據與反例：</strong>${esc(criticBlocks.counter_evidence)}<br/>
+                  • <strong>尚未驗證的假設：</strong>${esc(criticBlocks.unverified_assumptions)}<br/>
+                  • <strong>無法確認的部分：</strong>${esc(criticBlocks.unverifiable_or_missing_data)}
                 </div>
               ` : ''}
 
               ${rebByMe ? `
                 <div class="evidence-box" style="border-left-color:#34d399; white-space:pre-line;">
-                  <strong>【Phase 4 第二輪辯論最終立場：${rebByMe.decision}】</strong><br/>${esc(rebByMe.reason)}
+                  <strong>【Phase 4 第二輪辯論最終立場：${esc(rebByMe.decision)}】</strong><br/>${esc(rebByMe.reason)}
                 </div>
               ` : ''}
             </div>
