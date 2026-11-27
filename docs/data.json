@@ -1,15 +1,15 @@
 {
- "generated_at": "2026-11-27 23:02:24 (UTC+8)",
+ "generated_at": "2026-11-27 23:06:27 (UTC+8)",
  "data_provenance": {
   "live_data_available": true,
-  "last_live_ingestion": "2026-11-27T23:02:24+08:00",
+  "last_live_ingestion": "2026-11-27T23:06:27+08:00",
   "source_status": [
    {
     "source_key": "bfi82u",
     "label": "三大法人買賣金額統計 (BFI82U)",
     "status": "OK",
-    "last_attempt_at": "2026-11-27T22:58:25+08:00",
-    "last_success_at": "2026-11-27T22:58:25+08:00",
+    "last_attempt_at": "2026-11-27T23:05:03+08:00",
+    "last_success_at": "2026-11-27T23:05:03+08:00",
     "data_date": "2026-11-27",
     "record_count": 6,
     "prev_record_count": 6,
@@ -19,8 +19,8 @@
     "source_key": "mi_index",
     "label": "大盤與類股指數 (MI_INDEX)",
     "status": "OK",
-    "last_attempt_at": "2026-11-27T22:58:25+08:00",
-    "last_success_at": "2026-11-27T22:58:25+08:00",
+    "last_attempt_at": "2026-11-27T23:05:03+08:00",
+    "last_success_at": "2026-11-27T23:05:03+08:00",
     "data_date": "1151126",
     "record_count": 267,
     "prev_record_count": 267,
@@ -30,8 +30,8 @@
     "source_key": "tpex_3i",
     "label": "上櫃三大法人個股買賣超",
     "status": "OK",
-    "last_attempt_at": "2026-11-27T22:58:25+08:00",
-    "last_success_at": "2026-11-27T22:58:25+08:00",
+    "last_attempt_at": "2026-11-27T23:05:03+08:00",
+    "last_success_at": "2026-11-27T23:05:03+08:00",
     "data_date": "20261127",
     "record_count": 872,
     "prev_record_count": 872,
@@ -41,8 +41,8 @@
     "source_key": "tpex_pe",
     "label": "上櫃本益比/股價淨值比",
     "status": "OK",
-    "last_attempt_at": "2026-11-27T22:58:25+08:00",
-    "last_success_at": "2026-11-27T22:58:25+08:00",
+    "last_attempt_at": "2026-11-27T23:05:03+08:00",
+    "last_success_at": "2026-11-27T23:05:03+08:00",
     "data_date": "1151127",
     "record_count": 895,
     "prev_record_count": 895,
@@ -52,8 +52,8 @@
     "source_key": "tpex_quotes",
     "label": "上櫃個股每日收盤行情",
     "status": "OK",
-    "last_attempt_at": "2026-11-27T22:58:25+08:00",
-    "last_success_at": "2026-11-27T22:58:25+08:00",
+    "last_attempt_at": "2026-11-27T23:05:03+08:00",
+    "last_success_at": "2026-11-27T23:05:03+08:00",
     "data_date": "2026-11-27",
     "record_count": 3576,
     "prev_record_count": 3576,
@@ -63,8 +63,8 @@
     "source_key": "tpex_rev",
     "label": "上櫃公司月營收 (MOPS t187ap05_O)",
     "status": "OK",
-    "last_attempt_at": "2026-11-27T22:58:25+08:00",
-    "last_success_at": "2026-11-27T22:58:25+08:00",
+    "last_attempt_at": "2026-11-27T23:05:03+08:00",
+    "last_success_at": "2026-11-27T23:05:03+08:00",
     "data_date": "2026-10",
     "record_count": 898,
     "prev_record_count": 898,
@@ -74,8 +74,8 @@
     "source_key": "twse_pe",
     "label": "上市本益比/股價淨值比 (BWIBBU_ALL)",
     "status": "OK",
-    "last_attempt_at": "2026-11-27T22:58:25+08:00",
-    "last_success_at": "2026-11-27T22:58:25+08:00",
+    "last_attempt_at": "2026-11-27T23:05:03+08:00",
+    "last_success_at": "2026-11-27T23:05:03+08:00",
     "data_date": "1151126",
     "record_count": 1088,
     "prev_record_count": 1088,
@@ -85,8 +85,8 @@
     "source_key": "twse_quotes",
     "label": "上市個股每日收盤行情 (MI_INDEX ALLBUT0999)",
     "status": "OK",
-    "last_attempt_at": "2026-11-27T22:58:25+08:00",
-    "last_success_at": "2026-11-27T22:58:25+08:00",
+    "last_attempt_at": "2026-11-27T23:05:03+08:00",
+    "last_success_at": "2026-11-27T23:05:03+08:00",
     "data_date": "2026-11-27",
     "record_count": 1384,
     "prev_record_count": 1384,
@@ -96,8 +96,8 @@
     "source_key": "twse_rev",
     "label": "上市公司月營收 (MOPS t187ap05_L)",
     "status": "OK",
-    "last_attempt_at": "2026-11-27T22:58:25+08:00",
-    "last_success_at": "2026-11-27T22:58:25+08:00",
+    "last_attempt_at": "2026-11-27T23:05:03+08:00",
+    "last_success_at": "2026-11-27T23:05:03+08:00",
     "data_date": "2026-10",
     "record_count": 1091,
     "prev_record_count": 1091,
@@ -107,8 +107,8 @@
     "source_key": "twse_t86",
     "label": "上市三大法人個股買賣超 (T86)",
     "status": "OK",
-    "last_attempt_at": "2026-11-27T22:58:25+08:00",
-    "last_success_at": "2026-11-27T22:58:25+08:00",
+    "last_attempt_at": "2026-11-27T23:05:03+08:00",
+    "last_success_at": "2026-11-27T23:05:03+08:00",
     "data_date": "20261127",
     "record_count": 1359,
     "prev_record_count": 1359,
@@ -775,7 +775,7 @@
  },
  "macro_latest": [
   {
-   "obs_id": 1473,
+   "obs_id": 1514,
    "metric_code": "INTL_DXY",
    "period_covered": "2026-11-20",
    "release_date": "2026-11-21",
@@ -799,7 +799,7 @@
    "source_url": "https://finance.yahoo.com/"
   },
   {
-   "obs_id": 1475,
+   "obs_id": 1516,
    "metric_code": "INTL_SOX_INDEX",
    "period_covered": "2026-11-20",
    "release_date": "2026-11-21",
@@ -823,7 +823,7 @@
    "source_url": "https://finance.yahoo.com/"
   },
   {
-   "obs_id": 1446,
+   "obs_id": 1487,
    "metric_code": "TW_BANK_LOAN_INV_YOY",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -847,7 +847,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1469,
+   "obs_id": 1510,
    "metric_code": "TW_CPI_YOY",
    "period_covered": "2026-10",
    "release_date": "2026-11-05",
@@ -871,7 +871,7 @@
    "source_url": "https://www.stat.gov.tw/"
   },
   {
-   "obs_id": 1465,
+   "obs_id": 1506,
    "metric_code": "TW_CUSTOMS_EXPORTS",
    "period_covered": "2026-10",
    "release_date": "2026-11-08",
@@ -895,7 +895,7 @@
    "source_url": "https://web02.mof.gov.tw/njswww/WebMain.aspx"
   },
   {
-   "obs_id": 1448,
+   "obs_id": 1489,
    "metric_code": "TW_DOM_BANK_DEPOSITS",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -919,7 +919,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1447,
+   "obs_id": 1488,
    "metric_code": "TW_DOM_BANK_LOANS",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -943,7 +943,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1463,
+   "obs_id": 1504,
    "metric_code": "TW_EXPORT_ORDERS",
    "period_covered": "2026-10",
    "release_date": "2026-11-20",
@@ -967,7 +967,7 @@
    "source_url": "https://www.moea.gov.tw/Mns/dos/home/Home.aspx"
   },
   {
-   "obs_id": 1455,
+   "obs_id": 1496,
    "metric_code": "TW_FIVE_BANK_MORTGAGE",
    "period_covered": "2026-10",
    "release_date": "2026-11-20",
@@ -991,7 +991,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1453,
+   "obs_id": 1494,
    "metric_code": "TW_FIVE_BANK_NEW_RATE",
    "period_covered": "2026-10",
    "release_date": "2026-11-20",
@@ -1015,7 +1015,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1451,
+   "obs_id": 1492,
    "metric_code": "TW_FX_DEPOSIT_BAL",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -1039,7 +1039,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1458,
+   "obs_id": 1499,
    "metric_code": "TW_FX_RESERVES",
    "period_covered": "2026-10",
    "release_date": "2026-11-05",
@@ -1063,7 +1063,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1467,
+   "obs_id": 1508,
    "metric_code": "TW_GDP_YOY",
    "period_covered": "2026-Q3",
    "release_date": "2026-10-30",
@@ -1087,7 +1087,7 @@
    "source_url": "https://www.stat.gov.tw/"
   },
   {
-   "obs_id": 1444,
+   "obs_id": 1485,
    "metric_code": "TW_M1B_M2_SPREAD",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -1111,7 +1111,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1438,
+   "obs_id": 1479,
    "metric_code": "TW_M1B_YOY",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -1135,7 +1135,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1441,
+   "obs_id": 1482,
    "metric_code": "TW_M2_YOY",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -1159,7 +1159,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1470,
+   "obs_id": 1511,
    "metric_code": "TW_MOPS_TOTAL_REV",
    "period_covered": "2026-10",
    "release_date": "2026-11-11",
@@ -1183,7 +1183,7 @@
    "source_url": "https://mops.twse.com.tw/"
   },
   {
-   "obs_id": 1461,
+   "obs_id": 1502,
    "metric_code": "TW_NDC_SCORE",
    "period_covered": "2026-09",
    "release_date": "2026-10-28",
@@ -1207,7 +1207,7 @@
    "source_url": "https://index.ndc.gov.tw/"
   },
   {
-   "obs_id": 1450,
+   "obs_id": 1491,
    "metric_code": "TW_SEC_GIRO_BAL",
    "period_covered": "2026-09",
    "release_date": "2026-10-23",
@@ -1231,7 +1231,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1476,
+   "obs_id": 1517,
    "metric_code": "TW_TAIEX_INDEX",
    "period_covered": "2026-11-27",
    "release_date": "2026-11-27",
@@ -1255,7 +1255,7 @@
    "source_url": "https://www.twse.com.tw/rwd/zh/fund/BFI82U"
   },
   {
-   "obs_id": 1474,
+   "obs_id": 1515,
    "metric_code": "TW_USD_TWD",
    "period_covered": "2026-11-20",
    "release_date": "2026-11-21",
@@ -1279,7 +1279,7 @@
    "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
   },
   {
-   "obs_id": 1472,
+   "obs_id": 1513,
    "metric_code": "US_10Y_YIELD",
    "period_covered": "2026-11-20",
    "release_date": "2026-11-21",
@@ -1303,7 +1303,7 @@
    "source_url": "https://fred.stlouisfed.org/"
   },
   {
-   "obs_id": 1471,
+   "obs_id": 1512,
    "metric_code": "US_FED_RATE_UPPER",
    "period_covered": "2026-11",
    "release_date": "2026-11-20",
@@ -1330,7 +1330,7 @@
  "macro_series": {
   "INTL_DXY": [
    {
-    "obs_id": 1473,
+    "obs_id": 1514,
     "metric_code": "INTL_DXY",
     "period_covered": "2026-11-20",
     "release_date": "2026-11-21",
@@ -1356,7 +1356,7 @@
   ],
   "INTL_SOX_INDEX": [
    {
-    "obs_id": 1475,
+    "obs_id": 1516,
     "metric_code": "INTL_SOX_INDEX",
     "period_covered": "2026-11-20",
     "release_date": "2026-11-21",
@@ -1382,7 +1382,7 @@
   ],
   "TW_BANK_LOAN_INV_YOY": [
    {
-    "obs_id": 1445,
+    "obs_id": 1486,
     "metric_code": "TW_BANK_LOAN_INV_YOY",
     "period_covered": "2026-08",
     "release_date": "2026-09-24",
@@ -1406,7 +1406,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1446,
+    "obs_id": 1487,
     "metric_code": "TW_BANK_LOAN_INV_YOY",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -1432,7 +1432,7 @@
   ],
   "TW_CPI_YOY": [
    {
-    "obs_id": 1468,
+    "obs_id": 1509,
     "metric_code": "TW_CPI_YOY",
     "period_covered": "2026-09",
     "release_date": "2026-10-06",
@@ -1456,7 +1456,7 @@
     "source_url": "https://www.stat.gov.tw/"
    },
    {
-    "obs_id": 1469,
+    "obs_id": 1510,
     "metric_code": "TW_CPI_YOY",
     "period_covered": "2026-10",
     "release_date": "2026-11-05",
@@ -1482,7 +1482,7 @@
   ],
   "TW_CUSTOMS_EXPORTS": [
    {
-    "obs_id": 1464,
+    "obs_id": 1505,
     "metric_code": "TW_CUSTOMS_EXPORTS",
     "period_covered": "2026-09",
     "release_date": "2026-10-08",
@@ -1506,7 +1506,7 @@
     "source_url": "https://web02.mof.gov.tw/njswww/WebMain.aspx"
    },
    {
-    "obs_id": 1465,
+    "obs_id": 1506,
     "metric_code": "TW_CUSTOMS_EXPORTS",
     "period_covered": "2026-10",
     "release_date": "2026-11-08",
@@ -1532,7 +1532,7 @@
   ],
   "TW_DOM_BANK_DEPOSITS": [
    {
-    "obs_id": 1448,
+    "obs_id": 1489,
     "metric_code": "TW_DOM_BANK_DEPOSITS",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -1558,7 +1558,7 @@
   ],
   "TW_DOM_BANK_LOANS": [
    {
-    "obs_id": 1447,
+    "obs_id": 1488,
     "metric_code": "TW_DOM_BANK_LOANS",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -1584,7 +1584,7 @@
   ],
   "TW_EXPORT_ORDERS": [
    {
-    "obs_id": 1462,
+    "obs_id": 1503,
     "metric_code": "TW_EXPORT_ORDERS",
     "period_covered": "2026-09",
     "release_date": "2026-10-20",
@@ -1608,7 +1608,7 @@
     "source_url": "https://www.moea.gov.tw/Mns/dos/home/Home.aspx"
    },
    {
-    "obs_id": 1463,
+    "obs_id": 1504,
     "metric_code": "TW_EXPORT_ORDERS",
     "period_covered": "2026-10",
     "release_date": "2026-11-20",
@@ -1634,7 +1634,7 @@
   ],
   "TW_FIVE_BANK_MORTGAGE": [
    {
-    "obs_id": 1454,
+    "obs_id": 1495,
     "metric_code": "TW_FIVE_BANK_MORTGAGE",
     "period_covered": "2026-09",
     "release_date": "2026-10-22",
@@ -1658,7 +1658,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1455,
+    "obs_id": 1496,
     "metric_code": "TW_FIVE_BANK_MORTGAGE",
     "period_covered": "2026-10",
     "release_date": "2026-11-20",
@@ -1684,7 +1684,7 @@
   ],
   "TW_FIVE_BANK_NEW_RATE": [
    {
-    "obs_id": 1452,
+    "obs_id": 1493,
     "metric_code": "TW_FIVE_BANK_NEW_RATE",
     "period_covered": "2026-09",
     "release_date": "2026-10-22",
@@ -1708,7 +1708,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1453,
+    "obs_id": 1494,
     "metric_code": "TW_FIVE_BANK_NEW_RATE",
     "period_covered": "2026-10",
     "release_date": "2026-11-20",
@@ -1734,7 +1734,7 @@
   ],
   "TW_FX_DEPOSIT_BAL": [
    {
-    "obs_id": 1451,
+    "obs_id": 1492,
     "metric_code": "TW_FX_DEPOSIT_BAL",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -1760,7 +1760,7 @@
   ],
   "TW_FX_RESERVES": [
    {
-    "obs_id": 1456,
+    "obs_id": 1497,
     "metric_code": "TW_FX_RESERVES",
     "period_covered": "2026-08",
     "release_date": "2026-09-05",
@@ -1784,7 +1784,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1457,
+    "obs_id": 1498,
     "metric_code": "TW_FX_RESERVES",
     "period_covered": "2026-09",
     "release_date": "2026-10-05",
@@ -1808,7 +1808,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1458,
+    "obs_id": 1499,
     "metric_code": "TW_FX_RESERVES",
     "period_covered": "2026-10",
     "release_date": "2026-11-05",
@@ -1834,7 +1834,7 @@
   ],
   "TW_GDP_YOY": [
    {
-    "obs_id": 1466,
+    "obs_id": 1507,
     "metric_code": "TW_GDP_YOY",
     "period_covered": "2026-Q2",
     "release_date": "2026-08-15",
@@ -1858,7 +1858,7 @@
     "source_url": "https://www.stat.gov.tw/"
    },
    {
-    "obs_id": 1467,
+    "obs_id": 1508,
     "metric_code": "TW_GDP_YOY",
     "period_covered": "2026-Q3",
     "release_date": "2026-10-30",
@@ -1884,7 +1884,7 @@
   ],
   "TW_M1B_M2_SPREAD": [
    {
-    "obs_id": 1442,
+    "obs_id": 1483,
     "metric_code": "TW_M1B_M2_SPREAD",
     "period_covered": "2026-07",
     "release_date": "2026-08-24",
@@ -1908,7 +1908,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1443,
+    "obs_id": 1484,
     "metric_code": "TW_M1B_M2_SPREAD",
     "period_covered": "2026-08",
     "release_date": "2026-09-24",
@@ -1932,7 +1932,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1444,
+    "obs_id": 1485,
     "metric_code": "TW_M1B_M2_SPREAD",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -1958,7 +1958,7 @@
   ],
   "TW_M1B_YOY": [
    {
-    "obs_id": 1436,
+    "obs_id": 1477,
     "metric_code": "TW_M1B_YOY",
     "period_covered": "2026-07",
     "release_date": "2026-08-24",
@@ -1982,7 +1982,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1437,
+    "obs_id": 1478,
     "metric_code": "TW_M1B_YOY",
     "period_covered": "2026-08",
     "release_date": "2026-09-24",
@@ -2006,7 +2006,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1438,
+    "obs_id": 1479,
     "metric_code": "TW_M1B_YOY",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -2032,7 +2032,7 @@
   ],
   "TW_M2_YOY": [
    {
-    "obs_id": 1439,
+    "obs_id": 1480,
     "metric_code": "TW_M2_YOY",
     "period_covered": "2026-07",
     "release_date": "2026-08-24",
@@ -2056,7 +2056,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1440,
+    "obs_id": 1481,
     "metric_code": "TW_M2_YOY",
     "period_covered": "2026-08",
     "release_date": "2026-09-24",
@@ -2080,7 +2080,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1441,
+    "obs_id": 1482,
     "metric_code": "TW_M2_YOY",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -2106,7 +2106,7 @@
   ],
   "TW_MOPS_TOTAL_REV": [
    {
-    "obs_id": 1470,
+    "obs_id": 1511,
     "metric_code": "TW_MOPS_TOTAL_REV",
     "period_covered": "2026-10",
     "release_date": "2026-11-11",
@@ -2132,7 +2132,7 @@
   ],
   "TW_NDC_SCORE": [
    {
-    "obs_id": 1459,
+    "obs_id": 1500,
     "metric_code": "TW_NDC_SCORE",
     "period_covered": "2026-07",
     "release_date": "2026-08-27",
@@ -2156,7 +2156,7 @@
     "source_url": "https://index.ndc.gov.tw/"
    },
    {
-    "obs_id": 1460,
+    "obs_id": 1501,
     "metric_code": "TW_NDC_SCORE",
     "period_covered": "2026-08",
     "release_date": "2026-09-28",
@@ -2180,7 +2180,7 @@
     "source_url": "https://index.ndc.gov.tw/"
    },
    {
-    "obs_id": 1461,
+    "obs_id": 1502,
     "metric_code": "TW_NDC_SCORE",
     "period_covered": "2026-09",
     "release_date": "2026-10-28",
@@ -2206,7 +2206,7 @@
   ],
   "TW_SEC_GIRO_BAL": [
    {
-    "obs_id": 1449,
+    "obs_id": 1490,
     "metric_code": "TW_SEC_GIRO_BAL",
     "period_covered": "2026-08",
     "release_date": "2026-09-24",
@@ -2230,7 +2230,7 @@
     "source_url": "https://www.cbc.gov.tw/tw/lp-640-1.html"
    },
    {
-    "obs_id": 1450,
+    "obs_id": 1491,
     "metric_code": "TW_SEC_GIRO_BAL",
     "period_covered": "2026-09",
     "release_date": "2026-10-23",
@@ -2256,7 +2256,7 @@
   ],
   "TW_TAIEX_INDEX": [
    {
-    "obs_id": 1476,
+    "obs_id": 1517,
     "metric_code": "TW_TAIEX_INDEX",
     "period_covered": "2026-11-20",
     "release_date": "2026-11-21",
@@ -2282,7 +2282,7 @@
   ],
   "TW_USD_TWD": [
    {
-    "obs_id": 1474,
+    "obs_id": 1515,
     "metric_code": "TW_USD_TWD",
     "period_covered": "2026-11-20",
     "release_date": "2026-11-21",
@@ -2308,7 +2308,7 @@
   ],
   "US_10Y_YIELD": [
    {
-    "obs_id": 1472,
+    "obs_id": 1513,
     "metric_code": "US_10Y_YIELD",
     "period_covered": "2026-11-20",
     "release_date": "2026-11-21",
@@ -2334,7 +2334,7 @@
   ],
   "US_FED_RATE_UPPER": [
    {
-    "obs_id": 1471,
+    "obs_id": 1512,
     "metric_code": "US_FED_RATE_UPPER",
     "period_covered": "2026-11",
     "release_date": "2026-11-20",
@@ -3801,7 +3801,7 @@
    "horizon": "中期(依累計營收動能)",
    "trigger_reason": "半導體－IC設計與IP：即時評分 79.0 分（資金流向 55／基本面 95／成長動能 85／法人布局 75／估值 88；皆為相對其他 13 個產業的百分位分數）。營收年增排名居前，資金流向在中段，尚無明顯的資金確認或背離。",
    "raw_data_evidence": "單月營收年增 +82.1%、累計營收年增 +59.1%、營收加速度 +23.0%（旗下 190 家公司，營收 3,571.6 億 vs 去年同月 1,960.9 億）；法人當日淨買賣：外資 -29.3 億、投信 +45.0 億、自營商 -9.7 億（外資+投信占產業成交值 +1.04%）；近 5 日相對大盤 -1.22%；本益比中位數 19.1 倍、PEG 代理 0.32。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -3821,7 +3821,7 @@
    "horizon": "短期(依當日法人與近期相對強弱)至中期(依累計營收動能)",
    "trigger_reason": "PCB與ABF載板：即時評分 76.7 分（資金流向 95／基本面 88／成長動能 82／法人布局 62／估值 35；皆為相對其他 13 個產業的百分位分數）。營收動能與資金面同時排名居前。",
    "raw_data_evidence": "單月營收年增 +76.3%、累計營收年增 +49.8%、營收加速度 +26.4%（旗下 9 家公司，營收 1,135.2 億 vs 去年同月 644.1 億）；法人當日淨買賣：外資 +4.7 億、投信 -4.0 億、自營商 -6.9 億（外資+投信占產業成交值 +0.07%）；近 6 日相對大盤 +7.88%；本益比中位數 33.3 倍、PEG 代理 0.67。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -3841,7 +3841,7 @@
    "horizon": "短期(依當日法人與近期相對強弱)至中期(依累計營收動能)",
    "trigger_reason": "AI伺服器、機櫃系統與高速連接：即時評分 69.3 分（資金流向 88／基本面 75／成長動能 55／法人布局 35／估值 82；皆為相對其他 13 個產業的百分位分數）。營收動能與資金面同時排名居前。",
    "raw_data_evidence": "單月營收年增 +57.6%、累計營收年增 +47.2%、營收加速度 +10.4%（旗下 399 家公司，營收 33,206.6 億 vs 去年同月 21,073.1 億）；法人當日淨買賣：外資 -38.7 億、投信 +0.6 億、自營商 -3.5 億（外資+投信占產業成交值 -2.73%）；近 6 日相對大盤 +4.62%；本益比中位數 16.8 倍、PEG 代理 0.36。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -3861,7 +3861,7 @@
    "horizon": "短期(依當日法人與近期相對強弱)至中期(依累計營收動能)",
    "trigger_reason": "半導體－設備、材料與測試介面：即時評分 70.0 分（資金流向 82／基本面 82／成長動能 78／法人布局 42／估值 48；皆為相對其他 13 個產業的百分位分數）。營收動能與資金面同時排名居前。",
    "raw_data_evidence": "單月營收年增 +72.5%、累計營收年增 +51.6%、營收加速度 +20.9%（旗下 9 家公司，營收 92.7 億 vs 去年同月 53.8 億）；法人當日淨買賣：外資 -2.0 億、投信 +0.1 億、自營商 -1.3 億（外資+投信占產業成交值 -1.88%）；近 6 日相對大盤 +0.58%；本益比中位數 29.6 倍、PEG 代理 0.57。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -3881,7 +3881,7 @@
    "horizon": "短期(依當日法人與近期相對強弱)至中期",
    "trigger_reason": "鋼鐵、塑化、水泥與化工：即時評分 37.0 分（資金流向 22／基本面 35／成長動能 42／法人布局 68／估值 28；皆為相對其他 13 個產業的百分位分數）。資金流向、營收與成長動能都排名落後。",
    "raw_data_evidence": "單月營收年增 +29.6%、累計營收年增 +12.1%、營收加速度 +17.5%（旗下 145 家公司，營收 2,991.4 億 vs 去年同月 2,308.1 億）；法人當日淨買賣：外資 -3.0 億、投信 +5.6 億、自營商 -1.3 億（外資+投信占產業成交值 +0.87%）；近 6 日相對大盤 -4.19%；本益比中位數 13.9 倍、PEG 代理 1.15。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -3901,7 +3901,7 @@
    "horizon": "短期(依當日法人與近期相對強弱)至中期",
    "trigger_reason": "機械、工具機、汽車零組件與紡織食品：即時評分 32.3 分（資金流向 28／基本面 22／成長動能 22／法人布局 88／估值 15；皆為相對其他 13 個產業的百分位分數）。資金流向、營收與成長動能都排名落後。",
    "raw_data_evidence": "單月營收年增 +4.9%、累計營收年增 +4.1%、營收加速度 +0.8%（旗下 194 家公司，營收 2,881.2 億 vs 去年同月 2,746.1 億）；法人當日淨買賣：外資 -0.7 億、投信 +2.7 億、自營商 +0.8 億（外資+投信占產業成交值 +3.32%）；近 6 日相對大盤 -3.99%；本益比中位數 13.0 倍、PEG 代理 2.59。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -3921,7 +3921,7 @@
    "horizon": "短期(依當日法人與近期相對強弱)至中期",
    "trigger_reason": "營建與不動產代銷：即時評分 58.4 分（資金流向 42／基本面 42／成長動能 45／法人布局 95／估值 95；皆為相對其他 13 個產業的百分位分數）。資金流向、營收與成長動能都排名落後。",
    "raw_data_evidence": "單月營收年增 +30.8%、累計營收年增 +29.4%、營收加速度 +1.4%（旗下 88 家公司，營收 603.1 億 vs 去年同月 461.0 億）；法人當日淨買賣：外資 +2.6 億、投信 -1.2 億、自營商 +0.2 億（外資+投信占產業成交值 +12.94%）；近 6 日相對大盤 -3.01%；本益比中位數 9.3 倍、PEG 代理 0.32。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -3941,7 +3941,7 @@
    "horizon": "中期(依累計營收動能)",
    "trigger_reason": "航運與航空：即時評分 51.3 分（資金流向 35／基本面 68／成長動能 65／法人布局 22／估值 62；皆為相對其他 13 個產業的百分位分數）。營收年增排名居前，但資金流向排名偏弱。",
    "raw_data_evidence": "單月營收年增 +57.1%、累計營收年增 +21.5%、營收加速度 +35.6%（旗下 34 家公司，營收 1,841.0 億 vs 去年同月 1,171.6 億）；法人當日淨買賣：外資 +24.6 億、投信 -34.4 億、自營商 +0.6 億（外資+投信占產業成交值 -8.00%）；近 6 日相對大盤 -3.83%；本益比中位數 9.3 倍、PEG 代理 0.43。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -3961,7 +3961,7 @@
    "horizon": "短期(依當日法人與近期相對強弱)至中期",
    "trigger_reason": "金融－金控、銀行、保險與證券：即時評分 28.3 分（資金流向 15／基本面 15／成長動能 32／法人布局 28／估值 68；皆為相對其他 13 個產業的百分位分數）。資金流向、營收與成長動能都排名落後。",
    "raw_data_evidence": "單月營收年增 -50.3%、累計營收年增 +28.4%、營收加速度 -78.7%（旗下 40 家公司，營收 1,516.8 億 vs 去年同月 3,051.2 億）；法人當日淨買賣：外資 +7.6 億、投信 -18.7 億、自營商 +4.3 億（外資+投信占產業成交值 -3.17%）；近 6 日相對大盤 -7.51%；本益比中位數 11.9 倍、PEG 代理 0.42。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。 單月營收年增 -50.3% 與累計年增 +28.4% 相差 79 個百分點，單月可能受一次性或認列時點影響（金融、營建等產業常見），不宜單看一個月。",
@@ -3981,7 +3981,7 @@
    "horizon": "短期至中期",
    "trigger_reason": "電力設備、重電與綠能：即時評分 55.3 分（資金流向 48／基本面 55／成長動能 55／法人布局 82／估值 42；皆為相對其他 13 個產業的百分位分數）。各項分數互有高低，沒有明顯單向訊號。",
    "raw_data_evidence": "單月營收年增 +45.8%、累計營收年增 +25.3%、營收加速度 +20.5%（旗下 160 家公司，營收 1,592.4 億 vs 去年同月 1,092.2 億）；法人當日淨買賣：外資 -5.2 億、投信 +9.7 億、自營商 +0.1 億（外資+投信占產業成交值 +3.29%）；近 6 日相對大盤 -1.54%；本益比中位數 16.3 倍、PEG 代理 0.64。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 法人金額只涵蓋有收盤價的公司（覆蓋率 99%）。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -4001,7 +4001,7 @@
    "horizon": "短期至中期",
    "trigger_reason": "散熱與伺服器機構件：即時評分 57.6 分（資金流向 62／基本面 48／成長動能 58／法人布局 48／估值 75；皆為相對其他 13 個產業的百分位分數）。各項分數互有高低，沒有明顯單向訊號。",
    "raw_data_evidence": "單月營收年增 +43.4%、累計營收年增 +63.4%、營收加速度 -20.0%（旗下 8 家公司，營收 397.5 億 vs 去年同月 277.3 億）；法人當日淨買賣：外資 -30.7 億、投信 +24.2 億、自營商 -8.4 億（外資+投信占產業成交值 -1.88%）；近 6 日相對大盤 -0.89%；本益比中位數 26.4 倍、PEG 代理 0.42。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -4021,7 +4021,7 @@
    "horizon": "短期(依當日法人與近期相對強弱)",
    "trigger_reason": "半導體－晶圓代工與先進封裝：即時評分 56.3 分（資金流向 75／基本面 62／成長動能 58／法人布局 15／估值 55；皆為相對其他 13 個產業的百分位分數）。資金與法人買盤排名居前，但營收動能排名未居前 (不代表營收衰退，請看營收年增數字)。",
    "raw_data_evidence": "單月營收年增 +55.8%、累計營收年增 +40.2%、營收加速度 +15.6%（旗下 7 家公司，營收 7,207.2 億 vs 去年同月 4,626.4 億）；法人當日淨買賣：外資 -208.8 億、投信 +36.5 億、自營商 +10.6 億（外資+投信占產業成交值 -14.38%）；近 5 日相對大盤 +0.47%；本益比中位數 21.8 倍、PEG 代理 0.54。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -4041,7 +4041,7 @@
    "horizon": "短期(依當日法人與近期相對強弱)",
    "trigger_reason": "CPO光通訊與高階網通：即時評分 43.3 分（資金流向 68／基本面 28／成長動能 38／法人布局 55／估值 22；皆為相對其他 13 個產業的百分位分數）。資金與法人買盤排名居前，但營收動能排名未居前 (不代表營收衰退，請看營收年增數字)。",
    "raw_data_evidence": "單月營收年增 +28.7%、累計營收年增 +16.3%、營收加速度 +12.4%（旗下 209 家公司，營收 2,792.6 億 vs 去年同月 2,170.4 億）；法人當日淨買賣：外資 -53.9 億、投信 +52.3 億、自營商 -4.2 億（外資+投信占產業成交值 -0.23%）；近 6 日相對大盤 +0.13%；本益比中位數 21.0 倍、PEG 代理 1.29。",
-   "triggered_at": "2026-11-27T23:02:24+08:00",
+   "triggered_at": "2026-11-27T23:06:27+08:00",
    "source_id": "SRC_MOPS",
    "credibility_grade": "A級官方數據（代理指標）",
    "missing_data_notes": "本則預警由機械式規則依即時評分自動產生，不是分析師撰寫；每個交易日收盤後重算。 全部為代理指標 (無財報獲利、毛利率、資本支出或分析師預估)；百分位分數只反映相對其他產業的位置；法人金額以收盤價近似；估值為營收成長調整後的 PEG 代理指標。 成交值占比變化需至少 2 天歷史，目前尚不足。",
@@ -5292,6 +5292,105 @@
  ],
  "audit_logs": [
   {
+   "log_id": 363,
+   "run_timestamp": "2026-11-27T23:06:27+08:00",
+   "task_name": "LIVE_INDUSTRY_SCORING",
+   "source_id": "SRC_MOPS",
+   "status": "SUCCESS",
+   "records_affected": 13,
+   "message": "已用官方即時資料重算 13 個產業的 5 項子分數 (模型 v1.2.0 (1122-020448)，資料日 2026-11-27，2026-10營收 + 2026-11-27 盤後)"
+  },
+  {
+   "log_id": 362,
+   "run_timestamp": "2026-11-22T11:15:00+08:00",
+   "task_name": "ETF_DECISION_CENTER_SYNC",
+   "source_id": "SRC_TWSE",
+   "status": "SUCCESS",
+   "records_affected": 28,
+   "message": "已完成台美 28 檔核心ETF主檔、TWSE 0099P/ETFRank/T86即時行情串接、MOPS 1,989家底層成分股穿透估值、雙軌獨立評分(模型A長期+模型B短中期)、雙軌回測與4份7問研究報告入庫"
+  },
+  {
+   "log_id": 361,
+   "run_timestamp": "2026-11-27T23:05:03+08:00",
+   "task_name": "LIVE_STOCK_QUOTES_INGEST",
+   "source_id": "SRC_TWSE",
+   "status": "SUCCESS",
+   "records_affected": 1950,
+   "message": "已寫入 1950 檔上市櫃個股收盤價與成交金額 (日期 ['2026-11-27'])"
+  },
+  {
+   "log_id": 360,
+   "run_timestamp": "2026-11-27T23:05:03+08:00",
+   "task_name": "LIVE_TWSE_MI_INDEX_INGEST",
+   "source_id": "SRC_TWSE",
+   "status": "SUCCESS",
+   "records_affected": 267,
+   "message": "已寫入證交所 MI_INDEX 共 267 項指數與產業類股收盤行情 (日期:1151126)"
+  },
+  {
+   "log_id": 359,
+   "run_timestamp": "2026-11-27T23:05:03+08:00",
+   "task_name": "LIVE_MOPS_PE_T86_FULL_INGEST",
+   "source_id": "SRC_MOPS",
+   "status": "SUCCESS",
+   "records_affected": 1989,
+   "message": "已寫入上市(1091家)＋上櫃(898家)共 1989 家公司之 2026-10 月營收、估值與三大法人個股買賣超 (法人資料日期 20261127)"
+  },
+  {
+   "log_id": 358,
+   "run_timestamp": "2026-11-22T01:12:00+08:00",
+   "task_name": "FULL_SYSTEM_P2_TO_P6_DEPLOY",
+   "source_id": "SRC_TWSE",
+   "status": "SUCCESS",
+   "records_affected": 31,
+   "message": "已完成階段二(資料品質SLA與Z-Score檢查7項)、階段三(三大法人日/週/月/季籌碼追蹤13筆)、階段五(2025~2026樣本外回測91樣本與8大歷史驗證事件)、階段六(每日/每週/每月/每季固定研究報告4份)全量入庫"
+  },
+  {
+   "log_id": 357,
+   "run_timestamp": "2026-11-22T00:55:00+08:00",
+   "task_name": "EARLY_WARNING_ENGINE_M07",
+   "source_id": "SRC_TWSE",
+   "status": "SUCCESS",
+   "records_affected": 7,
+   "message": "多因子預警引擎觸發7項預警訊號 (含LEVEL 4晶圓代工、LEVEL 3 AI伺服器/金控/散熱、LEVEL 2 CPO網通、LEVEL R 營建/塑化鋼鐵)"
+  },
+  {
+   "log_id": 356,
+   "run_timestamp": "2026-11-22T00:55:00+08:00",
+   "task_name": "INDUSTRY_ROTATION_SCORE_M04",
+   "source_id": "SRC_MOPS",
+   "status": "SUCCESS",
+   "records_affected": 14,
+   "message": "完成14大產業分類與2026年10~11月資金輪動評分；其中1項(生技/電信/觀光綜合類)因異質與缺失比例42%自動觸發防呆標示為『不可評分』"
+  },
+  {
+   "log_id": 355,
+   "run_timestamp": "2026-11-22T00:55:00+08:00",
+   "task_name": "ASSET_FLOW_MATRIX_M02",
+   "source_id": "SRC_SITCA_TDCC",
+   "status": "SUCCESS",
+   "records_affected": 6,
+   "message": "成功建立六大資產配置流向矩陣，包含11月0050單月淨申購破2,200億、外資匯出與房市買賣移轉26萬棟保衛戰，並寫入防重複計算規則"
+  },
+  {
+   "log_id": 354,
+   "run_timestamp": "2026-11-22T00:55:00+08:00",
+   "task_name": "MACRO_EXPORT_GDP_CPI_INGEST",
+   "source_id": "SRC_MOEA",
+   "status": "SUCCESS",
+   "records_affected": 12,
+   "message": "成功載入2026年10月外銷訂單(1,238.2億美元,+78.3%)、海關出口(967.6億美元,+58.9%)、CPI(+2.33%)、Q3 GDP(+14.36%)及9月景氣燈號(41分紅燈)真實數據"
+  },
+  {
+   "log_id": 353,
+   "run_timestamp": "2026-11-22T00:55:00+08:00",
+   "task_name": "MACRO_M01_M03_INGEST",
+   "source_id": "SRC_CBC",
+   "status": "SUCCESS",
+   "records_affected": 22,
+   "message": "成功載入央行2026年9月M1B(7.20%)、M2(7.24%)、放款與投資(+9.79%)、證券劃撥存款(4.6981兆)及10月外匯存底(5,964.37億美元)、五大銀行放款利率(2.254%)真實數據"
+  },
+  {
    "log_id": 352,
    "run_timestamp": "2026-11-27T23:02:24+08:00",
    "task_name": "LIVE_INDUSTRY_SCORING",
@@ -5416,110 +5515,11 @@
    "status": "SUCCESS",
    "records_affected": 1950,
    "message": "已寫入 1950 檔上市櫃個股收盤價與成交金額 (日期 ['2026-11-27'])"
-  },
-  {
-   "log_id": 338,
-   "run_timestamp": "2026-11-27T22:39:52+08:00",
-   "task_name": "LIVE_TWSE_MI_INDEX_INGEST",
-   "source_id": "SRC_TWSE",
-   "status": "SUCCESS",
-   "records_affected": 267,
-   "message": "已寫入證交所 MI_INDEX 共 267 項指數與產業類股收盤行情 (日期:1151126)"
-  },
-  {
-   "log_id": 337,
-   "run_timestamp": "2026-11-27T22:39:52+08:00",
-   "task_name": "LIVE_MOPS_PE_T86_FULL_INGEST",
-   "source_id": "SRC_MOPS",
-   "status": "SUCCESS",
-   "records_affected": 1989,
-   "message": "已寫入上市(1091家)＋上櫃(898家)共 1989 家公司之 2026-10 月營收、估值與三大法人個股買賣超 (法人資料日期 20261127)"
-  },
-  {
-   "log_id": 336,
-   "run_timestamp": "2026-11-22T01:12:00+08:00",
-   "task_name": "FULL_SYSTEM_P2_TO_P6_DEPLOY",
-   "source_id": "SRC_TWSE",
-   "status": "SUCCESS",
-   "records_affected": 31,
-   "message": "已完成階段二(資料品質SLA與Z-Score檢查7項)、階段三(三大法人日/週/月/季籌碼追蹤13筆)、階段五(2025~2026樣本外回測91樣本與8大歷史驗證事件)、階段六(每日/每週/每月/每季固定研究報告4份)全量入庫"
-  },
-  {
-   "log_id": 335,
-   "run_timestamp": "2026-11-22T00:55:00+08:00",
-   "task_name": "EARLY_WARNING_ENGINE_M07",
-   "source_id": "SRC_TWSE",
-   "status": "SUCCESS",
-   "records_affected": 7,
-   "message": "多因子預警引擎觸發7項預警訊號 (含LEVEL 4晶圓代工、LEVEL 3 AI伺服器/金控/散熱、LEVEL 2 CPO網通、LEVEL R 營建/塑化鋼鐵)"
-  },
-  {
-   "log_id": 334,
-   "run_timestamp": "2026-11-22T00:55:00+08:00",
-   "task_name": "INDUSTRY_ROTATION_SCORE_M04",
-   "source_id": "SRC_MOPS",
-   "status": "SUCCESS",
-   "records_affected": 14,
-   "message": "完成14大產業分類與2026年10~11月資金輪動評分；其中1項(生技/電信/觀光綜合類)因異質與缺失比例42%自動觸發防呆標示為『不可評分』"
-  },
-  {
-   "log_id": 333,
-   "run_timestamp": "2026-11-22T00:55:00+08:00",
-   "task_name": "ASSET_FLOW_MATRIX_M02",
-   "source_id": "SRC_SITCA_TDCC",
-   "status": "SUCCESS",
-   "records_affected": 6,
-   "message": "成功建立六大資產配置流向矩陣，包含11月0050單月淨申購破2,200億、外資匯出與房市買賣移轉26萬棟保衛戰，並寫入防重複計算規則"
-  },
-  {
-   "log_id": 332,
-   "run_timestamp": "2026-11-22T00:55:00+08:00",
-   "task_name": "MACRO_EXPORT_GDP_CPI_INGEST",
-   "source_id": "SRC_MOEA",
-   "status": "SUCCESS",
-   "records_affected": 12,
-   "message": "成功載入2026年10月外銷訂單(1,238.2億美元,+78.3%)、海關出口(967.6億美元,+58.9%)、CPI(+2.33%)、Q3 GDP(+14.36%)及9月景氣燈號(41分紅燈)真實數據"
-  },
-  {
-   "log_id": 331,
-   "run_timestamp": "2026-11-22T00:55:00+08:00",
-   "task_name": "MACRO_M01_M03_INGEST",
-   "source_id": "SRC_CBC",
-   "status": "SUCCESS",
-   "records_affected": 22,
-   "message": "成功載入央行2026年9月M1B(7.20%)、M2(7.24%)、放款與投資(+9.79%)、證券劃撥存款(4.6981兆)及10月外匯存底(5,964.37億美元)、五大銀行放款利率(2.254%)真實數據"
-  },
-  {
-   "log_id": 330,
-   "run_timestamp": "2026-11-27T22:28:00+08:00",
-   "task_name": "LIVE_INDUSTRY_SCORING",
-   "source_id": "SRC_MOPS",
-   "status": "SUCCESS",
-   "records_affected": 13,
-   "message": "已用官方即時資料重算 13 個產業的 5 項子分數 (模型 v1.2.0 (1122-020448)，資料日 2026-11-27，2026-10營收 + 2026-11-27 盤後)"
-  },
-  {
-   "log_id": 329,
-   "run_timestamp": "2026-11-22T11:15:00+08:00",
-   "task_name": "ETF_DECISION_CENTER_SYNC",
-   "source_id": "SRC_TWSE",
-   "status": "SUCCESS",
-   "records_affected": 28,
-   "message": "已完成台美 28 檔核心ETF主檔、TWSE 0099P/ETFRank/T86即時行情串接、MOPS 1,989家底層成分股穿透估值、雙軌獨立評分(模型A長期+模型B短中期)、雙軌回測與4份7問研究報告入庫"
-  },
-  {
-   "log_id": 328,
-   "run_timestamp": "2026-11-27T22:23:38+08:00",
-   "task_name": "LIVE_STOCK_QUOTES_INGEST",
-   "source_id": "SRC_TWSE",
-   "status": "SUCCESS",
-   "records_affected": 1950,
-   "message": "已寫入 1950 檔上市櫃個股收盤價與成交金額 (日期 ['2026-11-27'])"
   }
  ],
  "institutional_flows": [
   {
-   "flow_record_id": 507,
+   "flow_record_id": 521,
    "period_type": "DAILY",
    "period_label": "2026-11-27 (TWSE BFI82U 官方API直連)",
    "release_date": "2026-11-27",
@@ -5696,7 +5696,7 @@
    "text_source": "computed"
   },
   {
-   "flow_record_id": 494,
+   "flow_record_id": 508,
    "period_type": "DAILY",
    "period_label": "2026-11-16",
    "release_date": "2026-11-16",
@@ -5716,7 +5716,7 @@
    "text_source": "seed"
   },
   {
-   "flow_record_id": 495,
+   "flow_record_id": 509,
    "period_type": "DAILY",
    "period_label": "2026-11-17",
    "release_date": "2026-11-17",
@@ -5736,7 +5736,7 @@
    "text_source": "seed"
   },
   {
-   "flow_record_id": 496,
+   "flow_record_id": 510,
    "period_type": "DAILY",
    "period_label": "2026-11-18",
    "release_date": "2026-11-18",
@@ -5756,7 +5756,7 @@
    "text_source": "seed"
   },
   {
-   "flow_record_id": 497,
+   "flow_record_id": 511,
    "period_type": "DAILY",
    "period_label": "2026-11-19",
    "release_date": "2026-11-19",
@@ -5776,7 +5776,7 @@
    "text_source": "seed"
   },
   {
-   "flow_record_id": 499,
+   "flow_record_id": 513,
    "period_type": "WEEKLY",
    "period_label": "2026-W45 (11/02~11/06)",
    "release_date": "2026-11-06",
@@ -5796,7 +5796,7 @@
    "text_source": "seed"
   },
   {
-   "flow_record_id": 500,
+   "flow_record_id": 514,
    "period_type": "WEEKLY",
    "period_label": "2026-W46 (11/09~11/13)",
    "release_date": "2026-11-13",
@@ -5816,7 +5816,7 @@
    "text_source": "seed"
   },
   {
-   "flow_record_id": 502,
+   "flow_record_id": 516,
    "period_type": "MONTHLY",
    "period_label": "2026-09",
    "release_date": "2026-09-30",
@@ -5836,7 +5836,7 @@
    "text_source": "seed"
   },
   {
-   "flow_record_id": 503,
+   "flow_record_id": 517,
    "period_type": "MONTHLY",
    "period_label": "2026-10",
    "release_date": "2026-10-30",
@@ -5856,7 +5856,7 @@
    "text_source": "seed"
   },
   {
-   "flow_record_id": 505,
+   "flow_record_id": 519,
    "period_type": "QUARTERLY",
    "period_label": "2026-Q3",
    "release_date": "2026-09-30",
@@ -6100,7 +6100,7 @@
    "frequency": "每日",
    "report_title": "【每日資金盤後日報】2026-11-27",
    "as_of_cutoff_date": "2026-11-27 盤後",
-   "published_at": "2026-11-27T23:02:24+08:00",
+   "published_at": "2026-11-27T23:06:27+08:00",
    "update_status": "即時產生（官方資料，機械式規則）",
    "primary_sources": "證交所 BFI82U／T86／個股行情、櫃買三大法人與行情、MOPS 月營收（官方 OpenAPI）",
    "executive_summary": "2026-11-27 三大法人合計 -213.0 億（外資 -296.3、投信 +85.2）；大盤當日 +0.40%；即時評分最高 IC設計與IP 79.0、最低 金融(金控/銀行/保險) 28.3。",
@@ -6134,7 +6134,7 @@
    "frequency": "每週",
    "report_title": "【每週資金輪動週報】2026 年第 48 週（11-23~11-27）",
    "as_of_cutoff_date": "2026-11-27 盤後（2026-W48）",
-   "published_at": "2026-11-27T23:02:24+08:00",
+   "published_at": "2026-11-27T23:06:27+08:00",
    "update_status": "即時產生（官方資料，機械式規則）",
    "primary_sources": "證交所 BFI82U／T86／個股行情、櫃買三大法人與行情、MOPS 月營收（官方 OpenAPI）",
    "executive_summary": "2026 年第 48 週（11-23~11-27）三大法人合計 -2,916 億，外資 -2,818、投信 +904；僅涵蓋 5 個交易日。",
@@ -6168,7 +6168,7 @@
    "frequency": "每月",
    "report_title": "【每月營收與資金月報】2026 年 11 月",
    "as_of_cutoff_date": "2026-11-27 盤後（營收為2026 年 10 月）",
-   "published_at": "2026-11-27T23:02:24+08:00",
+   "published_at": "2026-11-27T23:06:27+08:00",
    "update_status": "即時產生（官方資料，機械式規則）",
    "primary_sources": "證交所 BFI82U／T86／個股行情、櫃買三大法人與行情、MOPS 月營收（官方 OpenAPI）",
    "executive_summary": "2026 年 10 月營收 6.8635 兆、年增 +45.5%；2026-11 月累計三大法人 -3,426 億（6 個交易日）。",
@@ -8806,7 +8806,7 @@
    "change_dir": "+",
    "change_points": 2211.7,
    "change_pct": 2.5,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -8816,7 +8816,7 @@
    "change_dir": "+",
    "change_points": 361.37,
    "change_pct": 0.4,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
   },
   {
@@ -8866,7 +8866,7 @@
    "change_dir": "+",
    "change_points": 956.38,
    "change_pct": 2.5,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -8876,7 +8876,7 @@
    "change_dir": "+",
    "change_points": 156.27,
    "change_pct": 0.4,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
   },
   {
@@ -8926,7 +8926,7 @@
    "change_dir": "+",
    "change_points": 1514.76,
    "change_pct": 1.81,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -8936,7 +8936,7 @@
    "change_dir": "+",
    "change_points": 583.63,
    "change_pct": 0.69,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
   },
   {
@@ -8986,7 +8986,7 @@
    "change_dir": "+",
    "change_points": 2594.31,
    "change_pct": 1.61,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -8996,7 +8996,7 @@
    "change_dir": "+",
    "change_points": 1612.55,
    "change_pct": 0.98,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
   },
   {
@@ -9046,7 +9046,7 @@
    "change_dir": "+",
    "change_points": 1747.56,
    "change_pct": 3.97,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -9056,7 +9056,7 @@
    "change_dir": "-",
    "change_points": 346.73,
    "change_pct": -0.76,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
   },
   {
@@ -9346,7 +9346,7 @@
    "change_dir": "+",
    "change_points": 1203.56,
    "change_pct": 1.61,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -9356,7 +9356,7 @@
    "change_dir": "+",
    "change_points": 7371.78,
    "change_pct": 5.01,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -9366,7 +9366,7 @@
    "change_dir": "+",
    "change_points": 10915.93,
    "change_pct": 4.78,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -9376,7 +9376,7 @@
    "change_dir": "+",
    "change_points": 4979.82,
    "change_pct": 5.04,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -9386,7 +9386,7 @@
    "change_dir": "+",
    "change_points": 1727.22,
    "change_pct": 2.65,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -9396,7 +9396,7 @@
    "change_dir": "+",
    "change_points": 2257.36,
    "change_pct": 3.23,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -9406,7 +9406,7 @@
    "change_dir": "+",
    "change_points": 2692.91,
    "change_pct": 4.38,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -9416,7 +9416,7 @@
    "change_dir": "+",
    "change_points": 12550.19,
    "change_pct": 12.67,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
   },
   {
@@ -9426,7 +9426,7 @@
    "change_dir": "+",
    "change_points": 748.1,
    "change_pct": 0.98,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
   },
   {
@@ -9436,7 +9436,7 @@
    "change_dir": "+",
    "change_points": 1233.95,
    "change_pct": 0.8,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
   },
   {
@@ -9446,7 +9446,7 @@
    "change_dir": "+",
    "change_points": 3340.53,
    "change_pct": 1.4,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
   },
   {
@@ -9456,7 +9456,7 @@
    "change_dir": "+",
    "change_points": 194.94,
    "change_pct": 0.29,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
   },
   {
@@ -9466,7 +9466,7 @@
    "change_dir": "+",
    "change_points": 38.86,
    "change_pct": 0.05,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
   },
   {
@@ -9476,7 +9476,7 @@
    "change_dir": "-",
    "change_points": 161.73,
    "change_pct": -0.25,
-   "fetched_at": "2026-11-27T22:58:25+08:00",
+   "fetched_at": "2026-11-27T23:05:03+08:00",
    "source_url": "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
   }
  ],
@@ -9591,7 +9591,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4469,
+      "holding_id": 4594,
       "etf_code": "VTI",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -9605,7 +9605,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4470,
+      "holding_id": 4595,
       "etf_code": "VTI",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -9619,7 +9619,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4471,
+      "holding_id": 4596,
       "etf_code": "VTI",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -9633,7 +9633,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4472,
+      "holding_id": 4597,
       "etf_code": "VTI",
       "constituent_code": "AMZN",
       "constituent_name": "Amazon.com",
@@ -9647,7 +9647,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4474,
+      "holding_id": 4599,
       "etf_code": "VTI",
       "constituent_code": "GOOGL",
       "constituent_name": "Alphabet Inc",
@@ -9661,7 +9661,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4473,
+      "holding_id": 4598,
       "etf_code": "VTI",
       "constituent_code": "META",
       "constituent_name": "Meta Platforms",
@@ -9675,7 +9675,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4475,
+      "holding_id": 4600,
       "etf_code": "VTI",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -9805,7 +9805,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4492,
+      "holding_id": 4617,
       "etf_code": "VT",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -9819,7 +9819,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4493,
+      "holding_id": 4618,
       "etf_code": "VT",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -9833,7 +9833,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4494,
+      "holding_id": 4619,
       "etf_code": "VT",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -9847,7 +9847,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4495,
+      "holding_id": 4620,
       "etf_code": "VT",
       "constituent_code": "2330",
       "constituent_name": "台積電 (TSMC)",
@@ -9974,7 +9974,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4454,
+      "holding_id": 4579,
       "etf_code": "VOO",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -9988,7 +9988,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4455,
+      "holding_id": 4580,
       "etf_code": "VOO",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -10002,7 +10002,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4456,
+      "holding_id": 4581,
       "etf_code": "VOO",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -10016,7 +10016,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4457,
+      "holding_id": 4582,
       "etf_code": "VOO",
       "constituent_code": "AMZN",
       "constituent_name": "Amazon.com",
@@ -10030,7 +10030,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4459,
+      "holding_id": 4584,
       "etf_code": "VOO",
       "constituent_code": "GOOGL",
       "constituent_name": "Alphabet Inc",
@@ -10044,7 +10044,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4458,
+      "holding_id": 4583,
       "etf_code": "VOO",
       "constituent_code": "META",
       "constituent_name": "Meta Platforms",
@@ -10058,7 +10058,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4460,
+      "holding_id": 4585,
       "etf_code": "VOO",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -10072,7 +10072,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4461,
+      "holding_id": 4586,
       "etf_code": "VOO",
       "constituent_code": "BRK.B",
       "constituent_name": "Berkshire Hathaway",
@@ -10199,7 +10199,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4476,
+      "holding_id": 4601,
       "etf_code": "SCHD",
       "constituent_code": "LCID_VAL_FIN",
       "constituent_name": "BlackRock / U.S. Bancorp / 美國高息金融龍頭",
@@ -10213,7 +10213,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4477,
+      "holding_id": 4602,
       "etf_code": "SCHD",
       "constituent_code": "HC_DIV_CORE",
       "constituent_name": "Amgen / AbbVie / Pfizer 美國高息醫療龍頭",
@@ -10227,7 +10227,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4478,
+      "holding_id": 4603,
       "etf_code": "SCHD",
       "constituent_code": "CONS_DIV_CORE",
       "constituent_name": "Coca-Cola / PepsiCo / Home Depot 必需與內需龍頭",
@@ -10362,7 +10362,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4491,
+      "holding_id": 4616,
       "etf_code": "LQD",
       "constituent_code": "USD_IG_CORP_20Y",
       "constituent_name": "美元投資等級公司債組合",
@@ -10485,7 +10485,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4489,
+      "holding_id": 4614,
       "etf_code": "TLT",
       "constituent_code": "US_TREASURY_20Y",
       "constituent_name": "美國財政部20年以上長期公債組合",
@@ -10608,7 +10608,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4490,
+      "holding_id": 4615,
       "etf_code": "SGOV",
       "constituent_code": "US_TBILL_0_3M",
       "constituent_name": "美國財政部0-3個月超短期國庫券",
@@ -10735,7 +10735,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4462,
+      "holding_id": 4587,
       "etf_code": "QQQ",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -10749,7 +10749,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4463,
+      "holding_id": 4588,
       "etf_code": "QQQ",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -10763,7 +10763,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4464,
+      "holding_id": 4589,
       "etf_code": "QQQ",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -10777,7 +10777,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4465,
+      "holding_id": 4590,
       "etf_code": "QQQ",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -10791,7 +10791,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4466,
+      "holding_id": 4591,
       "etf_code": "QQQ",
       "constituent_code": "AMZN",
       "constituent_name": "Amazon.com",
@@ -10805,7 +10805,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4467,
+      "holding_id": 4592,
       "etf_code": "QQQ",
       "constituent_code": "META",
       "constituent_name": "Meta Platforms",
@@ -10819,7 +10819,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4468,
+      "holding_id": 4593,
       "etf_code": "QQQ",
       "constituent_code": "GOOGL",
       "constituent_name": "Alphabet Inc",
@@ -10942,7 +10942,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4496,
+      "holding_id": 4621,
       "etf_code": "GLD",
       "constituent_code": "LBMA_PHYSICAL_GOLD",
       "constituent_name": "倫敦金庫100%實體黃金條塊",
@@ -11067,7 +11067,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4485,
+      "holding_id": 4610,
       "etf_code": "XLK",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -11081,7 +11081,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4486,
+      "holding_id": 4611,
       "etf_code": "XLK",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -11095,7 +11095,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4487,
+      "holding_id": 4612,
       "etf_code": "XLK",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -11109,7 +11109,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4488,
+      "holding_id": 4613,
       "etf_code": "XLK",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -11234,7 +11234,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4497,
+      "holding_id": 4622,
       "etf_code": "VNQ",
       "constituent_code": "US_REITS_DC",
       "constituent_name": "Prologis / Equinix / American Tower / Digital Realty",
@@ -11362,7 +11362,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4479,
+      "holding_id": 4604,
       "etf_code": "SMH",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -11376,7 +11376,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4480,
+      "holding_id": 4605,
       "etf_code": "SMH",
       "constituent_code": "2330",
       "constituent_name": "台積電 (TSMC ADR)",
@@ -11390,7 +11390,7 @@
       "live_pb": 7.95
      },
      {
-      "holding_id": 4481,
+      "holding_id": 4606,
       "etf_code": "SMH",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -11404,7 +11404,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4482,
+      "holding_id": 4607,
       "etf_code": "SMH",
       "constituent_code": "AMD",
       "constituent_name": "Advanced Micro Devices",
@@ -11418,7 +11418,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4483,
+      "holding_id": 4608,
       "etf_code": "SMH",
       "constituent_code": "ASML",
       "constituent_name": "ASML Holding NV",
@@ -11432,7 +11432,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4484,
+      "holding_id": 4609,
       "etf_code": "SMH",
       "constituent_code": "AMAT",
       "constituent_name": "Applied Materials",
@@ -11557,7 +11557,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4450,
+      "holding_id": 4575,
       "etf_code": "00937B",
       "constituent_code": "USD_IG_CORP_20Y",
       "constituent_name": "20年期以上BBB級美元公司債組合(微軟/康卡斯特/甲骨文等)",
@@ -11735,7 +11735,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4396,
+      "holding_id": 4521,
       "etf_code": "0056",
       "constituent_code": "2382",
       "constituent_name": "廣達",
@@ -11749,7 +11749,7 @@
       "live_pb": 3.35
      },
      {
-      "holding_id": 4397,
+      "holding_id": 4522,
       "etf_code": "0056",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -11763,7 +11763,7 @@
       "live_pb": 12.71
      },
      {
-      "holding_id": 4398,
+      "holding_id": 4523,
       "etf_code": "0056",
       "constituent_code": "2603",
       "constituent_name": "長榮",
@@ -11777,7 +11777,7 @@
       "live_pb": 0.9
      },
      {
-      "holding_id": 4399,
+      "holding_id": 4524,
       "etf_code": "0056",
       "constituent_code": "2303",
       "constituent_name": "聯電",
@@ -11791,7 +11791,7 @@
       "live_pb": 2.36
      },
      {
-      "holding_id": 4400,
+      "holding_id": 4525,
       "etf_code": "0056",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -11805,7 +11805,7 @@
       "live_pb": 1.91
      },
      {
-      "holding_id": 4401,
+      "holding_id": 4526,
       "etf_code": "0056",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -11819,7 +11819,7 @@
       "live_pb": 5.34
      },
      {
-      "holding_id": 4402,
+      "holding_id": 4527,
       "etf_code": "0056",
       "constituent_code": "2618",
       "constituent_name": "長榮航",
@@ -11833,7 +11833,7 @@
       "live_pb": 1.69
      },
      {
-      "holding_id": 4403,
+      "holding_id": 4528,
       "etf_code": "0056",
       "constituent_code": "1216",
       "constituent_name": "統一",
@@ -12008,7 +12008,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4411,
+      "holding_id": 4536,
       "etf_code": "00919",
       "constituent_code": "2603",
       "constituent_name": "長榮",
@@ -12022,7 +12022,7 @@
       "live_pb": 0.9
      },
      {
-      "holding_id": 4412,
+      "holding_id": 4537,
       "etf_code": "00919",
       "constituent_code": "2303",
       "constituent_name": "聯電",
@@ -12036,7 +12036,7 @@
       "live_pb": 2.36
      },
      {
-      "holding_id": 4413,
+      "holding_id": 4538,
       "etf_code": "00919",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -12050,7 +12050,7 @@
       "live_pb": 12.71
      },
      {
-      "holding_id": 4414,
+      "holding_id": 4539,
       "etf_code": "00919",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -12064,7 +12064,7 @@
       "live_pb": 1.91
      },
      {
-      "holding_id": 4415,
+      "holding_id": 4540,
       "etf_code": "00919",
       "constituent_code": "2618",
       "constituent_name": "長榮航",
@@ -12078,7 +12078,7 @@
       "live_pb": 1.69
      },
      {
-      "holding_id": 4416,
+      "holding_id": 4541,
       "etf_code": "00919",
       "constituent_code": "6223",
       "constituent_name": "旺矽",
@@ -12251,7 +12251,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4451,
+      "holding_id": 4576,
       "etf_code": "00679B",
       "constituent_code": "US_TREASURY_20Y",
       "constituent_name": "美國財政部20年以上長期公債組合",
@@ -12418,7 +12418,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4404,
+      "holding_id": 4529,
       "etf_code": "00878",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -12432,7 +12432,7 @@
       "live_pb": 12.71
      },
      {
-      "holding_id": 4405,
+      "holding_id": 4530,
       "etf_code": "00878",
       "constituent_code": "2303",
       "constituent_name": "聯電",
@@ -12446,7 +12446,7 @@
       "live_pb": 2.36
      },
      {
-      "holding_id": 4406,
+      "holding_id": 4531,
       "etf_code": "00878",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -12460,7 +12460,7 @@
       "live_pb": 1.91
      },
      {
-      "holding_id": 4407,
+      "holding_id": 4532,
       "etf_code": "00878",
       "constituent_code": "2882",
       "constituent_name": "國泰金",
@@ -12474,7 +12474,7 @@
       "live_pb": 1.51
      },
      {
-      "holding_id": 4408,
+      "holding_id": 4533,
       "etf_code": "00878",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -12488,7 +12488,7 @@
       "live_pb": 5.34
      },
      {
-      "holding_id": 4409,
+      "holding_id": 4534,
       "etf_code": "00878",
       "constituent_code": "2382",
       "constituent_name": "廣達",
@@ -12502,7 +12502,7 @@
       "live_pb": 3.35
      },
      {
-      "holding_id": 4410,
+      "holding_id": 4535,
       "etf_code": "00878",
       "constituent_code": "2412",
       "constituent_name": "中華電",
@@ -12676,7 +12676,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4429,
+      "holding_id": 4554,
       "etf_code": "00891",
       "constituent_code": "2330",
       "constituent_name": "台積電",
@@ -12690,7 +12690,7 @@
       "live_pb": 7.95
      },
      {
-      "holding_id": 4430,
+      "holding_id": 4555,
       "etf_code": "00891",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -12704,7 +12704,7 @@
       "live_pb": 12.71
      },
      {
-      "holding_id": 4431,
+      "holding_id": 4556,
       "etf_code": "00891",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -12718,7 +12718,7 @@
       "live_pb": 5.34
      },
      {
-      "holding_id": 4432,
+      "holding_id": 4557,
       "etf_code": "00891",
       "constituent_code": "2303",
       "constituent_name": "聯電",
@@ -12732,7 +12732,7 @@
       "live_pb": 2.36
      },
      {
-      "holding_id": 4433,
+      "holding_id": 4558,
       "etf_code": "00891",
       "constituent_code": "3661",
       "constituent_name": "世芯-KY",
@@ -12746,7 +12746,7 @@
       "live_pb": 5.06
      },
      {
-      "holding_id": 4434,
+      "holding_id": 4559,
       "etf_code": "00891",
       "constituent_code": "6223",
       "constituent_name": "旺矽",
@@ -12909,7 +12909,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4422,
+      "holding_id": 4547,
       "etf_code": "0052",
       "constituent_code": "2330",
       "constituent_name": "台積電",
@@ -12923,7 +12923,7 @@
       "live_pb": 7.95
      },
      {
-      "holding_id": 4423,
+      "holding_id": 4548,
       "etf_code": "0052",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -12937,7 +12937,7 @@
       "live_pb": 12.71
      },
      {
-      "holding_id": 4424,
+      "holding_id": 4549,
       "etf_code": "0052",
       "constituent_code": "2382",
       "constituent_name": "廣達",
@@ -12951,7 +12951,7 @@
       "live_pb": 3.35
      },
      {
-      "holding_id": 4425,
+      "holding_id": 4550,
       "etf_code": "0052",
       "constituent_code": "2308",
       "constituent_name": "台達電",
@@ -12965,7 +12965,7 @@
       "live_pb": 9.14
      },
      {
-      "holding_id": 4426,
+      "holding_id": 4551,
       "etf_code": "0052",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -12979,7 +12979,7 @@
       "live_pb": 5.34
      },
      {
-      "holding_id": 4427,
+      "holding_id": 4552,
       "etf_code": "0052",
       "constituent_code": "2345",
       "constituent_name": "智邦",
@@ -12993,7 +12993,7 @@
       "live_pb": 11.04
      },
      {
-      "holding_id": 4428,
+      "holding_id": 4553,
       "etf_code": "0052",
       "constituent_code": "3017",
       "constituent_name": "奇鋐",
@@ -13157,7 +13157,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4417,
+      "holding_id": 4542,
       "etf_code": "00713",
       "constituent_code": "2412",
       "constituent_name": "中華電",
@@ -13171,7 +13171,7 @@
       "live_pb": 3.42
      },
      {
-      "holding_id": 4418,
+      "holding_id": 4543,
       "etf_code": "00713",
       "constituent_code": "1216",
       "constituent_name": "統一",
@@ -13185,7 +13185,7 @@
       "live_pb": 3.08
      },
      {
-      "holding_id": 4419,
+      "holding_id": 4544,
       "etf_code": "00713",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -13199,7 +13199,7 @@
       "live_pb": 1.91
      },
      {
-      "holding_id": 4420,
+      "holding_id": 4545,
       "etf_code": "00713",
       "constituent_code": "2881",
       "constituent_name": "富邦金",
@@ -13213,7 +13213,7 @@
       "live_pb": 1.71
      },
      {
-      "holding_id": 4421,
+      "holding_id": 4546,
       "etf_code": "00713",
       "constituent_code": "2303",
       "constituent_name": "聯電",
@@ -13388,7 +13388,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4376,
+      "holding_id": 4501,
       "etf_code": "0050",
       "constituent_code": "2330",
       "constituent_name": "台積電",
@@ -13402,7 +13402,7 @@
       "live_pb": 7.95
      },
      {
-      "holding_id": 4377,
+      "holding_id": 4502,
       "etf_code": "0050",
       "constituent_code": "2317",
       "constituent_name": "鴻海",
@@ -13416,7 +13416,7 @@
       "live_pb": 1.54
      },
      {
-      "holding_id": 4378,
+      "holding_id": 4503,
       "etf_code": "0050",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -13430,7 +13430,7 @@
       "live_pb": 12.71
      },
      {
-      "holding_id": 4379,
+      "holding_id": 4504,
       "etf_code": "0050",
       "constituent_code": "2382",
       "constituent_name": "廣達",
@@ -13444,7 +13444,7 @@
       "live_pb": 3.35
      },
      {
-      "holding_id": 4380,
+      "holding_id": 4505,
       "etf_code": "0050",
       "constituent_code": "2308",
       "constituent_name": "台達電",
@@ -13458,7 +13458,7 @@
       "live_pb": 9.14
      },
      {
-      "holding_id": 4381,
+      "holding_id": 4506,
       "etf_code": "0050",
       "constituent_code": "2881",
       "constituent_name": "富邦金",
@@ -13472,7 +13472,7 @@
       "live_pb": 1.71
      },
      {
-      "holding_id": 4382,
+      "holding_id": 4507,
       "etf_code": "0050",
       "constituent_code": "2882",
       "constituent_name": "國泰金",
@@ -13486,7 +13486,7 @@
       "live_pb": 1.51
      },
      {
-      "holding_id": 4383,
+      "holding_id": 4508,
       "etf_code": "0050",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -13500,7 +13500,7 @@
       "live_pb": 1.91
      },
      {
-      "holding_id": 4384,
+      "holding_id": 4509,
       "etf_code": "0050",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -13514,7 +13514,7 @@
       "live_pb": 5.34
      },
      {
-      "holding_id": 4385,
+      "holding_id": 4510,
       "etf_code": "0050",
       "constituent_code": "2345",
       "constituent_name": "智邦",
@@ -13679,7 +13679,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4446,
+      "holding_id": 4571,
       "etf_code": "00400A",
       "constituent_code": "2330",
       "constituent_name": "台積電",
@@ -13693,7 +13693,7 @@
       "live_pb": 7.95
      },
      {
-      "holding_id": 4447,
+      "holding_id": 4572,
       "etf_code": "00400A",
       "constituent_code": "2317",
       "constituent_name": "鴻海",
@@ -13707,7 +13707,7 @@
       "live_pb": 1.54
      },
      {
-      "holding_id": 4448,
+      "holding_id": 4573,
       "etf_code": "00400A",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -13721,7 +13721,7 @@
       "live_pb": 1.91
      },
      {
-      "holding_id": 4449,
+      "holding_id": 4574,
       "etf_code": "00400A",
       "constituent_code": "2603",
       "constituent_name": "長榮",
@@ -13885,7 +13885,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4386,
+      "holding_id": 4511,
       "etf_code": "006208",
       "constituent_code": "2330",
       "constituent_name": "台積電",
@@ -13899,7 +13899,7 @@
       "live_pb": 7.95
      },
      {
-      "holding_id": 4387,
+      "holding_id": 4512,
       "etf_code": "006208",
       "constituent_code": "2317",
       "constituent_name": "鴻海",
@@ -13913,7 +13913,7 @@
       "live_pb": 1.54
      },
      {
-      "holding_id": 4388,
+      "holding_id": 4513,
       "etf_code": "006208",
       "constituent_code": "2454",
       "constituent_name": "聯發科",
@@ -13927,7 +13927,7 @@
       "live_pb": 12.71
      },
      {
-      "holding_id": 4389,
+      "holding_id": 4514,
       "etf_code": "006208",
       "constituent_code": "2382",
       "constituent_name": "廣達",
@@ -13941,7 +13941,7 @@
       "live_pb": 3.35
      },
      {
-      "holding_id": 4390,
+      "holding_id": 4515,
       "etf_code": "006208",
       "constituent_code": "2308",
       "constituent_name": "台達電",
@@ -13955,7 +13955,7 @@
       "live_pb": 9.14
      },
      {
-      "holding_id": 4391,
+      "holding_id": 4516,
       "etf_code": "006208",
       "constituent_code": "2881",
       "constituent_name": "富邦金",
@@ -13969,7 +13969,7 @@
       "live_pb": 1.71
      },
      {
-      "holding_id": 4392,
+      "holding_id": 4517,
       "etf_code": "006208",
       "constituent_code": "2882",
       "constituent_name": "國泰金",
@@ -13983,7 +13983,7 @@
       "live_pb": 1.51
      },
      {
-      "holding_id": 4393,
+      "holding_id": 4518,
       "etf_code": "006208",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -13997,7 +13997,7 @@
       "live_pb": 1.91
      },
      {
-      "holding_id": 4394,
+      "holding_id": 4519,
       "etf_code": "006208",
       "constituent_code": "3711",
       "constituent_name": "日月光投控",
@@ -14011,7 +14011,7 @@
       "live_pb": 5.34
      },
      {
-      "holding_id": 4395,
+      "holding_id": 4520,
       "etf_code": "006208",
       "constituent_code": "2345",
       "constituent_name": "智邦",
@@ -14174,7 +14174,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4435,
+      "holding_id": 4560,
       "etf_code": "0055",
       "constituent_code": "2881",
       "constituent_name": "富邦金",
@@ -14188,7 +14188,7 @@
       "live_pb": 1.71
      },
      {
-      "holding_id": 4436,
+      "holding_id": 4561,
       "etf_code": "0055",
       "constituent_code": "2882",
       "constituent_name": "國泰金",
@@ -14202,7 +14202,7 @@
       "live_pb": 1.51
      },
      {
-      "holding_id": 4437,
+      "holding_id": 4562,
       "etf_code": "0055",
       "constituent_code": "2891",
       "constituent_name": "中信金",
@@ -14216,7 +14216,7 @@
       "live_pb": 1.91
      },
      {
-      "holding_id": 4438,
+      "holding_id": 4563,
       "etf_code": "0055",
       "constituent_code": "2883",
       "constituent_name": "凱基金",
@@ -14378,7 +14378,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4439,
+      "holding_id": 4564,
       "etf_code": "00757",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp",
@@ -14392,7 +14392,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4440,
+      "holding_id": 4565,
       "etf_code": "00757",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc",
@@ -14406,7 +14406,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4441,
+      "holding_id": 4566,
       "etf_code": "00757",
       "constituent_code": "MSFT",
       "constituent_name": "Microsoft Corp",
@@ -14420,7 +14420,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4442,
+      "holding_id": 4567,
       "etf_code": "00757",
       "constituent_code": "AAPL",
       "constituent_name": "Apple Inc",
@@ -14434,7 +14434,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4444,
+      "holding_id": 4569,
       "etf_code": "00757",
       "constituent_code": "AMZN",
       "constituent_name": "Amazon.com",
@@ -14448,7 +14448,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4443,
+      "holding_id": 4568,
       "etf_code": "00757",
       "constituent_code": "META",
       "constituent_name": "Meta Platforms",
@@ -14462,7 +14462,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4445,
+      "holding_id": 4570,
       "etf_code": "00757",
       "constituent_code": "GOOGL",
       "constituent_name": "Alphabet Inc",
@@ -14624,7 +14624,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4452,
+      "holding_id": 4577,
       "etf_code": "00635U",
       "constituent_code": "COMEX_GOLD_FUT",
       "constituent_name": "COMEX黃金期貨契約",
@@ -14788,7 +14788,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4453,
+      "holding_id": 4578,
       "etf_code": "00631L",
       "constituent_code": "2330",
       "constituent_name": "台積電(透過台指期/臺灣50期貨200%曝險穿透)",
@@ -14950,7 +14950,7 @@
     },
     "holdings": [
      {
-      "holding_id": 4498,
+      "holding_id": 4623,
       "etf_code": "SOXL",
       "constituent_code": "NVDA",
       "constituent_name": "NVIDIA Corp (300%槓桿Swap曝險)",
@@ -14964,7 +14964,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4499,
+      "holding_id": 4624,
       "etf_code": "SOXL",
       "constituent_code": "AVGO",
       "constituent_name": "Broadcom Inc (300%槓桿Swap曝險)",
@@ -14978,7 +14978,7 @@
       "live_pb": null
      },
      {
-      "holding_id": 4500,
+      "holding_id": 4625,
       "etf_code": "SOXL",
       "constituent_code": "2330",
       "constituent_name": "台積電 TSMC ADR (300%槓桿曝險)",
@@ -15451,12 +15451,12 @@
   "note": "淨買賣金額 = 法人淨買賣股數 × 當日收盤價 (近似，實際成交均價不同)；只含有營收資料的上市櫃個股，不含 ETF 與權證。"
  },
  "multi_agent_center": {
-  "session_id": "SESSION-LIVE-20261127-230224",
+  "session_id": "SESSION-LIVE-20261127-230627",
   "origin": "live_audit",
   "topic": "ETF 與產業輪動系統即時稽核",
   "trigger_mode": "SCHEDULED_LIVE_AUDIT",
-  "started_at": "2026-11-27T23:02:24+08:00",
-  "completed_at": "2026-11-27T23:02:24+08:00",
+  "started_at": "2026-11-27T23:06:27+08:00",
+  "completed_at": "2026-11-27T23:06:27+08:00",
   "status": "COMPLETED_AWAITING_USER_APPROVAL",
   "production_integrity_verified": true,
   "production_checksums": {
@@ -15465,15 +15465,15 @@
    "phase2_to_6_engine.py": "df96e5ce98b715b1ea2e71a2cae0c7f5301c0959186925f57a69b0e663fa4e44",
    "live_api_connector.py": "8c8016a44512fa2b56c250b55fa94365b835486a76d69228a6e4db41b7d86724",
    "etf_engine.py": "ee520db7d452e017a2baee6f97e44f3fc4ec63bb9ced74e0ac8baa142e47f416",
-   "twfin_intelligence.db": "6fac9cb02bafae34b2ed7a0d9f954641560d68d926a5fd57411963d7a245240b"
+   "twfin_intelligence.db": "a9b59234a5fc06309f30b507f9d4cdee5eed5492ada6e094fbf62ec3f777cc8a"
   },
   "phase2_independent_reports": {
    "AGENT_01": {
     "agent_id": "AGENT_01",
     "agent_name": "Agent 01：長期配置研究員",
     "role": "Long-Term Allocation & Fund Quality Auditor",
-    "submitted_at": "2026-11-27T23:02:24+08:00",
-    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:02:24+08:00",
+    "submitted_at": "2026-11-27T23:06:27+08:00",
+    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:06:27+08:00",
     "current_system_problems": "1. 【P1】美股 ETF 的評分仍是手寫種子值：13/28 檔 ETF (全部美股) 的長短期分數與敘述沒有官方即時依據，不會隨資料更新。\n2. 【P2】部分台股 ETF 有 20% 以上的子分數缺資料 (以 50 分中性值代入)：債券、黃金等沒有持股或本益比的 ETF，底層品質與分散度無法計算；其長期配置總分的可比性較低。\n• 觀察：部分台股 ETF 單一持股高度集中 — 集中度是商品本身的結構特性，評分已用「分散度」子分數與「需注意集中風險」結論反映；持股權重為人工維護 (非即時)。",
     "research_evidence": "• 美股 ETF 的評分仍是手寫種子值：手寫評分：VOO、QQQ、VTI、SCHD、SMH、XLK 等 13 檔\n• 部分台股 ETF 有 20% 以上的子分數缺資料 (以 50 分中性值代入)：00937B 缺 20%；00679B 缺 20%；00635U 缺 20%\n• 部分台股 ETF 單一持股高度集中：0050 最大單一持股 56.8%；006208 最大單一持股 56.9%；0052 最大單一持股 63.2%；00635U 最大單一持股 99.0%；00631L 最大單一持股 113.6%",
     "identified_defects": "缺陷 01-1：美股 ETF 的評分仍是手寫種子值\n缺陷 01-2：部分台股 ETF 有 20% 以上的子分數缺資料 (以 50 分中性值代入)",
@@ -15535,8 +15535,8 @@
     "agent_id": "AGENT_02",
     "agent_name": "Agent 02：短中期市場時機研究員",
     "role": "Short/Mid-Term Market Timing & Flow Auditor",
-    "submitted_at": "2026-11-27T23:02:24+08:00",
-    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:02:24+08:00",
+    "submitted_at": "2026-11-27T23:06:27+08:00",
+    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:06:27+08:00",
     "current_system_problems": "1. 【P2】價格與法人買賣方向相反的 ETF：單日法人買賣金額很容易受單一事件影響，單看一天不宜過度解讀；需要連續多日確認。\n2. 【P2】多數台股 ETF 的短中期結論同為「風險偏高」：模型 B 的「大盤環境」子分數對所有股票型 ETF 相同，因此大盤轉弱時全體同向被拉低；這是公式的結構限制，不代表每檔 ETF 個別都有風險。\n• 觀察：大盤目前狀態 — 加權指數 39,308，相對 60 日均線 -12.9%，近 20 日年化波動 61.9%。",
     "research_evidence": "• 價格與法人買賣方向相反的 ETF：0050 (近 1 月 -13.8%、法人 +12.24%)；0052 (近 1 月 -14.0%、法人 +34.80%)；00891 (近 1 月 -22.9%、法人 +29.92%)；0055 (近 1 月 -19.8%、法人 +2.79%)；00400A (近 1 月 -23.2%、法人 +9.01%)；00631L (近 1 月 -29.2%、法人 +2.04%)\n• 多數台股 ETF 的短中期結論同為「風險偏高」：11/14 檔 (非槓桿型)\n• 大盤目前狀態：指數逐日歷史 (證交所 FMTQIK)",
     "identified_defects": "缺陷 02-1：價格與法人買賣方向相反的 ETF\n缺陷 02-2：多數台股 ETF 的短中期結論同為「風險偏高」",
@@ -15597,28 +15597,15 @@
     "agent_id": "AGENT_03",
     "agent_name": "Agent 03：數據品質研究員",
     "role": "Data Quality, Freshness & Cross-Source Consistency Auditor",
-    "submitted_at": "2026-11-27T23:02:24+08:00",
-    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:02:24+08:00",
-    "current_system_problems": "1. 【P0】數據品質檢查 7：重複與唯一性：trend_early_warnings：IND_AI_SERVER、IND_CONSTRUCTION、IND_CPO_NET、IND_FIN_HOLDING、IND_SEMI_FOUNDRY、IND_STEEL_PLASTIC 等 7 檔\n2. 【P1】台股 ETF 缺少淨值與折溢價的官方來源：折溢價是 ETF 追價風險的核心指標，目前評分沒有納入；官方 OpenAPI 沒有 ETF 淨值。\n3. 【P2】數據品質檢查 6：手寫內容比例：仍有手寫內容：趨勢預警 7 列；個股研究名單 11 列；固定研究報告 4 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列",
-    "research_evidence": "• 數據品質檢查 7：重複與唯一性：trend_early_warnings：IND_AI_SERVER、IND_CONSTRUCTION、IND_CPO_NET、IND_FIN_HOLDING、IND_SEMI_FOUNDRY、IND_STEEL_PLASTIC 等 7 檔\n• 台股 ETF 缺少淨值與折溢價的官方來源：15 檔台股 ETF 的淨值與折溢價為空\n• 數據品質檢查 6：手寫內容比例：仍有手寫內容：趨勢預警 7 列；個股研究名單 11 列；固定研究報告 4 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列",
-    "identified_defects": "缺陷 03-1：數據品質檢查 7：重複與唯一性\n缺陷 03-2：台股 ETF 缺少淨值與折溢價的官方來源\n缺陷 03-3：數據品質檢查 6：手寫內容比例",
+    "submitted_at": "2026-11-27T23:06:27+08:00",
+    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:06:27+08:00",
+    "current_system_problems": "1. 【P1】台股 ETF 缺少淨值與折溢價的官方來源：折溢價是 ETF 追價風險的核心指標，目前評分沒有納入；官方 OpenAPI 沒有 ETF 淨值。\n2. 【P2】數據品質檢查 6：手寫內容比例：仍有手寫內容：固定研究報告 1 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列",
+    "research_evidence": "• 台股 ETF 缺少淨值與折溢價的官方來源：15 檔台股 ETF 的淨值與折溢價為空\n• 數據品質檢查 6：手寫內容比例：仍有手寫內容：固定研究報告 1 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列",
+    "identified_defects": "缺陷 03-1：台股 ETF 缺少淨值與折溢價的官方來源\n缺陷 03-2：數據品質檢查 6：手寫內容比例",
     "improvement_suggestions": "建議 1（台股 ETF 缺少淨值與折溢價的官方來源）：評估各投信公開網站的每日淨值 (注意網頁結構穩定性與使用條款)，取得後在評分「估值與價位」加入折溢價。",
     "expected_effects": "把溢價追價風險納入短中期分數。",
     "potential_risks": "網頁改版會讓抓取失效，需要健康度監控。",
     "findings": [
-     {
-      "key": "DQ_CHECK_7",
-      "agent": "AGENT_03",
-      "severity": "P0",
-      "title": "數據品質檢查 7：重複與唯一性",
-      "detail": "trend_early_warnings：IND_AI_SERVER、IND_CONSTRUCTION、IND_CPO_NET、IND_FIN_HOLDING、IND_SEMI_FOUNDRY、IND_STEEL_PLASTIC 等 7 檔",
-      "evidence": "trend_early_warnings：IND_AI_SERVER、IND_CONSTRUCTION、IND_CPO_NET、IND_FIN_HOLDING、IND_SEMI_FOUNDRY、IND_STEEL_PLASTIC 等 7 檔",
-      "topic": "duplicates",
-      "n": null,
-      "insufficient": false,
-      "gap": false,
-      "proposal": null
-     },
      {
       "key": "NAV_NO_SOURCE",
       "agent": "AGENT_03",
@@ -15646,8 +15633,8 @@
       "agent": "AGENT_03",
       "severity": "P2",
       "title": "數據品質檢查 6：手寫內容比例",
-      "detail": "仍有手寫內容：趨勢預警 7 列；個股研究名單 11 列；固定研究報告 4 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列",
-      "evidence": "仍有手寫內容：趨勢預警 7 列；個股研究名單 11 列；固定研究報告 4 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列",
+      "detail": "仍有手寫內容：固定研究報告 1 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列",
+      "evidence": "仍有手寫內容：固定研究報告 1 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列",
       "topic": "seed_inventory",
       "n": null,
       "insufficient": false,
@@ -15660,8 +15647,8 @@
     "agent_id": "AGENT_04",
     "agent_name": "Agent 04：風險管理研究員",
     "role": "Portfolio Risk, Redundancy & Liquidity Auditor",
-    "submitted_at": "2026-11-27T23:02:24+08:00",
-    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:02:24+08:00",
+    "submitted_at": "2026-11-27T23:06:27+08:00",
+    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:06:27+08:00",
     "current_system_problems": "1. 【P1】槓桿型 ETF 占台股 ETF 成交值比重偏高：槓桿型每日重設，持有越久波動耗損越大；成交值集中在此代表短線交易盛行，不代表適合長期持有。\n2. 【P2】前十大持股重疊度高的 ETF 組合：重疊度只用前十大持股計算，且持股權重為人工維護 (非即時)，僅供參考。\n3. 【P2】買賣價差偏寬的台股 ETF：價差越寬，實際成交價與市價差越大；只有上市 ETF 有官方的最後揭示買賣價。",
     "research_evidence": "• 槓桿型 ETF 占台股 ETF 成交值比重偏高：00631L 占 39% (槓桿 113.9 億 / 全部 291.0 億)\n• 前十大持股重疊度高的 ETF 組合：0050×006208 78%；0050×0052 68%；006208×0052 68%\n• 買賣價差偏寬的台股 ETF：00713 16.8 bps",
     "identified_defects": "缺陷 04-1：槓桿型 ETF 占台股 ETF 成交值比重偏高\n缺陷 04-2：前十大持股重疊度高的 ETF 組合\n缺陷 04-3：買賣價差偏寬的台股 ETF",
@@ -15723,10 +15710,10 @@
     "agent_id": "AGENT_05",
     "agent_name": "Agent 05：反方審查研究員",
     "role": "Devil's Advocate & Assumption Challenger",
-    "submitted_at": "2026-11-27T23:02:24+08:00",
-    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:02:24+08:00",
+    "submitted_at": "2026-11-27T23:06:27+08:00",
+    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:06:27+08:00",
     "current_system_problems": "1. 【P1】「即時評分有預測力」目前沒有任何驗證：前瞻回測只計即時評分之後的快照；目前 1 個快照日，至少需要 20 個才有統計意義。在這之前，分數與預警等級只是描述性指標，不能當作預測。\n2. 【P1】畫面上仍有手寫內容：這些列不會隨資料更新；畫面已標示來源，但使用者仍可能忽略標籤。\n3. 【P2】預警 LEVEL R 的比例可能是百分位評分的人為效應：各子分數是產業之間的相對百分位，資金流向分數低於門檻的產業比例天生偏高；即使整體市場很強，也總有產業落在後段。",
-    "research_evidence": "• 「即時評分有預測力」目前沒有任何驗證：快照日 1/20\n• 畫面上仍有手寫內容：趨勢預警 7 列；個股研究名單 11 列；固定研究報告 4 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列\n• 預警 LEVEL R 的比例可能是百分位評分的人為效應：7/20 個產業 (35%)：金融－金控、銀行、保險與證券、航運與航空、機械、工具機、汽車零組件與紡織食品、營建與不動產代銷、營建與不動產代銷、鋼鐵、塑化、水泥與化工 等 7 檔",
+    "research_evidence": "• 「即時評分有預測力」目前沒有任何驗證：快照日 1/20\n• 畫面上仍有手寫內容：固定研究報告 1 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列\n• 預警 LEVEL R 的比例可能是百分位評分的人為效應：5/13 個產業 (38%)：金融－金控、銀行、保險與證券、航運與航空、機械、工具機、汽車零組件與紡織食品、營建與不動產代銷、鋼鐵、塑化、水泥與化工",
     "identified_defects": "缺陷 05-1：「即時評分有預測力」目前沒有任何驗證\n缺陷 05-2：畫面上仍有手寫內容\n缺陷 05-3：預警 LEVEL R 的比例可能是百分位評分的人為效應",
     "improvement_suggestions": "建議 1（預警 LEVEL R 的比例可能是百分位評分的人為效應）：改用絕對門檻 (例如相對大盤超額報酬低於 -X%) 作為 LEVEL R 條件，或在畫面註明「LEVEL R 是相對落後，不是絕對撤退」。",
     "expected_effects": "避免把「相對落後」誤讀成「資金撤出」。",
@@ -15751,9 +15738,9 @@
       "severity": "P1",
       "title": "畫面上仍有手寫內容",
       "detail": "這些列不會隨資料更新；畫面已標示來源，但使用者仍可能忽略標籤。",
-      "evidence": "趨勢預警 7 列；個股研究名單 11 列；固定研究報告 4 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列",
+      "evidence": "固定研究報告 1 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列",
       "topic": "seed_inventory",
-      "n": 39,
+      "n": 18,
       "insufficient": false,
       "gap": false,
       "proposal": null
@@ -15764,9 +15751,9 @@
       "severity": "P2",
       "title": "預警 LEVEL R 的比例可能是百分位評分的人為效應",
       "detail": "各子分數是產業之間的相對百分位，資金流向分數低於門檻的產業比例天生偏高；即使整體市場很強，也總有產業落在後段。",
-      "evidence": "7/20 個產業 (35%)：金融－金控、銀行、保險與證券、航運與航空、機械、工具機、汽車零組件與紡織食品、營建與不動產代銷、營建與不動產代銷、鋼鐵、塑化、水泥與化工 等 7 檔",
+      "evidence": "5/13 個產業 (38%)：金融－金控、銀行、保險與證券、航運與航空、機械、工具機、汽車零組件與紡織食品、營建與不動產代銷、鋼鐵、塑化、水泥與化工",
       "topic": "level_r",
-      "n": 20,
+      "n": 13,
       "insufficient": false,
       "gap": false,
       "proposal": {
@@ -15786,10 +15773,10 @@
     "agent_id": "AGENT_06",
     "agent_name": "Agent 06：系統架構與測試工程師",
     "role": "Pipeline Health & System Engineering Auditor",
-    "submitted_at": "2026-11-27T23:02:24+08:00",
-    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:02:24+08:00",
+    "submitted_at": "2026-11-27T23:06:27+08:00",
+    "data_timestamp_used": "資料庫即時快照；稽核時間 2026-11-27T23:06:27+08:00",
     "current_system_problems": "本次規則稽核沒有發現需要處理的問題。\n• 觀察：後端程式規模 — 僅供參考的規模統計。",
-    "research_evidence": "• 後端程式規模：24 個模組、共 8,233 行；最大：etf_engine.py 1121 行、server.py 963 行、db.py 691 行",
+    "research_evidence": "• 後端程式規模：24 個模組、共 8,235 行；最大：etf_engine.py 1121 行、server.py 963 行、db.py 691 行",
     "identified_defects": "無",
     "improvement_suggestions": "本次沒有需要提案的項目。",
     "expected_effects": "維持目前的資料與評分品質。",
@@ -15801,7 +15788,7 @@
       "severity": "INFO",
       "title": "後端程式規模",
       "detail": "僅供參考的規模統計。",
-      "evidence": "24 個模組、共 8,233 行；最大：etf_engine.py 1121 行、server.py 963 行、db.py 691 行",
+      "evidence": "24 個模組、共 8,235 行；最大：etf_engine.py 1121 行、server.py 963 行、db.py 691 行",
       "topic": "code",
       "n": 24,
       "insufficient": false,
@@ -15824,9 +15811,9 @@
     "reviewer_id": "AGENT_02",
     "reviewer_name": "Agent 02：短中期市場時機研究員",
     "target_agent_id": "AGENT_03",
-    "target_topic": "審查 Agent 03：數據品質研究員 的最高嚴重度發現：數據品質檢查 7：重複與唯一性",
+    "target_topic": "審查 Agent 03：數據品質研究員 的最高嚴重度發現：台股 ETF 缺少淨值與折溢價的官方來源",
     "review_stance": "SUPPORT (檢查證據與樣本數後支持)",
-    "comment": "對「數據品質檢查 7：重複與唯一性」：已核對證據與樣本數 (n=N/A)，支持其嚴重度 P0。證據：trend_early_warnings：IND_AI_SERVER、IND_CONSTRUCTION、IND_CPO_NET、IND_FIN_HOLDING、IND_SEMI_FOUNDRY、IND_STEEL_PLASTIC 等 7 檔"
+    "comment": "對「台股 ETF 缺少淨值與折溢價的官方來源」：已核對證據與樣本數 (n=15)，支持其嚴重度 P1。證據：15 檔台股 ETF 的淨值與折溢價為空"
    },
    {
     "reviewer_id": "AGENT_03",
@@ -15924,11 +15911,11 @@
    }
   ],
   "phase5_synthesis": {
-   "session_id": "SESSION-LIVE-20261127-230224",
-   "synthesized_at": "2026-11-27T23:02:24+08:00",
+   "session_id": "SESSION-LIVE-20261127-230627",
+   "synthesized_at": "2026-11-27T23:06:27+08:00",
    "orchestrator": "ARGON_ORCHESTRATOR",
    "consensus_solutions": [
-    "【03/05 號 Agent 共同指出】數據品質檢查 6：手寫內容比例：仍有手寫內容：趨勢預警 7 列；個股研究名單 11 列；固定研究報告 4 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列"
+    "【03/05 號 Agent 共同指出】數據品質檢查 6：手寫內容比例：仍有手寫內容：固定研究報告 1 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列"
    ],
    "divergent_views_preserved": [
     {
@@ -16173,8 +16160,8 @@
    },
    {
     "proposal_id": "LIVE-IMPROVE-B_UNIFORMLY_WEAK",
-    "session_id": "SESSION-LIVE-20261127-230224",
-    "created_at": "2026-11-27T23:02:24+08:00",
+    "session_id": "SESSION-LIVE-20261127-230627",
+    "created_at": "2026-11-27T23:06:27+08:00",
     "proposer_agents": [
      "AGENT_02"
     ],
@@ -16182,7 +16169,7 @@
     "status": "PENDING_APPROVAL",
     "title": "多數台股 ETF 的短中期結論同為「風險偏高」",
     "current_problem": "模型 B 的「大盤環境」子分數對所有股票型 ETF 相同，因此大盤轉弱時全體同向被拉低；這是公式的結構限制，不代表每檔 ETF 個別都有風險。",
-    "problem_evidence": "規則稽核 (資料庫即時快照 2026-11-27T23:02:24+08:00)：11/14 檔 (非槓桿型)",
+    "problem_evidence": "規則稽核 (資料庫即時快照 2026-11-27T23:06:27+08:00)：11/14 檔 (非槓桿型)",
     "proposed_change": "把「大盤環境」子分數改為各 ETF 對大盤的敏感度 (Beta) 加權，而不是對全體套用同一個數值。",
     "diff_preview": "",
     "expected_effect": "讓防禦型 ETF (低 Beta) 與進攻型 ETF 在同一大盤環境下有不同的環境分數。",
@@ -16205,8 +16192,8 @@
    },
    {
     "proposal_id": "LIVE-IMPROVE-LEVEL_R_ARTIFACT",
-    "session_id": "SESSION-LIVE-20261127-230224",
-    "created_at": "2026-11-27T23:02:24+08:00",
+    "session_id": "SESSION-LIVE-20261127-230627",
+    "created_at": "2026-11-27T23:06:27+08:00",
     "proposer_agents": [
      "AGENT_05"
     ],
@@ -16214,7 +16201,7 @@
     "status": "PENDING_APPROVAL",
     "title": "預警 LEVEL R 的比例可能是百分位評分的人為效應",
     "current_problem": "各子分數是產業之間的相對百分位，資金流向分數低於門檻的產業比例天生偏高；即使整體市場很強，也總有產業落在後段。",
-    "problem_evidence": "規則稽核 (資料庫即時快照 2026-11-27T23:02:24+08:00)：7/20 個產業 (35%)：金融－金控、銀行、保險與證券、航運與航空、機械、工具機、汽車零組件與紡織食品、營建與不動產代銷、營建與不動產代銷、鋼鐵、塑化、水泥與化工 等 7 檔",
+    "problem_evidence": "規則稽核 (資料庫即時快照 2026-11-27T23:06:27+08:00)：5/13 個產業 (38%)：金融－金控、銀行、保險與證券、航運與航空、機械、工具機、汽車零組件與紡織食品、營建與不動產代銷、鋼鐵、塑化、水泥與化工",
     "proposed_change": "改用絕對門檻 (例如相對大盤超額報酬低於 -X%) 作為 LEVEL R 條件，或在畫面註明「LEVEL R 是相對落後，不是絕對撤退」。",
     "diff_preview": "",
     "expected_effect": "避免把「相對落後」誤讀成「資金撤出」。",
@@ -16238,8 +16225,8 @@
    },
    {
     "proposal_id": "LIVE-IMPROVE-LEVERAGED_TURNOVER",
-    "session_id": "SESSION-LIVE-20261127-230224",
-    "created_at": "2026-11-27T23:02:24+08:00",
+    "session_id": "SESSION-LIVE-20261127-230627",
+    "created_at": "2026-11-27T23:06:27+08:00",
     "proposer_agents": [
      "AGENT_04"
     ],
@@ -16247,7 +16234,7 @@
     "status": "PENDING_APPROVAL",
     "title": "槓桿型 ETF 占台股 ETF 成交值比重偏高",
     "current_problem": "槓桿型每日重設，持有越久波動耗損越大；成交值集中在此代表短線交易盛行，不代表適合長期持有。（經交叉審查，結論為暫定）",
-    "problem_evidence": "規則稽核 (資料庫即時快照 2026-11-27T23:02:24+08:00)：00631L 占 39% (槓桿 113.9 億 / 全部 291.0 億)",
+    "problem_evidence": "規則稽核 (資料庫即時快照 2026-11-27T23:06:27+08:00)：00631L 占 39% (槓桿 113.9 億 / 全部 291.0 億)",
     "proposed_change": "在 ETF 卡片與比較器對槓桿型標示「近 N 日占市場成交值比重」，並在持倉診斷中對槓桿型累積曝險加警示。",
     "diff_preview": "",
     "expected_effect": "讓使用者看見自己的持倉是否過度集中在短線工具。",
@@ -16271,8 +16258,8 @@
    },
    {
     "proposal_id": "LIVE-IMPROVE-NAV_NO_SOURCE",
-    "session_id": "SESSION-LIVE-20261127-230224",
-    "created_at": "2026-11-27T23:02:24+08:00",
+    "session_id": "SESSION-LIVE-20261127-230627",
+    "created_at": "2026-11-27T23:06:27+08:00",
     "proposer_agents": [
      "AGENT_03"
     ],
@@ -16280,7 +16267,7 @@
     "status": "PENDING_APPROVAL",
     "title": "台股 ETF 缺少淨值與折溢價的官方來源",
     "current_problem": "折溢價是 ETF 追價風險的核心指標，目前評分沒有納入；官方 OpenAPI 沒有 ETF 淨值。",
-    "problem_evidence": "規則稽核 (資料庫即時快照 2026-11-27T23:02:24+08:00)：15 檔台股 ETF 的淨值與折溢價為空",
+    "problem_evidence": "規則稽核 (資料庫即時快照 2026-11-27T23:06:27+08:00)：15 檔台股 ETF 的淨值與折溢價為空",
     "proposed_change": "評估各投信公開網站的每日淨值 (注意網頁結構穩定性與使用條款)，取得後在評分「估值與價位」加入折溢價。",
     "diff_preview": "",
     "expected_effect": "把溢價追價風險納入短中期分數。",
@@ -16304,8 +16291,8 @@
    },
    {
     "proposal_id": "LIVE-IMPROVE-US_ETF_SEED_SCORES",
-    "session_id": "SESSION-LIVE-20261127-230224",
-    "created_at": "2026-11-27T23:02:24+08:00",
+    "session_id": "SESSION-LIVE-20261127-230627",
+    "created_at": "2026-11-27T23:06:27+08:00",
     "proposer_agents": [
      "AGENT_01"
     ],
@@ -16313,7 +16300,7 @@
     "status": "PENDING_APPROVAL",
     "title": "美股 ETF 的評分仍是手寫種子值",
     "current_problem": "13/28 檔 ETF (全部美股) 的長短期分數與敘述沒有官方即時依據，不會隨資料更新。",
-    "problem_evidence": "規則稽核 (資料庫即時快照 2026-11-27T23:02:24+08:00)：手寫評分：VOO、QQQ、VTI、SCHD、SMH、XLK 等 13 檔",
+    "problem_evidence": "規則稽核 (資料庫即時快照 2026-11-27T23:06:27+08:00)：手寫評分：VOO、QQQ、VTI、SCHD、SMH、XLK 等 13 檔",
     "proposed_change": "評估可合法使用的美股行情來源 (需確認授權與穩定性)，接入後套用與台股相同的公式評分；在此之前維持「手寫評分」標籤。",
     "diff_preview": "",
     "expected_effect": "讓美股 ETF 與台股 ETF 使用同一套可驗證的公式。",
@@ -16337,9 +16324,9 @@
    }
   ],
   "data_quality_audit": {
-   "session_id": "SESSION-LIVE-20261127-230224",
+   "session_id": "SESSION-LIVE-20261127-230627",
    "auditor": "AGENT_03 (數據品質研究員)",
-   "audited_at": "2026-11-27T23:02:24+08:00",
+   "audited_at": "2026-11-27T23:06:27+08:00",
    "seven_statutory_checks": [
     {
      "check_no": 1,
@@ -16363,7 +16350,7 @@
      "check_no": 4,
      "name": "官方統計 vs 產業彙總一致性",
      "status": "PASS",
-     "detail": "官方外資+投信 -211.1 億；各產業彙總 -450.3 億 (只含有營收資料的個股，不含 ETF 與其他證券)，涵蓋約 213%"
+     "detail": "官方外資+投信 -211.1 億；各產業彙總 -224.6 億 (只含有營收資料的個股，不含 ETF 與其他證券)，涵蓋約 106%"
     },
     {
      "check_no": 5,
@@ -16375,13 +16362,13 @@
      "check_no": 6,
      "name": "手寫內容比例",
      "status": "WARNING",
-     "detail": "仍有手寫內容：趨勢預警 7 列；個股研究名單 11 列；固定研究報告 4 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列"
+     "detail": "仍有手寫內容：固定研究報告 1 列；ETF 雙軌評分 13 列；ETF 研究報告 3 列；產業評分 1 列"
     },
     {
      "check_no": 7,
      "name": "重複與唯一性",
-     "status": "FAIL",
-     "detail": "trend_early_warnings：IND_AI_SERVER、IND_CONSTRUCTION、IND_CPO_NET、IND_FIN_HOLDING、IND_SEMI_FOUNDRY、IND_STEEL_PLASTIC 等 7 檔"
+     "status": "PASS",
+     "detail": "沒有重複列"
     }
    ]
   },
