@@ -1612,13 +1612,39 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
 
       <!-- 四層全景桑基資金流向地圖 -->
       <div class="sankey-wrapper" id="sankeyWrapperBox">
+        <!-- 分頁：即時資金流向 (官方當日盤後資料) / 總體背景 (央行與經濟部的月資料，原本的四層全景圖) -->
+        <div id="sankeyModeBar" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+          <button id="sankeyModeLiveBtn" class="btn btn-sm btn-play" aria-pressed="true" onclick="setSankeyMode('live')">⚡ 即時資金流向（法人買賣超 → 產業）</button>
+          <button id="sankeyModeMacroBtn" class="btn btn-sm" aria-pressed="false" onclick="setSankeyMode('macro')">🏦 總體背景（月資料）</button>
+        </div>
+
+        <div id="sankeyLivePane">
+          <div class="sankey-header-bar">
+            <div>
+              <div class="panel-title">
+                <span class="badge badge-grade-A">即時</span>
+                <span>三大法人資金流向各產業</span>
+              </div>
+              <div class="panel-sub" id="liveSankeySub">載入中…</div>
+            </div>
+          </div>
+          <div class="kpi-tiles" id="liveSankeyKpis"></div>
+          <div class="sankey-stage" style="overflow-x:auto;"><div id="liveSankeyContainer"></div></div>
+          <div id="liveSankeyNote" class="callout" style="margin-top:12px; --callout-col:var(--accent-emerald);"></div>
+        </div>
+
+        <div id="sankeyMacroPane" style="display:none;">
+        <div class="callout" style="margin-bottom:14px; --callout-col:var(--accent-orange);">
+          🏦 <strong>總體背景（月資料，非即時）</strong>：下圖的銀行存款、外匯存款、放款、外銷訂單等來自央行、經濟部與 MOPS 的<strong>月統計</strong>（多數截至 2026-09 / 10），
+          流量與文字是人工整理的快照，<strong>不會隨每日同步更新</strong>。要看每天的資金動向請切換到「即時資金流向」。
+        </div>
         <div class="sankey-header-bar">
           <div>
             <div class="panel-title">
-              <span class="badge badge-grade-A">即時資金動脈</span>
+              <span class="badge badge-grade-C">月資料</span>
               <span id="sankeyMainTitle">台灣總體資金流向全景圖</span>
             </div>
-            <div class="panel-sub">2026 年 10 月 – 11 月 21 日｜流帶粗細＝資金規模，點擊流帶可釘選明細</div>
+            <div class="panel-sub">資料期間 2026 年 9～10 月（人工整理）｜流帶粗細＝資金規模，點擊流帶可釘選明細</div>
           </div>
           <div class="panel-tools">
             <select id="sankeyPeriodSelect" onchange="onSankeyPeriodChange(this.value)">
@@ -1683,6 +1709,7 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
 
         <div id="sankeyAltListView" style="display:none; margin-top:12px;"></div>
         <div id="sankeyPeriodNarrative" class="callout" style="margin-top:14px; --callout-col:var(--accent-emerald);"></div>
+        </div><!-- /sankeyMacroPane -->
       </div>
 
       <!-- 產業資金熱度地圖 + 內嵌時間軸 -->
@@ -1690,7 +1717,7 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
         <div class="sankey-header-bar">
           <div>
             <div class="panel-title">19 大產業板塊熱度地圖</div>
-            <div class="panel-sub">點擊板塊查看第二層分析；拖曳時間軸觀看歷史輪動</div>
+            <div class="panel-sub">點擊板塊查看第二層分析；最右側「最新」為即時評分，其餘為手寫的歷史情境回顧</div>
           </div>
           <div class="heatmap-legend">
             <span><i class="legend-dot" style="background:#10b981;"></i>加速流入 A</span>
@@ -1727,7 +1754,7 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
             <span>2025 下半年<br/>水冷拐點／打房</span>
             <span>2026 上半年<br/>重電／測試崛起</span>
             <span>2026 年 8~9 月<br/>劃撥 4.7 兆創高</span>
-            <span style="color:var(--accent-emerald); font-weight:700;">2026 年 10~11 月<br/>營收 6.86 兆</span>
+            <span id="timelineLatestStep" style="color:var(--accent-emerald); font-weight:700;">最新<br/>即時評分</span>
           </div>
         </div>
 
@@ -2990,6 +3017,7 @@ function renderAll() {
   renderTenSecPulse();
   renderEightVitalCards();
   renderSankeyDiagram(parseInt(document.getElementById('sankeyPeriodSelect').value || '4', 10));
+  initSankeyMode();
   renderIndustryHeatmap();
   onTimelineSliderInput(document.getElementById('timelineRangeInput').value || 5);
   renderSixLeaderboards();
@@ -3926,7 +3954,7 @@ function getExpanded17Sectors(overrideMap = {}) {
     { id: "IND_BIO_RETAIL", displayTitle: "14. 生技醫療與新藥研發", icon: "🧬", subOverride: "新藥(藥華藥 6446)、CDMO與高階醫材（次產業異質觀察）" },
     { id: "IND_BIO_RETAIL", displayTitle: "15. 觀光與連鎖餐飲", icon: "🍽️", subOverride: "連鎖餐飲(王品 2727)、飯店旅宿（外食CPI +3.01%轉嫁觀察）" },
     { id: "IND_BIO_RETAIL", displayTitle: "16. 零售百貨與電信防禦", icon: "🛍️", subOverride: "電信防禦龍頭(中華電 2412)、超商百貨內需服務" },
-    { id: "IND_CONSTRUCTION", displayTitle: "17. 營建、塑化與鋼鐵原物料", icon: "🏗️", subOverride: "營建(興富發 2542, 47.1分) / 塑化鋼鐵(台塑/中鋼, 43.0分)" }
+    { id: "IND_CONSTRUCTION", displayTitle: "17. 營建、塑化與鋼鐵原物料", icon: "🏗️", subOverride: "營建(興富發 2542)、塑化鋼鐵(台塑/中鋼)" }
   ];
 
   // 若想要把鋼鐵與塑化獨立顯示也可直接對應
@@ -3971,15 +3999,45 @@ function renderIndustryHeatmap(overrideMap = {}) {
   const sectors = getExpanded17Sectors(overrideMap);
   window.__HEATMAP_SECTORS__ = sectors;
   const grid = document.getElementById('industryHeatmapGrid');
+  const ym = String(((STATE.live_top_companies || [])[0] || {}).data_ym || '');
+  const monthLabel = /^\d{4,}$/.test(ym) ? `${parseInt(ym.slice(0, -2), 10) + 1911}年${parseInt(ym.slice(-2), 10)}月` : '最新月';
+  window.__HEATMAP_MONTH__ = monthLabel;
+
+  // 說明目前顯示的分數來源 (即時重算 / 種子)；時間軸前 5 格是手寫歷史情境，另外標示
+  const liveInds = (STATE.industries || []).filter(i => i.score_source === 'live');
+  let note = document.getElementById('heatmapSourceNote');
+  if (!note) {
+    note = document.createElement('div');
+    note.id = 'heatmapSourceNote';
+    note.style.cssText = 'font-size:12.5px; margin:8px 2px 10px; color:var(--text-muted);';
+    grid.parentNode.insertBefore(note, grid);
+  }
+  const latestSel = !document.getElementById('timelineRangeInput') || document.getElementById('timelineRangeInput').value === '5';
+  if (!latestSel) {
+    note.textContent = '🕰️ 目前顯示的是「歷史情境」(手寫的時期回顧，用來說明當時的輪動，沒有對應的歷史資料可重算)，不是即時分數。拖到最右側「最新」可回到即時分數。';
+  } else if (liveInds.length) {
+    const asOf = (liveInds[0].as_of_date || '').slice(0, 10);
+    note.textContent = `✅ 分數由官方即時資料重算（${asOf} 盤後；${liveInds.length} 個產業，每個交易日收盤後更新）。方塊顏色為資金流向狀態，分數為啟用模型的綜合總分。`;
+  } else {
+    note.textContent = '⚠️ 此快照的分數為內建種子值，尚未啟用即時評分，不會隨資料更新。';
+  }
 
   grid.innerHTML = sectors.map((sec, idx) => {
     const hInfo = stateToHeatClass(sec.effectiveState);
-    const isUnratable = sec.total_weighted_score === null || sec.rotation_state === 'INSUFFICIENT_DATA';
-    const scoreDisplay = isUnratable ? '觀察中' : `${sec.total_weighted_score.toFixed(1)} 分`;
+    const isUnratable = sec.total_weighted_score == null || sec.rotation_state === 'INSUFFICIENT_DATA';
+    // 歷史情境的顏色是手寫的，不能配上現在的即時分數，否則會被誤認為當時的分數
+    const scoreDisplay = !latestSel ? '歷史情境' : (isUnratable ? '觀察中' : `${sec.total_weighted_score.toFixed(1)} 分`);
     const agg = sec.live_agg || {};
     const compNames = sec.focusTicker || (sec.representative_companies || []).slice(0, 2).map(c => `${c.ticker} ${c.name}`).join('、');
 
-    const sgn = (v) => (v >= 0 ? '+' : '') + v + '%';
+    const lm = sec.live_metrics || null;
+    const isLive = sec.score_source === 'live' && lm;
+    const sgn = (v) => (v === null || v === undefined || Number.isNaN(v)) ? 'N/A' : (v >= 0 ? '+' : '') + v + '%';
+    const cls = (v) => (v === null || v === undefined || v >= 0) ? 'pos' : 'neg';
+    const yoyVal = isLive ? (lm.yoy === null ? null : Math.round(lm.yoy * 10) / 10) : sec.rev_yoy_pct;
+    // 第二個指標：即時評分時顯示「近 N 日相對大盤」(類股報酬指數)；種子分數時維持原本的 20 日相對強弱
+    const rsVal = isLive ? lm.rs_pct : sec.rel_strength_20d;
+    const rsLabel = isLive ? `近 ${lm.rs_days || '?'} 日相對大盤` : '20 日相對強弱';
     return `
       <div class="heat-tile ${hInfo.cls}" onclick="openIndustryDrawer(${idx})">
         <div>
@@ -3992,8 +4050,8 @@ function renderIndustryHeatmap(overrideMap = {}) {
         </div>
         <div>
           <div class="ht-metrics">
-            <div><div class="ht-m-label">10 月營收 YoY</div><div class="ht-m-val ${sec.rev_yoy_pct >= 0 ? 'pos' : 'neg'}">${sgn(sec.rev_yoy_pct)}</div></div>
-            <div><div class="ht-m-label">20 日相對強弱</div><div class="ht-m-val ${sec.rel_strength_20d >= 0 ? 'pos' : 'neg'}">${sgn(sec.rel_strength_20d)}</div></div>
+            <div><div class="ht-m-label">${monthLabel} 營收 YoY</div><div class="ht-m-val ${cls(yoyVal)}">${sgn(yoyVal)}</div></div>
+            <div><div class="ht-m-label">${rsLabel}</div><div class="ht-m-val ${cls(rsVal)}">${sgn(rsVal)}</div></div>
           </div>
           <div class="ht-comp" style="margin-top:8px;" title="${compNames}">${compNames}</div>
         </div>
@@ -4006,17 +4064,25 @@ function openIndustryDrawer(idx) {
   const sec = window.__HEATMAP_SECTORS__[idx];
   if (!sec) return;
   const hInfo = stateToHeatClass(sec.effectiveState);
-  const isUnratable = sec.total_weighted_score === null || sec.rotation_state === 'INSUFFICIENT_DATA';
+  const isUnratable = sec.total_weighted_score == null || sec.rotation_state === 'INSUFFICIENT_DATA';
   const agg = sec.live_agg || {};
   const comps = (sec.representative_companies || []).map(c =>
     `<span class="badge badge-grade-B" style="margin:3px 4px 0 0;">${c.ticker} ${c.name}（${c.role}）</span>`
   ).join('');
 
-  const q1 = `${sec.title} 目前處於「<strong>${hInfo.label}</strong>」，景氣循環位置為「<strong>${sec.cycle_stage}</strong>」，轉折訊號為「<strong>${sec.transition_tag}</strong>」。20日相對大盤表現 ${sec.rel_strength_20d >= 0 ? '+' : ''}${sec.rel_strength_20d}%，60日相對大盤 ${sec.rel_strength_60d >= 0 ? '+' : ''}${sec.rel_strength_60d}%。`;
+  const lmX = sec.live_metrics || null;
+  const isLiveX = sec.score_source === 'live' && lmX;
+  const fmtN = (v, d = 1) => (v === null || v === undefined) ? 'N/A' : (v >= 0 ? '+' : '') + v.toFixed(d);
+  const rsText = isLiveX
+    ? `近 ${lmX.rs_days || '?'} 日相對大盤 ${fmtN(lmX.rs_pct, 2)}%（類股報酬指數 − 加權報酬指數）`
+    : `20日相對大盤表現 ${sec.rel_strength_20d >= 0 ? '+' : ''}${sec.rel_strength_20d}%，60日相對大盤 ${sec.rel_strength_60d >= 0 ? '+' : ''}${sec.rel_strength_60d}%`;
+  const q1 = `${sec.title} 目前處於「<strong>${hInfo.label}</strong>」，景氣循環位置為「<strong>${sec.cycle_stage}</strong>」（人工標註，不隨資料更新），轉折訊號為「<strong>${sec.transition_tag}</strong>」。${rsText}。`;
   const q2 = sec.supporting_evidence;
   const q3 = isUnratable
     ? `此分類涵蓋次產業商業模式差異過大（缺失與不可比資料比例達 ${sec.missing_data_pct}%），本系統嚴格遵守「資料不足不得硬排名」原則，僅列示個別公司營收供觀察。`
-    : `綜合研究總分為 <strong>${sec.total_weighted_score} 分</strong>（短期資金動能 ${sec.short_term_momentum_score} 分／中期基本面 ${sec.mid_term_fundamental_score} 分／長期結構成長 ${sec.long_term_structural_score} 分）。法人動向：${sec.itc_net_flow_trend}；${sec.foreign_net_flow_trend}。`;
+    : (isLiveX
+      ? `綜合研究總分為 <strong>${sec.total_weighted_score} 分</strong>（資金流向 ${sec.score_capital_flow}／基本面 ${sec.score_fundamentals}／成長動能 ${sec.score_future_growth}／法人布局 ${sec.score_institutional}／估值 ${sec.score_valuation}，皆為相對其他產業的百分位分數）。法人動向：${sec.foreign_net_flow_trend}；${sec.itc_net_flow_trend}。`
+      : `綜合研究總分為 <strong>${sec.total_weighted_score} 分</strong>（短期資金動能 ${sec.short_term_momentum_score} 分／中期基本面 ${sec.mid_term_fundamental_score} 分／長期結構成長 ${sec.long_term_structural_score} 分）。法人動向：${sec.itc_net_flow_trend}；${sec.foreign_net_flow_trend}。`);
   const q4 = `供應鏈受惠核心與代表公司：<div style="margin-top:4px;">${comps}</div>`;
   const q5 = `<strong>反方證據與潛在風險：</strong>${sec.counter_evidence}`;
   const q6 = `<strong>結論失效條件：</strong>${sec.invalidation_conditions}<br/><strong>資料統計限制：</strong>${sec.data_limitations}`;
@@ -4025,9 +4091,9 @@ function openIndustryDrawer(idx) {
     <div class="q6-box" style="border-color:var(--accent-emerald); background:rgba(6,78,59,0.25);">
       <div class="q6-title" style="color:#34d399;">📊 MOPS 公開資訊觀測站全市場 ${agg.company_count} 家上市櫃公司真實匯總</div>
       <div style="font-size:13px; color:#fff;">
-        • 115年10月(2026-10) 產業合計總營收：<strong>${agg.ind_rev_billion.toLocaleString()} 億元</strong>（去年同月 ${agg.ind_ly_rev_billion.toLocaleString()} 億元，實測匯總年增率 <strong class="${agg.agg_yoy_pct >= 0 ? 'pos' : 'neg'}">${agg.agg_yoy_pct >= 0 ? '+' : ''}${agg.agg_yoy_pct}%</strong>）<br/>
+        • ${window.__HEATMAP_MONTH__ || '最新月'} 產業合計總營收：<strong>${agg.ind_rev_billion.toLocaleString()} 億元</strong>（去年同月 ${agg.ind_ly_rev_billion.toLocaleString()} 億元，實測匯總年增率 <strong class="${agg.agg_yoy_pct >= 0 ? 'pos' : 'neg'}">${agg.agg_yoy_pct >= 0 ? '+' : ''}${agg.agg_yoy_pct}%</strong>）<br/>
         • 產業平均本益比 (P/E)：<strong>${agg.avg_pe || 'N/A'} 倍</strong> ｜ 平均股價淨值比 (P/B)：<strong>${agg.avg_pb || 'N/A'} 倍</strong><br/>
-        • 最新交易日(11/20) 法人合計買賣超：外資 <strong>${(agg.sum_foreign_shares || 0).toLocaleString()} 股</strong> ｜ 投信 <strong>${(agg.sum_itc_shares || 0).toLocaleString()} 股</strong>
+        • ${(sec.as_of_date || '').slice(0, 10) || '最新交易日'} 法人買賣超：外資 <strong>${(agg.sum_foreign_shares || 0).toLocaleString()} 股</strong> ｜ 投信 <strong>${(agg.sum_itc_shares || 0).toLocaleString()} 股</strong>${isLiveX ? `（約 ${fmtN(lmX.foreign_billion)} / ${fmtN(lmX.itc_billion)} 億元；占產業成交值 ${lmX.inst_ratio_pct === null ? 'N/A' : fmtN(lmX.inst_ratio_pct, 2) + '%'}；收盤價覆蓋率 ${Math.round(lmX.price_coverage * 100)}%）` : ''}
       </div>
     </div>
   ` : '';
@@ -4040,14 +4106,28 @@ function openIndustryDrawer(idx) {
 /* =========================================================================
    5. 資金輪動動畫時間軸播放器 (Timeline Player)
    ========================================================================= */
+// 時間軸資料：前 5 格是手寫的歷史情境 (沒有對應的歷史資料可重算，標明為歷史情境)；
+// 最右側「最新」優先使用後端用即時資料產生的內容 (STATE.home_pulse.timeline_latest)，沒有時才退回手寫文字並標示。
+function getTimelineSnapshot(idx) {
+  const base = TIMELINE_SNAPSHOTS[idx] || TIMELINE_SNAPSHOTS[5];
+  if (idx < 5) return { ...base, label: `【歷史情境・手寫】${base.label}` };
+  const live = STATE && STATE.home_pulse && STATE.home_pulse.timeline_latest;
+  if (live) return { ...base, ...live, heatOverrides: {} };
+  return { ...base, label: `【手寫・未更新】${base.label}`, heatOverrides: {} };
+}
+
 function onTimelineSliderInput(val) {
   const idx = parseInt(val, 10);
-  const snap = TIMELINE_SNAPSHOTS[idx] || TIMELINE_SNAPSHOTS[5];
+  const snap = getTimelineSnapshot(idx);
   document.getElementById('timelineRangeInput').value = idx;
 
   // 同步更新上方 19宮格產業熱度地圖顏色！
   renderIndustryHeatmap(snap.heatOverrides || {});
 
+  const stepEl = document.getElementById('timelineLatestStep');
+  if (stepEl && STATE && STATE.home_pulse && STATE.home_pulse.timeline_latest) {
+    stepEl.innerHTML = `最新<br/>${(STATE.home_pulse.timeline_latest.label.match(/\d{4}-\d{2}-\d{2}/) || [''])[0]} 盤後`;
+  }
   const lblEl = document.getElementById('timelineCurrentLabel');
   if (lblEl) lblEl.textContent = `當前顯示時期：${snap.label}`;
   const compactEl = document.getElementById('timelineCompactBar');
@@ -4121,8 +4201,58 @@ function toggleTimelinePlay() {
 /* =========================================================================
    6. 六大產業趨勢排行榜 (嚴格區分「目前最熱門」vs「可能即將轉強」)
    ========================================================================= */
+// 即時排行榜：六個榜都由 STATE.industries 的即時指標 (live_metrics) 與即時評分產生，沒有任何手寫數字。
+// 只有拿不到即時指標的舊快照才退回下面的靜態版本 (2026-11-21 前後手寫)。
+function buildLiveBoards() {
+  const inds = (STATE.industries || []).filter(i => i.live_metrics);
+  if (inds.length < 6) return null;
+  const sg = (v, d = 1) => (v === null || v === undefined || Number.isNaN(v)) ? 'N/A' : (v >= 0 ? '+' : '') + v.toFixed(d);
+  const scored = inds.filter(i => i.score_source === 'live' && i.total_weighted_score !== null);
+  const rank = (list, key, dir, n = 3) => [...list].filter(i => key(i) !== null && key(i) !== undefined)
+    .sort((a, b) => dir * (key(b) - key(a))).slice(0, n);
+  const L = i => i.live_metrics;
+  const item = (i, metric, plain) => ({ name: esc(i.industry_name), metric, plain, indId: esc(i.industry_id) });
+  const facts = i => `營收年增 ${sg(L(i).yoy)}%、法人當日淨買賣 ${sg(L(i).inst_net_billion)} 億、${L(i).rs_days ? '近 ' + L(i).rs_days + ' 日相對大盤 ' + sg(L(i).rs_pct, 2) + '%' : '相對強弱資料不足'}`;
+  const none = '目前沒有符合條件的產業。';
+  const boardOf = (title, badge, color, list, mk) => ({ title, badge, color, items: list.length ? list.map(mk) : [{ name: none, metric: '', plain: '', indId: '' }] });
+
+  const gap = i => i.score_fundamentals - i.score_capital_flow;
+  return [
+    boardOf('1. 💰 法人當日淨買超金額最多的產業', '外資+投信+自營商，股數×收盤價', '#10b981',
+      rank(inds, i => L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion, 1).filter(i => (L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion) > 0),
+      i => item(i, `三大法人 ${sg(L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion)} 億`, `外資 ${sg(L(i).foreign_billion)}、投信 ${sg(L(i).itc_billion)}、自營商 ${sg(L(i).dealer_billion)} 億元；${facts(i)}。`)),
+    boardOf('2. ⚡ 相對大盤表現最強的產業（動能領先）', '類股報酬指數 − 加權報酬指數', '#38bdf8',
+      rank(inds, i => L(i).rs_pct, 1),
+      i => item(i, `近 ${L(i).rs_days} 日 ${sg(L(i).rs_pct, 2)}%`, `${facts(i)}。`)),
+    boardOf('3. 📈 營收年增最高的產業（實質營收爆發）', `${window.__HEATMAP_MONTH__ || '最新月'}營收，MOPS 全市場彙總`, '#34d399',
+      rank(inds, i => L(i).yoy, 1),
+      i => item(i, `營收年增 ${sg(L(i).yoy)}%`, `累計營收年增 ${sg(L(i).cum_yoy)}%、營收加速度 ${sg(L(i).accel)}（單月年增 − 累計年增）；旗下 ${L(i).companies} 家公司。`)),
+    boardOf('4. 🌱 基本面強但資金尚未跟上（可能即將轉強）', '基本面分數高、資金流向分數低', '#a855f7',
+      rank(scored.filter(i => i.score_fundamentals >= 65 && i.score_capital_flow <= 50), gap, 1),
+      i => item(i, `基本面 ${i.score_fundamentals}／資金流向 ${i.score_capital_flow}`, `${facts(i)}。條件：基本面分數 ≥65 且資金流向分數 ≤50（機械式篩選，不是預測）。`)),
+    boardOf('5. 📉 法人當日淨賣超金額最多的產業（避開弱勢）', '外資+投信+自營商，股數×收盤價', '#fb7185',
+      rank(inds, i => L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion, -1).filter(i => (L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion) < 0),
+      i => item(i, `三大法人 ${sg(L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion)} 億`, `外資 ${sg(L(i).foreign_billion)}、投信 ${sg(L(i).itc_billion)}、自營商 ${sg(L(i).dealer_billion)} 億元；${facts(i)}。`)),
+    boardOf('6. 🚨 即時評分最低的產業', '模型總分由低到高', '#f59e0b',
+      rank(scored, i => i.total_weighted_score, -1),
+      i => item(i, `總分 ${i.total_weighted_score}｜狀態 ${i.rotation_state}`, `${facts(i)}。評分是相對其他產業的百分位，分數低代表「相對落後」，不等於一定下跌。`)),
+  ];
+}
+
 function renderSixLeaderboards() {
-  const boards = [
+  const liveBoards = buildLiveBoards();
+  const grid = document.getElementById('sixLeaderboardsGrid');
+  let note = document.getElementById('sixBoardsNote');
+  if (!note) {
+    note = document.createElement('div');
+    note.id = 'sixBoardsNote';
+    note.style.cssText = 'font-size:12.5px; margin:4px 2px 10px; color:var(--text-muted);';
+    grid.parentNode.insertBefore(note, grid);
+  }
+  note.textContent = liveBoards
+    ? `✅ 六個排行榜皆由官方即時資料產生（${((STATE.live_sankey || {}).as_of) || ''} 盤後），每個交易日收盤後更新。`
+    : '⚠️ 此快照沒有即時指標，以下為 2026-11-21 前後手寫的靜態排行榜，不會隨資料更新。';
+  const staticBoards = [
     {
       title: "1. 💰 資金流入最多的產業（規模主力）",
       badge: "內資ETF與法人重倉核心",
@@ -4185,14 +4315,15 @@ function renderSixLeaderboards() {
     }
   ];
 
-  document.getElementById('sixLeaderboardsGrid').innerHTML = boards.map(b => `
+  const boards = liveBoards || staticBoards;
+  grid.innerHTML = boards.map(b => `
     <div class="lb-card" style="border-top: 4px solid ${b.color};">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px; flex-wrap:wrap;">
         <strong style="font-size:17px; color:#fff;">${b.title}</strong>
         <span class="badge" style="background:rgba(255,255,255,0.08); color:${b.color}; font-size:13px;">${b.badge}</span>
       </div>
       ${b.items.map(it => `
-        <div class="lb-item" onclick="openIndustryByCode('${it.indId}')">
+        <div class="lb-item" ${it.indId ? `onclick="openIndustryByCode('${it.indId}')"` : ''}>
           <div style="flex:1; padding-right:8px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
               <strong style="color:#f8fafc; font-size:15.5px;">${it.name}</strong>
@@ -4214,6 +4345,7 @@ function openIndustryByCode(indId) {
 /* =========================================================================
    7. 「市場正在發生什麼事」產業趨勢故事模式 (Trend Story Mode)
    ========================================================================= */
+// 趨勢故事是依特定日期寫成的敘事文章 (沒有可即時化的來源)，每一篇都標明撰寫期間，避免被當成最新分析。
 function renderTrendStories() {
   const stories = [
     {
@@ -4278,7 +4410,16 @@ function renderTrendStories() {
     }
   ];
 
-  document.getElementById('trendStoriesGrid').innerHTML = stories.map(st => `
+  const storiesGrid = document.getElementById('trendStoriesGrid');
+  let storiesNote = document.getElementById('trendStoriesNote');
+  if (!storiesNote) {
+    storiesNote = document.createElement('div');
+    storiesNote.id = 'trendStoriesNote';
+    storiesNote.style.cssText = 'font-size:12.5px; margin:4px 2px 10px; color:var(--text-muted);';
+    storiesGrid.parentNode.insertBefore(storiesNote, storiesGrid);
+  }
+  storiesNote.textContent = '🕰️ 以下四篇是 2026-11-21 前後撰寫的敘事文章，引用當時的總經與市場數字，不會隨資料更新；最新數字請看上方即時區塊。';
+  storiesGrid.innerHTML = stories.map(st => `
     <div class="story-card">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
         <span class="badge badge-grade-A">${st.credibility}</span>
@@ -7888,6 +8029,175 @@ function renderStrategySim() {
         <ul style="font-size:12.5px; color:var(--text-secondary); margin:6px 0 0 18px;">${ss.caveats.map(c => `<li>${esc(c)}</li>`).join('')}</ul>
       </details>
     </div>`;
+}
+
+/* =========================================================================
+   即時資金流向桑基圖：三大法人 (外資／投信／自營商) → 各產業的「淨買賣金額」(億元)
+   資料來自後端 STATE.live_sankey (backend/live_scoring.flow_matrix)，全部是官方當日盤後資料，沒有手寫數字。
+   - 左欄：各法人的「買超」總額 → 流向各產業 (綠色流帶)
+   - 中欄：產業 (高度 = 該產業買超 + 賣超的總量，標示淨額)
+   - 右欄：各產業對各法人的「賣超」 (紅色流帶) → 該法人的賣超總額
+   每個 (法人, 產業) 的淨額只會是買超或賣超其中一種，所以同一對法人與產業不會同時出現綠帶與紅帶。
+   原本的總體資金池桑基圖 (央行存款、外匯存款等月資料) 保留在「總體背景」分頁。
+   ========================================================================= */
+let SANKEY_MODE = 'live';
+
+const LIVE_SANKEY_INST_COLORS = { foreign: '#60a5fa', itc: '#2dd4bf', dealer: '#c084fc' };
+
+function liveSankeyFmt(v, d = 1) {
+  if (v === null || v === undefined || Number.isNaN(v)) return 'N/A';
+  return (v >= 0 ? '+' : '−') + Math.abs(v).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+function shortIndustryName(name) {
+  // 資料表的產業名稱很長，畫在節點旁會重疊：取第一個頓號/「與」之前的主要名稱
+  const n = String(name || '');
+  const cut = n.search(/[、與]/);
+  return cut > 1 ? n.slice(0, cut) : n;
+}
+
+function renderLiveSankey() {
+  const box = document.getElementById('liveSankeyContainer');
+  if (!box) return;
+  const ls = STATE && STATE.live_sankey;
+  const noteEl = document.getElementById('liveSankeyNote');
+  const kpiEl = document.getElementById('liveSankeyKpis');
+  const subEl = document.getElementById('liveSankeySub');
+  if (!ls || !ls.available || !(ls.industries || []).length) {
+    box.innerHTML = '<div class="callout" style="--callout-col:var(--accent-orange);">⚠️ 此快照沒有即時的法人買賣金額資料（需要個股收盤價與三大法人買賣超）。請等下一次排程同步，或切換到「總體背景」。</div>';
+    if (kpiEl) kpiEl.innerHTML = '';
+    if (noteEl) noteEl.textContent = '';
+    return;
+  }
+  const inst = ls.institutions;   // [{key,label,buy,sell,net}]
+  const inds = ls.industries;     // 依淨額由高到低
+  if (subEl) subEl.textContent = `${ls.as_of || ''} 盤後｜單位：${ls.unit}｜流帶粗細＝淨買賣金額｜綠＝買超、紅＝賣超`;
+
+  if (kpiEl) {
+    kpiEl.innerHTML = inst.map(i => `
+      <div class="kpi-tile" style="--kpi-col:${LIVE_SANKEY_INST_COLORS[i.key]};">
+        <div class="kt-label">${esc(i.label)} 當日淨買賣</div>
+        <div class="kt-value">${liveSankeyFmt(i.net)} 億</div>
+        <div class="kt-note">買超 ${liveSankeyFmt(i.buy)} 億（${inds.filter(r => r.flows[i.key] > 0).length} 個產業）／賣超 ${liveSankeyFmt(-i.sell)} 億（${inds.filter(r => r.flows[i.key] < 0).length} 個產業）</div>
+      </div>`).join('');
+  }
+
+  // --- 版面計算 -------------------------------------------------------
+  const W = 1040, PAD_T = 24, NODE_W = 14, GAP = 9, MIN_H = 4;
+  const XL = 190, XM = 505, XR = 820;                  // 左／中／右欄節點的左緣
+  const grossInd = inds.map(r => r.buy + r.sell);
+  const colTotals = [inst.reduce((a, i) => a + i.buy, 0), grossInd.reduce((a, b) => a + b, 0), inst.reduce((a, i) => a + i.sell, 0)];
+  const H = Math.max(420, inds.length * 34 + PAD_T * 2);
+  const usable = H - PAD_T * 2 - GAP * Math.max(inds.length - 1, 0);
+  const k = usable / Math.max(colTotals[1], 1e-9);     // 每 1 億元對應的像素高度 (以中欄為準，三欄共用同一比例)
+
+  // 中欄產業節點
+  let y = PAD_T;
+  const indNodes = inds.map(r => {
+    const h = Math.max(MIN_H, (r.buy + r.sell) * k);
+    const node = { r, y, h, inY: y, outY: y };
+    y += h + GAP;
+    return node;
+  });
+  // 左欄 / 右欄法人節點：垂直置中對齊中欄的範圍
+  const midBottom = y - GAP;
+  const stack = (vals, totalFor) => {
+    const hs = vals.map(v => Math.max(MIN_H, v * k));
+    const total = hs.reduce((a, b) => a + b, 0) + GAP * (vals.length - 1);
+    let yy = PAD_T + Math.max(0, (midBottom - PAD_T - total) / 2);
+    return hs.map(h => { const o = { y: yy, h, cur: yy }; yy += h + GAP; return o; });
+  };
+  const left = stack(inst.map(i => i.buy));
+  const right = stack(inst.map(i => i.sell));
+
+  const ribbon = (x0, yTop0, yBot0, x1, yTop1, yBot1) => {
+    const mx = (x0 + x1) / 2;
+    return `M ${x0} ${yTop0} C ${mx} ${yTop0}, ${mx} ${yTop1}, ${x1} ${yTop1} L ${x1} ${yBot1} C ${mx} ${yBot1}, ${mx} ${yBot0}, ${x0} ${yBot0} Z`;
+  };
+
+  let defs = '', ribbons = '', nodes = '', labels = '';
+  let gid = 0;
+  const grad = (c0, c1) => {
+    const id = `lsg_${gid++}`;
+    defs += `<linearGradient id="${id}" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="${c0}" stop-opacity="0.55"/><stop offset="100%" stop-color="${c1}" stop-opacity="0.55"/></linearGradient>`;
+    return id;
+  };
+
+  indNodes.forEach(n => {
+    inst.forEach((i, ii) => {
+      const v = n.r.flows[i.key];
+      if (!v) return;
+      const th = Math.max(1.2, Math.abs(v) * k);
+      const tip = `${i.label} ${v > 0 ? '買超' : '賣超'} ${shortIndustryName(n.r.name)}：${liveSankeyFmt(v)} 億元`;
+      if (v > 0) {   // 法人(左) → 產業
+        const ly = left[ii].cur; left[ii].cur += th;
+        const my = n.inY; n.inY += th;
+        const g = grad(LIVE_SANKEY_INST_COLORS[i.key], '#10b981');
+        ribbons += `<path class="ls-rib" data-ind="${esc(n.r.id)}" data-inst="${i.key}" d="${ribbon(XL + NODE_W, ly, ly + th, XM, my, my + th)}" fill="url(#${g})" stroke="#10b981" stroke-opacity="0.35" stroke-width="0.6"><title>${esc(tip)}</title></path>`;
+      } else {       // 產業 → 法人(右)
+        const my = n.outY + 0; n.outY += th;
+        const ry = right[ii].cur; right[ii].cur += th;
+        const g = grad('#fb7185', LIVE_SANKEY_INST_COLORS[i.key]);
+        ribbons += `<path class="ls-rib" data-ind="${esc(n.r.id)}" data-inst="${i.key}" d="${ribbon(XM + NODE_W, my, my + th, XR, ry, ry + th)}" fill="url(#${g})" stroke="#fb7185" stroke-opacity="0.35" stroke-width="0.6"><title>${esc(tip)}</title></path>`;
+      }
+    });
+  });
+  // 右側流帶起點要對齊產業節點的右緣、買進流帶終點對齊左緣 (上面已處理)；買進與賣出各自從節點頂端往下疊放，互不重疊
+
+  inst.forEach((i, ii) => {
+    const c = LIVE_SANKEY_INST_COLORS[i.key];
+    const L = left[ii], R = right[ii];
+    nodes += `<rect x="${XL}" y="${L.y}" width="${NODE_W}" height="${L.h}" rx="2" fill="${c}"/>`;
+    nodes += `<rect x="${XR}" y="${R.y}" width="${NODE_W}" height="${R.h}" rx="2" fill="${c}"/>`;
+    labels += `<text x="${XL - 8}" y="${L.y + L.h / 2 + 4}" text-anchor="end" font-size="13" font-weight="700" fill="#e2e8f0">${esc(i.label)} 買超 ${liveSankeyFmt(i.buy, 0)} 億</text>`;
+    labels += `<text x="${XR + NODE_W + 8}" y="${R.y + R.h / 2 + 4}" text-anchor="start" font-size="13" font-weight="700" fill="#e2e8f0">${esc(i.label)} 賣超 ${liveSankeyFmt(-i.sell, 0)} 億</text>`;
+  });
+  indNodes.forEach(n => {
+    const netCol = n.r.net >= 0 ? '#34d399' : '#fb7185';
+    nodes += `<rect class="ls-node" data-ind="${esc(n.r.id)}" x="${XM}" y="${n.y}" width="${NODE_W}" height="${n.h}" rx="2" fill="${netCol}" style="cursor:pointer" onclick="openIndustryByCode('${esc(n.r.id)}')" onmouseenter="liveSankeyHighlight('${esc(n.r.id)}')" onmouseleave="liveSankeyHighlight(null)"><title>${esc(shortIndustryName(n.r.name))}：淨 ${liveSankeyFmt(n.r.net)} 億（買超 ${liveSankeyFmt(n.r.buy)}／賣超 ${liveSankeyFmt(-n.r.sell)}）｜成交值 ${n.r.turnover.toLocaleString()} 億｜收盤價覆蓋率 ${Math.round(n.r.coverage * 100)}%</title></rect>`;
+    labels += `<text x="${XM + NODE_W + 8}" y="${n.y + Math.max(n.h, 14) / 2 + 4}" font-size="12.5" fill="#cbd5e1" style="cursor:pointer" onclick="openIndustryByCode('${esc(n.r.id)}')">${esc(shortIndustryName(n.r.name))} <tspan fill="${netCol}" font-weight="700">${liveSankeyFmt(n.r.net)}</tspan></text>`;
+  });
+
+  box.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="三大法人買賣超流向各產業的桑基圖，資料日 ${esc(ls.as_of || '')}" style="width:100%; height:auto; max-height:${H}px;">
+      <defs>${defs}</defs>
+      <g>${ribbons}</g><g>${nodes}</g><g>${labels}</g>
+    </svg>`;
+
+  if (noteEl) {
+    const cov = inds.reduce((a, r) => a + r.coverage * r.companies, 0) / Math.max(inds.reduce((a, r) => a + r.companies, 0), 1);
+    noteEl.innerHTML = `${esc(ls.note)}　收盤價覆蓋率約 ${Math.round(cov * 100)}%。左欄＝法人買超、右欄＝賣超；點產業節點可看第二層分析。`;
+  }
+}
+
+function liveSankeyHighlight(indId) {
+  document.querySelectorAll('#liveSankeyContainer .ls-rib').forEach(p => {
+    p.style.opacity = (!indId || p.getAttribute('data-ind') === indId) ? '1' : '0.08';
+  });
+}
+
+function setSankeyMode(mode) {
+  SANKEY_MODE = mode === 'macro' ? 'macro' : 'live';
+  const live = document.getElementById('sankeyLivePane');
+  const macro = document.getElementById('sankeyMacroPane');
+  if (live) live.style.display = SANKEY_MODE === 'live' ? 'block' : 'none';
+  if (macro) macro.style.display = SANKEY_MODE === 'macro' ? 'block' : 'none';
+  const lb = document.getElementById('sankeyModeLiveBtn'), mb = document.getElementById('sankeyModeMacroBtn');
+  if (lb) lb.classList.toggle('btn-play', SANKEY_MODE === 'live');
+  if (mb) mb.classList.toggle('btn-play', SANKEY_MODE === 'macro');
+  if (lb) lb.setAttribute('aria-pressed', String(SANKEY_MODE === 'live'));
+  if (mb) mb.setAttribute('aria-pressed', String(SANKEY_MODE === 'macro'));
+  try { sessionStorage.setItem('twfin_sankey_mode', SANKEY_MODE); } catch (e) {}
+}
+
+// 初始顯示：有即時資料就預設即時圖；沒有 (舊快照) 就顯示總體背景。使用者上次手動選的分頁在同一個工作階段內保留。
+function initSankeyMode() {
+  renderLiveSankey();
+  let pref = null;
+  try { pref = sessionStorage.getItem('twfin_sankey_mode'); } catch (e) {}
+  const hasLive = !!(STATE && STATE.live_sankey && STATE.live_sankey.available);
+  setSankeyMode(pref || (hasLive ? 'live' : 'macro'));
+  if (!hasLive && SANKEY_MODE === 'live') setSankeyMode('macro');
 }
 </script>
 </body>
