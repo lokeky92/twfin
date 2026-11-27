@@ -389,7 +389,7 @@ def _build_dashboard_base():
                    s.score_b_valuation_and_pos, s.score_b_vol_event_downside, s.total_score_b_short_mid, s.conclusion_b_short_mid,
                    s.divergence_tag, s.top_advantage, s.top_risk, s.supporting_evidence, s.counter_evidence,
                    s.contradiction_notes, s.invalidation_conditions, s.next_watch_indicator,
-                   s.credibility_grade, s.missing_data_pct
+                   s.credibility_grade, s.missing_data_pct, s.score_source, d.metrics_source
             FROM etf_master m
             LEFT JOIN etf_daily_metrics d ON m.etf_code = d.etf_code
             LEFT JOIN etf_allocation_summary a ON m.etf_code = a.etf_code
@@ -417,10 +417,15 @@ def _build_dashboard_base():
         cur.execute("SELECT * FROM etf_dividend_breakdown")
         div_map = {r["etf_code"]: dict(r) for r in cur.fetchall()}
 
+        try:
+            live_etf = {r["etf_code"]: json.loads(r["metrics_json"]) for r in cur.execute("SELECT * FROM etf_live_metrics")}
+        except Exception:  # noqa: BLE001 — 舊資料庫沒有這張表
+            live_etf = {}
         for item in etf_list:
             ec = item["etf_code"]
             item["holdings"] = holdings_by_etf.get(ec, [])
             item["dividend_breakdown"] = div_map.get(ec)
+            item["live"] = live_etf.get(ec)        # 由官方逐日行情算出的指標 (台股 ETF)；其餘為 None
 
         cur.execute("SELECT * FROM etf_backtest_runs ORDER BY bt_id ASC")
         etf_bts = []
@@ -429,7 +434,7 @@ def _build_dashboard_base():
             bd["key_metrics"] = json.loads(bd["key_metrics_json"])
             etf_bts.append(bd)
 
-        cur.execute("SELECT * FROM etf_research_reports ORDER BY etf_report_id ASC")
+        cur.execute("SELECT * FROM etf_research_reports ORDER BY CASE text_source WHEN 'live' THEN 0 ELSE 1 END, etf_report_id DESC")
         etf_rpts = [dict(r) for r in cur.fetchall()]
 
         etf_center = {

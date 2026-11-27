@@ -49,6 +49,10 @@ function renderEtfLists() {
   const isFiltering = !!q || concFilter !== 'ALL';
   const limit = (ETF_SHOW_ALL || isFiltering || ETF_DEEP_MODE) ? filtered.length : ETF_PAGE_SIZE;
   const shown = filtered.slice(0, limit);
+  const liveN = STATE.etf_center.etfs.filter(e => e.score_source === 'live').length;
+  setSourceNote('etfCardsGridContainer', 'etfSourceNote', liveN
+    ? `✅ 台灣掛牌 ${liveN} 檔 ETF 的雙軌評分由官方逐日行情（證交所／櫃買）與法人買賣超用公式即時計算，附「即時評分」標籤；美國 ETF 沒有官方資料來源，行情與評分是 2026-11-21 前後手寫的種子值（「手寫評分」），不會更新。規模、費用率、追蹤誤差與持股權重為人工維護；淨值／折溢價、配息率、含息報酬沒有官方即時來源，顯示 N/A。`
+    : '⚠️ 此快照沒有即時 ETF 評分，全部 ETF 的行情、評分與報告都是 2026-11-21 前後手寫的，不會隨資料更新。');
   container.innerHTML = filtered.length
     ? shown.map(e => buildEtfCardHtml(e)).join('')
     : '<div class="etf-clean-card" style="grid-column: 1 / -1; text-align:center; font-size:16px; color:var(--text-secondary);">無符合目前篩選條件之 ETF，請切換上方分類頁籤或清空搜尋關鍵字。</div>';
@@ -198,7 +202,7 @@ function buildEtfCardHtml(e) {
     </div>
   ` : `
     <div style="background:#111a2e; padding:12px 16px; border-radius:10px; border:1px solid #2a3b5c; margin-top:14px; font-size:14px; color:#cbd5e1;">
-      💰 <strong>配息分析：</strong>年化殖利率 <strong>${e.dividend_yield_pct}%</strong>（配息頻率：${e.dividend_frequency}），100% 來自成分股真實股利或自動滾入再投資，無動用收益平準金。
+      💰 <strong>配息分析：</strong>年化殖利率 <strong>${fmtEtfPct(e.dividend_yield_pct)}</strong>（配息頻率：${e.dividend_frequency}），100% 來自成分股真實股利或自動滾入再投資，無動用收益平準金。
     </div>
   `;
 
@@ -210,6 +214,7 @@ function buildEtfCardHtml(e) {
           <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
             <span class="etf-mkt-tag">${e.listing_market === 'TW' ? '🇹🇼 台灣' : '🇺🇸 美國'}</span>
             ${isLev ? '<span class="badge badge-lvlR">🔴 槓桿/反向</span>' : ''}
+            ${etfLiveBadge(e)}
           </div>
           <div style="margin-top:6px; line-height:1.3;">
             <span class="etf-card-code">${e.etf_code}</span> <span class="etf-card-name">${e.etf_name}</span>
@@ -316,16 +321,17 @@ function buildEtfCardHtml(e) {
             <div style="font-size:15.5px; font-weight:800; color:#f8fafc; margin-bottom:6px;">
               📈 歷史績效曲線（2021～2026 基期=100）與風險指標
             </div>
-            ${buildInlinePerfMiniSvg(e)}
+            ${e.live ? '' : buildInlinePerfMiniSvg(e)}
+            ${etfLiveMetricsHtml(e)}
             <div class="etf-metrics-2col">
-              <div>• 近1年含息報酬：<strong class="${e.return_1y_total_pct >= 0 ? 'pos' : 'neg'}">${e.return_1y_total_pct >= 0 ? '+' : ''}${e.return_1y_total_pct}%</strong></div>
-              <div>• 換算TWD年報酬：<strong class="${e.twd_adjusted_1y_return_pct >= 0 ? 'pos' : 'neg'}">${e.twd_adjusted_1y_return_pct >= 0 ? '+' : ''}${e.twd_adjusted_1y_return_pct}%</strong></div>
+              <div>• 近1年含息報酬：<strong class="${e.return_1y_total_pct >= 0 ? 'pos' : 'neg'}">${fmtEtfPct(e.return_1y_total_pct, true)}</strong></div>
+              <div>• 換算TWD年報酬：<strong class="${e.twd_adjusted_1y_return_pct >= 0 ? 'pos' : 'neg'}">${fmtEtfPct(e.twd_adjusted_1y_return_pct, true)}</strong></div>
               <div>• 近3年/5年年化：<strong>${e.return_3y_ann_pct ?? 'N/A'}% / ${e.return_5y_ann_pct ?? 'N/A'}%</strong></div>
-              <div>• 年化波動 / 回撤：<strong>${e.annualized_volatility_pct}% / <span class="neg">${e.max_drawdown_pct}%</span></strong></div>
+              <div>• 年化波動 / 回撤：<strong>${fmtEtfPct(e.annualized_volatility_pct)} / <span class="neg">${fmtEtfPct(e.max_drawdown_pct)}</span></strong></div>
               <div>• 總費用率 (TER)：<strong>${e.total_expense_ratio_pct}%</strong></div>
               <div>• 追蹤誤差 / 價差：<strong>${e.tracking_error_pct ?? 'N/A'}% / ${e.bid_ask_spread_bps ?? '-'} bps</strong></div>
-              <div>• 折溢價率：<strong class="${Math.abs(e.premium_discount_pct) > 0.5 ? 'warn' : ''}">${e.premium_discount_pct >= 0 ? '+' : ''}${e.premium_discount_pct}%</strong></div>
-              <div>• 初級市場淨流向：<strong class="${e.primary_net_flow_value >= 0 ? 'pos' : 'neg'}">${e.primary_net_flow_value >= 0 ? '+' : ''}${e.primary_net_flow_value} ${e.aum_unit}</strong></div>
+              <div>• 折溢價率：<strong class="${Math.abs(e.premium_discount_pct) > 0.5 ? 'warn' : ''}">${fmtEtfPct(e.premium_discount_pct, true)}</strong></div>
+              <div>• 初級市場淨流向：<strong class="${e.primary_net_flow_value >= 0 ? 'pos' : 'neg'}">${e.primary_net_flow_value === null || e.primary_net_flow_value === undefined ? 'N/A' : fmtEtfNum(e.primary_net_flow_value, true) + ' ' + e.aum_unit}</strong></div>
               <div style="grid-column: 1 / -1;">
                 • 底層估值與營收：${e.asset_class === '債券'
                   ? `到期殖利率(YTM) <strong>${e.bond_ytm_pct}%</strong> ｜ 存續期間 <strong>${e.bond_duration_years}年</strong> (${e.bond_avg_credit_rating})`
@@ -403,7 +409,7 @@ function openEtfDetailDrawer(etfCode) {
       <div class="q6-title" style="font-size:15px;">📊 基金品質、估值與底層成分股穿透 (${e.holdings_coverage_note})</div>
       <div style="font-size:14.5px; color:#e2e8f0; margin-bottom:10px; line-height:1.7;">
         • 總費用率(TER)：<strong>${e.total_expense_ratio_pct}%</strong> (管理費 ${e.mgmt_fee_pct}%)｜追蹤誤差：<strong>${e.tracking_error_pct ?? 'N/A'}%</strong>｜買賣價差：<strong>${e.bid_ask_spread_bps ?? '-'} bps</strong><br/>
-        • 折溢價率：<strong>${e.premium_discount_pct >= 0 ? '+' : ''}${e.premium_discount_pct}%</strong>｜初級市場近期淨申贖：<strong>${e.primary_net_flow_value >= 0 ? '+' : ''}${e.primary_net_flow_value} ${e.aum_unit}</strong><br/>
+        • 折溢價率：<strong>${fmtEtfPct(e.premium_discount_pct, true)}</strong>｜初級市場近期淨申贖：<strong>${e.primary_net_flow_value === null || e.primary_net_flow_value === undefined ? 'N/A' : fmtEtfNum(e.primary_net_flow_value, true) + ' ' + e.aum_unit}</strong><br/>
         • 底層加權P/E：<strong>${e.weighted_pe ?? 'N/A'}x</strong>｜加權P/B：<strong>${e.weighted_pb ?? 'N/A'}x</strong>｜底層10月營收加權YoY：<strong>${e.weighted_rev_yoy_pct !== null ? (e.weighted_rev_yoy_pct >= 0 ? '+' : '') + e.weighted_rev_yoy_pct + '%' : 'N/A'}</strong>
         ${e.bond_ytm_pct ? `<br/>• 債券到期殖利率(YTM)：<strong>${e.bond_ytm_pct}%</strong>｜有效存續期間：<strong>${e.bond_duration_years} 年</strong>｜信用評等：<strong>${e.bond_avg_credit_rating}</strong>` : ''}
       </div>

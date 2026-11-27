@@ -716,6 +716,55 @@ class TestProTablesRender(unittest.TestCase):
         self.assertIn("加權指數為證交所每日收盤", self.o["macroNote"])
 
 
+ETF_UI_DRIVER = r"""
+const fs = require('fs'), vm = require('vm'), path = require('path');
+const dir = process.argv[1];
+const ctx = { console, window: {}, document: { getElementById: () => null, createElement: () => ({ style: {} }) } };
+vm.createContext(ctx);
+for (const f of ['01-core.js', '09-etf-center.js']) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), ctx, { filename: f });
+const run = c => vm.runInContext(c, ctx);
+const out = {};
+out.nums = run("[fmtEtfNum(null), fmtEtfNum(undefined), fmtEtfNum(NaN), fmtEtfNum(1.234, true, 1), fmtEtfNum(-1.234, true, 1), fmtEtfNum(0, true), fmtEtfPct(null), fmtEtfPct(2.5, true, 1), fmtEtfPct(-3, false)]");
+out.badgeLive = run("etfLiveBadge({ score_source: 'live' })");
+out.badgeSeed = run("etfLiveBadge({ score_source: 'seed' })");
+out.noLive = run("etfLiveMetricsHtml({ live: null })");
+ctx.__e = { live: { last_date: '2026-11-27', history_days: 250, ret_1m: 1.234, ret_3m: null, ret_6m: -2.5, ret_1y: 20, vol_ann: 18.2, mdd: -12.3, dd_from_high: -4.5,
+  beta: 1.02, corr_taiex: 0.99, corr_0050: null, insti_billion: -3.456, insti_ratio_pct: -0.21, turnover_20d_billion: 12.3 } };
+out.live = run("etfLiveMetricsHtml(__e)");
+console.log(JSON.stringify(out));
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過 ETF 畫面測試")
+class TestEtfUiHelpers(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", ETF_UI_DRIVER, JS_DIR], capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    def test_missing_numbers_render_as_na_never_null(self):
+        self.assertEqual(self.o["nums"], ["N/A", "N/A", "N/A", "+1.2", "-1.2", "+0", "N/A", "+2.5%", "-3%"])
+
+    def test_source_badges(self):
+        self.assertIn("即時評分", self.o["badgeLive"])
+        self.assertIn("手寫評分", self.o["badgeSeed"])
+
+    def test_live_metrics_block(self):
+        self.assertEqual(self.o["noLive"], "")                       # 美股 ETF 沒有即時指標區塊
+        h = self.o["live"]
+        self.assertIn("官方逐日行情，2026-11-27", h)
+        self.assertIn("1 月 +1.2%", h)
+        self.assertIn("3 月 N/A", h)                                  # 資料不足不可印成 null
+        self.assertIn("與 0050 相關 N/A", h)
+        self.assertIn("-3.46 億元", h)
+        self.assertIn("不含息", h)
+        self.assertIn("沒有官方即時來源", h)
+        self.assertNotIn("null", h)
+        self.assertNotIn("NaN", h)
+
+
 class TestInlineHandlersDefined(unittest.TestCase):
     ALLOWED = {"alert", "confirm", "parseInt", "parseFloat", "String", "Number", "Boolean"}
 

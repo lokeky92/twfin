@@ -1,3 +1,33 @@
+/* ETF 數字格式化：官方沒有來源而留空的欄位 (淨值、折溢價、配息率、含息報酬…) 一律顯示 N/A，不可印出 null 或 NaN */
+function fmtEtfNum(v, signed, digits) {
+  if (v === null || v === undefined || Number.isNaN(v)) return 'N/A';
+  const n = (digits === undefined) ? v : Number(v).toFixed(digits);
+  return (signed && v >= 0 ? '+' : '') + n;
+}
+function fmtEtfPct(v, signed, digits) {
+  const t = fmtEtfNum(v, signed, digits);
+  return t === 'N/A' ? t : t + '%';
+}
+function etfLiveBadge(e) {
+  return e.score_source === 'live'
+    ? '<span class="badge badge-grade-A" title="雙軌評分由官方逐日行情用公式即時計算">即時評分</span>'
+    : '<span class="badge badge-grade-C" title="評分為 2026-11-21 前後手寫，不會隨資料更新">手寫評分</span>';
+}
+// 台股 ETF 由官方逐日行情算出的指標 (報酬為價格報酬，不含息)
+function etfLiveMetricsHtml(e) {
+  const L = e.live;
+  if (!L) return '';
+  const p = (v) => fmtEtfPct(v, true, 1);
+  return `
+    <div style="margin-top:10px; padding:10px 12px; border-radius:8px; background:rgba(6,78,59,0.22); border:1px solid rgba(52,211,153,0.35); font-size:13.5px; line-height:1.7;">
+      <strong style="color:#34d399;">📡 即時指標（官方逐日行情，${esc(L.last_date)}；共 ${L.history_days} 個交易日資料）</strong><br/>
+      價格報酬（不含息）：1 月 ${p(L.ret_1m)}｜3 月 ${p(L.ret_3m)}｜6 月 ${p(L.ret_6m)}｜1 年 ${p(L.ret_1y)}<br/>
+      年化波動 ${fmtEtfPct(L.vol_ann, false, 1)}｜最大回撤 ${fmtEtfPct(L.mdd, false, 1)}｜距 1 年高點 ${fmtEtfPct(L.dd_from_high, true, 1)}｜Beta ${fmtEtfNum(L.beta, false, 2)}｜與加權指數相關 ${fmtEtfNum(L.corr_taiex, false, 2)}｜與 0050 相關 ${fmtEtfNum(L.corr_0050, false, 2)}<br/>
+      外資+投信當日淨買賣 ${fmtEtfNum(L.insti_billion, true, 2)} 億元（占成交金額 ${fmtEtfPct(L.insti_ratio_pct, true, 2)}）｜20 日均成交值 ${fmtEtfNum(L.turnover_20d_billion, false, 2)} 億元
+      <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">淨值／折溢價、配息率、含息報酬與初級市場申贖沒有官方即時來源，一律顯示 N/A；規模、費用率、追蹤誤差與持股權重是人工維護（非即時）。</div>
+    </div>`;
+}
+
 /* =========================================================================
    🎯 ETF 投資決策中心 (台灣 ETF ＋ 美國 ETF)｜可讀性全面優化＆七大視覺圖表渲染引擎
    ========================================================================= */

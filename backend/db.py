@@ -370,6 +370,38 @@ CREATE TABLE IF NOT EXISTS live_industry_daily (
     PRIMARY KEY (trade_date, industry_id)
 );
 
+-- 16c. 台股 ETF 逐日歷史行情 (TWSE STOCK_DAY / TPEx tradingStock) 與加權指數逐日 (TWSE FMTQIK)
+-- 用途：計算報酬、波動度、最大回撤、Beta 與相關係數；每次排程補抓當月，並逐步回補過去 13 個月 (每次有請求上限)
+CREATE TABLE IF NOT EXISTS etf_price_history (
+    etf_code TEXT NOT NULL,
+    trade_date TEXT NOT NULL,
+    close_price REAL,
+    volume_shares REAL,
+    turnover_twd REAL,
+    market TEXT NOT NULL,            -- TWSE / TPEx
+    PRIMARY KEY (etf_code, trade_date)
+);
+CREATE TABLE IF NOT EXISTS index_price_history (
+    index_name TEXT NOT NULL,
+    trade_date TEXT NOT NULL,
+    close_index REAL,
+    PRIMARY KEY (index_name, trade_date)
+);
+CREATE TABLE IF NOT EXISTS etf_history_fetch (
+    etf_code TEXT NOT NULL,          -- 加權指數用 '_TAIEX'
+    ym TEXT NOT NULL,                -- YYYYMM
+    market TEXT,
+    fetched_at TEXT NOT NULL,
+    row_count INTEGER NOT NULL,
+    PRIMARY KEY (etf_code, ym)
+);
+-- 16d. 台股 ETF 由歷史行情即時算出的指標 (JSON，供畫面與評分共用)
+CREATE TABLE IF NOT EXISTS etf_live_metrics (
+    etf_code TEXT PRIMARY KEY,
+    as_of_date TEXT NOT NULL,
+    metrics_json TEXT NOT NULL
+);
+
 -- 16b. 上市櫃個股每日收盤價與成交金額 (LIVE：TWSE MI_INDEX ALLBUT0999 / TPEx 每日收盤行情)
 -- 用途：把法人買賣超「股數」換算成金額 (淨買賣股數 × 收盤價)，並提供各產業成交值占比。只保留近期資料。
 CREATE TABLE IF NOT EXISTS live_stock_quotes (
@@ -623,6 +655,12 @@ def _migrate(conn):
     cols = {r[1] for r in conn.execute("PRAGMA table_info(industry_score_history)")}
     if cols and "alert_level" not in cols:
         conn.execute("ALTER TABLE industry_score_history ADD COLUMN alert_level TEXT")
+    for tbl, col, comment in (("etf_dual_scores", "score_source", "seed=手寫 / live=由官方行情即時計算 (etf_live.py)"),
+                              ("etf_daily_metrics", "metrics_source", "seed=手寫種子 / live=由官方行情即時計算"),
+                              ("etf_research_reports", "text_source", "seed=手寫 / live=即時產生")):
+        cols_e = {r[1] for r in conn.execute(f"PRAGMA table_info({tbl})")}
+        if cols_e and col not in cols_e:
+            conn.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} TEXT NOT NULL DEFAULT 'seed'")
     tew_cols = {r[1] for r in conn.execute("PRAGMA table_info(trend_early_warnings)")}
     if tew_cols and "text_source" not in tew_cols:
         # 'seed' = 手寫說明文字；'live' = 由即時評分機械式產生 (live_warnings.py)

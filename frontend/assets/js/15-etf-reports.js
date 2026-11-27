@@ -13,19 +13,19 @@ function renderEtfReportsAndBacktests() {
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
           <div>
             <span class="badge badge-lvl3">${r.report_type}</span>
-            <strong style="font-size:19px; color:#fff; margin-left:8px;">${r.report_title}</strong>
+            <strong style="font-size:19px; color:#fff; margin-left:8px;">${esc(r.report_title)}</strong>
           </div>
-          <span class="badge badge-grade-A">${r.version_tag}</span>
+          <span class="badge ${r.text_source === 'live' ? 'badge-grade-A' : 'badge-grade-C'}">${esc(r.version_tag)}｜${r.text_source === 'live' ? '即時產生' : '手寫・不會自動更新'}</span>
         </div>
-        <div style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">資料基準：${r.as_of_date} ｜ 來源：${r.primary_sources}</div>
-        <div class="evidence-box" style="font-size:15px;"><strong>1️⃣ 發生什麼事？</strong><br/>${r.q1_what_happened}</div>
-        <div class="evidence-box" style="white-space:pre-line; font-size:15px;"><strong>2️⃣ 哪些數據支持？</strong><br/>${r.q2_supporting_data}</div>
-        <div class="evidence-box" style="white-space:pre-line; font-size:15px;"><strong>3️⃣ 對哪些 ETF 有影響？</strong><br/>${r.q3_affected_etfs}</div>
-        <div class="evidence-box" style="border-left-color:#10b981; font-size:15px;"><strong>4️⃣ 可能的正面影響：</strong><br/>${r.q4_positive_impacts}</div>
-        <div class="evidence-box counter" style="font-size:15px;"><strong>5️⃣ 可能的負面影響（反方證據）：</strong><br/>${r.q5_negative_impacts}</div>
+        <div style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">資料基準：${esc(r.as_of_date)} ｜ 來源：${esc(r.primary_sources)}</div>
+        <div class="evidence-box" style="font-size:15px;"><strong>1️⃣ 發生什麼事？</strong><br/>${esc(r.q1_what_happened)}</div>
+        <div class="evidence-box" style="white-space:pre-line; font-size:15px;"><strong>2️⃣ 哪些數據支持？</strong><br/>${esc(r.q2_supporting_data)}</div>
+        <div class="evidence-box" style="white-space:pre-line; font-size:15px;"><strong>3️⃣ 對哪些 ETF 有影響？</strong><br/>${esc(r.q3_affected_etfs)}</div>
+        <div class="evidence-box" style="border-left-color:#10b981; font-size:15px;"><strong>4️⃣ 可能的正面影響：</strong><br/>${esc(r.q4_positive_impacts)}</div>
+        <div class="evidence-box counter" style="font-size:15px;"><strong>5️⃣ 可能的負面影響（反方證據）：</strong><br/>${esc(r.q5_negative_impacts)}</div>
         <div class="evidence-box invalid" style="font-size:15px;">
-          <strong>6️⃣ 接下來應該觀察什麼？</strong> ${r.q6_next_watch}<br/>
-          <strong>7️⃣ 哪些條件會讓目前判斷失效？</strong> ${r.q7_invalidation}
+          <strong>6️⃣ 接下來應該觀察什麼？</strong> ${esc(r.q6_next_watch)}<br/>
+          <strong>7️⃣ 哪些條件會讓目前判斷失效？</strong> ${esc(r.q7_invalidation)}
         </div>
       </div>
     `).join('');

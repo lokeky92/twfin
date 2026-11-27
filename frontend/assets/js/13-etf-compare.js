@@ -143,14 +143,14 @@ function renderEtfComparator() {
     ["經常性純股利/票息實質殖利率 (提案004)", e => computeRecurringPureYield(e)],
     ["基金規模 (AUM) 與近1月變化", e => `<strong>${e.aum_value.toLocaleString()} ${e.aum_unit}</strong> (${e.aum_change_1m_pct >= 0 ? '+' : ''}${e.aum_change_1m_pct}%)`],
     ["買賣價差 (Spread) / 追蹤誤差", e => `價差 <strong>${e.bid_ask_spread_bps ?? '-'} bps</strong> ｜ 誤差 <strong>${e.tracking_error_pct ?? 'N/A'}%</strong>`],
-    ["折溢價率 / 初級市場近期申贖", e => `折溢價 <strong>${e.premium_discount_pct >= 0 ? '+' : ''}${e.premium_discount_pct}%</strong><br/>淨申贖 <span class="${e.primary_net_flow_value>=0?'pos':'neg'}"><strong>${e.primary_net_flow_value >= 0 ? '+' : ''}${e.primary_net_flow_value} ${e.aum_unit}</strong></span>`],
+    ["折溢價率 / 初級市場近期申贖", e => `折溢價 <strong>${fmtEtfPct(e.premium_discount_pct, true)}</strong><br/>淨申贖 <span class="${e.primary_net_flow_value>=0?'pos':'neg'}"><strong>${e.primary_net_flow_value === null || e.primary_net_flow_value === undefined ? 'N/A' : fmtEtfNum(e.primary_net_flow_value, true) + ' ' + e.aum_unit}</strong></span>`],
     ["前十大集中度 / 最大單一持股", e => `前十大 <strong>${e.top10_concentration_pct}%</strong><br/><span style="color:#fde68a;">最大：${e.max_single_holding_name}</span>`],
     ["前三大核心持股明細", e => (e.holdings || []).slice(0, 3).map(h => `${h.constituent_name} (${h.weight_pct}%)`).join('<br/>')],
     ["底層加權估值 (P/E、P/B) 與10月營收YoY", e => e.asset_class === '債券' ? `YTM <strong>${e.bond_ytm_pct}%</strong>｜存續期 <strong>${e.bond_duration_years}年</strong> (${e.bond_avg_credit_rating})` : `P/E <strong>${e.weighted_pe ?? 'N/A'}x</strong>｜P/B <strong>${e.weighted_pb ?? 'N/A'}x</strong><br/>10月營收YoY：<strong>${e.weighted_rev_yoy_pct !== null ? (e.weighted_rev_yoy_pct>=0?'+':'')+e.weighted_rev_yoy_pct+'%' : 'N/A'}</strong>`],
-    ["配息殖利率與配息來源健康度", e => `${e.dividend_yield_pct}% (${e.dividend_frequency})<br/>${e.dividend_breakdown ? `<span style="color:#34d399; font-size:13.5px;">股利/票息佔 ${e.dividend_breakdown.dividend_income_ratio_pct}%｜價差佔 ${e.dividend_breakdown.capital_gains_ratio_pct}%</span>` : '<span style="color:var(--text-secondary); font-size:13.5px;">純股利或零配息滾入</span>'}`],
-    ["近1年 / 3年年化 / 5年年化含息報酬", e => `1Y: <strong>${e.return_1y_total_pct >= 0 ? '+' : ''}${e.return_1y_total_pct}%</strong> (TWD: ${e.twd_adjusted_1y_return_pct >= 0 ? '+' : ''}${e.twd_adjusted_1y_return_pct}%)<br/>3Y: ${e.return_3y_ann_pct ?? 'N/A'}% ｜ 5Y: ${e.return_5y_ann_pct ?? 'N/A'}%`],
-    ["年化波動度 / 最大回撤 / Beta", e => `波動 <strong>${e.annualized_volatility_pct}%</strong>｜回撤 <span class="neg"><strong>${e.max_drawdown_pct}%</strong></span>｜Beta ${e.beta_vs_market}`],
-    ["與台股(0050) / 美股(VOO) / 美債(TLT) 相關性", e => `台股: ${e.corr_tw_stock} ｜ 美股: ${e.corr_us_stock} ｜ 美債: ${e.corr_us_bond}`],
+    ["配息殖利率與配息來源健康度", e => `${fmtEtfPct(e.dividend_yield_pct)} (${e.dividend_frequency})<br/>${e.dividend_breakdown ? `<span style="color:#34d399; font-size:13.5px;">股利/票息佔 ${e.dividend_breakdown.dividend_income_ratio_pct}%｜價差佔 ${e.dividend_breakdown.capital_gains_ratio_pct}%</span>` : '<span style="color:var(--text-secondary); font-size:13.5px;">純股利或零配息滾入</span>'}`],
+    ["近1年 / 3年年化 / 5年年化含息報酬", e => `1Y: <strong>${fmtEtfPct(e.return_1y_total_pct, true)}</strong> (TWD: ${fmtEtfPct(e.twd_adjusted_1y_return_pct, true)})<br/>3Y: ${fmtEtfPct(e.return_3y_ann_pct)} ｜ 5Y: ${fmtEtfPct(e.return_5y_ann_pct)}`],
+    ["年化波動度 / 最大回撤 / Beta", e => `波動 <strong>${fmtEtfPct(e.annualized_volatility_pct)}</strong>｜回撤 <span class="neg"><strong>${fmtEtfPct(e.max_drawdown_pct)}</strong></span>｜Beta ${fmtEtfNum(e.beta_vs_market)}`],
+    ["與台股(0050) / 美股(VOO) / 美債(TLT) 相關性", e => `台股: ${fmtEtfNum(e.corr_tw_stock)} ｜ 美股: ${fmtEtfNum(e.corr_us_stock)} ｜ 美債: ${fmtEtfNum(e.corr_us_bond)}`],
     ["匯率曝險與稅務制度", e => `<div style="font-size:13.5px; max-width:250px;"><strong>${e.fx_hedged}</strong><br/>${e.tax_and_trading_notes}</div>`]
   ];
 
