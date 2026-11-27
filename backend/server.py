@@ -23,6 +23,8 @@ from db import DB_PATH, get_connection
 from data_health import SOURCES, age_status
 from history import history_summary
 from backtest import compute_live_backtest
+from etf_backtest import compute_etf_forward
+from live_timeline import build_timeline_history
 from strategy_sim import compute_strategy_sim
 from live_pulse import compute_home_pulse
 from live_scoring import compute_industry_metrics, flow_matrix, load_inputs as load_scoring_inputs
@@ -77,13 +79,14 @@ LIVE_SECTIONS = ["上市櫃月營收與估值 (MOPS/TWSE/TPEx)", "三大法人�
                  "個股收盤價與成交金額 (TWSE/TPEx)",
                  "產業輪動評分與狀態 (5 項子分數由即時資料重算)", "即時資金流向桑基圖 (法人買賣金額 → 產業)",
                  "首頁 Q1~Q6 摘要、板塊熱度圖與六大排行榜", "趨勢預警 (等級與說明文字由即時評分自動產生)",
-                 "個股研究名單 (全市場機械式篩選)", "固定研究報告：每日／每週／每月 (即時產生)",
+                 "個股研究名單 (全市場機械式篩選)", "固定研究報告：每日／每週／每月／每季 (即時產生；季報在本季營收湊滿三個月前標示累積中)",
                  "三大法人表 (官方逐日與逐日加總的週／月累計)", "總體指標中的加權指數",
-                 "前瞻追蹤回測 (每日評分快照 × 類股報酬指數)", "規則模擬器 (固定規則 × 類股報酬指數)"]
+                 "前瞻追蹤回測 (每日評分快照 × 類股報酬指數)", "規則模擬器 (固定規則 × 類股報酬指數)",
+                 "ETF 前瞻追蹤 (每日 A/B 評分快照 × 實際報酬)", "首頁資金輪動時間軸 (真實評分快照)", "本週變化 (快照與法人資金的週比較)"]
 SEED_SECTIONS = ["總體經濟指標 (除加權指數；央行／主計總處月統計與人工維護的國際行情)", "資產配置流向矩陣 (總體背景桑基圖)",
-                 "八大資金池卡片", "情境分析 (撰寫者的主觀假設與權重)", "固定研究報告：每季", "舊版示範回測 (手寫數據，非實測)",
+                 "八大資金池卡片", "情境分析 (撰寫者的主觀假設與權重)", "舊版示範回測 (手寫數據，非實測；已收進折疊的手寫存檔)",
                  "ETF 持股／配息／回測／報告", "AI 研究團隊 (規則式模擬)",
-                 "趨勢故事 (依撰稿日期的敘事文章)", "熱度圖時間軸前 5 格 (歷史情境回顧)", "三大法人表中 2026-11-20 之前的手寫歷史列"]
+                 "手寫存檔：四篇趨勢故事 (依撰稿日期的敘事文章，已收進折疊區)", "手寫的 5 個歷史情境回顧 (已收進折疊區)", "三大法人表中 2026-11-20 之前的手寫歷史列"]
 
 
 class AuthError(Exception):
@@ -449,6 +452,8 @@ def _build_dashboard_base():
 
     provenance = _data_provenance(cur)
     live_backtest = compute_live_backtest(conn)
+    etf_forward = compute_etf_forward(conn)
+    timeline_history = build_timeline_history(conn)
     strategy_sim = compute_strategy_sim(conn)
     conn.close()
     payload = {
@@ -456,6 +461,8 @@ def _build_dashboard_base():
         "data_provenance": provenance,
         "active_model": active_model,
         "live_backtest": live_backtest,
+        "etf_forward": etf_forward,
+        "timeline_history": timeline_history,
         "strategy_sim": strategy_sim,
         "weight_sensitivity": sensitivity_analysis(industries, active_model["weights"], effective_thresholds(active_model["thresholds"])),
         "threshold_sensitivity": threshold_sensitivity(industries, active_model["weights"], active_model["thresholds"]),

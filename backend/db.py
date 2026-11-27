@@ -370,6 +370,18 @@ CREATE TABLE IF NOT EXISTS live_industry_daily (
     PRIMARY KEY (trade_date, industry_id)
 );
 
+-- 16b. 各產業每月營收累積 (季報的來源)：live_company_fundamentals 只保留每家公司最新一個月，歷史月份會被覆蓋，
+-- 所以每次排程把各產業當月營收加總存一份；同一個月之後重跑只在涵蓋公司數不減少時才覆寫 (月初 10 日前後公司陸續換月，避免被部分資料蓋掉)。
+CREATE TABLE IF NOT EXISTS industry_monthly_revenue (
+    data_ym TEXT NOT NULL,           -- 資料年月 (民國) e.g. '11510' = 2026-10
+    industry_id TEXT NOT NULL,
+    rev_thousand REAL,               -- 當月營收合計 (仟元)
+    rev_last_year_thousand REAL,     -- 去年同月營收合計 (仟元)
+    companies INTEGER NOT NULL,      -- 納入加總的公司數
+    updated_at TEXT,
+    PRIMARY KEY (data_ym, industry_id)
+);
+
 -- 16c. 台股 ETF 逐日歷史行情 (TWSE STOCK_DAY / TPEx tradingStock) 與加權指數逐日 (TWSE FMTQIK)
 -- 用途：計算報酬、波動度、最大回撤、Beta 與相關係數；每次排程補抓當月，並逐步回補過去 13 個月 (每次有請求上限)
 CREATE TABLE IF NOT EXISTS etf_price_history (
@@ -386,6 +398,20 @@ CREATE TABLE IF NOT EXISTS index_price_history (
     trade_date TEXT NOT NULL,
     close_index REAL,
     PRIMARY KEY (index_name, trade_date)
+);
+-- 16d. 台股 ETF 每日評分快照 (前瞻追蹤用)：每次即時評分時記下當時的 A/B 模型分數與結論，之後與實際報酬比對。
+-- 模型分數無法事後重建 (輸入是最新一期資料)，所以只能從開始累積的那天起前瞻驗證。
+CREATE TABLE IF NOT EXISTS etf_score_history (
+    etf_code TEXT NOT NULL,
+    snapshot_date TEXT NOT NULL,     -- 該次行情的最新交易日 (資料日期)
+    score_a REAL,
+    score_b REAL,
+    conclusion_a TEXT,
+    conclusion_b TEXT,
+    is_leveraged INTEGER NOT NULL DEFAULT 0,
+    missing_count INTEGER,
+    created_at TEXT,
+    PRIMARY KEY (etf_code, snapshot_date)
 );
 CREATE TABLE IF NOT EXISTS etf_history_fetch (
     etf_code TEXT NOT NULL,          -- 加權指數用 '_TAIEX'

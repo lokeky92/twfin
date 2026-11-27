@@ -146,7 +146,44 @@ function openIndustryByCode(indId) {
    7. 「市場正在發生什麼事」產業趨勢故事模式 (Trend Story Mode)
    ========================================================================= */
 // 趨勢故事是依特定日期寫成的敘事文章 (沒有可即時化的來源)，每一篇都標明撰寫期間，避免被當成最新分析。
+// 本週變化：由 live_timeline.weekly_changes 產生 (STATE.timeline_history.weekly)，全部來自真實快照與法人資料
+function renderWeeklyChanges() {
+  const box = document.getElementById('weeklyChangesBox');
+  if (!box) return;
+  const th = STATE && STATE.timeline_history;
+  const w = th && th.weekly;
+  if (!w || !w.available) {
+    box.innerHTML = `<div class="card"><div class="card-title">本週變化</div><div style="color:var(--text-secondary);">${esc((w && w.reason) || '快照日不足，累積後會自動顯示分數、預警等級與法人資金的週變化。')}</div></div>`;
+    return;
+  }
+  const sg = (v) => (v >= 0 ? '+' : '') + v;
+  const list = (arr, f) => (arr && arr.length) ? arr.map(f).join('<br/>') : '<span style="color:var(--text-muted);">無</span>';
+  const scale = w.mixed_scale
+    ? `<div class="callout" style="margin:8px 0; --callout-col:var(--accent-orange); font-size:12.5px;">⚠️ 起點快照 (${esc(w.from_date)}) 與最新快照的分數來源不同（${esc(w.from_source === 'live' ? '即時評分' : '舊模型種子分數')} → ${esc(w.to_source === 'live' ? '即時評分' : '舊模型種子分數')}），兩者尺度與方法不同，分數變化包含模型切換的影響，不能直接當作產業轉強或轉弱。</div>` : '';
+  const gapNote = w.gap_days < 5 ? `（目前只累積 ${w.gap_days} 個快照日的間隔，滿 5 天才是完整一週）` : '';
+  const lv = (w.level_changes || []).filter(c => c.from && c.to);
+  const inst = w.inst || {};
+  const instHtml = inst.available ? `
+      <div class="evidence-box"><strong>💰 外資＋投信近 ${inst.days} 個交易日 (${esc(inst.from.slice(5))}～${esc(inst.to.slice(5))}) 累計淨買賣</strong><br/>
+        買超：${list(inst.buy, b => `${esc(b.name)} ${sg(b.value)} 億`)}<br/>賣超：${list(inst.sell, b => `${esc(b.name)} ${sg(b.value)} 億`)}
+        ${(inst.flips && inst.flips.length) ? `<br/><strong>方向翻轉 (與前 5 日相反)：</strong>${inst.flips.map(f => `${esc(f.name)}（前 5 日 ${sg(f.prior)} → 近 5 日 ${sg(f.recent)} 億）`).join('、')}` : ''}
+      </div>` : '';
+  box.innerHTML = `
+    <div class="card" style="border-left:4px solid var(--accent-emerald);">
+      <div class="card-header"><div class="card-title" style="font-size:16px;">✅ 本週變化（自動產生：${esc(w.from_date)} → ${esc(w.to_date)}）</div></div>
+      <div style="font-size:12.5px; color:var(--text-secondary);">由每日評分快照與法人買賣超機械式比較，沒有手寫敘事；只描述變化，不解釋原因 ${gapNote}</div>
+      ${scale}
+      <div class="stories-grid" style="margin-top:10px;">
+        <div class="evidence-box"><strong>📈 分數升幅最大</strong><br/>${list(w.score_up, r => `${esc(r.name)}：${r.from} → ${r.to}（${sg(r.delta)}）`)}</div>
+        <div class="evidence-box counter"><strong>📉 分數降幅最大</strong><br/>${list(w.score_down, r => `${esc(r.name)}：${r.from} → ${r.to}（${sg(r.delta)}）`)}</div>
+        <div class="evidence-box invalid"><strong>🔔 預警等級變動</strong><br/>${list(lv, c => `${esc(c.name)}：${esc(c.from)} → ${esc(c.to)} ${c.direction === 'up' ? '▲' : '▼'}`)}</div>
+      </div>
+      ${instHtml}
+    </div>`;
+}
+
 function renderTrendStories() {
+  renderWeeklyChanges();
   const stories = [
     {
       title: "故事一：台灣史上最大規模「內資被動化承接」正在對決「外資避險提款」",
@@ -218,7 +255,7 @@ function renderTrendStories() {
     storiesNote.style.cssText = 'font-size:12.5px; margin:4px 2px 10px; color:var(--text-muted);';
     storiesGrid.parentNode.insertBefore(storiesNote, storiesGrid);
   }
-  storiesNote.textContent = '🕰️ 以下四篇是 2026-11-21 前後撰寫的敘事文章，引用當時的總經與市場數字，不會隨資料更新；最新數字請看上方即時區塊。';
+  storiesNote.textContent = '🕰️ 以下四篇是 2026-11-21 前後撰寫的敘事文章，引用當時的總經與市場數字，不會隨資料更新；最新變化請看上方「本週變化」。';
   storiesGrid.innerHTML = stories.map(st => `
     <div class="story-card">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">

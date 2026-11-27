@@ -441,6 +441,11 @@ def apply_live_etf(conn=None, today=None, backfill_requests=None):
                   sc["b"]["b1"], sc["b"]["b2"], sc["b"]["b3"], sc["b"]["b4"], sc["b"]["b5"], tb, cb,
                   divergence_tag(etf, ca, cb, ta, tb), tx["top_advantage"], tx["top_risk"], tx["supporting_evidence"], tx["counter_evidence"],
                   tx["contradiction_notes"], tx["invalidation_conditions"], tx["next_watch_indicator"], credibility(m, sc["missing"]), missing_pct))
+            # 前瞻追蹤用的快照：記下「當時」的分數與結論；同一資料日重跑則覆寫 (同一天只留一筆)
+            cur.execute("""INSERT OR REPLACE INTO etf_score_history
+                           (etf_code, snapshot_date, score_a, score_b, conclusion_a, conclusion_b, is_leveraged, missing_count, created_at)
+                           VALUES (?,?,?,?,?,?,?,?,?)""",
+                        (code, m["last_date"], ta, tb, ca, cb, 1 if etf["is_leveraged"] else 0, len(sc["missing"]), now))
             rows_for_report.append({"code": code, "name": mst["etf_name"], "m": m, "insti_billion": full["insti_billion"],
                                     "insti_ratio_pct": etf["insti_ratio_pct"], "ta": ta, "tb": tb, "leveraged": etf["is_leveraged"]})
             n += 1

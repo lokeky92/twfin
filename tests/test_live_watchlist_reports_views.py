@@ -182,12 +182,64 @@ class TestReports(unittest.TestCase):
         self.assertIn("2026 年 10 月", f["一、最新月營收與產業排名"])
 
 
+def mrev(ym, iid, rev, ly, companies=100):
+    return {"data_ym": ym, "industry_id": iid, "rev_thousand": rev, "rev_last_year_thousand": ly, "companies": companies}
+
+
+class TestQuarterly(unittest.TestCase):
+    def test_no_monthly_data_means_no_quarterly(self):
+        self.assertIsNone(lr.build_quarterly(ctx()))
+        self.assertIsNone(lr.build_quarterly(ctx(monthly_rev=[])))
+
+    def test_partial_quarter_is_marked_accumulating(self):
+        rows = [mrev("11510", "A", 200e6, 100e6), mrev("11510", "B", 100e6, 100e6)]
+        r = lr.build_quarterly(ctx(monthly_rev=rows))
+        self.assertEqual(r["report_id"], "RPT_LIVE_QUARTERLY_2026Q4")
+        self.assertEqual(r["frequency"], "每季")
+        self.assertIn("累積中 1/3 個月", r["report_title"])
+        f = {x["section"]: x["content"] for x in json.loads(r["key_findings_json"])}
+        self.assertIn("累積中（本季已有 1/3 個月營收：10 月）", f["一、本季產業營收"])
+        self.assertIn("+100.0%", f["一、本季產業營收"])                         # A: 200 / 100 - 1
+        self.assertIn("沒有上一季的完整三個月營收", f["二、與上一季比較"])
+        self.assertIn("尚不足以比較評分變化", f["三、本季評分變化"])
+        self.assertIn("尚未湊滿三個月", r["counter_evidence"])
+        self.assertIn("沒有總體經濟", r["counter_evidence"])
+
+    def test_months_with_few_companies_are_not_complete(self):
+        rows = [mrev("11510", "A", 200e6, 100e6, 100), mrev("11511", "A", 5e6, 5e6, 20)]          # 11 月只有 20% 公司，視為尚未完整
+        r = lr.build_quarterly(ctx(monthly_rev=rows))
+        self.assertIn("累積中 1/3 個月", r["report_title"])
+        self.assertIn("10 月", json.loads(r["key_findings_json"])[0]["content"])
+
+    def test_full_quarter_with_previous_quarter_has_qoq(self):
+        rows = []
+        for ym, v in (("11507", 100e6), ("11508", 100e6), ("11509", 100e6), ("11510", 150e6), ("11511", 150e6), ("11512", 150e6)):
+            rows.append(mrev(ym, "A", v, 100e6))
+        r = lr.build_quarterly(ctx(monthly_rev=rows))
+        self.assertIn("完整", r["report_title"])
+        f = {x["section"]: x["content"] for x in json.loads(r["key_findings_json"])}
+        self.assertIn("季增最高", f["二、與上一季比較"])
+        self.assertIn("+50.0%", f["二、與上一季比較"])
+        self.assertNotIn("尚未湊滿", r["counter_evidence"])
+
+    def test_quarter_flow_and_scores_only_within_quarter(self):
+        rows = [mrev("11510", "A", 200e6, 100e6)]
+        daily = [{"trade_date": "2026-11-24", "industry_id": "A", "foreign_billion": 10.0, "itc_billion": 2.0},
+                 {"trade_date": "2026-09-30", "industry_id": "A", "foreign_billion": 999.0, "itc_billion": 0.0}]         # 上一季，不可計入
+        hist = [{"snapshot_date": "2026-11-24", "industry_id": "A", "total_weighted_score": 60.0},
+                {"snapshot_date": "2026-11-25", "industry_id": "A", "total_weighted_score": 66.0}]
+        f = {x["section"]: x["content"] for x in json.loads(lr.build_quarterly(ctx(monthly_rev=rows, daily_ind=daily, history=hist))["key_findings_json"])}
+        self.assertIn("+12.0", f["四、本季產業法人資金累計"])
+        self.assertNotIn("999", f["四、本季產業法人資金累計"])
+        self.assertIn("+6.0", f["三、本季評分變化"])
+
+
 class TestReportsDatabase(unittest.TestCase):
     def setUp(self):
         db.init_database()
         conn = db.get_connection()
         for t in ("research_reports", "institutional_flows", "live_company_fundamentals", "live_stock_quotes", "live_market_indices",
-                  "industry_rotation_scores", "industry_score_history", "trend_early_warnings", "company_research_watchlist", "live_industry_daily"):
+                  "industry_rotation_scores", "industry_score_history", "trend_early_warnings", "company_research_watchlist", "live_industry_daily", "industry_monthly_revenue"):
             conn.execute(f"DELETE FROM {t}")
         conn.commit()
         conn.close()
@@ -228,6 +280,31 @@ class TestReportsDatabase(unittest.TestCase):
         self.assertEqual(set(by_freq["每週"]), {"live"})
         self.assertEqual(set(by_freq["每月"]), {"live"})
         self.assertEqual(set(by_freq["每季"]), {"seed"})                          # 季報沒有即時來源，維持手寫
+
+    def test_monthly_revenue_is_recorded_and_not_overwritten_by_partial_month(self):
+        conn = db.get_connection()
+        conn.execute("DELETE FROM industry_monthly_revenue")
+        for k in range(10):
+            conn.execute("""INSERT OR REPLACE INTO live_company_fundamentals (company_code, company_name, market_type, official_industry,
+                mapped_industry_id, data_ym, report_date, rev_current_thousand, rev_last_year_thousand, fetched_at, source_url)
+                VALUES (?, 'n', 'TWSE', 'x', 'IND_SEMI_FOUNDRY', '11510', '1151110', 100, 50, 't', 'u')""", (f"90{k:02d}",))
+        conn.commit()
+        self.assertGreater(lr.record_monthly_revenue(conn), 0)
+        row = conn.execute("SELECT * FROM industry_monthly_revenue WHERE data_ym = '11510'").fetchone()
+        self.assertEqual((row["companies"], row["rev_thousand"], row["rev_last_year_thousand"]), (10, 1000.0, 500.0))
+        # 12 月初：其中 7 家已換成 11 月，剩 3 家仍是 10 月 → 10 月的紀錄不可被只剩 3 家的部分資料蓋掉
+        for k in range(7):
+            conn.execute("DELETE FROM live_company_fundamentals WHERE company_code = ?", (f"90{k:02d}",))
+            conn.execute("""INSERT INTO live_company_fundamentals (company_code, company_name, market_type, official_industry, mapped_industry_id,
+                data_ym, report_date, rev_current_thousand, rev_last_year_thousand, fetched_at, source_url)
+                VALUES (?, 'n', 'TWSE', 'x', 'IND_SEMI_FOUNDRY', '11511', '1151210', 120, 60, 't', 'u')""", (f"90{k:02d}",))
+        conn.commit()
+        lr.record_monthly_revenue(conn)
+        oct_row = conn.execute("SELECT * FROM industry_monthly_revenue WHERE data_ym = '11510' AND industry_id = 'IND_SEMI_FOUNDRY'").fetchone()
+        nov_row = conn.execute("SELECT * FROM industry_monthly_revenue WHERE data_ym = '11511' AND industry_id = 'IND_SEMI_FOUNDRY'").fetchone()
+        conn.close()
+        self.assertEqual(oct_row["companies"], 10)                            # 沒被蓋掉
+        self.assertEqual(nov_row["companies"], 7)
 
     def test_rerun_same_day_is_idempotent_and_old_reports_are_trimmed(self):
         conn = db.get_connection()

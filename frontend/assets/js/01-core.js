@@ -103,6 +103,52 @@ function renderDataProvenance() {
     '點擊展開「資料新鮮度」面板',
   ].join('\n');
   renderFreshnessPanel();
+  renderStaleBanner();
+}
+
+// ---- 資料過期警示橫幅 ----
+// 靜態頁可能在資料產生很多天後才被開啟，所以以「開啟當下」的日期重算：最新資料日期落後 STALE_BUSINESS_DAYS 個營業日以上就顯示橫幅。
+// 只排除週末，不含國定假日；連假期間出現屬正常，橫幅文字會說明。
+const STALE_BUSINESS_DAYS = 4;
+function businessDaysBetween(fromIso, toDate) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(fromIso || ''));
+  if (!m) return null;
+  const from = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  const to = new Date(Date.UTC(toDate.getFullYear(), toDate.getMonth(), toDate.getDate()));
+  if (to <= from) return 0;
+  let n = 0;
+  for (let d = new Date(from.getTime() + 86400000); d <= to; d = new Date(d.getTime() + 86400000)) {
+    const w = d.getUTCDay();
+    if (w !== 0 && w !== 6) n++;
+  }
+  return n;
+}
+function computeStaleness(p, generatedAt, now) {
+  const dates = ((p && p.source_status) || []).map(x => String(x.data_date || '').slice(0, 10)).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+  const latest = dates.length ? dates[dates.length - 1] : String(generatedAt || '').slice(0, 10);
+  const days = businessDaysBetween(latest, now);
+  const failed = ((p && p.source_status) || []).filter(x => x.status === 'FAILED' || x.status === 'EMPTY');
+  return { latest, days, stale: days !== null && days >= STALE_BUSINESS_DAYS, failed };
+}
+function renderStaleBanner(now) {
+  const p = STATE && STATE.data_provenance;
+  let bar = document.getElementById('staleBanner');
+  if (!p) { if (bar) bar.style.display = 'none'; return; }
+  const r = computeStaleness(p, STATE.generated_at, now || new Date());
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'staleBanner';
+    bar.style.cssText = 'margin:8px 16px; padding:10px 14px; border-radius:8px; font-size:13px; cursor:pointer; border:1px solid #fb7185; background:rgba(251,113,133,.12); color:#fecdd3;';
+    bar.onclick = toggleFreshnessPanel;
+    const header = document.querySelector('header');
+    if (header) header.parentNode.insertBefore(bar, header.nextSibling);
+  }
+  if (!r.stale && !r.failed.length) { bar.style.display = 'none'; return; }
+  bar.style.display = '';
+  const parts = [];
+  if (r.stale) parts.push(`資料可能已停止更新：最新資料日期 ${esc(r.latest)}，距今已 ${r.days} 個營業日（只排除週末，不含國定假日；若逢連假屬正常）。排程每個交易日約 16:30 與 20:00 (台灣時間) 自動更新，若連假後仍未更新請檢查 GitHub Actions。`);
+  if (r.failed.length) parts.push(`${r.failed.length} 個來源擷取失敗或無資料：${r.failed.map(x => esc(x.label)).join('、')}。`);
+  bar.innerHTML = '⚠️ ' + parts.join(' ') + ' <span style="text-decoration:underline;">點擊查看各來源狀態</span>';
 }
 
 function toggleFreshnessPanel() {

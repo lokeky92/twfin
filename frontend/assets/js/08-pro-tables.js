@@ -508,8 +508,11 @@ function renderReports() {
   const container = document.getElementById('reportsContainer');
   const list = STATE.research_reports.filter(r => freq === 'ALL' || r.frequency === freq);
   const liveN = STATE.research_reports.filter(r => r.text_source === 'live').length;
+  const liveQ = STATE.research_reports.some(r => r.text_source === 'live' && r.frequency === '每季');
   setSourceNote('reportsContainer', 'reportsSourceNote', liveN
-    ? `✅ 每日／每週／每月報告由官方即時資料機械式產生（共 ${liveN} 份，各頻率保留最近幾份；週報、月報只涵蓋已累積資料的交易日並會標明天數）。每季報告需要總體與財報資料，沒有即時來源，仍是手寫並標示「不會自動更新」。`
+    ? (liveQ
+      ? `✅ 每日／每週／每月／每季報告都由官方即時資料機械式產生（共 ${liveN} 份，各頻率保留最近幾份；週報、月報、季報只涵蓋已累積資料並會標明天數或月數）。季報是「產業營收與資金季報」：由累積的月營收、評分快照與法人買賣金額組成，沒有總體經濟與財報資料，本季營收湊滿三個月前標示「累積中」。`
+      : `✅ 每日／每週／每月報告由官方即時資料機械式產生（共 ${liveN} 份，各頻率保留最近幾份；週報、月報只涵蓋已累積資料的交易日並會標明天數）。每季報告目前仍是手寫並標示「不會自動更新」（累積到一個完整月營收後會改為自動產生）。`)
     : '⚠️ 此快照的固定研究報告全部是 2026-11-22 前後手寫的，不會隨資料更新。');
   container.innerHTML = list.map(r => {
     const sectionsHtml = (r.key_findings || []).map(sec => `

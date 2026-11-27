@@ -1,11 +1,12 @@
 """
-固定研究報告 (每日／每週／每月)：由即時資料機械式產生，取代 seed 裡 2026-11-22 手寫的報告。
+固定研究報告 (每日／每週／每月／每季)：由即時資料機械式產生，取代 seed 裡 2026-11-22 手寫的報告。
 
 每次排程產生：
   - 每日日報：當日三大法人、大盤、產業分數與法人買賣金額、預警等級分布、個股篩選
   - 每週週報：本週 (ISO 週) 逐日法人、大盤、產業累計法人買賣金額、評分變化 (資料天數不足時照實標示)
   - 每月月報：最新一期 MOPS 月營收的產業排名、當月累計法人、評分變化、預警分布
-每季季報沒有可用的即時來源 (需要總體與財報資料)，維持手寫並在畫面標示「不會更新」。
+  - 每季季報：由累積的各產業月營收 (industry_monthly_revenue)、評分快照與法人買賣金額組成；本季還沒湊滿三個月營收時標示「累積中」。
+    (沒有總體經濟與財報資料，所以是「產業營收與資金季報」，不含總體展望。)
 
 所有數字來自資料庫，文字由規則組成；不含新聞、事件或分析師觀點。
 「反方證據」由規則偵測資料裡互相矛盾的地方 (例如法人賣超但大盤上漲)；沒有就明說沒有。
@@ -17,7 +18,7 @@ from datetime import date
 from live_pulse import MARKET_INDEX, SHORT_NAMES, FOREIGN_SELL_ALERT_BILLION, index_series, live_daily_flows, to_iso_date, window_return
 
 PRICE_INDEX = "發行量加權股價指數"
-KEEP = {"每日": 7, "每週": 4, "每月": 3}      # 各頻率保留最近幾份
+KEEP = {"每日": 7, "每週": 4, "每月": 3, "每季": 2}      # 各頻率保留最近幾份
 SOURCES = "證交所 BFI82U／T86／個股行情、櫃買三大法人與行情、MOPS 月營收（官方 OpenAPI）"
 LIMITS = ("本報告由機械式規則依即時資料自動產生，不是分析師撰寫；5 項評分子分數皆為代理指標 (沒有財報獲利、毛利率、資本支出或分析師預估)，"
           "且是相對其他產業的百分位；法人金額 = 淨買賣股數 × 當日收盤價 (近似)。")
@@ -220,6 +221,128 @@ def build_monthly(ctx):
                  _tracking(flows, inds, "每月 10 日前公布下一期月營收後，月報的營收段落會更新。"), f"live-M-{ym}")
 
 
+def _ym_parts(ym):
+    return int(ym[:-2]) + 1911, int(ym[-2:])
+
+
+def _quarter_of(ym):
+    y, m = _ym_parts(ym)
+    return y, (m - 1) // 3 + 1
+
+
+COMPLETE_RATIO = 0.9      # 某月涵蓋公司數達最大月份的 90% 才算「完整月」(月初公司陸續換月，部分月份不可當完整資料)
+
+
+def build_quarterly(ctx):
+    """產業營收與資金季報。沒有累積任何完整月營收時回傳 None。"""
+    rows = ctx.get("monthly_rev") or []
+    if not rows:
+        return None
+    tot = {}
+    for r in rows:
+        t = tot.setdefault(r["data_ym"], {"companies": 0, "rev": 0.0, "ly": 0.0})
+        t["companies"] += r["companies"]
+        t["rev"] += r["rev_thousand"] or 0.0
+        t["ly"] += r["rev_last_year_thousand"] or 0.0
+    biggest = max(t["companies"] for t in tot.values())
+    complete = sorted(ym for ym, t in tot.items() if t["companies"] >= COMPLETE_RATIO * biggest)
+    if not complete:
+        return None
+    y, q = _quarter_of(complete[-1])
+    have = [ym for ym in complete if _quarter_of(ym) == (y, q)]
+    full = len(have) == 3
+    names = {i["id"]: i for i in ctx["inds"]}
+    agg = {}
+    for r in rows:
+        if r["data_ym"] in have:
+            a = agg.setdefault(r["industry_id"], {"rev": 0.0, "ly": 0.0})
+            a["rev"] += r["rev_thousand"] or 0.0
+            a["ly"] += r["rev_last_year_thousand"] or 0.0
+    items = []
+    for iid, a in agg.items():
+        base = dict(names.get(iid) or {"id": iid, "name": iid})
+        base["q_yoy"] = (a["rev"] / a["ly"] - 1) * 100 if a["ly"] else None
+        base["q_rev"] = a["rev"]
+        items.append(base)
+    # 與上一季比較：兩季都完整 (各 3 個完整月) 才算
+    py, pq = (y, q - 1) if q > 1 else (y - 1, 4)
+    prev_months = [ym for ym in complete if _quarter_of(ym) == (py, pq)]
+    qoq_txt = "與上一季比較：沒有上一季的完整三個月營收 (系統從導入月營收累積起才開始記錄)，無法計算季增率。"
+    if full and len(prev_months) == 3:
+        prev = {}
+        for r in rows:
+            if r["data_ym"] in prev_months:
+                prev[r["industry_id"]] = prev.get(r["industry_id"], 0.0) + (r["rev_thousand"] or 0.0)
+        for it in items:
+            pv = prev.get(it["id"])
+            it["q_qoq"] = (it["q_rev"] / pv - 1) * 100 if pv else None
+        qoq_txt = (f"與上一季相比，產業營收季增最高：{_fmt_inds(_top(items, lambda i: i.get('q_qoq')), lambda i: _sg(i['q_qoq'], 1, '%'))}；"
+                   f"最低：{_fmt_inds(_top(items, lambda i: i.get('q_qoq'), reverse=False), lambda i: _sg(i['q_qoq'], 1, '%'))}。")
+    months_lbl = "、".join(f"{_ym_parts(m)[1]} 月" for m in have)
+    state = "完整（三個月都已公布）" if full else f"累積中（本季已有 {len(have)}/3 個月營收：{months_lbl}）"
+    all_rev = sum(a["rev"] for a in agg.values())
+    all_ly = sum(a["ly"] for a in agg.values())
+    top = _top(items, lambda i: i["q_yoy"])
+    bot = _top(items, lambda i: i["q_yoy"], reverse=False)
+    s1 = (f"{y} 年第 {q} 季營收{state}。已公布月份合計 {all_rev / 1e9:,.2f} 兆元，較去年同期 {_sg(((all_rev / all_ly - 1) * 100) if all_ly else None, 1, '%')}。"
+          f"產業累計營收年增最高：{_fmt_inds(top, lambda i: _sg(i['q_yoy'], 1, '%'))}；最低：{_fmt_inds(bot, lambda i: _sg(i['q_yoy'], 1, '%'))}。")
+    # 評分：本季內的即時評分快照
+    in_q = lambda d: d[:4] == str(y) and (int(d[5:7]) - 1) // 3 + 1 == q      # noqa: E731
+    hist = [h for h in ctx["history"] if in_q(h["snapshot_date"]) and h["total_weighted_score"] is not None]
+    hd = sorted({h["snapshot_date"] for h in hist})
+    if len(hd) >= 2:
+        f0 = {h["industry_id"]: h["total_weighted_score"] for h in hist if h["snapshot_date"] == hd[0]}
+        f1 = {h["industry_id"]: h["total_weighted_score"] for h in hist if h["snapshot_date"] == hd[-1]}
+        ch = [dict(names.get(k) or {"id": k, "name": k}, v=f1[k] - f0[k]) for k in f1 if k in f0]
+        s2 = (f"本季內即時評分快照 {len(hd)} 天（{hd[0][5:]}→{hd[-1][5:]}）：分數上升最多 {_fmt_inds(_top(ch, lambda i: i['v']), lambda i: _sg(i['v'], 1))}；"
+              f"下降最多 {_fmt_inds(_top(ch, lambda i: i['v'], reverse=False), lambda i: _sg(i['v'], 1))}。")
+    else:
+        s2 = f"本季內只有 {len(hd)} 天的即時評分快照，尚不足以比較評分變化。"
+    # 法人：本季內的產業資金累計
+    drows = [r for r in ctx["daily_ind"] if in_q(r["trade_date"])]
+    dd = sorted({r["trade_date"] for r in drows})
+    flow = {}
+    for r in drows:
+        flow[r["industry_id"]] = flow.get(r["industry_id"], 0.0) + (r["foreign_billion"] or 0) + (r["itc_billion"] or 0)
+    fl = [dict(names.get(k) or {"id": k, "name": k}, v=v) for k, v in flow.items()]
+    if fl:
+        s3 = (f"本季累計外資+投信淨買賣（僅累積 {len(dd)} 個交易日的產業資料，非整季）：買超最多 "
+              f"{_fmt_inds([x for x in _top(fl, lambda i: i['v']) if x['v'] > 0], lambda i: _sg(i['v'], 1, ' 億'))}；賣超最多 "
+              f"{_fmt_inds([x for x in _top(fl, lambda i: i['v'], reverse=False) if x['v'] < 0], lambda i: _sg(i['v'], 1, ' 億'))}。")
+    else:
+        s3 = "本季還沒有累積產業層級的法人買賣金額資料。"
+    findings = [{"section": "一、本季產業營收", "content": s1}, {"section": "二、與上一季比較", "content": qoq_txt},
+                {"section": "三、本季評分變化", "content": s2}, {"section": "四、本季產業法人資金累計", "content": s3},
+                {"section": "五、目前預警等級分布", "content": _levels_text(ctx["inds"])}]
+    counter = ["季報只含產業營收、評分快照與法人買賣金額；沒有總體經濟 (利率、匯率、景氣燈號) 與財報獲利資料，不構成季度展望。"]
+    if not full:
+        counter.append("本季營收尚未湊滿三個月，上列年增是已公布月份的累計，會隨新月份公布而改變。")
+    summary = f"{y} 年第 {q} 季產業營收{state}；已公布月份合計 {all_rev / 1e9:,.2f} 兆元。"
+    tag = f"live-Q-{y}Q{q}"
+    return _base("每季", f"RPT_LIVE_QUARTERLY_{y}Q{q}", f"【每季產業營收與資金季報】{y} 年第 {q} 季（{'完整' if full else '累積中 ' + str(len(have)) + '/3 個月'}）",
+                 f"{ctx['flows'][-1]['date'] if ctx.get('flows') else have[-1]} 盤後（營收至 {_ym_parts(have[-1])[0]} 年 {_ym_parts(have[-1])[1]} 月）", ctx["now"], summary, findings, counter,
+                 "每月 10 日前公布新一期月營收後更新；三個月湊滿後轉為完整季報。", tag)
+
+
+def record_monthly_revenue(conn):
+    """把各產業「目前每家公司最新一個月」的營收加總存入 industry_monthly_revenue (只在涵蓋公司數不減少時覆寫)。"""
+    from common import now_iso
+    cur = conn.cursor()
+    ts = now_iso()
+    cur.execute("""SELECT data_ym, mapped_industry_id AS iid, COUNT(*) AS n, SUM(rev_current_thousand) AS rev, SUM(rev_last_year_thousand) AS ly
+                   FROM live_company_fundamentals WHERE mapped_industry_id IS NOT NULL AND rev_current_thousand IS NOT NULL
+                   GROUP BY data_ym, mapped_industry_id""")
+    n = 0
+    for r in cur.fetchall():
+        cur.execute("""INSERT INTO industry_monthly_revenue (data_ym, industry_id, rev_thousand, rev_last_year_thousand, companies, updated_at)
+                       VALUES (?,?,?,?,?,?)
+                       ON CONFLICT(data_ym, industry_id) DO UPDATE SET rev_thousand = excluded.rev_thousand,
+                           rev_last_year_thousand = excluded.rev_last_year_thousand, companies = excluded.companies, updated_at = excluded.updated_at
+                       WHERE excluded.companies >= industry_monthly_revenue.companies""", (r["data_ym"], r["iid"], r["rev"], r["ly"], r["n"], ts))
+        n += 1
+    return n
+
+
 # ---------------------------------------------------------------------------
 # 資料庫存取
 # ---------------------------------------------------------------------------
@@ -252,6 +375,8 @@ def gather_context(conn):
     daily_ind = [dict(r) for r in cur.fetchall()]
     cur.execute("SELECT snapshot_date, industry_id, total_weighted_score FROM industry_score_history WHERE score_source = 'live' AND model_version = ?", (version,))
     history = [dict(r) for r in cur.fetchall()]
+    cur.execute("SELECT * FROM industry_monthly_revenue")
+    monthly_rev = [dict(r) for r in cur.fetchall()]
     cur.execute("SELECT * FROM company_research_watchlist WHERE text_source = 'live'")
     picks = [dict(r) for r in cur.fetchall()]
     cur.execute("""SELECT COUNT(*) n, ROUND(SUM(rev_current_thousand)/1e9, 4) t, ROUND(SUM(rev_last_year_thousand)/1e9, 4) ly, MAX(data_ym) ym
@@ -261,7 +386,7 @@ def gather_context(conn):
     rev = {"companies": r["n"], "total_trillion": r["t"], "yoy_pct": ((r["t"] / r["ly"] - 1) * 100) if r["ly"] else None,
            "label": f"{int(ym[:-2]) + 1911} 年 {int(ym[-2:])} 月" if ym.isdigit() and len(ym) >= 4 else "最新月"}
     from common import now_iso
-    return {"flows": flows, "idx": idx, "inds": inds, "daily_ind": daily_ind, "history": history, "picks": picks, "revenue": rev,
+    return {"flows": flows, "idx": idx, "inds": inds, "daily_ind": daily_ind, "history": history, "picks": picks, "revenue": rev, "monthly_rev": monthly_rev,
             "now": now_iso()}
 
 
@@ -272,8 +397,11 @@ def apply_live_reports(conn=None):
     own = conn is None
     conn = conn or get_connection()
     try:
+        record_monthly_revenue(conn)
         ctx = gather_context(conn)
-        reports = [r for r in (build_daily(ctx), build_weekly(ctx), build_monthly(ctx)) if r]
+        if not ctx["flows"]:
+            return {"applied": False, "reason": "沒有即時法人資料"}
+        reports = [r for r in (build_daily(ctx), build_weekly(ctx), build_monthly(ctx), build_quarterly(ctx)) if r]
         if not reports:
             return {"applied": False, "reason": "沒有即時法人資料"}
         cur = conn.cursor()

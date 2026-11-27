@@ -211,26 +211,19 @@
               <span id="timelineCurrentLabel" style="font-size:13.5px; font-weight:700; color:#34d399; margin-left:6px;"></span>
             </div>
             <div class="tool-group">
-              <button class="btn btn-sm" onclick="jumpTimelineWindow('3Y')">近 3 年</button>
-              <button class="btn btn-sm" onclick="jumpTimelineWindow('1Y')">近 1 年</button>
-              <button class="btn btn-sm" onclick="jumpTimelineWindow('6M')">近 6 月</button>
-              <button class="btn btn-sm" onclick="jumpTimelineWindow('3M')">近 3 月</button>
-              <button class="btn btn-sm" onclick="jumpTimelineWindow('1M')">最新</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('FIRST')">最早</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('BACK20')">20 期前</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('BACK5')">5 期前</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('LATEST')">最新</button>
             </div>
           </div>
-          <input type="range" id="timelineRangeInput" class="timeline-slider" aria-label="資金輪動歷史時間軸 (拖曳切換時期)" min="0" max="5" value="5" oninput="onTimelineSliderInput(this.value)" />
-          <div class="timeline-steps">
-            <span>2024 下半年<br/>房市高峰</span>
-            <span>2025 上半年<br/>CoWoS 擴產</span>
-            <span>2025 下半年<br/>水冷拐點／打房</span>
-            <span>2026 上半年<br/>重電／測試崛起</span>
-            <span>2026 年 8~9 月<br/>劃撥 4.7 兆創高</span>
-            <span id="timelineLatestStep" style="color:var(--accent-emerald); font-weight:700;">最新<br/>即時評分</span>
-          </div>
+          <input type="range" id="timelineRangeInput" class="timeline-slider" aria-label="資金輪動歷史時間軸 (拖曳切換快照日)" min="0" max="0" value="0" oninput="onTimelineSliderInput(this.value)" />
+          <div class="timeline-steps" id="timelineSteps"></div>
         </div>
 
         <div id="industryHeatmapGrid" class="heatmap-grid"></div>
         <div id="timelineCompactBar" class="callout"></div>
+        <details id="timelineHandwritten" style="margin-top:10px;"></details>
       </div>
 
       <!-- 首頁底部：下一步 -->
@@ -291,10 +284,14 @@
       <div class="section-head">
         <div>
           <div class="section-title"><span class="sec-no">3</span>市場正在發生什麼事？</div>
-          <div class="section-desc">四則結構化趨勢故事，並列正方與反方證據</div>
+          <div class="section-desc">上方「本週變化」由資料自動產生；四篇手寫趨勢故事收在下方折疊區</div>
         </div>
       </div>
-      <div id="trendStoriesGrid" class="stories-grid"></div>
+      <div id="weeklyChangesBox"></div>
+      <details style="margin-top:14px;">
+        <summary style="cursor:pointer; font-weight:700; color:var(--text-secondary);">📁 手寫存檔：四篇趨勢故事（2026-11-21 前後撰寫，不會隨資料更新）</summary>
+        <div id="trendStoriesGrid" class="stories-grid" style="margin-top:12px;"></div>
+      </details>
 
       <!-- 4. 時間軸當期四維度詳細解析面板 -->
       <div class="section-head">
@@ -887,7 +884,11 @@
           </div>
         </div>
         <div id="etfReportsContainer" class="etf-grid-2"></div>
-        <div id="etfDualBacktestContainer" class="etf-grid-2" style="margin-top:20px;"></div>
+        <div id="etfForwardContainer"></div>
+        <details style="margin-top:20px;">
+          <summary style="cursor:pointer; font-weight:700; color:var(--text-secondary);">📁 手寫存檔：2026-11-21 前後預先寫好的「模型回測」（非實測，僅供留存）</summary>
+          <div id="etfDualBacktestContainer" class="etf-grid-2" style="margin-top:12px;"></div>
+        </details>
 
         <!-- ===================================================================
              第六區（第九節規範）：🤖 Argon ETF Multi-Agent Research Team 管理中心
@@ -968,5 +969,6 @@
   <script src="assets/js/21-live-backtest.js"></script>
   <script src="assets/js/22-strategy-sim.js"></script>
   <script src="assets/js/23-live-sankey.js"></script>
+  <script src="assets/js/24-etf-forward.js"></script>
 </body>
 </html>

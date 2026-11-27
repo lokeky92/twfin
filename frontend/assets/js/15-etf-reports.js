@@ -31,9 +31,10 @@ function renderEtfReportsAndBacktests() {
     `).join('');
   }
 
+  renderEtfForward();
   const bts = STATE.etf_center.backtests || [];
   const btBox = document.getElementById('etfDualBacktestContainer');
-  setSourceNote('etfDualBacktestContainer', 'etfBacktestNote', '⚠️ 下方模型 A／B 的「回測」是 2026-11-21 前後手寫的示範數字（勝率、樣本數、年化報酬等），不是由資料計算出來的實測結果，請勿當成模型有效的證據；本系統目前沒有 ETF 分數的歷史快照，無法做真正的回測。');
+  setSourceNote('etfDualBacktestContainer', 'etfBacktestNote', '⚠️ 下方模型 A／B 的「回測」是 2026-11-21 前後手寫的示範數字（勝率、樣本數、年化報酬等），不是由資料計算出來的實測結果，請勿當成模型有效的證據；真正的檢驗請看上方「ETF 前瞻追蹤」。');
   if (btBox) {
     btBox.innerHTML = bts.map(b => {
       const km = b.key_metrics || {};

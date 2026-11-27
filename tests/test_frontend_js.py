@@ -396,7 +396,7 @@ const ctx = {
   openDrawer() {}, buildSixQuestionsHtml: () => '',
 };
 vm.createContext(ctx);
-for (const f of ['01-core.js', '06-heatmap-timeline.js', '07-leaderboards-stories.js', '23-live-sankey.js']) {
+for (const f of ['01-core.js', '02-timeline-data.js', '06-heatmap-timeline.js', '07-leaderboards-stories.js', '23-live-sankey.js']) {
   vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), ctx, { filename: f });
 }
 const run = code => vm.runInContext(code, ctx);
@@ -426,12 +426,48 @@ run("renderIndustryHeatmap()");
 out.liveTiles = el('industryHeatmapGrid').innerHTML;
 out.liveNote = el('heatmapSourceNote').textContent;
 
-// 2. 歷史情境：不得把現在的分數配上手寫的歷史顏色
-el('timelineRangeInput').value = '3';
-run("renderIndustryHeatmap({ IND_SEMI_FOUNDRY: 'D' })");
+// 2. 歷史快照：顯示「當時記下」的分數，不得配上現在的即時分數
+ctx.__hist = { date: '2026-11-25', source: 'seed', scores: { IND_SEMI_FOUNDRY: { score: 41.2, state: 'D', level: 'LEVEL 1' }, IND_AI_SERVER: { score: null, state: 'C', level: null } } };
+run("renderIndustryHeatmap({ IND_SEMI_FOUNDRY: 'D' }, __hist)");
 out.histTiles = el('industryHeatmapGrid').innerHTML;
 out.histNote = el('heatmapSourceNote').textContent;
-el('timelineRangeInput').value = '5';
+
+// 2b. 時間軸：由真實快照產生，滑桿範圍隨快照數量、手寫情境移到折疊區
+const pt = (date, source, avg, hot, up) => ({ date, source, scored: 14, total: 14, avg, has_prev: up !== null,
+  scores: { IND_SEMI_FOUNDRY: { score: 60, state: 'A', level: 'LEVEL 3', name: '晶圓<b>代工</b>' } },
+  hot: [{ name: hot, score: 70.5 }], cold: [{ name: '營建', score: 30.1 }],
+  movers_up: up === null ? [] : [{ name: '散熱', delta: 4.2 }], movers_down: up === null ? [] : [{ name: '航運', delta: -3.1 }], levels: { 'LEVEL 3': 2, 'LEVEL R': 1 } });
+ctx.__tl = { available: true, total_days: 3, points: [pt('2026-11-25', 'seed', 50, '舊熱門', null), pt('2026-11-26', 'seed', 51, '舊熱門2', 1), pt('2026-11-27', 'live', 52, '即時熱門', 1)] };
+run("STATE = { industries: __inds, timeline_history: __tl, live_top_companies: [{ data_ym: '11510' }], home_pulse: { timeline_latest: { label: '最新（2026-11-27 盤後，即時評分）', flowSummary: 'FLOWLIVE', rotationOrder: 'ROTLIVE', keyEvent: 'EVTLIVE' } } }");
+run("initTimeline()");
+out.tlSlider = { min: el('timelineRangeInput').min, max: el('timelineRangeInput').max, value: el('timelineRangeInput').value };
+out.tlSteps = el('timelineSteps').innerHTML;
+out.tlHandwritten = el('timelineHandwritten').innerHTML;
+run("onTimelineSliderInput(0)");
+out.tlFirstLabel = el('timelineCurrentLabel').textContent;
+out.tlFirstPanel = el('timelineSnapshotPanel').innerHTML;
+out.tlFirstTiles = el('industryHeatmapGrid').innerHTML;
+run("onTimelineSliderInput(1)");
+out.tlMidPanel = el('timelineSnapshotPanel').innerHTML;
+run("onTimelineSliderInput(2)");
+out.tlLastPanel = el('timelineSnapshotPanel').innerHTML;
+out.tlLastNote = el('heatmapSourceNote').textContent;
+run("jumpTimelineWindow('FIRST')");
+out.tlJumpFirst = el('timelineCurrentLabel').textContent;
+run("STATE = { industries: __inds, timeline_history: { available: false, points: [] } }; initTimeline(); onTimelineSliderInput(0)");
+out.tlNone = el('timelineCurrentLabel').textContent;
+
+// 2c. 本週變化
+ctx.__wk = { available: true, from_date: '2026-11-18', to_date: '2026-11-27', gap_days: 3, mixed_scale: true, from_source: 'seed', to_source: 'live',
+  score_up: [{ name: '散熱<i>', from: 40, to: 50.5, delta: 10.5 }], score_down: [{ name: '航運', from: 60, to: 55, delta: -5 }],
+  level_changes: [{ name: '金融', from: 'LEVEL 2', to: 'LEVEL 3', direction: 'up' }],
+  inst: { available: true, days: 5, from: '2026-11-21', to: '2026-11-27', has_prior: true, buy: [{ name: '晶圓', value: 30.2 }], sell: [{ name: '營建', value: -8.1 }], flips: [{ name: '金融', recent: 3, prior: -4 }] } };
+run("STATE = { timeline_history: { available: true, points: [], weekly: __wk } }; renderWeeklyChanges()");
+out.weekly = el('weeklyChangesBox').innerHTML;
+run("STATE = { timeline_history: { available: false, points: [], weekly: { available: false, reason: 'NEED2' } } }; renderWeeklyChanges()");
+out.weeklyNone = el('weeklyChangesBox').innerHTML;
+run("STATE = {}; renderWeeklyChanges()");
+out.weeklyMissing = el('weeklyChangesBox').innerHTML;
 
 // 3. 種子分數 (沒有 live_metrics)：維持 20 日相對強弱，且 null 不可顯示成 +null
 ctx.__seed = inds.map(i => ({ ...i, score_source: 'seed', live_metrics: null }));
@@ -502,10 +538,54 @@ class TestLiveHeatmapBoardsAndSankey(unittest.TestCase):
             self.assertNotIn("NaN", html)
         self.assertIn("N/A", self.o["liveTiles"])        # 航運的營收年增、IC 設計的相對強弱為空
 
-    def test_history_period_does_not_pair_old_colors_with_current_scores(self):
-        self.assertNotIn("77.3 分", self.o["histTiles"])
-        self.assertIn("歷史情境", self.o["histTiles"])
-        self.assertIn("歷史情境", self.o["histNote"])
+    def test_history_snapshot_shows_recorded_scores_not_current_ones(self):
+        t = self.o["histTiles"]
+        self.assertIn("41.2 分", t)                              # 快照當時記下的分數
+        self.assertNotIn("77.3 分", t)                           # 現在的即時分數不可出現
+        self.assertIn("LEVEL 1", t)
+        self.assertNotIn("營收 YoY", t)                          # 快照沒有營收與相對強弱，不可拿現在的數字充數
+        self.assertIn("2026-11-25", self.o["histNote"])
+        self.assertIn("種子值", self.o["histNote"])              # 舊模型快照要揭露
+
+    def test_timeline_is_built_from_real_snapshots(self):
+        self.assertEqual(self.o["tlSlider"], {"min": 0, "max": 2, "value": 2})
+        self.assertIn("11-25", self.o["tlSteps"])
+        self.assertIn("11-27", self.o["tlSteps"])
+        self.assertIn("2026-11-25 盤後（舊模型種子分數）", self.o["tlFirstLabel"])
+        self.assertIn("舊熱門", self.o["tlFirstPanel"])
+        self.assertIn("沒有前一期可比較", self.o["tlFirstPanel"])
+        self.assertIn("散熱（+4.2）", self.o["tlMidPanel"])     # 與前一期相比的輪動
+        self.assertIn("航運（-3.1）", self.o["tlMidPanel"])
+        self.assertIn("LEVEL R：1", self.o["tlMidPanel"])
+        self.assertEqual(self.o["tlJumpFirst"], self.o["tlFirstLabel"])
+
+    def test_timeline_last_point_is_live_view(self):
+        self.assertIn("FLOWLIVE", self.o["tlLastPanel"])         # 疊上即時法人文字
+        self.assertIn("EVTLIVE", self.o["tlLastPanel"])
+        self.assertIn("分數由官方即時資料重算", self.o["tlLastNote"])   # 最新格回到即時分數畫面，不是歷史快照
+
+    def test_handwritten_periods_are_archived_and_labelled(self):
+        h = self.o["tlHandwritten"]
+        self.assertIn("手寫的歷史情境回顧", h)
+        self.assertIn("2024下半年", h)
+
+    def test_timeline_without_snapshots_falls_back_with_label(self):
+        self.assertIn("手寫・未更新", self.o["tlNone"])
+
+    def test_weekly_changes_render(self):
+        w = self.o["weekly"]
+        self.assertIn("2026-11-18 → 2026-11-27", w)
+        self.assertIn("40 → 50.5（+10.5）", w)
+        self.assertIn("LEVEL 2 → LEVEL 3", w)
+        self.assertIn("方向翻轉", w)
+        self.assertIn("尺度與方法不同", w)                          # 舊模型 → 即時評分要警示
+        self.assertIn("目前只累積 3 個快照日", w)
+        self.assertNotIn("<i>", w)                                  # 名稱已跳脫
+        self.assertIn("NEED2", self.o["weeklyNone"])
+        self.assertIn("快照日不足", self.o["weeklyMissing"])
+
+    def test_timeline_escapes_data(self):
+        self.assertNotIn("<b>代工</b>", self.o["tlFirstTiles"])
 
     def test_seed_snapshot_is_labelled_as_not_updating(self):
         self.assertIn("20 日相對強弱", self.o["seedTiles"])
@@ -657,6 +737,9 @@ out.rep = el('reportsContainer').innerHTML; out.repNote = el('reportsSourceNote'
 ctx.__r2 = [rep('seed', '手寫')];
 run("STATE = { research_reports: __r2 }; renderReports()");
 out.repSeedNote = el('reportsSourceNote').textContent;
+ctx.__r3 = [rep('live', '日報'), Object.assign(rep('live', '季報'), { frequency: '每季' })];
+run("STATE = { research_reports: __r3 }; renderReports()");
+out.repLiveQNote = el('reportsSourceNote').textContent;
 
 // 總體指標：年增為 null 不可顯示 null
 ctx.__m = [{ metric_code: 'TW_TAIEX_INDEX', module_id: 'M01', observation_type: 'DIRECT_STAT', metric_name: '加權指數', quality_grade: 'A', cleaned_value: 39308.08, unit: '點',
@@ -706,7 +789,9 @@ class TestProTablesRender(unittest.TestCase):
         self.assertIn("&lt;script&gt;", h)
         self.assertIn("badge-grade-A", h)                        # 即時報告
         self.assertIn("badge-grade-C", h)                        # 手寫報告
-        self.assertIn("每季報告需要總體與財報資料", self.o["repNote"])
+        self.assertIn("每季報告目前仍是手寫", self.o["repNote"])
+        self.assertIn("每日／每週／每月／每季報告都由官方即時資料", self.o["repLiveQNote"])     # 季報也即時產生後，說明改變
+        self.assertIn("沒有總體經濟與財報資料", self.o["repLiveQNote"])
         self.assertIn("不會隨資料更新", self.o["repSeedNote"])
 
     def test_macro_card_handles_missing_yoy(self):
@@ -1035,6 +1120,127 @@ console.log(JSON.stringify(out));
         self.assertNotIn("20 日相對強弱", t)
         self.assertNotIn("+0.5%", t)
         self.assertIn("觀察中", t)                                  # 仍然不評分
+
+
+class TestEtfForwardRender(unittest.TestCase):
+    DRIVER = r"""
+const fs = require('fs'), path = require('path'), vm = require('vm');
+const dir = process.argv[1];
+const stubs = {};
+function el(id) { return stubs[id] || (stubs[id] = { id, innerHTML: '', textContent: '', style: {}, parentNode: { insertBefore(n) { stubs[n.id] = n; } } }); }
+const ctx = { console, window: {}, document: { getElementById: el, createElement: () => ({ style: {} }), querySelectorAll: () => [] } };
+vm.createContext(ctx);
+for (const f of ['01-core.js', '24-etf-forward.js']) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), ctx, { filename: f });
+const run = c => vm.runInContext(c, ctx);
+const out = {};
+const hr = (h, matured) => ({ horizon: h, matured_signals: matured, pending_signals: 4, matured_dates: matured ? 1 : 0, enough_for_rates: false, enough_for_ic: false,
+  trading_days_needed: matured ? 0 : 3, ic: null, levels: matured ? [{ level: 'LEVEL 4', label: '條件相對有利', n: 2, mean_rel_pct: 1.5, hit_rate_pct: 100, hit_definition: '超額報酬 > 0' }] : [] });
+const base = { available: true, snapshot_days: 3, first_snapshot: '2026-11-25', last_snapshot: '2026-11-27', etf_count: 20, benchmark: '發行量加權股價指數',
+  min_signals: 30, min_dates: 20, caveats: ['<b>c</b>'], index_trading_days_after_first_snapshot: 2 };
+run("STATE = {}; renderEtfForward()");                      // 沒有資料也不可爆
+out.noData = el('etfForwardContainer').innerHTML;
+ctx.__a = Object.assign({}, base, { any_matured: false, models: { B: { signal_count: 8, horizon_results: [hr(5, 0), hr(10, 0), hr(20, 0)] }, A: { signal_count: 8, horizon_results: [hr(5, 0), hr(10, 0), hr(20, 0)] } } });
+run("STATE = { etf_forward: __a }; renderEtfForward()");
+out.pending = el('etfForwardContainer').innerHTML;
+ctx.__b = Object.assign({}, base, { any_matured: true, models: { B: { signal_count: 8, horizon_results: [hr(5, 2), hr(10, 0), hr(20, 0)] }, A: { signal_count: 8, horizon_results: [hr(5, 0), hr(10, 0), hr(20, 0)] } } });
+run("STATE = { etf_forward: __b }; renderEtfForward()");
+out.matured = el('etfForwardContainer').innerHTML;
+console.log(JSON.stringify(out));
+"""
+
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", cls.DRIVER, JS_DIR], capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    def test_no_data_shows_placeholder(self):
+        self.assertIn("尚無 ETF 評分快照", self.o["noData"])
+
+    def test_pending_state_shows_no_fake_numbers(self):
+        h = self.o["pending"]
+        self.assertIn("累積中：尚無成熟樣本", h)
+        self.assertIn("沒有命中率", h)
+        self.assertNotIn("命中率</th>", h)                          # 沒有成熟訊號就不畫結果表
+        self.assertIn("還需約 3 個交易日", h)
+
+    def test_matured_state_shows_results_with_insufficient_warning(self):
+        h = self.o["matured"]
+        self.assertIn("條件相對有利", h)
+        self.assertIn("100%", h)
+        self.assertIn("樣本不足，僅供觀察", h)
+
+    def test_caveats_are_escaped(self):
+        self.assertNotIn("<b>c</b>", self.o["pending"])
+
+
+class TestStaleBanner(unittest.TestCase):
+    DRIVER = r"""
+const fs = require('fs'), path = require('path'), vm = require('vm');
+const dir = process.argv[1];
+const stubs = {};
+const hdr = { parentNode: { insertBefore(n) { stubs[n.id] = n; } } };
+function el(id) { return stubs[id] || null; }
+const ctx = { console, window: {}, document: { getElementById: el, createElement: () => ({ style: {} }), querySelector: () => hdr, querySelectorAll: () => [] } };
+vm.createContext(ctx);
+vm.runInContext(fs.readFileSync(path.join(dir, '01-core.js'), 'utf8'), ctx, { filename: '01-core.js' });
+const run = c => vm.runInContext(c, ctx);
+const out = {};
+const d = (y, m, dd) => `new Date(${y}, ${m - 1}, ${dd})`;
+out.bd = {
+  sameDay: run(`businessDaysBetween('2026-11-27', ${d(2026, 11, 27)})`),
+  overWeekend: run(`businessDaysBetween('2026-11-27', ${d(2026, 11, 30)})`),           // 週五 → 下週一 = 1
+  fullWeek: run(`businessDaysBetween('2026-11-20', ${d(2026, 11, 27)})`),              // 5
+  future: run(`businessDaysBetween('2026-12-01', ${d(2026, 11, 27)})`),
+  bad: run(`businessDaysBetween('abc', ${d(2026, 11, 27)})`),
+};
+const prov = (dates, st) => `{ source_status: [${dates.map((x, i) => `{ label: 'S${i}', data_date: '${x}', status: '${st || 'OK'}' }`).join(',')}] }`;
+function banner(p, gen, now) {
+  run(`STATE = { data_provenance: ${p}, generated_at: '${gen}' }; renderStaleBanner(${now})`);
+  return el('staleBanner') ? { shown: el('staleBanner').style.display !== 'none', html: el('staleBanner').innerHTML } : { shown: false, html: '' };
+}
+out.fresh = banner(prov(['2026-11-27', '2026-11-26']), '2026-11-27 20:00:00 (UTC+8)', d(2026, 11, 30));
+out.stale = banner(prov(['2026-11-20', '2026-11-19']), '2026-11-20 20:00:00 (UTC+8)', d(2026, 11, 30));
+out.failed = banner(`{ source_status: [{ label: '<b>MOPS</b>', data_date: '2026-11-27', status: 'FAILED' }] }`, '2026-11-27 20:00:00 (UTC+8)', d(2026, 11, 30));
+out.fresh2 = banner(prov(['2026-11-27']), '2026-11-27 20:00:00 (UTC+8)', d(2026, 11, 30));     // 同一個橫幅元素要能收起
+out.noSources = banner('{ source_status: [] }', '2026-11-10 20:00:00 (UTC+8)', d(2026, 11, 30));  // 沒有來源狀態 → 以產生時間判斷
+console.log(JSON.stringify(out));
+"""
+
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", cls.DRIVER, JS_DIR], capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    def test_business_days(self):
+        bd = self.o["bd"]
+        self.assertEqual((bd["sameDay"], bd["overWeekend"], bd["fullWeek"], bd["future"]), (0, 1, 5, 0))
+        self.assertIsNone(bd["bad"])
+
+    def test_fresh_data_shows_no_banner(self):
+        self.assertFalse(self.o["fresh"]["shown"])
+
+    def test_stale_data_shows_banner_with_dates(self):
+        s = self.o["stale"]
+        self.assertTrue(s["shown"])
+        self.assertIn("2026-11-20", s["html"])
+        self.assertIn("6 個營業日", s["html"])
+        self.assertIn("連假", s["html"])
+
+    def test_failed_source_shows_banner_and_escapes_label(self):
+        f = self.o["failed"]
+        self.assertTrue(f["shown"])
+        self.assertIn("擷取失敗", f["html"])
+        self.assertNotIn("<b>MOPS</b>", f["html"])
+
+    def test_banner_hides_again_when_data_is_fresh(self):
+        self.assertFalse(self.o["fresh2"]["shown"])
+
+    def test_falls_back_to_generated_at(self):
+        self.assertTrue(self.o["noSources"]["shown"])
 
 
 class TestInlineHandlersDefined(unittest.TestCase):

@@ -64,7 +64,7 @@ function stateToHeatClass(st) {
   return { cls: 'heat-gray', label: '灰色｜資金觀望/分化 (C)' };
 }
 
-function renderIndustryHeatmap(overrideMap = {}) {
+function renderIndustryHeatmap(overrideMap = {}, hist = null) {
   const sectors = getExpanded17Sectors(overrideMap);
   window.__HEATMAP_SECTORS__ = sectors;
   const grid = document.getElementById('industryHeatmapGrid');
@@ -81,9 +81,10 @@ function renderIndustryHeatmap(overrideMap = {}) {
     note.style.cssText = 'font-size:12.5px; margin:8px 2px 10px; color:var(--text-muted);';
     grid.parentNode.insertBefore(note, grid);
   }
-  const latestSel = !document.getElementById('timelineRangeInput') || document.getElementById('timelineRangeInput').value === '5';
+  const latestSel = !hist;
   if (!latestSel) {
-    note.textContent = '🕰️ 目前顯示的是「歷史情境」(手寫的時期回顧，用來說明當時的輪動，沒有對應的歷史資料可重算)，不是即時分數。拖到最右側「最新」可回到即時分數。';
+    const srcTxt = hist.source === 'live' ? '由官方資料即時重算的分數' : '即時評分上線前的舊模型分數 (子分數是內建種子值，與現在的分數尺度不同)';
+    note.textContent = `🕰️ 目前顯示的是 ${hist.date} 收盤後當時記下的真實快照（${srcTxt}）。快照只保存分數與等級，所以不顯示營收與相對強弱。拖到最右側「最新」可回到目前的即時分數。`;
   } else if (liveInds.length) {
     const asOf = (liveInds[0].as_of_date || '').slice(0, 10);
     note.textContent = `✅ 分數由官方即時資料重算（${asOf} 盤後；${liveInds.length} 個產業，每個交易日收盤後更新）。方塊顏色為資金流向狀態，分數為啟用模型的綜合總分。`;
@@ -93,9 +94,10 @@ function renderIndustryHeatmap(overrideMap = {}) {
 
   grid.innerHTML = sectors.map((sec, idx) => {
     const hInfo = stateToHeatClass(sec.effectiveState);
-    const isUnratable = sec.total_weighted_score == null || sec.rotation_state === 'INSUFFICIENT_DATA';
-    // 歷史情境的顏色是手寫的，不能配上現在的即時分數，否則會被誤認為當時的分數
-    const scoreDisplay = !latestSel ? '歷史情境' : (isUnratable ? '觀察中' : `${sec.total_weighted_score.toFixed(1)} 分`);
+    const hs = hist ? (hist.scores || {})[sec.industry_id] : null;
+    const isUnratable = hist ? (!hs || hs.score == null) : (sec.total_weighted_score == null || sec.rotation_state === 'INSUFFICIENT_DATA');
+    // 歷史格顯示「當時記下」的分數與等級，絕不配上現在的即時分數
+    const scoreDisplay = hist ? (isUnratable ? '觀察中' : `${Number(hs.score).toFixed(1)} 分`) : (isUnratable ? '觀察中' : `${sec.total_weighted_score.toFixed(1)} 分`);
     const agg = sec.live_agg || {};
     const compNames = sec.focusTicker || (sec.representative_companies || []).slice(0, 2).map(c => `${c.ticker} ${c.name}`).join('、');
 
@@ -118,11 +120,12 @@ function renderIndustryHeatmap(overrideMap = {}) {
           <div class="ht-state">${hInfo.label}</div>
         </div>
         <div>
-          <div class="ht-metrics">
+          ${hist ? `<div class="ht-metrics"><div><div class="ht-m-label">快照日 ${esc(hist.date.slice(5))} 預警等級</div><div class="ht-m-val">${esc((hs && hs.level) || '—')}</div></div></div>
+          <div class="ht-comp" style="margin-top:8px;" title="${compNames}">${compNames}</div>` : `<div class="ht-metrics">
             <div><div class="ht-m-label">${monthLabel} 營收 YoY</div><div class="ht-m-val ${cls(yoyVal)}">${sgn(yoyVal)}</div></div>
             <div><div class="ht-m-label">${rsLabel}</div><div class="ht-m-val ${cls(rsVal)}">${sgn(rsVal)}</div></div>
           </div>
-          <div class="ht-comp" style="margin-top:8px;" title="${compNames}">${compNames}</div>
+          <div class="ht-comp" style="margin-top:8px;" title="${compNames}">${compNames}</div>`}
         </div>
       </div>
     `;
@@ -175,14 +178,72 @@ function openIndustryDrawer(idx) {
 /* =========================================================================
    5. 資金輪動動畫時間軸播放器 (Timeline Player)
    ========================================================================= */
-// 時間軸資料：前 5 格是手寫的歷史情境 (沒有對應的歷史資料可重算，標明為歷史情境)；
-// 最右側「最新」優先使用後端用即時資料產生的內容 (STATE.home_pulse.timeline_latest)，沒有時才退回手寫文字並標示。
-function getTimelineSnapshot(idx) {
-  const base = TIMELINE_SNAPSHOTS[idx] || TIMELINE_SNAPSHOTS[5];
-  if (idx < 5) return { ...base, label: `【歷史情境・手寫】${base.label}` };
+// 時間軸資料：每一格是 industry_score_history 裡的一個「真實快照日」(後端 live_timeline.py 產生，STATE.timeline_history)。
+// 文字由資料機械式產生；最右側「最新」再疊上首頁摘要產生的即時法人文字。沒有任何快照時才退回手寫的「最新」並標示。
+// 原本 5 格手寫的歷史情境 (TIMELINE_SNAPSHOTS 前 5 筆) 移到時間軸下方折疊的「手寫歷史情境回顧」。
+function timelinePoints() {
+  const th = STATE && STATE.timeline_history;
+  return (th && th.available && th.points) ? th.points : [];
+}
+
+function pointToSnapshot(pt, isLast) {
+  const fmt = (arr, f) => (arr && arr.length) ? arr.map(f).join('、') : '無';
+  const srcTxt = pt.source === 'live' ? '即時評分' : '舊模型種子分數';
+  const heat = {};
+  Object.keys(pt.scores || {}).forEach(id => { const st = pt.scores[id].state; if (st) heat[id] = st; });
+  const lv = pt.levels || {};
+  const lvTxt = Object.keys(lv).sort().map(k => `${k}：${lv[k]}`).join('、') || '無';
+  const snap = {
+    label: `${pt.date} 盤後（${srcTxt}）`,
+    flowSummary: `當日 ${pt.scored} / ${pt.total} 個產業有評分，平均 ${pt.avg == null ? '—' : pt.avg} 分。預警等級分布：${lvTxt}。`,
+    hotIndustries: fmt(pt.hot, h => `${h.name}（${h.score}）`),
+    coldIndustries: fmt(pt.cold, h => `${h.name}（${h.score}）`),
+    rotationOrder: pt.has_prev
+      ? `與前一個快照日相比，分數升幅最大：${fmt(pt.movers_up, m => `${m.name}（+${m.delta}）`)} ｜ 降幅最大：${fmt(pt.movers_down, m => `${m.name}（${m.delta}）`)}`
+      : '這是第一個快照日，沒有前一期可比較',
+    keyEvent: pt.source === 'live' ? '分數由官方資料每日重算；此處不附任何人工撰寫的事件說明。' : '此格的 5 項子分數是內建種子值 (營收與法人輸入是官方資料)，與之後的即時評分尺度不同。',
+    heatOverrides: heat,
+    hist: { date: pt.date, source: pt.source, scores: pt.scores },
+  };
   const live = STATE && STATE.home_pulse && STATE.home_pulse.timeline_latest;
-  if (live) return { ...base, ...live, heatOverrides: {} };
-  return { ...base, label: `【手寫・未更新】${base.label}`, heatOverrides: {} };
+  if (isLast && live && pt.source === 'live') {
+    // 最新一格：疊上首頁摘要由即時資料產生的法人買賣超文字，並回到「即時分數」畫面 (不是歷史快照)
+    return { ...snap, flowSummary: live.flowSummary, rotationOrder: live.rotationOrder, keyEvent: live.keyEvent, label: live.label, hist: null };
+  }
+  return isLast && pt.source === 'live' ? { ...snap, hist: null } : snap;
+}
+
+function getTimelineSnapshot(idx) {
+  const pts = timelinePoints();
+  if (pts.length) {
+    const i = Math.max(0, Math.min(pts.length - 1, idx));
+    return pointToSnapshot(pts[i], i === pts.length - 1);
+  }
+  // 沒有快照時：只剩手寫的「最新」，明確標示
+  const base = TIMELINE_SNAPSHOTS[5];
+  const live = STATE && STATE.home_pulse && STATE.home_pulse.timeline_latest;
+  if (live) return { ...base, ...live, heatOverrides: {}, hist: null };
+  return { ...base, label: `【手寫・未更新】${base.label}`, heatOverrides: {}, hist: null };
+}
+
+// 依快照數量設定滑桿範圍與下方日期刻度；也在折疊區列出手寫的歷史情境回顧
+function initTimeline() {
+  const pts = timelinePoints();
+  const n = Math.max(1, pts.length);
+  const slider = document.getElementById('timelineRangeInput');
+  if (slider) { slider.min = 0; slider.max = n - 1; slider.value = n - 1; }
+  const steps = document.getElementById('timelineSteps');
+  if (steps) {
+    const pick = n <= 6 ? pts.map((_, i) => i) : [0, Math.round((n - 1) / 3), Math.round(2 * (n - 1) / 3), n - 1];
+    steps.innerHTML = pts.length
+      ? pick.map(i => `<span${i === n - 1 ? ' id="timelineLatestStep" style="color:var(--accent-emerald); font-weight:700;"' : ''}>${esc(pts[i].date.slice(5))}<br/>${i === n - 1 ? '最新' : (pts[i].source === 'live' ? '即時評分' : '舊模型')}</span>`).join('')
+      : '<span id="timelineLatestStep" style="color:var(--accent-emerald); font-weight:700;">最新<br/>即時評分</span>';
+  }
+  const hw = document.getElementById('timelineHandwritten');
+  if (hw && typeof TIMELINE_SNAPSHOTS !== 'undefined') {
+    hw.innerHTML = `<summary style="cursor:pointer; font-weight:600; color:var(--text-secondary);">📁 手寫的歷史情境回顧（2024～2026 年 5 個時期；寫死的文字，沒有對應的歷史資料可重算，僅供參考）</summary>` +
+      TIMELINE_SNAPSHOTS.slice(0, 5).map(t => `<div class="evidence-box" style="margin:8px 0;"><strong>${esc(t.label)}</strong><br/>${esc(t.flowSummary)}<br/><span style="color:#94a3b8;">熱門：${esc(t.hotIndustries)} ｜ 降溫：${esc(t.coldIndustries)}</span></div>`).join('');
+  }
 }
 
 function onTimelineSliderInput(val) {
@@ -191,12 +252,8 @@ function onTimelineSliderInput(val) {
   document.getElementById('timelineRangeInput').value = idx;
 
   // 同步更新上方 19宮格產業熱度地圖顏色！
-  renderIndustryHeatmap(snap.heatOverrides || {});
+  renderIndustryHeatmap(snap.hist ? (snap.heatOverrides || {}) : {}, snap.hist || null);
 
-  const stepEl = document.getElementById('timelineLatestStep');
-  if (stepEl && STATE && STATE.home_pulse && STATE.home_pulse.timeline_latest) {
-    stepEl.innerHTML = `最新<br/>${(STATE.home_pulse.timeline_latest.label.match(/\d{4}-\d{2}-\d{2}/) || [''])[0]} 盤後`;
-  }
   const lblEl = document.getElementById('timelineCurrentLabel');
   if (lblEl) lblEl.textContent = `當前顯示時期：${snap.label}`;
   const compactEl = document.getElementById('timelineCompactBar');
@@ -230,17 +287,20 @@ function onTimelineSliderInput(val) {
   `;
 }
 
+function timelineLastIndex() { return Math.max(0, timelinePoints().length - 1); }
+
 function stepTimeline(delta) {
   const slider = document.getElementById('timelineRangeInput');
   let v = parseInt(slider.value, 10) + delta;
   if (v < 0) v = 0;
-  if (v > 5) v = 5;
+  if (v > timelineLastIndex()) v = timelineLastIndex();
   onTimelineSliderInput(v);
 }
 
 function jumpTimelineWindow(win) {
-  const map = { '3Y': 0, '1Y': 2, '6M': 3, '3M': 4, '1M': 5 };
-  onTimelineSliderInput(map[win] ?? 5);
+  const last = timelineLastIndex();
+  const map = { FIRST: 0, BACK5: Math.max(0, last - 5), BACK20: Math.max(0, last - 20), LATEST: last };
+  onTimelineSliderInput(map[win] ?? last);
 }
 
 function toggleTimelinePlay() {
@@ -256,7 +316,7 @@ function toggleTimelinePlay() {
   onTimelineSliderInput(idx);
   TIMELINE_TIMER = setInterval(() => {
     idx++;
-    if (idx > 5) {
+    if (idx > timelineLastIndex()) {
       clearInterval(TIMELINE_TIMER);
       TIMELINE_TIMER = null;
       btn.textContent = '▶ 重新播放';

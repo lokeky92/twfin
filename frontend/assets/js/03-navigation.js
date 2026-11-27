@@ -351,8 +351,9 @@ function renderAll() {
   renderEightVitalCards();
   renderSankeyDiagram(parseInt(document.getElementById('sankeyPeriodSelect').value || '4', 10));
   initSankeyMode();
+  initTimeline();
   renderIndustryHeatmap();
-  onTimelineSliderInput(document.getElementById('timelineRangeInput').value || 5);
+  onTimelineSliderInput(document.getElementById('timelineRangeInput').value || 0);
   renderSixLeaderboards();
   renderTrendStories();
 
