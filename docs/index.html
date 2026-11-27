@@ -1740,26 +1740,19 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
               <span id="timelineCurrentLabel" style="font-size:13.5px; font-weight:700; color:#34d399; margin-left:6px;"></span>
             </div>
             <div class="tool-group">
-              <button class="btn btn-sm" onclick="jumpTimelineWindow('3Y')">近 3 年</button>
-              <button class="btn btn-sm" onclick="jumpTimelineWindow('1Y')">近 1 年</button>
-              <button class="btn btn-sm" onclick="jumpTimelineWindow('6M')">近 6 月</button>
-              <button class="btn btn-sm" onclick="jumpTimelineWindow('3M')">近 3 月</button>
-              <button class="btn btn-sm" onclick="jumpTimelineWindow('1M')">最新</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('FIRST')">最早</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('BACK20')">20 期前</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('BACK5')">5 期前</button>
+              <button class="btn btn-sm" onclick="jumpTimelineWindow('LATEST')">最新</button>
             </div>
           </div>
-          <input type="range" id="timelineRangeInput" class="timeline-slider" aria-label="資金輪動歷史時間軸 (拖曳切換時期)" min="0" max="5" value="5" oninput="onTimelineSliderInput(this.value)" />
-          <div class="timeline-steps">
-            <span>2024 下半年<br/>房市高峰</span>
-            <span>2025 上半年<br/>CoWoS 擴產</span>
-            <span>2025 下半年<br/>水冷拐點／打房</span>
-            <span>2026 上半年<br/>重電／測試崛起</span>
-            <span>2026 年 8~9 月<br/>劃撥 4.7 兆創高</span>
-            <span id="timelineLatestStep" style="color:var(--accent-emerald); font-weight:700;">最新<br/>即時評分</span>
-          </div>
+          <input type="range" id="timelineRangeInput" class="timeline-slider" aria-label="資金輪動歷史時間軸 (拖曳切換快照日)" min="0" max="0" value="0" oninput="onTimelineSliderInput(this.value)" />
+          <div class="timeline-steps" id="timelineSteps"></div>
         </div>
 
         <div id="industryHeatmapGrid" class="heatmap-grid"></div>
         <div id="timelineCompactBar" class="callout"></div>
+        <details id="timelineHandwritten" style="margin-top:10px;"></details>
       </div>
 
       <!-- 首頁底部：下一步 -->
@@ -1820,10 +1813,14 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
       <div class="section-head">
         <div>
           <div class="section-title"><span class="sec-no">3</span>市場正在發生什麼事？</div>
-          <div class="section-desc">四則結構化趨勢故事，並列正方與反方證據</div>
+          <div class="section-desc">上方「本週變化」由資料自動產生；四篇手寫趨勢故事收在下方折疊區</div>
         </div>
       </div>
-      <div id="trendStoriesGrid" class="stories-grid"></div>
+      <div id="weeklyChangesBox"></div>
+      <details style="margin-top:14px;">
+        <summary style="cursor:pointer; font-weight:700; color:var(--text-secondary);">📁 手寫存檔：四篇趨勢故事（2026-11-21 前後撰寫，不會隨資料更新）</summary>
+        <div id="trendStoriesGrid" class="stories-grid" style="margin-top:12px;"></div>
+      </details>
 
       <!-- 4. 時間軸當期四維度詳細解析面板 -->
       <div class="section-head">
@@ -2416,7 +2413,11 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
           </div>
         </div>
         <div id="etfReportsContainer" class="etf-grid-2"></div>
-        <div id="etfDualBacktestContainer" class="etf-grid-2" style="margin-top:20px;"></div>
+        <div id="etfForwardContainer"></div>
+        <details style="margin-top:20px;">
+          <summary style="cursor:pointer; font-weight:700; color:var(--text-secondary);">📁 手寫存檔：2026-11-21 前後預先寫好的「模型回測」（非實測，僅供留存）</summary>
+          <div id="etfDualBacktestContainer" class="etf-grid-2" style="margin-top:12px;"></div>
+        </details>
 
         <!-- ===================================================================
              第六區（第九節規範）：🤖 Argon ETF Multi-Agent Research Team 管理中心
@@ -2581,6 +2582,52 @@ function renderDataProvenance() {
     '點擊展開「資料新鮮度」面板',
   ].join('\n');
   renderFreshnessPanel();
+  renderStaleBanner();
+}
+
+// ---- 資料過期警示橫幅 ----
+// 靜態頁可能在資料產生很多天後才被開啟，所以以「開啟當下」的日期重算：最新資料日期落後 STALE_BUSINESS_DAYS 個營業日以上就顯示橫幅。
+// 只排除週末，不含國定假日；連假期間出現屬正常，橫幅文字會說明。
+const STALE_BUSINESS_DAYS = 4;
+function businessDaysBetween(fromIso, toDate) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(fromIso || ''));
+  if (!m) return null;
+  const from = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  const to = new Date(Date.UTC(toDate.getFullYear(), toDate.getMonth(), toDate.getDate()));
+  if (to <= from) return 0;
+  let n = 0;
+  for (let d = new Date(from.getTime() + 86400000); d <= to; d = new Date(d.getTime() + 86400000)) {
+    const w = d.getUTCDay();
+    if (w !== 0 && w !== 6) n++;
+  }
+  return n;
+}
+function computeStaleness(p, generatedAt, now) {
+  const dates = ((p && p.source_status) || []).map(x => String(x.data_date || '').slice(0, 10)).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+  const latest = dates.length ? dates[dates.length - 1] : String(generatedAt || '').slice(0, 10);
+  const days = businessDaysBetween(latest, now);
+  const failed = ((p && p.source_status) || []).filter(x => x.status === 'FAILED' || x.status === 'EMPTY');
+  return { latest, days, stale: days !== null && days >= STALE_BUSINESS_DAYS, failed };
+}
+function renderStaleBanner(now) {
+  const p = STATE && STATE.data_provenance;
+  let bar = document.getElementById('staleBanner');
+  if (!p) { if (bar) bar.style.display = 'none'; return; }
+  const r = computeStaleness(p, STATE.generated_at, now || new Date());
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'staleBanner';
+    bar.style.cssText = 'margin:8px 16px; padding:10px 14px; border-radius:8px; font-size:13px; cursor:pointer; border:1px solid #fb7185; background:rgba(251,113,133,.12); color:#fecdd3;';
+    bar.onclick = toggleFreshnessPanel;
+    const header = document.querySelector('header');
+    if (header) header.parentNode.insertBefore(bar, header.nextSibling);
+  }
+  if (!r.stale && !r.failed.length) { bar.style.display = 'none'; return; }
+  bar.style.display = '';
+  const parts = [];
+  if (r.stale) parts.push(`資料可能已停止更新：最新資料日期 ${esc(r.latest)}，距今已 ${r.days} 個營業日（只排除週末，不含國定假日；若逢連假屬正常）。排程每個交易日約 16:30 與 20:00 (台灣時間) 自動更新，若連假後仍未更新請檢查 GitHub Actions。`);
+  if (r.failed.length) parts.push(`${r.failed.length} 個來源擷取失敗或無資料：${r.failed.map(x => esc(x.label)).join('、')}。`);
+  bar.innerHTML = '⚠️ ' + parts.join(' ') + ' <span style="text-decoration:underline;">點擊查看各來源狀態</span>';
 }
 
 function toggleFreshnessPanel() {
@@ -3043,8 +3090,9 @@ function renderAll() {
   renderEightVitalCards();
   renderSankeyDiagram(parseInt(document.getElementById('sankeyPeriodSelect').value || '4', 10));
   initSankeyMode();
+  initTimeline();
   renderIndustryHeatmap();
-  onTimelineSliderInput(document.getElementById('timelineRangeInput').value || 5);
+  onTimelineSliderInput(document.getElementById('timelineRangeInput').value || 0);
   renderSixLeaderboards();
   renderTrendStories();
 
@@ -4022,7 +4070,7 @@ function stateToHeatClass(st) {
   return { cls: 'heat-gray', label: '灰色｜資金觀望/分化 (C)' };
 }
 
-function renderIndustryHeatmap(overrideMap = {}) {
+function renderIndustryHeatmap(overrideMap = {}, hist = null) {
   const sectors = getExpanded17Sectors(overrideMap);
   window.__HEATMAP_SECTORS__ = sectors;
   const grid = document.getElementById('industryHeatmapGrid');
@@ -4039,9 +4087,10 @@ function renderIndustryHeatmap(overrideMap = {}) {
     note.style.cssText = 'font-size:12.5px; margin:8px 2px 10px; color:var(--text-muted);';
     grid.parentNode.insertBefore(note, grid);
   }
-  const latestSel = !document.getElementById('timelineRangeInput') || document.getElementById('timelineRangeInput').value === '5';
+  const latestSel = !hist;
   if (!latestSel) {
-    note.textContent = '🕰️ 目前顯示的是「歷史情境」(手寫的時期回顧，用來說明當時的輪動，沒有對應的歷史資料可重算)，不是即時分數。拖到最右側「最新」可回到即時分數。';
+    const srcTxt = hist.source === 'live' ? '由官方資料即時重算的分數' : '即時評分上線前的舊模型分數 (子分數是內建種子值，與現在的分數尺度不同)';
+    note.textContent = `🕰️ 目前顯示的是 ${hist.date} 收盤後當時記下的真實快照（${srcTxt}）。快照只保存分數與等級，所以不顯示營收與相對強弱。拖到最右側「最新」可回到目前的即時分數。`;
   } else if (liveInds.length) {
     const asOf = (liveInds[0].as_of_date || '').slice(0, 10);
     note.textContent = `✅ 分數由官方即時資料重算（${asOf} 盤後；${liveInds.length} 個產業，每個交易日收盤後更新）。方塊顏色為資金流向狀態，分數為啟用模型的綜合總分。`;
@@ -4051,9 +4100,10 @@ function renderIndustryHeatmap(overrideMap = {}) {
 
   grid.innerHTML = sectors.map((sec, idx) => {
     const hInfo = stateToHeatClass(sec.effectiveState);
-    const isUnratable = sec.total_weighted_score == null || sec.rotation_state === 'INSUFFICIENT_DATA';
-    // 歷史情境的顏色是手寫的，不能配上現在的即時分數，否則會被誤認為當時的分數
-    const scoreDisplay = !latestSel ? '歷史情境' : (isUnratable ? '觀察中' : `${sec.total_weighted_score.toFixed(1)} 分`);
+    const hs = hist ? (hist.scores || {})[sec.industry_id] : null;
+    const isUnratable = hist ? (!hs || hs.score == null) : (sec.total_weighted_score == null || sec.rotation_state === 'INSUFFICIENT_DATA');
+    // 歷史格顯示「當時記下」的分數與等級，絕不配上現在的即時分數
+    const scoreDisplay = hist ? (isUnratable ? '觀察中' : `${Number(hs.score).toFixed(1)} 分`) : (isUnratable ? '觀察中' : `${sec.total_weighted_score.toFixed(1)} 分`);
     const agg = sec.live_agg || {};
     const compNames = sec.focusTicker || (sec.representative_companies || []).slice(0, 2).map(c => `${c.ticker} ${c.name}`).join('、');
 
@@ -4076,11 +4126,12 @@ function renderIndustryHeatmap(overrideMap = {}) {
           <div class="ht-state">${hInfo.label}</div>
         </div>
         <div>
-          <div class="ht-metrics">
+          ${hist ? `<div class="ht-metrics"><div><div class="ht-m-label">快照日 ${esc(hist.date.slice(5))} 預警等級</div><div class="ht-m-val">${esc((hs && hs.level) || '—')}</div></div></div>
+          <div class="ht-comp" style="margin-top:8px;" title="${compNames}">${compNames}</div>` : `<div class="ht-metrics">
             <div><div class="ht-m-label">${monthLabel} 營收 YoY</div><div class="ht-m-val ${cls(yoyVal)}">${sgn(yoyVal)}</div></div>
             <div><div class="ht-m-label">${rsLabel}</div><div class="ht-m-val ${cls(rsVal)}">${sgn(rsVal)}</div></div>
           </div>
-          <div class="ht-comp" style="margin-top:8px;" title="${compNames}">${compNames}</div>
+          <div class="ht-comp" style="margin-top:8px;" title="${compNames}">${compNames}</div>`}
         </div>
       </div>
     `;
@@ -4133,14 +4184,72 @@ function openIndustryDrawer(idx) {
 /* =========================================================================
    5. 資金輪動動畫時間軸播放器 (Timeline Player)
    ========================================================================= */
-// 時間軸資料：前 5 格是手寫的歷史情境 (沒有對應的歷史資料可重算，標明為歷史情境)；
-// 最右側「最新」優先使用後端用即時資料產生的內容 (STATE.home_pulse.timeline_latest)，沒有時才退回手寫文字並標示。
-function getTimelineSnapshot(idx) {
-  const base = TIMELINE_SNAPSHOTS[idx] || TIMELINE_SNAPSHOTS[5];
-  if (idx < 5) return { ...base, label: `【歷史情境・手寫】${base.label}` };
+// 時間軸資料：每一格是 industry_score_history 裡的一個「真實快照日」(後端 live_timeline.py 產生，STATE.timeline_history)。
+// 文字由資料機械式產生；最右側「最新」再疊上首頁摘要產生的即時法人文字。沒有任何快照時才退回手寫的「最新」並標示。
+// 原本 5 格手寫的歷史情境 (TIMELINE_SNAPSHOTS 前 5 筆) 移到時間軸下方折疊的「手寫歷史情境回顧」。
+function timelinePoints() {
+  const th = STATE && STATE.timeline_history;
+  return (th && th.available && th.points) ? th.points : [];
+}
+
+function pointToSnapshot(pt, isLast) {
+  const fmt = (arr, f) => (arr && arr.length) ? arr.map(f).join('、') : '無';
+  const srcTxt = pt.source === 'live' ? '即時評分' : '舊模型種子分數';
+  const heat = {};
+  Object.keys(pt.scores || {}).forEach(id => { const st = pt.scores[id].state; if (st) heat[id] = st; });
+  const lv = pt.levels || {};
+  const lvTxt = Object.keys(lv).sort().map(k => `${k}：${lv[k]}`).join('、') || '無';
+  const snap = {
+    label: `${pt.date} 盤後（${srcTxt}）`,
+    flowSummary: `當日 ${pt.scored} / ${pt.total} 個產業有評分，平均 ${pt.avg == null ? '—' : pt.avg} 分。預警等級分布：${lvTxt}。`,
+    hotIndustries: fmt(pt.hot, h => `${h.name}（${h.score}）`),
+    coldIndustries: fmt(pt.cold, h => `${h.name}（${h.score}）`),
+    rotationOrder: pt.has_prev
+      ? `與前一個快照日相比，分數升幅最大：${fmt(pt.movers_up, m => `${m.name}（+${m.delta}）`)} ｜ 降幅最大：${fmt(pt.movers_down, m => `${m.name}（${m.delta}）`)}`
+      : '這是第一個快照日，沒有前一期可比較',
+    keyEvent: pt.source === 'live' ? '分數由官方資料每日重算；此處不附任何人工撰寫的事件說明。' : '此格的 5 項子分數是內建種子值 (營收與法人輸入是官方資料)，與之後的即時評分尺度不同。',
+    heatOverrides: heat,
+    hist: { date: pt.date, source: pt.source, scores: pt.scores },
+  };
   const live = STATE && STATE.home_pulse && STATE.home_pulse.timeline_latest;
-  if (live) return { ...base, ...live, heatOverrides: {} };
-  return { ...base, label: `【手寫・未更新】${base.label}`, heatOverrides: {} };
+  if (isLast && live && pt.source === 'live') {
+    // 最新一格：疊上首頁摘要由即時資料產生的法人買賣超文字，並回到「即時分數」畫面 (不是歷史快照)
+    return { ...snap, flowSummary: live.flowSummary, rotationOrder: live.rotationOrder, keyEvent: live.keyEvent, label: live.label, hist: null };
+  }
+  return isLast && pt.source === 'live' ? { ...snap, hist: null } : snap;
+}
+
+function getTimelineSnapshot(idx) {
+  const pts = timelinePoints();
+  if (pts.length) {
+    const i = Math.max(0, Math.min(pts.length - 1, idx));
+    return pointToSnapshot(pts[i], i === pts.length - 1);
+  }
+  // 沒有快照時：只剩手寫的「最新」，明確標示
+  const base = TIMELINE_SNAPSHOTS[5];
+  const live = STATE && STATE.home_pulse && STATE.home_pulse.timeline_latest;
+  if (live) return { ...base, ...live, heatOverrides: {}, hist: null };
+  return { ...base, label: `【手寫・未更新】${base.label}`, heatOverrides: {}, hist: null };
+}
+
+// 依快照數量設定滑桿範圍與下方日期刻度；也在折疊區列出手寫的歷史情境回顧
+function initTimeline() {
+  const pts = timelinePoints();
+  const n = Math.max(1, pts.length);
+  const slider = document.getElementById('timelineRangeInput');
+  if (slider) { slider.min = 0; slider.max = n - 1; slider.value = n - 1; }
+  const steps = document.getElementById('timelineSteps');
+  if (steps) {
+    const pick = n <= 6 ? pts.map((_, i) => i) : [0, Math.round((n - 1) / 3), Math.round(2 * (n - 1) / 3), n - 1];
+    steps.innerHTML = pts.length
+      ? pick.map(i => `<span${i === n - 1 ? ' id="timelineLatestStep" style="color:var(--accent-emerald); font-weight:700;"' : ''}>${esc(pts[i].date.slice(5))}<br/>${i === n - 1 ? '最新' : (pts[i].source === 'live' ? '即時評分' : '舊模型')}</span>`).join('')
+      : '<span id="timelineLatestStep" style="color:var(--accent-emerald); font-weight:700;">最新<br/>即時評分</span>';
+  }
+  const hw = document.getElementById('timelineHandwritten');
+  if (hw && typeof TIMELINE_SNAPSHOTS !== 'undefined') {
+    hw.innerHTML = `<summary style="cursor:pointer; font-weight:600; color:var(--text-secondary);">📁 手寫的歷史情境回顧（2024～2026 年 5 個時期；寫死的文字，沒有對應的歷史資料可重算，僅供參考）</summary>` +
+      TIMELINE_SNAPSHOTS.slice(0, 5).map(t => `<div class="evidence-box" style="margin:8px 0;"><strong>${esc(t.label)}</strong><br/>${esc(t.flowSummary)}<br/><span style="color:#94a3b8;">熱門：${esc(t.hotIndustries)} ｜ 降溫：${esc(t.coldIndustries)}</span></div>`).join('');
+  }
 }
 
 function onTimelineSliderInput(val) {
@@ -4149,12 +4258,8 @@ function onTimelineSliderInput(val) {
   document.getElementById('timelineRangeInput').value = idx;
 
   // 同步更新上方 19宮格產業熱度地圖顏色！
-  renderIndustryHeatmap(snap.heatOverrides || {});
+  renderIndustryHeatmap(snap.hist ? (snap.heatOverrides || {}) : {}, snap.hist || null);
 
-  const stepEl = document.getElementById('timelineLatestStep');
-  if (stepEl && STATE && STATE.home_pulse && STATE.home_pulse.timeline_latest) {
-    stepEl.innerHTML = `最新<br/>${(STATE.home_pulse.timeline_latest.label.match(/\d{4}-\d{2}-\d{2}/) || [''])[0]} 盤後`;
-  }
   const lblEl = document.getElementById('timelineCurrentLabel');
   if (lblEl) lblEl.textContent = `當前顯示時期：${snap.label}`;
   const compactEl = document.getElementById('timelineCompactBar');
@@ -4188,17 +4293,20 @@ function onTimelineSliderInput(val) {
   `;
 }
 
+function timelineLastIndex() { return Math.max(0, timelinePoints().length - 1); }
+
 function stepTimeline(delta) {
   const slider = document.getElementById('timelineRangeInput');
   let v = parseInt(slider.value, 10) + delta;
   if (v < 0) v = 0;
-  if (v > 5) v = 5;
+  if (v > timelineLastIndex()) v = timelineLastIndex();
   onTimelineSliderInput(v);
 }
 
 function jumpTimelineWindow(win) {
-  const map = { '3Y': 0, '1Y': 2, '6M': 3, '3M': 4, '1M': 5 };
-  onTimelineSliderInput(map[win] ?? 5);
+  const last = timelineLastIndex();
+  const map = { FIRST: 0, BACK5: Math.max(0, last - 5), BACK20: Math.max(0, last - 20), LATEST: last };
+  onTimelineSliderInput(map[win] ?? last);
 }
 
 function toggleTimelinePlay() {
@@ -4214,7 +4322,7 @@ function toggleTimelinePlay() {
   onTimelineSliderInput(idx);
   TIMELINE_TIMER = setInterval(() => {
     idx++;
-    if (idx > 5) {
+    if (idx > timelineLastIndex()) {
       clearInterval(TIMELINE_TIMER);
       TIMELINE_TIMER = null;
       btn.textContent = '▶ 重新播放';
@@ -4373,7 +4481,44 @@ function openIndustryByCode(indId) {
    7. 「市場正在發生什麼事」產業趨勢故事模式 (Trend Story Mode)
    ========================================================================= */
 // 趨勢故事是依特定日期寫成的敘事文章 (沒有可即時化的來源)，每一篇都標明撰寫期間，避免被當成最新分析。
+// 本週變化：由 live_timeline.weekly_changes 產生 (STATE.timeline_history.weekly)，全部來自真實快照與法人資料
+function renderWeeklyChanges() {
+  const box = document.getElementById('weeklyChangesBox');
+  if (!box) return;
+  const th = STATE && STATE.timeline_history;
+  const w = th && th.weekly;
+  if (!w || !w.available) {
+    box.innerHTML = `<div class="card"><div class="card-title">本週變化</div><div style="color:var(--text-secondary);">${esc((w && w.reason) || '快照日不足，累積後會自動顯示分數、預警等級與法人資金的週變化。')}</div></div>`;
+    return;
+  }
+  const sg = (v) => (v >= 0 ? '+' : '') + v;
+  const list = (arr, f) => (arr && arr.length) ? arr.map(f).join('<br/>') : '<span style="color:var(--text-muted);">無</span>';
+  const scale = w.mixed_scale
+    ? `<div class="callout" style="margin:8px 0; --callout-col:var(--accent-orange); font-size:12.5px;">⚠️ 起點快照 (${esc(w.from_date)}) 與最新快照的分數來源不同（${esc(w.from_source === 'live' ? '即時評分' : '舊模型種子分數')} → ${esc(w.to_source === 'live' ? '即時評分' : '舊模型種子分數')}），兩者尺度與方法不同，分數變化包含模型切換的影響，不能直接當作產業轉強或轉弱。</div>` : '';
+  const gapNote = w.gap_days < 5 ? `（目前只累積 ${w.gap_days} 個快照日的間隔，滿 5 天才是完整一週）` : '';
+  const lv = (w.level_changes || []).filter(c => c.from && c.to);
+  const inst = w.inst || {};
+  const instHtml = inst.available ? `
+      <div class="evidence-box"><strong>💰 外資＋投信近 ${inst.days} 個交易日 (${esc(inst.from.slice(5))}～${esc(inst.to.slice(5))}) 累計淨買賣</strong><br/>
+        買超：${list(inst.buy, b => `${esc(b.name)} ${sg(b.value)} 億`)}<br/>賣超：${list(inst.sell, b => `${esc(b.name)} ${sg(b.value)} 億`)}
+        ${(inst.flips && inst.flips.length) ? `<br/><strong>方向翻轉 (與前 5 日相反)：</strong>${inst.flips.map(f => `${esc(f.name)}（前 5 日 ${sg(f.prior)} → 近 5 日 ${sg(f.recent)} 億）`).join('、')}` : ''}
+      </div>` : '';
+  box.innerHTML = `
+    <div class="card" style="border-left:4px solid var(--accent-emerald);">
+      <div class="card-header"><div class="card-title" style="font-size:16px;">✅ 本週變化（自動產生：${esc(w.from_date)} → ${esc(w.to_date)}）</div></div>
+      <div style="font-size:12.5px; color:var(--text-secondary);">由每日評分快照與法人買賣超機械式比較，沒有手寫敘事；只描述變化，不解釋原因 ${gapNote}</div>
+      ${scale}
+      <div class="stories-grid" style="margin-top:10px;">
+        <div class="evidence-box"><strong>📈 分數升幅最大</strong><br/>${list(w.score_up, r => `${esc(r.name)}：${r.from} → ${r.to}（${sg(r.delta)}）`)}</div>
+        <div class="evidence-box counter"><strong>📉 分數降幅最大</strong><br/>${list(w.score_down, r => `${esc(r.name)}：${r.from} → ${r.to}（${sg(r.delta)}）`)}</div>
+        <div class="evidence-box invalid"><strong>🔔 預警等級變動</strong><br/>${list(lv, c => `${esc(c.name)}：${esc(c.from)} → ${esc(c.to)} ${c.direction === 'up' ? '▲' : '▼'}`)}</div>
+      </div>
+      ${instHtml}
+    </div>`;
+}
+
 function renderTrendStories() {
+  renderWeeklyChanges();
   const stories = [
     {
       title: "故事一：台灣史上最大規模「內資被動化承接」正在對決「外資避險提款」",
@@ -4445,7 +4590,7 @@ function renderTrendStories() {
     storiesNote.style.cssText = 'font-size:12.5px; margin:4px 2px 10px; color:var(--text-muted);';
     storiesGrid.parentNode.insertBefore(storiesNote, storiesGrid);
   }
-  storiesNote.textContent = '🕰️ 以下四篇是 2026-11-21 前後撰寫的敘事文章，引用當時的總經與市場數字，不會隨資料更新；最新數字請看上方即時區塊。';
+  storiesNote.textContent = '🕰️ 以下四篇是 2026-11-21 前後撰寫的敘事文章，引用當時的總經與市場數字，不會隨資料更新；最新變化請看上方「本週變化」。';
   storiesGrid.innerHTML = stories.map(st => `
     <div class="story-card">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
@@ -4975,8 +5120,11 @@ function renderReports() {
   const container = document.getElementById('reportsContainer');
   const list = STATE.research_reports.filter(r => freq === 'ALL' || r.frequency === freq);
   const liveN = STATE.research_reports.filter(r => r.text_source === 'live').length;
+  const liveQ = STATE.research_reports.some(r => r.text_source === 'live' && r.frequency === '每季');
   setSourceNote('reportsContainer', 'reportsSourceNote', liveN
-    ? `✅ 每日／每週／每月報告由官方即時資料機械式產生（共 ${liveN} 份，各頻率保留最近幾份；週報、月報只涵蓋已累積資料的交易日並會標明天數）。每季報告需要總體與財報資料，沒有即時來源，仍是手寫並標示「不會自動更新」。`
+    ? (liveQ
+      ? `✅ 每日／每週／每月／每季報告都由官方即時資料機械式產生（共 ${liveN} 份，各頻率保留最近幾份；週報、月報、季報只涵蓋已累積資料並會標明天數或月數）。季報是「產業營收與資金季報」：由累積的月營收、評分快照與法人買賣金額組成，沒有總體經濟與財報資料，本季營收湊滿三個月前標示「累積中」。`
+      : `✅ 每日／每週／每月報告由官方即時資料機械式產生（共 ${liveN} 份，各頻率保留最近幾份；週報、月報只涵蓋已累積資料的交易日並會標明天數）。每季報告目前仍是手寫並標示「不會自動更新」（累積到一個完整月營收後會改為自動產生）。`)
     : '⚠️ 此快照的固定研究報告全部是 2026-11-22 前後手寫的，不會隨資料更新。');
   container.innerHTML = list.map(r => {
     const sectionsHtml = (r.key_findings || []).map(sec => `
@@ -6649,9 +6797,10 @@ function renderEtfReportsAndBacktests() {
     `).join('');
   }
 
+  renderEtfForward();
   const bts = STATE.etf_center.backtests || [];
   const btBox = document.getElementById('etfDualBacktestContainer');
-  setSourceNote('etfDualBacktestContainer', 'etfBacktestNote', '⚠️ 下方模型 A／B 的「回測」是 2026-11-21 前後手寫的示範數字（勝率、樣本數、年化報酬等），不是由資料計算出來的實測結果，請勿當成模型有效的證據；本系統目前沒有 ETF 分數的歷史快照，無法做真正的回測。');
+  setSourceNote('etfDualBacktestContainer', 'etfBacktestNote', '⚠️ 下方模型 A／B 的「回測」是 2026-11-21 前後手寫的示範數字（勝率、樣本數、年化報酬等），不是由資料計算出來的實測結果，請勿當成模型有效的證據；真正的檢驗請看上方「ETF 前瞻追蹤」。');
   if (btBox) {
     btBox.innerHTML = bts.map(b => {
       const km = b.key_metrics || {};
@@ -8320,6 +8469,66 @@ function initSankeyMode() {
   const hasLive = !!(STATE && STATE.live_sankey && STATE.live_sankey.available);
   setSankeyMode(pref || (hasLive ? 'live' : 'macro'));
   if (!hasLive && SANKEY_MODE === 'live') setSankeyMode('macro');
+}
+
+/* =========================================================================
+   ETF 前瞻追蹤 (取代手寫的「ETF 模型回測」)
+   資料由後端 etf_backtest.compute_etf_forward() 產生 (STATE.etf_forward)：
+   每次即時評分記下 A/B 分數與結論，之後用快照日之後實際的 ETF 相對加權指數超額報酬檢驗；沒有手寫數字。
+   ========================================================================= */
+function renderEtfForward() {
+  const box = document.getElementById('etfForwardContainer');
+  if (!box) return;
+  const ef = STATE && STATE.etf_forward;
+  if (!ef || !ef.available) {
+    box.innerHTML = '<div class="card"><div class="card-title">ETF 前瞻追蹤</div><div style="color:var(--text-secondary);">尚無 ETF 評分快照，累積後才會顯示（每次同步記錄一份）。</div></div>';
+    return;
+  }
+  const fmtPct = (v) => v == null ? '—' : `<span class="${v >= 0 ? 'pos' : 'neg'}">${v >= 0 ? '+' : ''}${v}%</span>`;
+  const badge = ef.any_matured
+    ? '<span class="badge badge-grade-B">已有成熟訊號</span>'
+    : '<span class="badge badge-grade-C">累積中：尚無成熟樣本</span>';
+
+  const modelBlock = (key, title) => {
+    const m = ef.models && ef.models[key];
+    if (!m) return '';
+    const progress = m.horizon_results.map(h => {
+      const needed = h.horizon + 1;
+      const have = Math.min(needed, ef.index_trading_days_after_first_snapshot);
+      const pct = Math.round(100 * have / needed);
+      const state = h.matured_signals
+        ? `已成熟 ${h.matured_signals} 筆，尚待 ${h.pending_signals} 筆`
+        : `還需約 ${h.trading_days_needed} 個交易日才會有第一筆結果`;
+      return `<div style="margin:6px 0;">
+        <div style="display:flex; justify-content:space-between; font-size:12.5px;"><span><strong>${h.horizon} 個交易日</strong>觀察期</span><span style="color:var(--text-secondary);">${state}</span></div>
+        <div style="height:8px; background:rgba(255,255,255,.08); border-radius:4px; overflow:hidden;"><div style="height:100%; width:${pct}%; background:#38bdf8;"></div></div></div>`;
+    }).join('');
+    const results = m.horizon_results.filter(h => h.matured_signals > 0).map(h => {
+      const rows = h.levels.map(l => `<tr><td>${esc(l.label || l.level)}</td><td>${l.n}</td><td>${fmtPct(l.mean_rel_pct)}</td>
+        <td>${l.hit_rate_pct == null ? '—' : l.hit_rate_pct + '%'}<div style="font-size:11px; color:var(--text-secondary);">${esc(l.hit_definition || '不計命中率')}</div></td></tr>`).join('');
+      const warn = (!h.enough_for_rates || !h.enough_for_ic)
+        ? `<div class="evidence-box invalid" style="margin:8px 0;"><strong>樣本不足，僅供觀察，不是結論</strong>（命中率需 ${ef.min_signals} 筆成熟訊號、IC 需 ${ef.min_dates} 個快照日）。</div>` : '';
+      const ic = h.ic ? `平均 IC <strong>${h.ic.mean}</strong>（${h.ic.dates} 個快照日；0 代表沒有預測力）` : 'IC：資料不足 (每個快照日需要至少 8 檔 ETF 已成熟)';
+      return `<div style="margin-top:12px;"><div style="font-weight:700;">${h.horizon} 個交易日後：${h.matured_signals} 筆成熟訊號（${h.matured_dates} 個快照日）</div>${warn}
+        <table><thead><tr><th>結論</th><th>筆數</th><th>平均超額報酬</th><th>命中率</th></tr></thead><tbody>${rows}</tbody></table>
+        <div style="font-size:12.5px; margin-top:6px;">${ic}</div></div>`;
+    }).join('');
+    return `<div style="margin-top:14px; padding-top:10px; border-top:1px solid rgba(255,255,255,.08);">
+      <div style="font-weight:800;">${esc(title)}（${m.signal_count} 筆快照訊號）</div>${progress}${results}</div>`;
+  };
+
+  box.innerHTML = `
+    <div class="card" style="border-left:4px solid var(--accent-emerald); margin-top:20px;">
+      <div class="card-header"><div>
+        <div class="card-title" style="font-size:16px;">✅ ETF 前瞻追蹤（取代下方手寫的回測；只統計快照日之後實際發生的行情）</div>
+        <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">已累積 ${ef.snapshot_days} 個快照日（${esc(ef.first_snapshot)} ～ ${esc(ef.last_snapshot)}）｜追蹤 ${ef.etf_count} 檔非槓桿 ETF｜基準：${esc(ef.benchmark)}（價格報酬）</div>
+      </div>${badge}</div>
+      ${ef.any_matured ? '' : `<div class="evidence-box" style="margin:10px 0;">目前還沒有任何一筆訊號走完觀察期，所以<strong>沒有命中率、IC 或超額報酬可以顯示</strong>，這是刻意的：系統不會用手寫數字替代。之後每個交易日進度會前進；統計上有意義的結論通常要累積 2～3 個月。</div>`}
+      ${modelBlock('B', '🔵 模型 B：短中期進場時機（結論「條件相對有利」超額報酬 > 0 算命中；「風險偏高」< 0 算成功避險）')}
+      ${modelBlock('A', '🟢 模型 A：長期配置（結論「適合進一步研究」超額報酬 > 0 算命中；長期模型本非為 5~20 天設計，只是誠實檢驗）')}
+      <details style="margin-top:12px;" open><summary style="cursor:pointer; font-weight:600;">方法與限制</summary>
+        <ul style="font-size:12.5px; color:var(--text-secondary); margin:6px 0 0 18px;">${(ef.caveats || []).map(c => `<li>${esc(c)}</li>`).join('')}</ul></details>
+    </div>`;
 }
 </script>
 </body>
