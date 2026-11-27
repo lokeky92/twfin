@@ -197,6 +197,31 @@ class TestMetrics(unittest.TestCase):
         self.assertEqual([d for d, _ in curve], sorted(d for d, _ in curve))
         self.assertEqual(el.compute_metrics(make_series(10))["curve"][-1][0], make_series(10)[-1][0])   # 短歷史也不會出錯
 
+    def test_split_discontinuity_is_not_treated_as_a_crash(self):
+        """分割當天價格 245 → 35 不是下跌 (0052 真的發生過)；指標只能用斷層之後的資料，否則波動度與最大回撤全部失真。"""
+        before = make_series(120, start=245.0, daily=0.001, base=date(2025, 6, 2))
+        after = make_series(80, start=35.0, daily=0.001, base=date(2026, 1, 5))
+        m = el.compute_metrics(before + after)
+        self.assertEqual(m["split_break"], after[0][0])
+        self.assertEqual(m["history_days"], 80)                                    # 只算斷層之後
+        self.assertAlmostEqual(m["mdd"], 0.0, places=3)                            # 不是 -85%
+        self.assertLess(m["vol_ann"], 1.0)
+        self.assertGreater(m["ret_3m"], 0)                                         # 報酬沒有被 -85% 污染
+        self.assertTrue(all(c < 50 for _d, c in m["curve"]))                       # 走勢圖也只含斷層之後的真實點
+        clean = el.compute_metrics(make_series(100, daily=0.001))
+        self.assertIsNone(clean["split_break"])
+        # 槓桿型 2 倍的合理大漲 (+20%) 不是斷層
+        wild = make_series(60, start=22.5, daily=0.001)
+        wild = wild[:30] + [(d, c * 1.2, v, t_) for d, c, v, t_ in wild[30:]]
+        self.assertIsNone(el.compute_metrics(wild)["split_break"])
+
+    def test_beta_uses_the_same_continuous_segment(self):
+        pre = make_series(60, start=245.0, daily=0.0)
+        post = make_series(60, start=35.0, daily=0.0, base=date(2026, 3, 1))
+        seg, brk = el.continuous_segment(pre + post)
+        self.assertEqual(len(seg), 60)
+        self.assertEqual(brk, post[0][0])
+
     def test_short_history_returns_none_instead_of_guessing(self):
         m = el.compute_metrics(make_series(30))
         self.assertIsNone(m["ret_3m"])

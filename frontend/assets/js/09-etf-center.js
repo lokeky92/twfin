@@ -38,6 +38,7 @@ function etfLiveMetricsHtml(e) {
       價格報酬（不含息）：1 月 ${p(L.ret_1m)}｜3 月 ${p(L.ret_3m)}｜6 月 ${p(L.ret_6m)}｜1 年 ${p(L.ret_1y)}<br/>
       年化波動 ${fmtEtfPct(L.vol_ann, false, 1)}｜最大回撤 ${fmtEtfPct(L.mdd, false, 1)}｜距 1 年高點 ${fmtEtfPct(L.dd_from_high, true, 1)}｜Beta ${fmtEtfNum(L.beta, false, 2)}｜與加權指數相關 ${fmtEtfNum(L.corr_taiex, false, 2)}｜與 0050 相關 ${fmtEtfNum(L.corr_0050, false, 2)}<br/>
       外資+投信當日淨買賣 ${fmtEtfNum(L.insti_billion, true, 2)} 億元（占成交金額 ${fmtEtfPct(L.insti_ratio_pct, true, 2)}）｜20 日均成交值 ${fmtEtfNum(L.turnover_20d_billion, false, 2)} 億元
+      ${L.split_break ? `<div style="font-size:12.5px; color:#fbbf24; margin-top:4px;">⚠️ 價格歷史在 ${esc(L.split_break)} 有分割／合併造成的斷層（單日變動超過 35%，不是真實漲跌），以上指標與走勢只使用該日之後的資料。</div>` : ''}
       <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">淨值／折溢價、配息率、含息報酬與初級市場申贖沒有官方即時來源，一律顯示 N/A；規模、費用率、追蹤誤差與持股權重是人工維護（非即時）。</div>
     </div>`;
 }

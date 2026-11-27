@@ -64,18 +64,35 @@ def _returns(closes):
     return [closes[i] / closes[i - 1] - 1 for i in range(1, len(closes)) if closes[i - 1]]
 
 
+SPLIT_JUMP = 0.35     # 單日變動超過 35% 視為分割 / 合併 / 資料斷層 (ETF 有漲跌幅限制，真實行情不可能單日 -35%；槓桿型 2 倍最多約 ±20%)
+
+
+def continuous_segment(series, jump=SPLIT_JUMP):
+    """
+    回傳 (最後一段連續的行情, 斷層日期或 None)。價格在分割或合併當天會出現巨大落差 (例如 245 → 35)，那不是下跌；
+    若把它當成報酬，波動度、最大回撤與報酬全部失真。這裡保守地只使用「最後一個斷層之後」的資料。
+    """
+    cut, when = 0, None
+    for i in range(1, len(series)):
+        prev, cur = series[i - 1][1], series[i][1]
+        if prev and cur and abs(cur / prev - 1) > jump:
+            cut, when = i, series[i][0]
+    return series[cut:], when
+
+
 def compute_metrics(series):
     """
     series: [(ISO 日期, 收盤, 成交股數, 成交金額)] 依日期遞增。回傳指標 dict；資料不足的指標為 None。
     報酬是價格報酬 (不含息)。
     """
+    series, split_break = continuous_segment(series)
     n = len(series)
     if n == 0:
         return {"history_days": 0}
     dates = [s[0] for s in series]
     closes = [s[1] for s in series]
     last = closes[-1]
-    m = {"history_days": n, "last_date": dates[-1], "last_close": last,
+    m = {"history_days": n, "split_break": split_break, "last_date": dates[-1], "last_close": last,
          "change_pct": round((last / closes[-2] - 1) * 100, 2) if n >= 2 and closes[-2] else None,
          "volume_shares": series[-1][2], "turnover_twd": series[-1][3]}
     for key, k in LOOKBACK.items():
@@ -364,7 +381,7 @@ def apply_live_etf(conn=None, today=None, backfill_requests=None):
         rows_for_report, n = [], 0
         for code, s in series.items():
             m = compute_metrics(s)
-            asset = [(d, c) for d, c, _v, _t in s]
+            asset = [(d, c) for d, c, _v, _t in continuous_segment(s)[0]]
             beta, corr_taiex = beta_corr(asset, idx_series)
             corr_core = beta_corr(asset, core)[1] if code != "0050" and core else None
             market = cur.execute("SELECT market FROM etf_price_history WHERE etf_code = ? LIMIT 1", (code,)).fetchone()["market"]
