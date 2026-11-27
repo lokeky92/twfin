@@ -3,8 +3,8 @@
 同一天重跑會覆蓋，不會重複累積。這是前瞻追蹤回測 (backtest.py) 的訊號來源：累積足夠天數後，
 才能用快照日之後實際發生的行情檢驗預警與排名是否有預測力。
 
-注意：目前部分子分數 (成長性、基本面等) 仍來自內建種子資料，快照分數在短期內變動有限，
-真正會每日變動的是資金流向/法人/估值相關的即時資料。
+score_source 欄位標示快照當下的子分數來源：'live' = 由官方即時資料重算 (live_scoring.py)、'seed' = 內建種子值。
+前瞻回測只採用 'live' 快照，種子分數不會被當成「預測」。
 """
 import json
 
@@ -28,7 +28,7 @@ def snapshot_industry_scores(snapshot_date=None):
     th = effective_thresholds(json.loads(row["thresholds_json"]))
     cur.execute("""
         SELECT industry_id, model_version, total_weighted_score, score_capital_flow, score_fundamentals,
-               score_future_growth, score_institutional, score_valuation, rotation_state
+               score_future_growth, score_institutional, score_valuation, rotation_state, score_source
         FROM industry_rotation_scores WHERE model_version = ?
     """, (version,))
     n = 0
@@ -37,11 +37,11 @@ def snapshot_industry_scores(snapshot_date=None):
         cur.execute("""
             INSERT OR REPLACE INTO industry_score_history
             (snapshot_date, industry_id, model_version, total_weighted_score, score_capital_flow, score_fundamentals,
-             score_future_growth, score_institutional, score_valuation, rotation_state, alert_level)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             score_future_growth, score_institutional, score_valuation, rotation_state, alert_level, score_source)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (snap, r["industry_id"], r["model_version"], r["total_weighted_score"], r["score_capital_flow"],
               r["score_fundamentals"], r["score_future_growth"], r["score_institutional"], r["score_valuation"],
-              r["rotation_state"], level))
+              r["rotation_state"], level, r["score_source"]))
         n += 1
     conn.commit()
     conn.close()

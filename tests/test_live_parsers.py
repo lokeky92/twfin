@@ -222,5 +222,128 @@ class TestIngestionFlow(unittest.TestCase):
         self.assertIsNone(row["margin_balance_billion"])
 
 
+TWSE_QUOTES = {"stat": "OK", "date": "20261124", "tables": [
+    {"title": "價格指數(臺灣證券交易所)", "fields": ["指數", "收盤指數"], "data": [["x", "1"]]},
+    {"title": "115年11月24日 每日收盤行情(全部(不含權證、牛熊證、可展延牛熊證))",
+     "fields": ["證券代號", "證券名稱", "成交股數", "成交筆數", "成交金額", "開盤價", "最高價", "最低價", "收盤價", "漲跌(+/-)", "漲跌價差"],
+     "data": [
+         ["2330", "台積電", "1", "1", "9,000,000,000", "0", "0", "0", "1,000.00", "<p style= color:red>+</p>", "10.00"],
+         ["2317", "鴻海", "1", "1", "500,000,000", "0", "0", "0", "100.00", "<p style= color:green>-</p>", "5.00"],
+         ["2454", "聯發科", "1", "1", "100", "0", "0", "0", "--", "X", "0.00"],          # 無收盤價 → 略過
+         ["9999", "平盤", "1", "1", "100", "0", "0", "0", "50.00", " ", "0.00"],         # 方向不明 → 不猜漲跌幅
+         ["short"],                                                                        # 欄位不足 → 略過
+     ]}]}
+
+TPEX_QUOTES = [
+    {"Date": "1151124", "SecuritiesCompanyCode": "6223", "Close": "2,000.00", "Change": "+50.00", "TransactionAmount": "3,000,000,000"},
+    {"Date": "1151124", "SecuritiesCompanyCode": "3017", "Close": "100.00", "Change": "-10.00", "TransactionAmount": "1,000"},
+    {"Date": "1151124", "SecuritiesCompanyCode": "9958", "Close": "---", "Change": "---", "TransactionAmount": "0"},
+]
+
+
+class TestQuoteParsers(unittest.TestCase):
+    NOW = "2026-11-24T18:00:00+08:00"
+
+    def test_twse_quotes_values_and_sign_from_html(self):
+        rows, d = lac.parse_twse_quotes(TWSE_QUOTES, self.NOW)
+        self.assertEqual(d, "2026-11-24")
+        by = {r[0]: r for r in rows}
+        self.assertEqual(set(by), {"2330", "2317", "9999"})
+        self.assertEqual(by["2330"][3], 1000.0)
+        self.assertEqual(by["2330"][5], 9_000_000_000.0)
+        self.assertAlmostEqual(by["2330"][4], 10 / 990 * 100, places=2)      # 前收 990
+        self.assertAlmostEqual(by["2317"][4], -5 / 105 * 100, places=2)      # 前收 105
+        self.assertIsNone(by["9999"][4])                                      # 方向不明不猜
+
+    def test_twse_quotes_schema_drift_is_an_error_not_silent(self):
+        bad = {"stat": "OK", "date": "20261124", "tables": [
+            {"title": "每日收盤行情", "fields": ["代號", "收盤價"], "data": []}]}
+        with self.assertRaises(ValueError):
+            lac.parse_twse_quotes(bad, self.NOW)
+        with self.assertRaises(ValueError):
+            lac.parse_twse_quotes({"stat": "OK", "date": "20261124", "tables": []}, self.NOW)
+        with self.assertRaises(ValueError):
+            lac.parse_twse_quotes({"stat": "很多筆", "date": "20261124", "tables": []}, self.NOW)
+
+    def test_tpex_quotes(self):
+        rows, d = lac.parse_tpex_quotes(TPEX_QUOTES, self.NOW)
+        self.assertEqual(d, "2026-11-24")
+        by = {r[0]: r for r in rows}
+        self.assertEqual(set(by), {"6223", "3017"})                           # 無收盤價的略過
+        self.assertAlmostEqual(by["6223"][4], 50 / 1950 * 100, places=2)
+        self.assertAlmostEqual(by["3017"][4], -10 / 110 * 100, places=2)
+
+
+class TestQuoteIngestionAndRetention(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        seed_and_compute_all()
+
+    @classmethod
+    def tearDownClass(cls):
+        # 與 TestIngestionFlow 相同：這個暫存庫會被後面的測試模組共用，擷取進來的即時資料不能留下
+        shutil.rmtree(_TMP, ignore_errors=True)
+
+    def _run(self, rev_ym, quote_date):
+        rev = {**REV_ROW, "資料年月": rev_ym}
+        tw = {**TWSE_QUOTES, "date": quote_date}
+        responses = {
+            lac.URL_TWSE_PE: [], lac.URL_TPEX_PE: [], lac.URL_T86.split("?")[0]: T86, lac.URL_TPEX_3I: TPEX_3I,
+            lac.URL_TWSE_REV: [rev], lac.URL_TPEX_REV: [],
+            lac.URL_MI_INDEX: [], lac.URL_BFI82U.split("?")[0]: BFI,
+            lac.URL_TWSE_QUOTES.split("?")[0]: tw, lac.URL_TPEX_QUOTES: TPEX_QUOTES,
+        }
+
+        def fake(url, timeout=15):
+            for prefix, value in responses.items():
+                if url.startswith(prefix):
+                    return value
+            raise ConnectionError("no fixture for " + url)
+        original = lac._fetch_json
+        lac._fetch_json = fake
+        try:
+            return lac.run_live_ingestion()
+        finally:
+            lac._fetch_json = original
+
+    def test_quotes_only_for_known_companies_and_latest_month_only(self):
+        res = self._run("11510", "20261124")
+        self.assertEqual(res["health"]["twse_quotes"], "OK")
+        conn = get_connection()
+        codes = {r[0] for r in conn.execute("SELECT company_code FROM live_stock_quotes")}
+        conn.close()
+        self.assertEqual(codes, {"2330"})                    # 只存有營收資料的公司 (2317 等不在名單)
+
+        # 下個月營收公布：同一家公司不能同時留著兩個月份，否則所有產業彙總會把兩個月加在一起
+        self._run("11511", "20261125")
+        conn = get_connection()
+        months = [r[0] for r in conn.execute("SELECT data_ym FROM live_company_fundamentals WHERE company_code = '2330'")]
+        days = [r[0] for r in conn.execute("SELECT trade_date FROM live_stock_quotes WHERE company_code = '2330' ORDER BY 1")]
+        conn.close()
+        self.assertEqual(months, ["11511"])
+        self.assertEqual(days, ["2026-11-24", "2026-11-25"])  # 收盤價則保留多日 (算成交值占比變化需要)
+
+    def test_quote_source_failure_is_not_critical(self):
+        def fake(url, timeout=15):
+            if "MI_INDEX?type=ALLBUT0999" in url or "daily_close_quotes" in url:
+                raise TimeoutError("boom")
+            if url.startswith(lac.URL_TWSE_REV):
+                return [REV_ROW]
+            if url.startswith(lac.URL_TPEX_REV):
+                return [{**REV_ROW, "公司代號": "6223", "公司名稱": "旺矽"}]
+            if url.startswith(lac.URL_T86.split("?")[0]):
+                return T86
+            raise ConnectionError(url)
+        original = lac._fetch_json
+        lac._fetch_json = fake
+        try:
+            res = lac.run_live_ingestion()
+        finally:
+            lac._fetch_json = original
+        self.assertEqual(res["health"]["twse_quotes"], "FAILED")
+        self.assertEqual(res["health"]["tpex_quotes"], "FAILED")
+        self.assertEqual(res["critical_failures"], [])
+
+
 if __name__ == "__main__":
     unittest.main()

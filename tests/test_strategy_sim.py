@@ -26,6 +26,10 @@ def setUpModule():
     _ORIG_DB_PATH = db.DB_PATH
     db.DB_PATH = os.path.join(_TMP, "ss.db")
     seed_and_compute_all()
+    # 這裡測的是回測/模擬的計算機制，不是評分來源：把種子分數標成 'live' 讓快照被採用
+    # (「種子分數的快照不會被當成預測」另有專門的測試)
+    with db.get_connection() as _c:
+        _c.execute("UPDATE industry_rotation_scores SET score_source = 'live'")
 
 
 def tearDownModule():

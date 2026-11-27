@@ -31,6 +31,10 @@ def setUpModule():
     _ORIG_DB_PATH = db.DB_PATH
     db.DB_PATH = os.path.join(_TMP, "bt.db")
     seed_and_compute_all()                 # 建立資料表與啟用中的模型
+    # 這裡測的是回測/模擬的計算機制，不是評分來源：把種子分數標成 'live' 讓快照被採用
+    # (「種子分數的快照不會被當成預測」另有專門的測試)
+    with db.get_connection() as _c:
+        _c.execute("UPDATE industry_rotation_scores SET score_source = 'live'")
 
 
 def tearDownModule():
@@ -202,6 +206,27 @@ class TestDatabaseIntegration(unittest.TestCase):
         self.assertFalse(r["any_matured"])
         self.assertEqual([h["matured_signals"] for h in r["horizon_results"]], [0, 0, 0])
         self.assertEqual(len(r["caveats"]), len(bt.CAVEATS))
+
+    def test_seed_sourced_snapshots_are_not_used_as_predictions(self):
+        """手寫種子分數的快照不是「預測」，不能進入回測；改成即時評分之前的快照也一樣被排除。"""
+        conn = db.get_connection()
+        conn.execute("UPDATE industry_rotation_scores SET score_source = 'seed'")
+        conn.commit()
+        conn.close()
+        try:
+            snapshot_industry_scores(DAYS[2].isoformat())
+            conn = db.get_connection()
+            sources = {r[0] for r in conn.execute("SELECT DISTINCT score_source FROM industry_score_history")}
+            self.assertEqual(sources, {"seed"})                       # 快照有記下來源
+            r = bt.compute_live_backtest(conn)
+            conn.close()
+            self.assertEqual(r["snapshot_days"], 0)                    # 但回測不採用
+            self.assertFalse(r["any_matured"])
+        finally:
+            conn = db.get_connection()
+            conn.execute("UPDATE industry_rotation_scores SET score_source = 'live'")
+            conn.commit()
+            conn.close()
 
     def test_snapshot_records_alert_level_and_feeds_the_backtest(self):
         snap_day = DAYS[2]

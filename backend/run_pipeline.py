@@ -19,6 +19,7 @@ from etf_engine import build_and_compute_etf_center
 from server import get_dashboard_payload, probe_live_sources
 from export_standalone import export_standalone
 from history import snapshot_industry_scores
+from live_scoring import apply_live_scoring
 
 def report_ingestion_health(statuses, critical):
     """把各來源狀態輸出成 GitHub Actions annotation；關鍵來源失敗回傳 1，讓排程失敗而不發佈過期資料。"""
@@ -67,6 +68,7 @@ def main():
         critical = live_res.get("critical_failures", []) if isinstance(live_res, dict) else []
         print("Live OpenAPI Ingestion:", live_res)
         build_and_compute_etf_center(shared_insti_map=shared_map)
+        print("Live industry scoring:", apply_live_scoring())
         print(f"Industry score snapshot rows: {snapshot_industry_scores()}")
         export_standalone()
         print_health_summary()

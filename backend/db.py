@@ -356,6 +356,19 @@ CREATE TABLE IF NOT EXISTS live_market_indices (
     PRIMARY KEY (index_name, trade_date)
 );
 
+-- 16b. 上市櫃個股每日收盤價與成交金額 (LIVE：TWSE MI_INDEX ALLBUT0999 / TPEx 每日收盤行情)
+-- 用途：把法人買賣超「股數」換算成金額 (淨買賣股數 × 收盤價)，並提供各產業成交值占比。只保留近期資料。
+CREATE TABLE IF NOT EXISTS live_stock_quotes (
+    company_code TEXT NOT NULL,
+    trade_date TEXT NOT NULL,        -- ISO 日期 (YYYY-MM-DD)
+    market_type TEXT NOT NULL,
+    close_price REAL,
+    change_pct REAL,                 -- 當日漲跌幅 (%)，由收盤價與漲跌價差反推
+    trade_value_twd REAL,            -- 成交金額 (元)
+    fetched_at TEXT NOT NULL,
+    PRIMARY KEY (company_code, trade_date)
+);
+
 -- ============================================================================
 -- ETF 投資決策中心擴充資料表 (17 ~ 23) — 嚴格保留原有 1~16 張表不動
 -- ============================================================================
@@ -596,6 +609,12 @@ def _migrate(conn):
     cols = {r[1] for r in conn.execute("PRAGMA table_info(industry_score_history)")}
     if cols and "alert_level" not in cols:
         conn.execute("ALTER TABLE industry_score_history ADD COLUMN alert_level TEXT")
+    irs_cols = {r[1] for r in conn.execute("PRAGMA table_info(industry_rotation_scores)")}
+    if irs_cols and "score_source" not in irs_cols:
+        conn.execute("ALTER TABLE industry_rotation_scores ADD COLUMN score_source TEXT NOT NULL DEFAULT 'seed'")
+    if cols and "score_source" not in cols:
+        # 'seed' = 子分數為內建種子值；'live' = 由官方即時資料算出。前瞻回測只採用 'live' 的快照 (見 backtest.py)
+        conn.execute("ALTER TABLE industry_score_history ADD COLUMN score_source TEXT NOT NULL DEFAULT 'seed'")
 
 
 def init_database():

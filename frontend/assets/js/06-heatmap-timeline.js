@@ -23,7 +23,7 @@ function getExpanded17Sectors(overrideMap = {}) {
     { id: "IND_BIO_RETAIL", displayTitle: "14. 生技醫療與新藥研發", icon: "🧬", subOverride: "新藥(藥華藥 6446)、CDMO與高階醫材（次產業異質觀察）" },
     { id: "IND_BIO_RETAIL", displayTitle: "15. 觀光與連鎖餐飲", icon: "🍽️", subOverride: "連鎖餐飲(王品 2727)、飯店旅宿（外食CPI +3.01%轉嫁觀察）" },
     { id: "IND_BIO_RETAIL", displayTitle: "16. 零售百貨與電信防禦", icon: "🛍️", subOverride: "電信防禦龍頭(中華電 2412)、超商百貨內需服務" },
-    { id: "IND_CONSTRUCTION", displayTitle: "17. 營建、塑化與鋼鐵原物料", icon: "🏗️", subOverride: "營建(興富發 2542, 47.1分) / 塑化鋼鐵(台塑/中鋼, 43.0分)" }
+    { id: "IND_CONSTRUCTION", displayTitle: "17. 營建、塑化與鋼鐵原物料", icon: "🏗️", subOverride: "營建(興富發 2542)、塑化鋼鐵(台塑/中鋼)" }
   ];
 
   // 若想要把鋼鐵與塑化獨立顯示也可直接對應
@@ -68,15 +68,45 @@ function renderIndustryHeatmap(overrideMap = {}) {
   const sectors = getExpanded17Sectors(overrideMap);
   window.__HEATMAP_SECTORS__ = sectors;
   const grid = document.getElementById('industryHeatmapGrid');
+  const ym = String(((STATE.live_top_companies || [])[0] || {}).data_ym || '');
+  const monthLabel = /^\d{4,}$/.test(ym) ? `${parseInt(ym.slice(0, -2), 10) + 1911}年${parseInt(ym.slice(-2), 10)}月` : '最新月';
+  window.__HEATMAP_MONTH__ = monthLabel;
+
+  // 說明目前顯示的分數來源 (即時重算 / 種子)；時間軸前 5 格是手寫歷史情境，另外標示
+  const liveInds = (STATE.industries || []).filter(i => i.score_source === 'live');
+  let note = document.getElementById('heatmapSourceNote');
+  if (!note) {
+    note = document.createElement('div');
+    note.id = 'heatmapSourceNote';
+    note.style.cssText = 'font-size:12.5px; margin:8px 2px 10px; color:var(--text-muted);';
+    grid.parentNode.insertBefore(note, grid);
+  }
+  const latestSel = !document.getElementById('timelineRangeInput') || document.getElementById('timelineRangeInput').value === '5';
+  if (!latestSel) {
+    note.textContent = '🕰️ 目前顯示的是「歷史情境」(手寫的時期回顧，用來說明當時的輪動，沒有對應的歷史資料可重算)，不是即時分數。拖到最右側「最新」可回到即時分數。';
+  } else if (liveInds.length) {
+    const asOf = (liveInds[0].as_of_date || '').slice(0, 10);
+    note.textContent = `✅ 分數由官方即時資料重算（${asOf} 盤後；${liveInds.length} 個產業，每個交易日收盤後更新）。方塊顏色為資金流向狀態，分數為啟用模型的綜合總分。`;
+  } else {
+    note.textContent = '⚠️ 此快照的分數為內建種子值，尚未啟用即時評分，不會隨資料更新。';
+  }
 
   grid.innerHTML = sectors.map((sec, idx) => {
     const hInfo = stateToHeatClass(sec.effectiveState);
-    const isUnratable = sec.total_weighted_score === null || sec.rotation_state === 'INSUFFICIENT_DATA';
-    const scoreDisplay = isUnratable ? '觀察中' : `${sec.total_weighted_score.toFixed(1)} 分`;
+    const isUnratable = sec.total_weighted_score == null || sec.rotation_state === 'INSUFFICIENT_DATA';
+    // 歷史情境的顏色是手寫的，不能配上現在的即時分數，否則會被誤認為當時的分數
+    const scoreDisplay = !latestSel ? '歷史情境' : (isUnratable ? '觀察中' : `${sec.total_weighted_score.toFixed(1)} 分`);
     const agg = sec.live_agg || {};
     const compNames = sec.focusTicker || (sec.representative_companies || []).slice(0, 2).map(c => `${c.ticker} ${c.name}`).join('、');
 
-    const sgn = (v) => (v >= 0 ? '+' : '') + v + '%';
+    const lm = sec.live_metrics || null;
+    const isLive = sec.score_source === 'live' && lm;
+    const sgn = (v) => (v === null || v === undefined || Number.isNaN(v)) ? 'N/A' : (v >= 0 ? '+' : '') + v + '%';
+    const cls = (v) => (v === null || v === undefined || v >= 0) ? 'pos' : 'neg';
+    const yoyVal = isLive ? (lm.yoy === null ? null : Math.round(lm.yoy * 10) / 10) : sec.rev_yoy_pct;
+    // 第二個指標：即時評分時顯示「近 N 日相對大盤」(類股報酬指數)；種子分數時維持原本的 20 日相對強弱
+    const rsVal = isLive ? lm.rs_pct : sec.rel_strength_20d;
+    const rsLabel = isLive ? `近 ${lm.rs_days || '?'} 日相對大盤` : '20 日相對強弱';
     return `
       <div class="heat-tile ${hInfo.cls}" onclick="openIndustryDrawer(${idx})">
         <div>
@@ -89,8 +119,8 @@ function renderIndustryHeatmap(overrideMap = {}) {
         </div>
         <div>
           <div class="ht-metrics">
-            <div><div class="ht-m-label">10 月營收 YoY</div><div class="ht-m-val ${sec.rev_yoy_pct >= 0 ? 'pos' : 'neg'}">${sgn(sec.rev_yoy_pct)}</div></div>
-            <div><div class="ht-m-label">20 日相對強弱</div><div class="ht-m-val ${sec.rel_strength_20d >= 0 ? 'pos' : 'neg'}">${sgn(sec.rel_strength_20d)}</div></div>
+            <div><div class="ht-m-label">${monthLabel} 營收 YoY</div><div class="ht-m-val ${cls(yoyVal)}">${sgn(yoyVal)}</div></div>
+            <div><div class="ht-m-label">${rsLabel}</div><div class="ht-m-val ${cls(rsVal)}">${sgn(rsVal)}</div></div>
           </div>
           <div class="ht-comp" style="margin-top:8px;" title="${compNames}">${compNames}</div>
         </div>
@@ -103,17 +133,25 @@ function openIndustryDrawer(idx) {
   const sec = window.__HEATMAP_SECTORS__[idx];
   if (!sec) return;
   const hInfo = stateToHeatClass(sec.effectiveState);
-  const isUnratable = sec.total_weighted_score === null || sec.rotation_state === 'INSUFFICIENT_DATA';
+  const isUnratable = sec.total_weighted_score == null || sec.rotation_state === 'INSUFFICIENT_DATA';
   const agg = sec.live_agg || {};
   const comps = (sec.representative_companies || []).map(c =>
     `<span class="badge badge-grade-B" style="margin:3px 4px 0 0;">${c.ticker} ${c.name}（${c.role}）</span>`
   ).join('');
 
-  const q1 = `${sec.title} 目前處於「<strong>${hInfo.label}</strong>」，景氣循環位置為「<strong>${sec.cycle_stage}</strong>」，轉折訊號為「<strong>${sec.transition_tag}</strong>」。20日相對大盤表現 ${sec.rel_strength_20d >= 0 ? '+' : ''}${sec.rel_strength_20d}%，60日相對大盤 ${sec.rel_strength_60d >= 0 ? '+' : ''}${sec.rel_strength_60d}%。`;
+  const lmX = sec.live_metrics || null;
+  const isLiveX = sec.score_source === 'live' && lmX;
+  const fmtN = (v, d = 1) => (v === null || v === undefined) ? 'N/A' : (v >= 0 ? '+' : '') + v.toFixed(d);
+  const rsText = isLiveX
+    ? `近 ${lmX.rs_days || '?'} 日相對大盤 ${fmtN(lmX.rs_pct, 2)}%（類股報酬指數 − 加權報酬指數）`
+    : `20日相對大盤表現 ${sec.rel_strength_20d >= 0 ? '+' : ''}${sec.rel_strength_20d}%，60日相對大盤 ${sec.rel_strength_60d >= 0 ? '+' : ''}${sec.rel_strength_60d}%`;
+  const q1 = `${sec.title} 目前處於「<strong>${hInfo.label}</strong>」，景氣循環位置為「<strong>${sec.cycle_stage}</strong>」（人工標註，不隨資料更新），轉折訊號為「<strong>${sec.transition_tag}</strong>」。${rsText}。`;
   const q2 = sec.supporting_evidence;
   const q3 = isUnratable
     ? `此分類涵蓋次產業商業模式差異過大（缺失與不可比資料比例達 ${sec.missing_data_pct}%），本系統嚴格遵守「資料不足不得硬排名」原則，僅列示個別公司營收供觀察。`
-    : `綜合研究總分為 <strong>${sec.total_weighted_score} 分</strong>（短期資金動能 ${sec.short_term_momentum_score} 分／中期基本面 ${sec.mid_term_fundamental_score} 分／長期結構成長 ${sec.long_term_structural_score} 分）。法人動向：${sec.itc_net_flow_trend}；${sec.foreign_net_flow_trend}。`;
+    : (isLiveX
+      ? `綜合研究總分為 <strong>${sec.total_weighted_score} 分</strong>（資金流向 ${sec.score_capital_flow}／基本面 ${sec.score_fundamentals}／成長動能 ${sec.score_future_growth}／法人布局 ${sec.score_institutional}／估值 ${sec.score_valuation}，皆為相對其他產業的百分位分數）。法人動向：${sec.foreign_net_flow_trend}；${sec.itc_net_flow_trend}。`
+      : `綜合研究總分為 <strong>${sec.total_weighted_score} 分</strong>（短期資金動能 ${sec.short_term_momentum_score} 分／中期基本面 ${sec.mid_term_fundamental_score} 分／長期結構成長 ${sec.long_term_structural_score} 分）。法人動向：${sec.itc_net_flow_trend}；${sec.foreign_net_flow_trend}。`);
   const q4 = `供應鏈受惠核心與代表公司：<div style="margin-top:4px;">${comps}</div>`;
   const q5 = `<strong>反方證據與潛在風險：</strong>${sec.counter_evidence}`;
   const q6 = `<strong>結論失效條件：</strong>${sec.invalidation_conditions}<br/><strong>資料統計限制：</strong>${sec.data_limitations}`;
@@ -122,9 +160,9 @@ function openIndustryDrawer(idx) {
     <div class="q6-box" style="border-color:var(--accent-emerald); background:rgba(6,78,59,0.25);">
       <div class="q6-title" style="color:#34d399;">📊 MOPS 公開資訊觀測站全市場 ${agg.company_count} 家上市櫃公司真實匯總</div>
       <div style="font-size:13px; color:#fff;">
-        • 115年10月(2026-10) 產業合計總營收：<strong>${agg.ind_rev_billion.toLocaleString()} 億元</strong>（去年同月 ${agg.ind_ly_rev_billion.toLocaleString()} 億元，實測匯總年增率 <strong class="${agg.agg_yoy_pct >= 0 ? 'pos' : 'neg'}">${agg.agg_yoy_pct >= 0 ? '+' : ''}${agg.agg_yoy_pct}%</strong>）<br/>
+        • ${window.__HEATMAP_MONTH__ || '最新月'} 產業合計總營收：<strong>${agg.ind_rev_billion.toLocaleString()} 億元</strong>（去年同月 ${agg.ind_ly_rev_billion.toLocaleString()} 億元，實測匯總年增率 <strong class="${agg.agg_yoy_pct >= 0 ? 'pos' : 'neg'}">${agg.agg_yoy_pct >= 0 ? '+' : ''}${agg.agg_yoy_pct}%</strong>）<br/>
         • 產業平均本益比 (P/E)：<strong>${agg.avg_pe || 'N/A'} 倍</strong> ｜ 平均股價淨值比 (P/B)：<strong>${agg.avg_pb || 'N/A'} 倍</strong><br/>
-        • 最新交易日(11/20) 法人合計買賣超：外資 <strong>${(agg.sum_foreign_shares || 0).toLocaleString()} 股</strong> ｜ 投信 <strong>${(agg.sum_itc_shares || 0).toLocaleString()} 股</strong>
+        • ${(sec.as_of_date || '').slice(0, 10) || '最新交易日'} 法人買賣超：外資 <strong>${(agg.sum_foreign_shares || 0).toLocaleString()} 股</strong> ｜ 投信 <strong>${(agg.sum_itc_shares || 0).toLocaleString()} 股</strong>${isLiveX ? `（約 ${fmtN(lmX.foreign_billion)} / ${fmtN(lmX.itc_billion)} 億元；占產業成交值 ${lmX.inst_ratio_pct === null ? 'N/A' : fmtN(lmX.inst_ratio_pct, 2) + '%'}；收盤價覆蓋率 ${Math.round(lmX.price_coverage * 100)}%）` : ''}
       </div>
     </div>
   ` : '';
@@ -137,14 +175,28 @@ function openIndustryDrawer(idx) {
 /* =========================================================================
    5. 資金輪動動畫時間軸播放器 (Timeline Player)
    ========================================================================= */
+// 時間軸資料：前 5 格是手寫的歷史情境 (沒有對應的歷史資料可重算，標明為歷史情境)；
+// 最右側「最新」優先使用後端用即時資料產生的內容 (STATE.home_pulse.timeline_latest)，沒有時才退回手寫文字並標示。
+function getTimelineSnapshot(idx) {
+  const base = TIMELINE_SNAPSHOTS[idx] || TIMELINE_SNAPSHOTS[5];
+  if (idx < 5) return { ...base, label: `【歷史情境・手寫】${base.label}` };
+  const live = STATE && STATE.home_pulse && STATE.home_pulse.timeline_latest;
+  if (live) return { ...base, ...live, heatOverrides: {} };
+  return { ...base, label: `【手寫・未更新】${base.label}`, heatOverrides: {} };
+}
+
 function onTimelineSliderInput(val) {
   const idx = parseInt(val, 10);
-  const snap = TIMELINE_SNAPSHOTS[idx] || TIMELINE_SNAPSHOTS[5];
+  const snap = getTimelineSnapshot(idx);
   document.getElementById('timelineRangeInput').value = idx;
 
   // 同步更新上方 19宮格產業熱度地圖顏色！
   renderIndustryHeatmap(snap.heatOverrides || {});
 
+  const stepEl = document.getElementById('timelineLatestStep');
+  if (stepEl && STATE && STATE.home_pulse && STATE.home_pulse.timeline_latest) {
+    stepEl.innerHTML = `最新<br/>${(STATE.home_pulse.timeline_latest.label.match(/\d{4}-\d{2}-\d{2}/) || [''])[0]} 盤後`;
+  }
   const lblEl = document.getElementById('timelineCurrentLabel');
   if (lblEl) lblEl.textContent = `當前顯示時期：${snap.label}`;
   const compactEl = document.getElementById('timelineCompactBar');

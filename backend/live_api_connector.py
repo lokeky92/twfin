@@ -100,6 +100,9 @@ URL_TWSE_REV = "https://openapi.twse.com.tw/v1/opendata/t187ap05_L"
 URL_TPEX_REV = "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap05_O"
 URL_MI_INDEX = "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
 URL_BFI82U = "https://www.twse.com.tw/rwd/zh/fund/BFI82U?response=json"
+# 個股每日收盤行情：用 rwd 版 (與 T86 同網域、同日更新)；openapi 的 STOCK_DAY_ALL 會晚一個交易日，換算買賣金額會錯位
+URL_TWSE_QUOTES = "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
+URL_TPEX_QUOTES = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes"
 
 
 def parse_twse_pe(rows):
@@ -223,6 +226,65 @@ def parse_mi_index(rows, now_str):
     return out
 
 
+def _quote_row(code, market, close, chg, value, date_iso, now_str):
+    """收盤價與漲跌價差 → (代號, 日期, 市場, 收盤, 漲跌幅%, 成交金額, 抓取時間)；收盤價缺值回傳 None。"""
+    if not code or close is None or close <= 0:
+        return None
+    prev = close - chg if chg is not None else None
+    pct = round(chg / prev * 100.0, 3) if prev and prev > 0 else None
+    return (code, date_iso, market, close, pct, value, now_str)
+
+
+def parse_twse_quotes(payload, now_str):
+    """
+    證交所 rwd MI_INDEX (type=ALLBUT0999) 的「每日收盤行情」表。回傳 (rows, ISO 日期或 None)。
+    漲跌方向欄 (漲跌(+/-)) 是 HTML 片段，正負號在裡面；無法判斷方向時漲跌幅留空，不猜。
+    """
+    if payload.get("stat") != "OK":
+        raise ValueError(f"MI_INDEX 回傳 stat={payload.get('stat')!r}")
+    d = parse_date(payload.get("date"))
+    if d is None:
+        raise ValueError("MI_INDEX 缺少日期")
+    table = next((t for t in payload.get("tables", []) if "每日收盤行情" in str(t.get("title", ""))), None)
+    if not table:
+        raise ValueError("MI_INDEX 找不到「每日收盤行情」表 (官方可能改版)")
+    fields = table.get("fields", [])
+    try:
+        i_code, i_val, i_close = fields.index("證券代號"), fields.index("成交金額"), fields.index("收盤價")
+        i_dir, i_diff = fields.index("漲跌(+/-)"), fields.index("漲跌價差")
+    except ValueError as e:
+        raise ValueError(f"MI_INDEX 每日收盤行情欄位改版：{e}") from e
+    out = []
+    for row in table.get("data", []):
+        if len(row) <= max(i_code, i_val, i_close, i_dir, i_diff):
+            continue
+        sign_html = str(row[i_dir])
+        sign = 1.0 if "+" in sign_html else (-1.0 if "-" in sign_html else None)
+        diff = _to_float(row[i_diff])
+        chg = sign * abs(diff) if (sign is not None and diff is not None) else None
+        r = _quote_row(str(row[i_code]).strip(), "TWSE", _to_float(row[i_close]), chg, _to_float(row[i_val]), d.isoformat(), now_str)
+        if r:
+            out.append(r)
+    return out, d.isoformat()
+
+
+def parse_tpex_quotes(rows, now_str):
+    """櫃買每日收盤行情 (openapi)。Change 欄自帶正負號。回傳 (rows, ISO 日期或 None)。"""
+    out, date_iso = [], None
+    for r in rows:
+        d = parse_date(r.get("Date"))
+        if d is None:
+            continue
+        date_iso = date_iso or d.isoformat()
+        chg_raw = str(r.get("Change", "")).strip().replace(",", "")
+        chg = _to_float(chg_raw.replace("+", "")) if chg_raw not in ("", "---", "--") else None
+        q = _quote_row(str(r.get("SecuritiesCompanyCode", "")).strip(), "TPEx", _to_float(r.get("Close")), chg,
+                       _to_float(r.get("TransactionAmount")), d.isoformat(), now_str)
+        if q:
+            out.append(q)
+    return out, date_iso
+
+
 # ---------------------------------------------------------------------------
 # 來源狀態記錄與沿用舊資料
 # ---------------------------------------------------------------------------
@@ -282,10 +344,10 @@ def run_live_ingestion():
     summary = {}
     results = {}   # source_key -> dict(ok, count, date, error)
 
-    def attempt(key, url, parser):
+    def attempt(key, url, parser, timeout=15):
         """執行單一來源；任何例外都只標記該來源失敗，不影響其他來源。parser(raw) -> (資料, 筆數, 資料日期)。"""
         try:
-            parsed, count, date = parser(_fetch_json(url))
+            parsed, count, date = parser(_fetch_json(url, timeout=timeout))
             results[key] = {"ok": True, "count": count, "date": date}
             summary[f"{key}_count"] = count
             return parsed
@@ -351,6 +413,12 @@ def run_live_ingestion():
              insti_trade_date, fetched_at, source_url, notes)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, company_rows)
+        # 每家公司只保留最新月份：主鍵是 (公司, 資料年月)，不清理的話新月份公布後所有產業彙總會把兩個月加在一起
+        cur.execute("""
+            DELETE FROM live_company_fundamentals
+            WHERE data_ym < (SELECT MAX(x.data_ym) FROM live_company_fundamentals x
+                             WHERE x.company_code = live_company_fundamentals.company_code)
+        """)
         period = minguo_ym_to_iso(company_rows[0][5])
         cur.execute("""
             INSERT INTO ingestion_audit_logs
@@ -379,6 +447,35 @@ def run_live_ingestion():
             VALUES (?, ?, ?, ?, ?, ?)
         """, (now_str, "LIVE_TWSE_MI_INDEX_INGEST", "SRC_TWSE", "SUCCESS", len(idx_rows),
               f"已寫入證交所 MI_INDEX 共 {len(idx_rows)} 項指數與產業類股收盤行情 (日期:{idx_rows[0][1]})"))
+
+    # 4b. 個股每日收盤價與成交金額 (法人買賣超股數 → 金額、各產業成交值占比用)。只存已有營收資料的公司，並只保留近 90 天。
+    known_codes = {r[0] for r in company_rows}
+
+    def _quote_parser(fn):
+        def run(raw):
+            rows, d = fn(raw, now_str)
+            return rows, len(rows), d
+        return run
+
+    quote_rows = []
+    for key, url, fn, tmo in (("twse_quotes", URL_TWSE_QUOTES, parse_twse_quotes, 30),
+                              ("tpex_quotes", URL_TPEX_QUOTES, parse_tpex_quotes, 60)):
+        rows = attempt(key, url, _quote_parser(fn), timeout=tmo)
+        if rows:
+            quote_rows.extend(r for r in rows if r[0] in known_codes)
+    if quote_rows:
+        cur.executemany("""
+            INSERT OR REPLACE INTO live_stock_quotes
+            (company_code, trade_date, market_type, close_price, change_pct, trade_value_twd, fetched_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, quote_rows)
+        cur.execute("DELETE FROM live_stock_quotes WHERE trade_date < date(?, '-90 day')",
+                    (max(r[1] for r in quote_rows),))
+        cur.execute("""
+            INSERT INTO ingestion_audit_logs (run_timestamp, task_name, source_id, status, records_affected, message)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (now_str, "LIVE_STOCK_QUOTES_INGEST", "SRC_TWSE", "SUCCESS", len(quote_rows),
+              f"已寫入 {len(quote_rows)} 檔上市櫃個股收盤價與成交金額 (日期 {sorted({r[1] for r in quote_rows})})"))
 
     # 5. BFI82U 三大法人金額 (期貨未平倉與融資餘額此 API 不提供，寫入 NULL 而非假數字)
     def _parse_bfi(raw):

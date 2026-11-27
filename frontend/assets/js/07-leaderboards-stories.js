@@ -1,8 +1,58 @@
 /* =========================================================================
    6. 六大產業趨勢排行榜 (嚴格區分「目前最熱門」vs「可能即將轉強」)
    ========================================================================= */
+// 即時排行榜：六個榜都由 STATE.industries 的即時指標 (live_metrics) 與即時評分產生，沒有任何手寫數字。
+// 只有拿不到即時指標的舊快照才退回下面的靜態版本 (2026-11-21 前後手寫)。
+function buildLiveBoards() {
+  const inds = (STATE.industries || []).filter(i => i.live_metrics);
+  if (inds.length < 6) return null;
+  const sg = (v, d = 1) => (v === null || v === undefined || Number.isNaN(v)) ? 'N/A' : (v >= 0 ? '+' : '') + v.toFixed(d);
+  const scored = inds.filter(i => i.score_source === 'live' && i.total_weighted_score !== null);
+  const rank = (list, key, dir, n = 3) => [...list].filter(i => key(i) !== null && key(i) !== undefined)
+    .sort((a, b) => dir * (key(b) - key(a))).slice(0, n);
+  const L = i => i.live_metrics;
+  const item = (i, metric, plain) => ({ name: esc(i.industry_name), metric, plain, indId: esc(i.industry_id) });
+  const facts = i => `營收年增 ${sg(L(i).yoy)}%、法人當日淨買賣 ${sg(L(i).inst_net_billion)} 億、${L(i).rs_days ? '近 ' + L(i).rs_days + ' 日相對大盤 ' + sg(L(i).rs_pct, 2) + '%' : '相對強弱資料不足'}`;
+  const none = '目前沒有符合條件的產業。';
+  const boardOf = (title, badge, color, list, mk) => ({ title, badge, color, items: list.length ? list.map(mk) : [{ name: none, metric: '', plain: '', indId: '' }] });
+
+  const gap = i => i.score_fundamentals - i.score_capital_flow;
+  return [
+    boardOf('1. 💰 法人當日淨買超金額最多的產業', '外資+投信+自營商，股數×收盤價', '#10b981',
+      rank(inds, i => L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion, 1).filter(i => (L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion) > 0),
+      i => item(i, `三大法人 ${sg(L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion)} 億`, `外資 ${sg(L(i).foreign_billion)}、投信 ${sg(L(i).itc_billion)}、自營商 ${sg(L(i).dealer_billion)} 億元；${facts(i)}。`)),
+    boardOf('2. ⚡ 相對大盤表現最強的產業（動能領先）', '類股報酬指數 − 加權報酬指數', '#38bdf8',
+      rank(inds, i => L(i).rs_pct, 1),
+      i => item(i, `近 ${L(i).rs_days} 日 ${sg(L(i).rs_pct, 2)}%`, `${facts(i)}。`)),
+    boardOf('3. 📈 營收年增最高的產業（實質營收爆發）', `${window.__HEATMAP_MONTH__ || '最新月'}營收，MOPS 全市場彙總`, '#34d399',
+      rank(inds, i => L(i).yoy, 1),
+      i => item(i, `營收年增 ${sg(L(i).yoy)}%`, `累計營收年增 ${sg(L(i).cum_yoy)}%、營收加速度 ${sg(L(i).accel)}（單月年增 − 累計年增）；旗下 ${L(i).companies} 家公司。`)),
+    boardOf('4. 🌱 基本面強但資金尚未跟上（可能即將轉強）', '基本面分數高、資金流向分數低', '#a855f7',
+      rank(scored.filter(i => i.score_fundamentals >= 65 && i.score_capital_flow <= 50), gap, 1),
+      i => item(i, `基本面 ${i.score_fundamentals}／資金流向 ${i.score_capital_flow}`, `${facts(i)}。條件：基本面分數 ≥65 且資金流向分數 ≤50（機械式篩選，不是預測）。`)),
+    boardOf('5. 📉 法人當日淨賣超金額最多的產業（避開弱勢）', '外資+投信+自營商，股數×收盤價', '#fb7185',
+      rank(inds, i => L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion, -1).filter(i => (L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion) < 0),
+      i => item(i, `三大法人 ${sg(L(i).foreign_billion + L(i).itc_billion + L(i).dealer_billion)} 億`, `外資 ${sg(L(i).foreign_billion)}、投信 ${sg(L(i).itc_billion)}、自營商 ${sg(L(i).dealer_billion)} 億元；${facts(i)}。`)),
+    boardOf('6. 🚨 即時評分最低的產業', '模型總分由低到高', '#f59e0b',
+      rank(scored, i => i.total_weighted_score, -1),
+      i => item(i, `總分 ${i.total_weighted_score}｜狀態 ${i.rotation_state}`, `${facts(i)}。評分是相對其他產業的百分位，分數低代表「相對落後」，不等於一定下跌。`)),
+  ];
+}
+
 function renderSixLeaderboards() {
-  const boards = [
+  const liveBoards = buildLiveBoards();
+  const grid = document.getElementById('sixLeaderboardsGrid');
+  let note = document.getElementById('sixBoardsNote');
+  if (!note) {
+    note = document.createElement('div');
+    note.id = 'sixBoardsNote';
+    note.style.cssText = 'font-size:12.5px; margin:4px 2px 10px; color:var(--text-muted);';
+    grid.parentNode.insertBefore(note, grid);
+  }
+  note.textContent = liveBoards
+    ? `✅ 六個排行榜皆由官方即時資料產生（${((STATE.live_sankey || {}).as_of) || ''} 盤後），每個交易日收盤後更新。`
+    : '⚠️ 此快照沒有即時指標，以下為 2026-11-21 前後手寫的靜態排行榜，不會隨資料更新。';
+  const staticBoards = [
     {
       title: "1. 💰 資金流入最多的產業（規模主力）",
       badge: "內資ETF與法人重倉核心",
@@ -65,14 +115,15 @@ function renderSixLeaderboards() {
     }
   ];
 
-  document.getElementById('sixLeaderboardsGrid').innerHTML = boards.map(b => `
+  const boards = liveBoards || staticBoards;
+  grid.innerHTML = boards.map(b => `
     <div class="lb-card" style="border-top: 4px solid ${b.color};">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px; flex-wrap:wrap;">
         <strong style="font-size:17px; color:#fff;">${b.title}</strong>
         <span class="badge" style="background:rgba(255,255,255,0.08); color:${b.color}; font-size:13px;">${b.badge}</span>
       </div>
       ${b.items.map(it => `
-        <div class="lb-item" onclick="openIndustryByCode('${it.indId}')">
+        <div class="lb-item" ${it.indId ? `onclick="openIndustryByCode('${it.indId}')"` : ''}>
           <div style="flex:1; padding-right:8px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
               <strong style="color:#f8fafc; font-size:15.5px;">${it.name}</strong>
@@ -94,6 +145,7 @@ function openIndustryByCode(indId) {
 /* =========================================================================
    7. 「市場正在發生什麼事」產業趨勢故事模式 (Trend Story Mode)
    ========================================================================= */
+// 趨勢故事是依特定日期寫成的敘事文章 (沒有可即時化的來源)，每一篇都標明撰寫期間，避免被當成最新分析。
 function renderTrendStories() {
   const stories = [
     {
@@ -158,7 +210,16 @@ function renderTrendStories() {
     }
   ];
 
-  document.getElementById('trendStoriesGrid').innerHTML = stories.map(st => `
+  const storiesGrid = document.getElementById('trendStoriesGrid');
+  let storiesNote = document.getElementById('trendStoriesNote');
+  if (!storiesNote) {
+    storiesNote = document.createElement('div');
+    storiesNote.id = 'trendStoriesNote';
+    storiesNote.style.cssText = 'font-size:12.5px; margin:4px 2px 10px; color:var(--text-muted);';
+    storiesGrid.parentNode.insertBefore(storiesNote, storiesGrid);
+  }
+  storiesNote.textContent = '🕰️ 以下四篇是 2026-11-21 前後撰寫的敘事文章，引用當時的總經與市場數字，不會隨資料更新；最新數字請看上方即時區塊。';
+  storiesGrid.innerHTML = stories.map(st => `
     <div class="story-card">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
         <span class="badge badge-grade-A">${st.credibility}</span>

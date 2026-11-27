@@ -207,7 +207,12 @@ def window_return(series, days=WINDOW_DAYS):
 
 
 def industry_live_table(industries):
-    """各產業的即時熱度表：營收年增 (MOPS) + 法人買超張數 (T86 / 櫃買)，各取百分位後加權。"""
+    """
+    各產業的即時排名表。
+    - 模型模式：啟用版本的分數已由即時資料重算 (score_source == 'live') 時，直接用模型總分排名，
+      這樣首頁摘要、熱度圖、排行榜、預警用的是同一組分數，不會互相矛盾。
+    - 簡易模式 (只有種子分數的舊資料庫)：營收年增 + 法人買超張數的百分位加權。
+    """
     rows = []
     for ind in industries or []:
         a = ind.get("live_agg") or {}
@@ -220,17 +225,29 @@ def industry_live_table(industries):
             "foreign": frg, "itc": itc, "inst": frg + itc,
             "companies": int(a.get("company_count")), "pe": _num(a.get("avg_pe")),
             "model_score": _num(ind.get("total_weighted_score")), "model_asof": ind.get("as_of_date"),
+            "live_scored": ind.get("score_source") == "live" and _num(ind.get("total_weighted_score")) is not None,
+            "state": ind.get("rotation_state"),
+            "inst_billion": _num((ind.get("live_metrics") or {}).get("inst_net_billion")),
         })
+    scored = [r for r in rows if r["live_scored"]]
+    if len(scored) >= 5:
+        for r in scored:
+            r["heat"] = round(r["model_score"], 1)
+            r["mode"] = "model"
+        scored.sort(key=lambda r: (-r["heat"], -r["yoy"]))
+        return scored
     yr = _pct_rank([r["yoy"] for r in rows])
     ir = _pct_rank([r["inst"] for r in rows])
     for r, y, i in zip(rows, yr, ir):
         r["heat"] = round(100.0 * (HEAT_WEIGHT_YOY * y + HEAT_WEIGHT_INST * i), 1)
+        r["mode"] = "heuristic"
     rows.sort(key=lambda r: (-r["heat"], -r["yoy"]))
     return rows
 
 
 def _industry_phrase(r):
-    return f"{_e(r['name'])}（營收年增 {_sgn(r['yoy'], 1, '%')}、法人 {_lots(r['inst'])}）"
+    inst = f"法人 {_sgn(r['inst_billion'], 1)} 億" if r.get("inst_billion") is not None else f"法人 {_lots(r['inst'])}"
+    return f"{_e(r['name'])}（營收年增 {_sgn(r['yoy'], 1, '%')}、{inst}）"
 
 
 # ---------------------------------------------------------------------------
@@ -334,6 +351,19 @@ def _card_q2(d, flows, table, idx_series):
     return _card(1, q, a, sub, q6, basis)
 
 
+def _rank_text(table):
+    """排名依據的說明 (依模式不同)：模型模式用即時重算的總分；簡易模式用營收年增 + 法人買超百分位。"""
+    if table and table[0].get("mode") == "model":
+        return ("排名依據：啟用中模型的總分 (5 項子分數都由官方即時資料重算：基本面=營收年增、成長動能=累計營收年增與加速度、"
+                "法人布局=法人買賣金額占成交值、估值=PEG 代理、資金流向=類股相對大盤報酬與成交值占比；各取產業間百分位後依治理頁權重加總)。")
+    return (f"排名依據：{int(HEAT_WEIGHT_YOY * 100)}% 產業營收年增（MOPS）+ {int(HEAT_WEIGHT_INST * 100)}% 當日外資+投信買超張數，"
+            f"各取 {len(table)} 個產業間的百分位 (此資料庫尚未啟用即時評分，採簡易模式)。")
+
+
+def _score_word(table):
+    return "模型分數" if table and table[0].get("mode") == "model" else "即時熱度"
+
+
 def _card_q3(d, table):
     q = "Q3. 哪些產業正在明顯升溫？"
     if not table:
@@ -341,24 +371,21 @@ def _card_q3(d, table):
     s = d.get("live_summary") or {}
     ym = _ym_label((d.get("live_top_companies") or [{}])[0].get("data_ym"))
     top = table[:5]
+    word = _score_word(table)
     a = "🔥 " + "、".join(_e(r["name"]) for r in top[:3])
     total_rev, yoy = _num(s.get("total_rev_trillion")), _num(s.get("total_yoy_pct"))
     sub = (f"全市場 {s.get('total_companies')} 家{ym}營收 {total_rev} 兆（{_sgn(yoy, 1, '%')}）" if total_rev is not None and yoy is not None
-           else "即時熱度前三名") + f"；即時熱度第 1 名 {_e(top[0]['name'])} {top[0]['heat']:.0f} 分"
-    leaders = []
-    for r in top[:3]:
-        ms = f"，模型分數 {r['model_score']:.1f}（{_e(r['model_asof'])}）" if r["model_score"] is not None else ""
-        leaders.append(f"{_industry_phrase(r)}{ms}")
+           else f"{word}前三名") + f"；{word}第 1 名 {_e(top[0]['name'])} {top[0]['heat']:.1f} 分"
     q6 = [
-        "即時熱度前五名：" + "；".join(f"#{i + 1} {_industry_phrase(r)}" for i, r in enumerate(top)) + "。",
-        f"熱度算法：{int(HEAT_WEIGHT_YOY * 100)}% 看產業{ym}營收年增（MOPS 官方彙總）、{int(HEAT_WEIGHT_INST * 100)}% 看當日外資+投信買超張數，兩者各取在 {len(table)} 個產業中的百分位。",
-        f"代表這幾個產業在「營收年增」與「法人買超」的綜合排名居前（兩項不一定同時偏強，見各產業數字）。{ym}全市場營收 {total_rev} 兆、年增 {_sgn(yoy, 1, '%')}。" if total_rev is not None and yoy is not None
-        else "代表這幾個產業在「營收年增」與「法人買超」的綜合排名居前。",
-        "；".join(leaders[:3]),
-        "熱度偏低（見 Q4）的產業。",
-        "下個月 10 日前公布的當月營收是否延續年增，以及法人買超是否連續。注意：模型分數是人工維護的種子資料，與即時熱度可能不一致，請以即時數字為準。",
+        f"{word}前五名：" + "；".join(f"#{i + 1} {_industry_phrase(r)} {r['heat']:.1f} 分" for i, r in enumerate(top)) + "。",
+        _rank_text(table),
+        (f"代表這幾個產業在綜合排名居前，但各項子分數不一定同時偏強，請看各產業數字。{ym}全市場營收 {total_rev} 兆、年增 {_sgn(yoy, 1, '%')}。"
+         if total_rev is not None and yoy is not None else "代表這幾個產業在綜合排名居前，但各項子分數不一定同時偏強。"),
+        "；".join(_industry_phrase(r) for r in top[:3]),
+        f"{word}偏低（見 Q4）的產業。",
+        "下個月 10 日前公布的當月營收是否延續年增，以及法人買超是否連續；分數每個交易日收盤後重算。",
     ]
-    basis = f"資料來源：MOPS {ym}營收（t187ap05）、證交所 T86 / 櫃買三大法人，14 個產業對照表彙總；模型分數僅供對照。"
+    basis = f"資料來源：MOPS {ym}營收（t187ap05）、證交所 T86 / 櫃買三大法人、個股收盤價與成交金額，14 個產業對照表彙總。"
     return _card(2, q, a, sub, q6, basis)
 
 
@@ -367,18 +394,21 @@ def _card_q4(d, table):
     if len(table) < 3:
         return _no_data_card(3, q, "產業營收與法人資料")
     ym = _ym_label((d.get("live_top_companies") or [{}])[0].get("data_ym"))
-    bottom = list(reversed(table[-3:]))   # 熱度最低在前
+    word = _score_word(table)
+    bottom = list(reversed(table[-3:]))   # 分數最低在前
     a = "🧊 " + "、".join(_e(r["name"]) for r in bottom)
-    sub = "；".join(f"{_e(r['name'])} 營收年增 {_sgn(r['yoy'], 1, '%')}、法人 {_lots(r['inst'])}" for r in bottom[:2])
+    sub = "；".join(f"{_e(r['name'])} 營收年增 {_sgn(r['yoy'], 1, '%')}、"
+                    + (f"法人 {_sgn(r['inst_billion'], 1)} 億" if r.get("inst_billion") is not None else f"法人 {_lots(r['inst'])}")
+                    for r in bottom[:2])
     q6 = [
-        "即時熱度最低：" + "；".join(f"{_e(r['name'])}（熱度 {r['heat']:.0f} 分、營收年增 {_sgn(r['yoy'], 1, '%')}、法人 {_lots(r['inst'])}）" for r in bottom) + "。",
-        f"這些產業的{ym}營收年增與當日法人買賣超，在 {len(table)} 個產業中排名最後。",
-        "代表營收年增與法人買盤的綜合排名落後；但營收年增只反映單月，金融、營建等產業的營收認列本來就有季節與一次性因素，不宜單看一個月。",
-        "熱度排名上升的產業（見 Q3）。",
+        f"{word}最低：" + "；".join(f"{_industry_phrase(r)} {r['heat']:.1f} 分" for r in bottom) + "。",
+        _rank_text(table),
+        "代表綜合排名落後；但營收年增只反映單月，金融、營建等產業的營收認列本來就有季節與一次性因素，不宜單看一個月。",
+        f"{word}排名上升的產業（見 Q3）。",
         "、".join(_e(r["name"]) for r in bottom),
         "下個月營收是否轉強、法人是否轉為買超；若連續兩個月都落後才較有訊號意義。",
     ]
-    basis = f"資料來源：MOPS {ym}營收、證交所 T86 / 櫃買三大法人，14 個產業對照表彙總。"
+    basis = f"資料來源：MOPS {ym}營收、證交所 T86 / 櫃買三大法人、個股收盤價與成交金額，14 個產業對照表彙總。"
     return _card(3, q, a, sub, q6, basis)
 
 
@@ -498,5 +528,28 @@ def compute_home_pulse(dash):
     return {
         "items": items,
         "flows_through": flows[-1]["date"] if flows else None,
+        "timeline_latest": _timeline_latest(items, table, flows),
         "method": "由官方 OpenAPI 即時資料機械式產生；規則與門檻見 backend/live_pulse.py。",
+    }
+
+
+def _timeline_latest(items, table, flows):
+    """熱度圖時間軸「最新」那一格的文字 (原本是手寫)；資料不足時回傳 None，前端保留舊文字並標示。"""
+    if not table or not flows:
+        return None
+    word = _score_word(table)
+    hot, cold = table[:3], list(reversed(table[-3:]))
+    by_inst = sorted((r for r in table if r.get("inst_billion") is not None), key=lambda r: -r["inst_billion"])
+    buyers = [r for r in by_inst if r["inst_billion"] > 0][:3]
+    sellers = [r for r in reversed(by_inst) if r["inst_billion"] < 0][:3]
+    fmt = lambda rs: "、".join(f"{_e(r['name'])}（{_sgn(r['inst_billion'], 1)} 億）" for r in rs) or "無"   # noqa: E731
+    d = flows[-1]["date"]
+    return {
+        "label": f"最新（{d} 盤後，即時評分）",
+        "flowSummary": f"{items[0]['a']}。{items[0]['sub']}。",
+        "hotIndustries": "、".join(f"{_e(r['name'])}（{r['heat']:.1f}）" for r in hot),
+        "coldIndustries": "、".join(f"{_e(r['name'])}（{r['heat']:.1f}）" for r in cold),
+        "rotationOrder": f"法人當日買超：{fmt(buyers)} ｜ 賣超：{fmt(sellers)}",
+        "keyEvent": f"{items[5]['a'].lstrip('⚠️🟡🟢 ')}：{items[5]['sub']}",
+        "scoreWord": word,
     }

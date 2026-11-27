@@ -83,13 +83,39 @@
 
       <!-- 四層全景桑基資金流向地圖 -->
       <div class="sankey-wrapper" id="sankeyWrapperBox">
+        <!-- 分頁：即時資金流向 (官方當日盤後資料) / 總體背景 (央行與經濟部的月資料，原本的四層全景圖) -->
+        <div id="sankeyModeBar" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+          <button id="sankeyModeLiveBtn" class="btn btn-sm btn-play" aria-pressed="true" onclick="setSankeyMode('live')">⚡ 即時資金流向（法人買賣超 → 產業）</button>
+          <button id="sankeyModeMacroBtn" class="btn btn-sm" aria-pressed="false" onclick="setSankeyMode('macro')">🏦 總體背景（月資料）</button>
+        </div>
+
+        <div id="sankeyLivePane">
+          <div class="sankey-header-bar">
+            <div>
+              <div class="panel-title">
+                <span class="badge badge-grade-A">即時</span>
+                <span>三大法人資金流向各產業</span>
+              </div>
+              <div class="panel-sub" id="liveSankeySub">載入中…</div>
+            </div>
+          </div>
+          <div class="kpi-tiles" id="liveSankeyKpis"></div>
+          <div class="sankey-stage" style="overflow-x:auto;"><div id="liveSankeyContainer"></div></div>
+          <div id="liveSankeyNote" class="callout" style="margin-top:12px; --callout-col:var(--accent-emerald);"></div>
+        </div>
+
+        <div id="sankeyMacroPane" style="display:none;">
+        <div class="callout" style="margin-bottom:14px; --callout-col:var(--accent-orange);">
+          🏦 <strong>總體背景（月資料，非即時）</strong>：下圖的銀行存款、外匯存款、放款、外銷訂單等來自央行、經濟部與 MOPS 的<strong>月統計</strong>（多數截至 2026-09 / 10），
+          流量與文字是人工整理的快照，<strong>不會隨每日同步更新</strong>。要看每天的資金動向請切換到「即時資金流向」。
+        </div>
         <div class="sankey-header-bar">
           <div>
             <div class="panel-title">
-              <span class="badge badge-grade-A">即時資金動脈</span>
+              <span class="badge badge-grade-C">月資料</span>
               <span id="sankeyMainTitle">台灣總體資金流向全景圖</span>
             </div>
-            <div class="panel-sub">2026 年 10 月 – 11 月 21 日｜流帶粗細＝資金規模，點擊流帶可釘選明細</div>
+            <div class="panel-sub">資料期間 2026 年 9～10 月（人工整理）｜流帶粗細＝資金規模，點擊流帶可釘選明細</div>
           </div>
           <div class="panel-tools">
             <select id="sankeyPeriodSelect" onchange="onSankeyPeriodChange(this.value)">
@@ -154,6 +180,7 @@
 
         <div id="sankeyAltListView" style="display:none; margin-top:12px;"></div>
         <div id="sankeyPeriodNarrative" class="callout" style="margin-top:14px; --callout-col:var(--accent-emerald);"></div>
+        </div><!-- /sankeyMacroPane -->
       </div>
 
       <!-- 產業資金熱度地圖 + 內嵌時間軸 -->
@@ -161,7 +188,7 @@
         <div class="sankey-header-bar">
           <div>
             <div class="panel-title">19 大產業板塊熱度地圖</div>
-            <div class="panel-sub">點擊板塊查看第二層分析；拖曳時間軸觀看歷史輪動</div>
+            <div class="panel-sub">點擊板塊查看第二層分析；最右側「最新」為即時評分，其餘為手寫的歷史情境回顧</div>
           </div>
           <div class="heatmap-legend">
             <span><i class="legend-dot" style="background:#10b981;"></i>加速流入 A</span>
@@ -198,7 +225,7 @@
             <span>2025 下半年<br/>水冷拐點／打房</span>
             <span>2026 上半年<br/>重電／測試崛起</span>
             <span>2026 年 8~9 月<br/>劃撥 4.7 兆創高</span>
-            <span style="color:var(--accent-emerald); font-weight:700;">2026 年 10~11 月<br/>營收 6.86 兆</span>
+            <span id="timelineLatestStep" style="color:var(--accent-emerald); font-weight:700;">最新<br/>即時評分</span>
           </div>
         </div>
 
@@ -940,5 +967,6 @@
   <script src="assets/js/20-export.js"></script>
   <script src="assets/js/21-live-backtest.js"></script>
   <script src="assets/js/22-strategy-sim.js"></script>
+  <script src="assets/js/23-live-sankey.js"></script>
 </body>
 </html>

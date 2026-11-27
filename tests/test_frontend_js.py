@@ -381,6 +381,181 @@ class TestHomePulseRender(unittest.TestCase):
         self.assertEqual(self.o["badGrid"].count("pulse-pill"), 6)
 
 
+LIVE_UI_DRIVER = r"""
+const fs = require('fs'), vm = require('vm'), path = require('path');
+const dir = process.argv[1];
+const stubs = {};
+function el(id) {
+  return stubs[id] || (stubs[id] = { id, innerHTML: '', textContent: '', style: {}, value: '5', classList: { toggle(c, on) { this['_' + c] = on; } },
+    parentNode: { insertBefore(n) { stubs[n.id] = n; } }, nextSibling: null, setAttribute(k, v) { this[k] = v; } });
+}
+const store = {};
+const ctx = {
+  console, window: {}, sessionStorage: { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = v; } },
+  document: { getElementById: el, createElement: () => ({ style: {}, setAttribute() {} }), querySelectorAll: () => [] },
+  openDrawer() {}, buildSixQuestionsHtml: () => '',
+};
+vm.createContext(ctx);
+for (const f of ['01-core.js', '06-heatmap-timeline.js', '07-leaderboards-stories.js', '23-live-sankey.js']) {
+  vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), ctx, { filename: f });
+}
+const run = code => vm.runInContext(code, ctx);
+
+const mk = (id, name, total, state, src, lm) => ({
+  industry_id: id, industry_name: name, total_weighted_score: total, rotation_state: state, score_source: src,
+  as_of_date: '2026-11-27', rev_yoy_pct: 12.3, rel_strength_20d: null, rel_strength_60d: null, representative_companies: [],
+  score_capital_flow: 40, score_fundamentals: 80, score_future_growth: 60, score_institutional: 50, score_valuation: 70,
+  live_agg: {}, live_metrics: lm,
+});
+const lm = (yoy, f, i, d, rs) => ({ yoy, cum_yoy: yoy === null ? null : yoy - 5, accel: 5, rs_pct: rs, rs_days: 5, foreign_billion: f, itc_billion: i, dealer_billion: d,
+  inst_net_billion: f + i, inst_ratio_pct: 1.2, price_coverage: 1, companies: 10, turnover_billion: 100 });
+const inds = [
+  mk('IND_SEMI_FOUNDRY', '半導體－晶圓代工', 77.3, 'A', 'live', lm(80, 10, 5, 0, 3)),
+  mk('IND_AI_SERVER', '<img src=x onerror=alert(1)>', 60.1, 'B', 'live', lm(50, -20, 1, 0, -1)),
+  mk('IND_THERMAL', '散熱', 50.0, 'C', 'live', lm(30, 2, 2, 0, 0.5)),
+  mk('IND_IC_DESIGN', 'IC設計', 45.0, 'C', 'live', lm(40, 0, 0, 0, null)),
+  mk('IND_SHIPPING', '航運', 35.0, 'D', 'live', lm(null, -3, -1, 0, -2)),
+  mk('IND_FIN_HOLDING', '金融', 28.3, 'E', 'live', lm(-50, -11, 0, 0, -6)),
+];
+const out = {};
+
+// 1. 熱度圖：即時分數
+ctx.__inds = inds;
+run("STATE = { industries: __inds, live_top_companies: [{ data_ym: '11510' }], live_sankey: { as_of: '2026-11-27' } }");
+run("renderIndustryHeatmap()");
+out.liveTiles = el('industryHeatmapGrid').innerHTML;
+out.liveNote = el('heatmapSourceNote').textContent;
+
+// 2. 歷史情境：不得把現在的分數配上手寫的歷史顏色
+el('timelineRangeInput').value = '3';
+run("renderIndustryHeatmap({ IND_SEMI_FOUNDRY: 'D' })");
+out.histTiles = el('industryHeatmapGrid').innerHTML;
+out.histNote = el('heatmapSourceNote').textContent;
+el('timelineRangeInput').value = '5';
+
+// 3. 種子分數 (沒有 live_metrics)：維持 20 日相對強弱，且 null 不可顯示成 +null
+ctx.__seed = inds.map(i => ({ ...i, score_source: 'seed', live_metrics: null }));
+run("STATE = { industries: __seed }");
+run("renderIndustryHeatmap()");
+out.seedTiles = el('industryHeatmapGrid').innerHTML;
+out.seedNote = el('heatmapSourceNote').textContent;
+
+// 4. 排行榜
+run("STATE = { industries: __inds, live_top_companies: [{ data_ym: '11510' }], live_sankey: { as_of: '2026-11-27' } }");
+run("renderSixLeaderboards()");
+out.boards = el('sixLeaderboardsGrid').innerHTML;
+out.boardsNote = el('sixBoardsNote').textContent;
+run("STATE = { industries: __seed }");
+run("renderSixLeaderboards()");
+out.staticBoards = el('sixLeaderboardsGrid').innerHTML;
+out.staticBoardsNote = el('sixBoardsNote').textContent;
+
+// 5. 即時桑基
+ctx.__ls = {
+  available: true, as_of: '2026-11-27', unit: '億元', note: '近似說明',
+  institutions: [{ key: 'foreign', label: '外資', buy: 10, sell: 31, net: -21 }, { key: 'itc', label: '投信', buy: 6, sell: 0, net: 6 }, { key: 'dealer', label: '自營商', buy: 0, sell: 0, net: 0 }],
+  industries: [
+    { id: 'A', name: '產業甲、其他', flows: { foreign: 10, itc: 5, dealer: 0 }, net: 15, buy: 15, sell: 0, turnover: 100, coverage: 1, companies: 5 },
+    { id: 'B', name: '<b>乙</b>', flows: { foreign: -31, itc: 1, dealer: 0 }, net: -30, buy: 1, sell: 31, turnover: 200, coverage: 0.9, companies: 5 },
+  ],
+};
+run("STATE = { live_sankey: __ls }");
+run("initSankeyMode()");
+out.sankeyHtml = el('liveSankeyContainer').innerHTML;
+out.sankeyKpi = el('liveSankeyKpis').innerHTML;
+out.sankeyMode1 = { live: el('sankeyLivePane').style.display, macro: el('sankeyMacroPane').style.display, saved: store.twfin_sankey_mode };
+run("setSankeyMode('macro')");
+out.sankeyMode2 = { live: el('sankeyLivePane').style.display, macro: el('sankeyMacroPane').style.display, saved: store.twfin_sankey_mode };
+// 沒有即時資料 → 預設顯示總體背景，且圖區有明確提示
+for (const k of Object.keys(store)) delete store[k];
+run("STATE = { live_sankey: { available: false, industries: [] } }");
+run("initSankeyMode()");
+out.noLive = { html: el('liveSankeyContainer').innerHTML, mode: run('SANKEY_MODE'), macro: el('sankeyMacroPane').style.display };
+console.log(JSON.stringify(out));
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過即時畫面渲染測試")
+class TestLiveHeatmapBoardsAndSankey(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", LIVE_UI_DRIVER, JS_DIR], capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    # --- 熱度圖 ---
+    def test_live_tiles_show_live_score_and_relative_strength(self):
+        t = self.o["liveTiles"]
+        first = t.split('class="heat-tile')[1]                   # 第一個方塊 = 有即時指標的晶圓代工
+        self.assertIn("77.3 分", first)
+        self.assertIn("近 5 日相對大盤", first)
+        self.assertNotIn("20 日相對強弱", first)
+        self.assertIn("2026年10月 營收 YoY", first)
+        self.assertIn("+3%", first)                              # 即時的相對強弱數字，不是舊的種子值
+        self.assertIn("分數由官方即時資料重算", self.o["liveNote"])
+
+    def test_missing_values_render_as_na_not_null(self):
+        for html in (self.o["liveTiles"], self.o["seedTiles"]):
+            self.assertNotIn("null", html)
+            self.assertNotIn("undefined", html)
+            self.assertNotIn("NaN", html)
+        self.assertIn("N/A", self.o["liveTiles"])        # 航運的營收年增、IC 設計的相對強弱為空
+
+    def test_history_period_does_not_pair_old_colors_with_current_scores(self):
+        self.assertNotIn("77.3 分", self.o["histTiles"])
+        self.assertIn("歷史情境", self.o["histTiles"])
+        self.assertIn("歷史情境", self.o["histNote"])
+
+    def test_seed_snapshot_is_labelled_as_not_updating(self):
+        self.assertIn("20 日相對強弱", self.o["seedTiles"])
+        self.assertIn("種子值", self.o["seedNote"])
+
+    # --- 排行榜 ---
+    def test_live_boards_have_no_hardcoded_scores_and_escape_names(self):
+        b = self.o["boards"]
+        self.assertEqual(b.count("lb-card"), 6)
+        self.assertNotIn("88.4", b)
+        self.assertNotIn("<img", b)                      # 產業名稱是動態文字，必須跳脫
+        self.assertIn("&lt;img", b)
+        self.assertIn("即時資料產生", self.o["boardsNote"])
+
+    def test_live_boards_rank_by_the_right_quantity(self):
+        b = self.o["boards"]
+        # 第 6 榜 (即時評分最低)：金融 28.3 要出現在航運 35.0 之前
+        board6 = b.split("6. ")[1]
+        self.assertLess(board6.index("金融"), board6.index("航運"))
+        # 第 1 榜只列「淨買超」的產業：金融 (淨賣) 不可在第 1 榜
+        board1 = b.split("1. ")[1].split("2. ")[0]
+        self.assertNotIn("金融", board1)
+        self.assertIn("半導體", board1)
+
+    def test_old_snapshot_falls_back_to_static_boards_with_warning(self):
+        self.assertEqual(self.o["staticBoards"].count("lb-card"), 6)
+        self.assertIn("不會隨資料更新", self.o["staticBoardsNote"])
+
+    # --- 即時桑基 ---
+    def test_sankey_draws_one_ribbon_per_nonzero_flow_and_escapes(self):
+        h = self.o["sankeyHtml"]
+        self.assertEqual(h.count('class="ls-rib"'), 4)            # 甲: 外資買、投信買；乙: 外資賣、投信買 (自營商皆 0)
+        self.assertNotIn("<b>", h)
+        self.assertIn("&lt;b&gt;乙&lt;/b&gt;", h)
+        self.assertIn("外資 買超", h)
+        self.assertIn("外資 賣超", h)
+        self.assertNotIn("NaN", h)
+        self.assertIn("−21", self.o["sankeyKpi"])                  # 外資淨賣用真正的負號顯示
+
+    def test_sankey_mode_switch_and_default(self):
+        self.assertEqual(self.o["sankeyMode1"], {"live": "block", "macro": "none", "saved": "live"})
+        self.assertEqual(self.o["sankeyMode2"], {"live": "none", "macro": "block", "saved": "macro"})
+
+    def test_sankey_without_live_data_shows_notice_and_macro_pane(self):
+        n = self.o["noLive"]
+        self.assertIn("沒有即時", n["html"])
+        self.assertEqual(n["mode"], "macro")
+        self.assertEqual(n["macro"], "block")
+
+
 class TestInlineHandlersDefined(unittest.TestCase):
     ALLOWED = {"alert", "confirm", "parseInt", "parseFloat", "String", "Number", "Boolean"}
 

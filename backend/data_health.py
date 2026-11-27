@@ -25,6 +25,8 @@ SOURCES = {
     "tpex_3i":   ("上櫃三大法人個股買賣超", True, False),
     "mi_index":  ("大盤與類股指數 (MI_INDEX)", True, False),
     "bfi82u":    ("三大法人買賣金額統計 (BFI82U)", True, False),
+    "twse_quotes": ("上市個股每日收盤行情 (MI_INDEX ALLBUT0999)", True, False),
+    "tpex_quotes": ("上櫃個股每日收盤行情", True, False),
 }
 CRITICAL_SOURCES = tuple(k for k, v in SOURCES.items() if v[2])
 

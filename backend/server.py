@@ -25,6 +25,7 @@ from history import history_summary
 from backtest import compute_live_backtest
 from strategy_sim import compute_strategy_sim
 from live_pulse import compute_home_pulse
+from live_scoring import compute_industry_metrics, flow_matrix, load_inputs as load_scoring_inputs
 from snapshot_bundle import inline_snapshot
 from scoring import (
     DEFAULT_THRESHOLDS,
@@ -71,9 +72,13 @@ KEEP_SCORE_VERSIONS = 20
 
 # 各區塊資料來源分類 (顯示於前端「即時 / 種子」標示)
 LIVE_SECTIONS = ["上市櫃月營收與估值 (MOPS/TWSE/TPEx)", "三大法人個股買賣超", "大盤與類股指數", "ETF 每日行情",
+                 "個股收盤價與成交金額 (TWSE/TPEx)",
+                 "產業輪動評分與狀態 (5 項子分數由即時資料重算)", "即時資金流向桑基圖 (法人買賣金額 → 產業)",
+                 "首頁 Q1~Q6 摘要、板塊熱度圖與六大排行榜",
                  "前瞻追蹤回測 (每日評分快照 × 類股報酬指數)", "規則模擬器 (固定規則 × 類股報酬指數)"]
-SEED_SECTIONS = ["總體經濟指標", "資產配置流向矩陣", "產業輪動子分數", "趨勢預警訊號", "個股研究名單",
-                 "情境分析", "舊版示範回測 (手寫數據，非實測)", "固定研究報告", "ETF 持股／配息／回測", "AI 研究團隊 (規則式模擬)"]
+SEED_SECTIONS = ["總體經濟指標", "資產配置流向矩陣 (總體背景桑基圖)", "趨勢預警訊號 (文字)", "個股研究名單",
+                 "情境分析", "舊版示範回測 (手寫數據，非實測)", "固定研究報告", "ETF 持股／配息／回測", "AI 研究團隊 (規則式模擬)",
+                 "趨勢故事 (依撰稿日期的敘事文章)", "熱度圖時間軸前 5 格 (歷史情境回顧)"]
 
 
 class AuthError(Exception):
@@ -323,6 +328,16 @@ def _build_dashboard_base():
     for ind in industries:
         ind["live_agg"] = live_industry_agg.get(ind["industry_id"], {})
 
+    # 即時指標 (法人買賣「金額」、成交值、PEG 代理、相對強弱…)：與評分用同一份計算，畫面與分數永遠對得上
+    try:
+        _comps, _turn, _rr, _info = load_scoring_inputs(conn)
+        live_metrics = compute_industry_metrics(_comps, _turn, _rr)
+    except Exception:  # noqa: BLE001 — 舊資料庫沒有收盤價表等情況：不影響其他區塊
+        logger.exception("即時產業指標計算失敗")
+        live_metrics, _info = {}, {}
+    for ind in industries:
+        ind["live_metrics"] = live_metrics.get(ind["industry_id"])
+
     cur.execute("""
         SELECT company_code, company_name, market_type, official_industry, mapped_industry_id,
                data_ym, report_date, ROUND(rev_current_thousand/1e5, 2) AS rev_billion,
@@ -450,6 +465,9 @@ def _build_dashboard_base():
     }
     # 首頁 Q1~Q6 摘要卡：由上面的即時欄位機械式產生 (不含手寫敘事)，一併進快照
     payload["home_pulse"] = compute_home_pulse(payload)
+    # 即時資金流向桑基圖：外資／投信／自營商 → 各產業的淨買賣金額 (億元)
+    payload["live_sankey"] = flow_matrix(live_metrics, {i["industry_id"]: i["industry_name"] for i in industries},
+                                         _info.get("insti_date"))
     return payload
 
 def _next_model_version(cur):

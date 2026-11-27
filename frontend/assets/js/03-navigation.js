@@ -350,6 +350,7 @@ function renderAll() {
   renderTenSecPulse();
   renderEightVitalCards();
   renderSankeyDiagram(parseInt(document.getElementById('sankeyPeriodSelect').value || '4', 10));
+  initSankeyMode();
   renderIndustryHeatmap();
   onTimelineSliderInput(document.getElementById('timelineRangeInput').value || 5);
   renderSixLeaderboards();
