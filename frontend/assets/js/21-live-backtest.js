@@ -74,6 +74,7 @@ function renderLiveBacktest() {
         </div>
         ${statusBadge}
       </div>
+      ${snapshotCompositionHtml(lb.snapshot_sources)}
       <div style="margin:10px 0;">${progress}</div>
       ${emptyState}
       ${results}

@@ -18,8 +18,10 @@
   * 高低分價差：總分前 3 名與後 3 名的平均超額報酬差。
 - 樣本不足 (成熟訊號 < 30 筆或 IC 日數 < 20 天) 時照實標示，不當成結論。
 
-只採用 score_source='live' 的快照 (見 history.py、live_scoring.py)：改為即時評分之前的快照用的是手寫種子分數，
-拿來「驗證」沒有意義，所以不納入；樣本從第一個即時快照日開始累積。
+快照組成 (score_source，見 history.py、live_scoring.py)：改為即時評分之前的快照 ('seed') 的營收與法人「輸入」是官方資料，
+但 5 項子分數是內建的種子值；之後的快照 ('live') 的子分數由官方資料每日重算。兩者都是「當時就記下」的紀錄 (沒有偷看之後的行情)，
+所以都納入前瞻追蹤，但兩種分數的尺度與方法不同，結果會混合兩種模型 — 結果中的 snapshot_sources 列出每個快照日用的是哪一種，
+畫面會顯示，讓使用者自己判斷。
 
 限制：產業與類股指數只是近似對應 (見 INDUSTRY_INDEX_MAP)；5 項子分數皆為代理指標，
 所以這主要在檢驗「目前這組排名」的持續性；相鄰快照日的報酬區間重疊，有效樣本比筆數少。
@@ -60,7 +62,9 @@ CAVEATS = [
     "只統計快照日「之後」實際發生的行情 (前瞻追蹤)；模型分數的歷史無法事後重建，因此不提供事後回測。",
     "進場為快照日之後第一個交易日的收盤，報酬為相對加權報酬指數的超額報酬，且使用含息的報酬指數。",
     "產業與類股指數只是近似對應，題材型產業 (散熱、CPO 等) 沒有專屬指數。",
-    "只統計即時評分 (官方資料重算) 的快照；5 項子分數都是代理指標；相鄰快照日的報酬區間重疊，有效樣本比筆數少。",
+    "快照由兩種分數組成：開始即時評分之前的快照 (營收與法人輸入是官方資料，但 5 項子分數是內建種子值) 與之後的即時評分快照 (子分數由官方資料重算)；"
+    "兩者的分數尺度與方法不同，統計結果混合兩種模型，請看「快照組成」。",
+    "5 項子分數都是代理指標；相鄰快照日的報酬區間重疊，有效樣本比筆數少。",
     "成熟訊號少於 30 筆或快照日少於 20 天時，數字只供觀察，不是結論。",
 ]
 
@@ -214,7 +218,6 @@ def load_inputs(conn):
             SELECT h.*, t.industry_name FROM industry_score_history h
             LEFT JOIN industry_taxonomy t ON t.industry_id = h.industry_id
             WHERE h.model_version = ? AND h.total_weighted_score IS NOT NULL
-              AND h.score_source = 'live'   -- 種子分數不是預測：只採用由官方即時資料算出的快照
             ORDER BY h.snapshot_date
         """, (model["version_id"],))
         rows = [dict(r) for r in cur.fetchall()]
@@ -228,13 +231,22 @@ def load_inputs(conn):
             continue
         level = r.get("alert_level") or classify_alert_level(r["total_weighted_score"], r["score_capital_flow"], th)
         snapshots.append({"snapshot_date": d, "industry_id": r["industry_id"], "industry_name": r.get("industry_name"),
-                          "total": r["total_weighted_score"], "level": level})
+                          "total": r["total_weighted_score"], "level": level, "source": r.get("score_source") or "seed"})
 
     names = sorted(set(INDUSTRY_INDEX_MAP.values()) | {BENCHMARK_INDEX})
     series_all = _load_series(cur, names)
     bench = series_all.get(BENCHMARK_INDEX, {})
     series_by_industry = {iid: series_all.get(idx, {}) for iid, idx in INDUSTRY_INDEX_MAP.items()}
     return model, snapshots, series_by_industry, bench
+
+
+def snapshot_sources(snapshots):
+    """每個快照日用的分數來源：{'seed': [ISO 日期...], 'live': [ISO 日期...]}。同一天若同時有兩種 (例如同日重跑)，以 live 為準。"""
+    by_day = {}
+    for s in snapshots:
+        d = s["snapshot_date"].isoformat()
+        by_day[d] = "live" if (by_day.get(d) == "live" or s.get("source") == "live") else "seed"
+    return {"seed": sorted(d for d, v in by_day.items() if v == "seed"), "live": sorted(d for d, v in by_day.items() if v == "live")}
 
 
 def compute_live_backtest(conn):
@@ -266,6 +278,7 @@ def compute_live_backtest(conn):
         "available": True,
         "model_version": model["version_id"],
         "snapshot_days": len(snap_dates),
+        "snapshot_sources": snapshot_sources(snapshots),
         "first_snapshot": first.isoformat() if first else None,
         "last_snapshot": snap_dates[-1].isoformat() if snap_dates else None,
         "index_last_date": index_dates[-1].isoformat() if index_dates else None,

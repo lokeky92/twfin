@@ -34,7 +34,8 @@ CAVEATS = [
     "只統計決策日之後實際發生的行情；決策日是每週最後一個快照日，隔天收盤進場。",
     "每次調整依買進與賣出成交金額扣單邊成本 0.2% (手續費、證交稅與滑價的保守估計)。",
     "使用含息的類股報酬指數，指數本身不能直接買進，實務上要用 ETF 或個股近似，會有追蹤誤差與溢價折價。",
-    "快照分數由官方即時資料每日重算 (5 項子分數皆為代理指標，且是相對其他產業的百分位)；分數變動會讓規則 A 與 B 的持股隨之調整，績效差異同時反映選股規則與產業本身的行情。",
+    "快照由兩種分數組成：開始即時評分之前的快照 (營收與法人輸入是官方資料，但 5 項子分數是內建種子值) 與之後的即時評分快照 (5 項子分數皆為代理指標，且是相對其他產業的百分位)；"
+    "兩者尺度不同，規則 A 與 B 的持股會隨分數來源改變，績效差異同時反映選股規則、分數來源與產業本身的行情，請看「快照組成」。",
     "期數少於 26 週時，績效數字只供觀察，不是結論；這只是檢驗規則，不是買賣建議。",
 ]
 
@@ -192,7 +193,8 @@ def compute_strategy_sim(conn):
             holdings_now[key] = {"decision_date": T.isoformat(), "entry_date": entry.isoformat(), "weights": w}
         schedules["equal"].append((entry, rule_equal_weight_all(rows)))
 
-    out = {**base, "available": True, "snapshot_days": len(by_date),
+    from backtest import snapshot_sources
+    out = {**base, "available": True, "snapshot_days": len(by_date), "snapshot_sources": snapshot_sources(snapshots),
            "decision_dates": [d.isoformat() for d in decisions],
            "current_week_pending": bool(by_date),
            "first_entry": None, "last_date": dates[-1].isoformat() if dates else None,

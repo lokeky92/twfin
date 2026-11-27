@@ -816,6 +816,42 @@ class TestMultiAgentUi(unittest.TestCase):
         self.assertTrue(self.o["handSim"])
 
 
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過快照組成說明測試")
+class TestSnapshotCompositionNote(unittest.TestCase):
+    DRIVER = r"""
+const fs = require('fs'), vm = require('vm'), path = require('path');
+const ctx = { console, window: {}, document: { getElementById: () => null, createElement: () => ({ style: {} }) } };
+vm.createContext(ctx);
+vm.runInContext(fs.readFileSync(path.join(process.argv[1], '01-core.js'), 'utf8'), ctx);
+const run = c => vm.runInContext(c, ctx);
+console.log(JSON.stringify({
+  mixed: run("snapshotCompositionHtml({ seed: ['2026-11-25', '2026-11-26'], live: ['2026-11-27'] })"),
+  empty: run("snapshotCompositionHtml(null)"),
+  liveOnly: run("snapshotCompositionHtml({ seed: [], live: ['2026-11-27'] })"),
+  escaped: run("snapshotCompositionHtml({ seed: ['<b>x</b>'], live: [] })"),
+}));
+"""
+
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", cls.DRIVER, JS_DIR], capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    def test_mixed_composition_names_each_group_and_discloses_the_difference(self):
+        h = self.o["mixed"]
+        self.assertIn("舊模型 2 天（11-25、11-26", h)
+        self.assertIn("即時評分 1 天（11-27", h)
+        self.assertIn("內建種子值", h)
+        self.assertIn("尺度與方法不同", h)
+
+    def test_missing_data_renders_nothing_and_values_are_escaped(self):
+        self.assertEqual(self.o["empty"], "")
+        self.assertIn("舊模型 0 天（無", self.o["liveOnly"])
+        self.assertNotIn("<b>", self.o["escaped"])
+
+
 class TestInlineHandlersDefined(unittest.TestCase):
     ALLOWED = {"alert", "confirm", "parseInt", "parseFloat", "String", "Number", "Boolean"}
 

@@ -19,6 +19,16 @@ function setSourceNote(anchorId, noteId, text) {
   note.textContent = text;
 }
 
+// 前瞻追蹤用的「快照組成」說明：哪幾天用內建種子子分數、哪幾天用即時評分 (兩者尺度不同，結果混合兩種模型)
+function snapshotCompositionHtml(src) {
+  if (!src) return '';
+  const seed = src.seed || [], live = src.live || [];
+  const fmt = (a) => a.length ? a.map(d => esc(d.slice(5))).join('、') : '無';
+  return `<div class="callout" style="margin:8px 0; --callout-col:var(--accent-orange); font-size:12.5px;">
+    <strong>快照組成</strong>：舊模型 ${seed.length} 天（${fmt(seed)}：營收與法人輸入是官方資料，但 5 項子分數是內建種子值）＋ 即時評分 ${live.length} 天（${fmt(live)}：子分數由官方資料每日重算）。
+    兩種分數的尺度與方法不同，下方統計混合了兩種模型，請自行判斷；之後新增的快照都是即時評分。</div>`;
+}
+
 // ---- 安全性工具 ----
 // 將任意值轉為可安全插入 innerHTML 的字串（防止儲存型 XSS）
 function esc(value) {

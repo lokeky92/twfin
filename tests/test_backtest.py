@@ -207,26 +207,39 @@ class TestDatabaseIntegration(unittest.TestCase):
         self.assertEqual([h["matured_signals"] for h in r["horizon_results"]], [0, 0, 0])
         self.assertEqual(len(r["caveats"]), len(bt.CAVEATS))
 
-    def test_seed_sourced_snapshots_are_not_used_as_predictions(self):
-        """手寫種子分數的快照不是「預測」，不能進入回測；改成即時評分之前的快照也一樣被排除。"""
+    def test_seed_and_live_snapshots_are_both_counted_and_the_mix_is_disclosed(self):
+        """開始即時評分之前的快照 (輸入是官方資料、子分數是種子) 也是「當時就記下」的紀錄，納入前瞻追蹤；但必須揭露每個快照日的分數來源。"""
         conn = db.get_connection()
         conn.execute("UPDATE industry_rotation_scores SET score_source = 'seed'")
         conn.commit()
         conn.close()
         try:
             snapshot_industry_scores(DAYS[2].isoformat())
+            snapshot_industry_scores(DAYS[3].isoformat())
             conn = db.get_connection()
-            sources = {r[0] for r in conn.execute("SELECT DISTINCT score_source FROM industry_score_history")}
-            self.assertEqual(sources, {"seed"})                       # 快照有記下來源
+            conn.execute("UPDATE industry_rotation_scores SET score_source = 'live'")
+            conn.commit()
+            conn.close()
+            snapshot_industry_scores(DAYS[4].isoformat())
+            conn = db.get_connection()
             r = bt.compute_live_backtest(conn)
             conn.close()
-            self.assertEqual(r["snapshot_days"], 0)                    # 但回測不採用
-            self.assertFalse(r["any_matured"])
+            self.assertEqual(r["snapshot_days"], 3)                                  # 種子快照也算
+            self.assertEqual(r["snapshot_sources"]["seed"], [DAYS[2].isoformat(), DAYS[3].isoformat()])
+            self.assertEqual(r["snapshot_sources"]["live"], [DAYS[4].isoformat()])
+            self.assertTrue(any("兩種分數" in c for c in r["caveats"]))             # 方法與限制裡有說明
         finally:
             conn = db.get_connection()
             conn.execute("UPDATE industry_rotation_scores SET score_source = 'live'")
             conn.commit()
             conn.close()
+
+    def test_same_day_rerun_as_live_overrides_the_seed_label(self):
+        self.assertEqual(bt.snapshot_sources([{"snapshot_date": date(2026, 11, 27), "source": "seed"},
+                                              {"snapshot_date": date(2026, 11, 27), "source": "live"},
+                                              {"snapshot_date": date(2026, 11, 26), "source": "seed"}]),
+                         {"seed": ["2026-11-26"], "live": ["2026-11-27"]})
+        self.assertEqual(bt.snapshot_sources([]), {"seed": [], "live": []})
 
     def test_snapshot_records_alert_level_and_feeds_the_backtest(self):
         snap_day = DAYS[2]

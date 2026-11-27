@@ -51,13 +51,14 @@ function renderStrategySim() {
       ? '<span class="badge badge-grade-B">樣本已達標</span>'
       : `<span class="badge badge-grade-C">樣本不足：${ss.max_complete_periods} / ${p.min_periods} 週</span>`;
 
-  const emptyState = started ? '' : `
+  const comp = snapshotCompositionHtml(ss.snapshot_sources);
+  const emptyState = comp + (started ? '' : `
     <div class="evidence-box" style="margin:10px 0;">
       目前沒有任何績效數字，這是刻意的。規則只會在「每個已結束的週」最後一個快照日做決策，隔個交易日收盤進場，
       所以要累積到至少一個完整的週之後才會有第一次調整，之後每週再多一期。
       已累積 ${ss.snapshot_days} 個快照日${ss.decision_dates.length ? `，已結算 ${ss.decision_dates.length} 週` : ''}。
       統計上有意義的結論通常要累積半年 (26 週) 以上。
-    </div>`;
+    </div>`);
 
   const rows = (ss.strategies || []).map(s => `<tr>
       <td style="min-width:240px;"><span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:${STRATEGY_COLORS[s.key]}; margin-right:6px;"></span>
