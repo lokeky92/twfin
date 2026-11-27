@@ -765,6 +765,57 @@ class TestEtfUiHelpers(unittest.TestCase):
         self.assertNotIn("NaN", h)
 
 
+MA_UI_DRIVER = r"""
+const fs = require('fs'), vm = require('vm'), path = require('path');
+const dir = process.argv[1];
+const stubs = {};
+function el(id) {
+  return stubs[id] || (stubs[id] = { id, innerHTML: '', textContent: '', style: {}, value: '', classList: { add() {}, remove() {}, toggle() {} },
+    parentNode: { insertBefore() {} }, querySelectorAll: () => [] });
+}
+const store = {};
+const ctx = { console, window: { addEventListener() {} }, localStorage: { getItem: k => store[k] || null, setItem: (k, v) => { store[k] = v; } },
+  document: { getElementById: el, createElement: () => ({ style: {} }), querySelectorAll: () => [], addEventListener() {} },
+  alert() {}, apiPost: async () => { throw new Error('no api'); } };
+vm.createContext(ctx);
+for (const f of ['01-core.js', '16-multi-agent.js']) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), ctx, { filename: f });
+const run = c => vm.runInContext(c, ctx);
+const rpt = id => ({ agent_name: id, data_timestamp_used: 't', current_system_problems: '<script>x</script>', research_evidence: 'e', identified_defects: 'd',
+  improvement_suggestions: 's', expected_effects: 'x', potential_risks: 'r' });
+const mk = origin => ({ session_id: 'SESSION-LIVE-1', origin, started_at: '2026-11-27T22:00:00+08:00', topic: 't',
+  phase2_independent_reports: Object.fromEntries(['AGENT_01', 'AGENT_02', 'AGENT_03', 'AGENT_04', 'AGENT_05', 'AGENT_06'].map(a => [a, rpt(a)])),
+  phase3_cross_reviews: [{ reviewer_id: 'AGENT_01', target_agent_id: 'AGENT_02', review_stance: '<b>支持</b>', comment: '<img src=x onerror=alert(1)>' }],
+  phase4_rebuttals: [], phase5_synthesis: {}, phase6_proposals: [] });
+const out = {};
+ctx.__live = mk('live_audit');
+run("STATE = { multi_agent_center: __live }");
+const before = JSON.stringify(ctx.__live.phase2_independent_reports.AGENT_01);
+out.guard = run("runCloudClientMultiAgentSession('主題')");                          // 真實稽核存在時，瀏覽器不可再用假資料覆蓋
+out.unchanged = JSON.stringify(run("STATE.multi_agent_center").phase2_independent_reports.AGENT_01) === before;
+ctx.__hand = mk('handwritten');
+run("STATE = { multi_agent_center: __hand, generated_at: 'G', etf_center: { etfs: [] }, industries: [], live_summary: {} }");
+out.handSim = run("runCloudClientMultiAgentSession('主題')");                         // 手寫記錄時維持原行為
+console.log(JSON.stringify(out));
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過多代理畫面測試")
+class TestMultiAgentUi(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", MA_UI_DRIVER, JS_DIR], capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    def test_browser_simulation_never_overwrites_a_real_audit(self):
+        self.assertFalse(self.o["guard"])
+        self.assertTrue(self.o["unchanged"])
+
+    def test_handwritten_record_keeps_previous_behaviour(self):
+        self.assertTrue(self.o["handSim"])
+
+
 class TestInlineHandlersDefined(unittest.TestCase):
     ALLOWED = {"alert", "confirm", "parseInt", "parseFloat", "String", "Number", "Boolean"}
 

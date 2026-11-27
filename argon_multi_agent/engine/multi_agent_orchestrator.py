@@ -1031,15 +1031,40 @@ def reconcile_proposals(dry_run=False):
     return report
 
 
+LEGACY_SESSION_ID = "SESSION-20261122-001"
+
+
+def _latest_history_file():
+    """最新的研究記錄：優先採用排程產生的即時稽核 (SESSION-LIVE-*，檔名含時間，最後一個最新)；沒有時才用舊的手寫記錄。"""
+    hist = os.path.join(MA_ROOT, "research", "history")
+    # safe_write_ma_file 在 Windows 會把路徑 normcase 成小寫，所以檔名比對必須不分大小寫
+    live = sorted((f for f in os.listdir(hist) if f.lower().startswith("session-live-") and f.lower().endswith("_full_record.json")),
+                  key=str.lower) if os.path.isdir(hist) else []
+    if live:
+        return os.path.join(hist, live[-1])
+    return os.path.join(hist, f"{LEGACY_SESSION_ID}_full_record.json")
+
+
+def current_session_id():
+    """最新研究記錄的 session_id (讀檔案內容的原始值；檔名在 Windows 會被小寫化)。"""
+    path = _latest_history_file()
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)["session_id"]
+    except (OSError, ValueError, KeyError):
+        return os.path.basename(path).replace("_full_record.json", "")
+
+
 def get_multi_agent_state():
     """讀取 argon_multi_agent/ 目錄下最新研究 Session、提案狀態與設定，供前端管理介面與 CLI 查詢"""
     ensure_ma_directories()
-    hist_file = os.path.join(MA_ROOT, "research", "history", "SESSION-20261122-001_full_record.json")
+    hist_file = _latest_history_file()
     if not os.path.exists(hist_file):
         run_full_multi_agent_session()
 
     with open(hist_file, "r", encoding="utf-8") as f:
         bundle = json.load(f)
+    bundle.setdefault("origin", "handwritten")      # 舊的固定記錄是手寫的；即時稽核會自己標 live_audit
 
     bundle["phase6_proposals"] = list_proposals()
     return bundle
@@ -1087,7 +1112,7 @@ def update_proposal_approval_status(proposal_id, decision, user_note=""):
             if os.path.exists(path):
                 os.remove(path)
 
-    log_agent_activity("SESSION-20261122-001", "USER_APPROVER", "APPROVAL_GATE", f"提案 {proposal_id} 狀態更新為 {new_status} ({user_note})")
+    log_agent_activity(current_session_id(), "USER_APPROVER", "APPROVAL_GATE", f"提案 {proposal_id} 狀態更新為 {new_status} ({user_note})")
     return obj
 
 

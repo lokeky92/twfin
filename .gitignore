@@ -13,3 +13,12 @@ data/*.db
 data/*.db-journal
 # 舊版建置產物 (已改為只輸出 docs/index.html)
 frontend/twfin_dashboard_standalone.html
+
+# 多代理即時稽核每次同步都會產生新的研究紀錄與提案 (舊的手寫紀錄仍在版本控制內)。
+# 若要保存某次的人工決定，可用 git add -f 單獨加入。
+argon_multi_agent/research/history/SESSION-LIVE-*
+argon_multi_agent/research/completed/SESSION-LIVE-*
+argon_multi_agent/discussions/debate_records/SESSION-LIVE-*
+argon_multi_agent/evaluations/*/SESSION-LIVE-*
+argon_multi_agent/logs/agent_logs/SESSION-LIVE-*
+argon_multi_agent/proposals/*/LIVE-IMPROVE-*

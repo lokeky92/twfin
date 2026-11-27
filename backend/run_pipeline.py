@@ -72,6 +72,12 @@ def main():
         print("Live OpenAPI Ingestion:", live_res)
         build_and_compute_etf_center(shared_insti_map=shared_map)
         print("Live ETF (TW):", apply_live_etf())
+        try:      # 多代理即時稽核 (唯讀資料庫)；失敗只記錄，不讓整個同步失敗
+            from argon_multi_agent.engine.live_audit_session import run_live_audit_session
+            _b = run_live_audit_session()
+            print("Live audit session:", _b["session_id"], "integrity:", _b["production_integrity_verified"], "proposals:", len(_b["phase6_proposals"]))
+        except Exception as _e:  # noqa: BLE001
+            print(f"::warning title=多代理即時稽核失敗::{type(_e).__name__}: {_e}")
         print("Live industry scoring:", apply_live_scoring())
         print(f"Industry score snapshot rows: {snapshot_industry_scores()}")
         print("Live watchlist:", apply_live_watchlist())

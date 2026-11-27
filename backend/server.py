@@ -52,6 +52,7 @@ from argon_multi_agent.engine.multi_agent_orchestrator import (
     update_proposal_approval_status,
     InvalidProposalTransition,
 )
+from argon_multi_agent.engine.live_audit_session import run_live_audit_session
 
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
 
@@ -928,7 +929,7 @@ def _handle_proposal_decision(payload):
 def _handle_run_session(payload):
     topic = str(payload.get("topic") or "台美 ETF 雙軌評分模型、跨時區數據品質、跨國持股穿透重疊與系統架構全面體檢").strip()[:200]
     mode = str(payload.get("trigger_mode", "MANUAL_START")).strip()[:50]
-    bundle = run_full_multi_agent_session(topic=topic, trigger_mode=mode)
+    bundle = run_live_audit_session(topic=topic, trigger_mode=mode)     # 以即時資料稽核 (舊的手寫研究記錄已不再重新產生)
     return {"status": "ok", "multi_agent_center": bundle}
 
 
