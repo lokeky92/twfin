@@ -127,6 +127,8 @@ function openPulseDrawer(idx) {
    2. 渲染八大台灣資金總覽卡片 (8 Macro & Asset Vital Cards)
    ========================================================================= */
 function renderEightVitalCards() {
+  setSourceNote('eightVitalCardsGrid', 'eightVitalSourceNote',
+    'ℹ️ 八大資金池的數字來自央行、主計總處、經濟部與 MOPS 的月／季統計與人工整理（多數截至 2026-09 / 10），沒有每日的官方來源，不會隨每日同步更新；每日的資金動向請看上方「即時資金流向」與下方各即時區塊。');
   const s = STATE.live_summary || { total_companies: 1989, total_rev_trillion: 6.8635, total_yoy_pct: 45.49 };
   const cards = [
     {

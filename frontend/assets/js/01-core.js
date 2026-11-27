@@ -4,6 +4,21 @@ let REDUCED_MOTION = false;
 let SANKEY_TIMER = null;
 let TIMELINE_TIMER = null;
 
+// 在某個容器上方放一行「資料來源說明」(即時 / 手寫 / 月資料…)；同一個 id 重複呼叫只會更新文字
+function setSourceNote(anchorId, noteId, text) {
+  let anchor = document.getElementById(anchorId);
+  if (!anchor) return;
+  if (anchor.tagName === 'TBODY' && anchor.closest) anchor = anchor.closest('table') || anchor;   // 不能把 div 塞進表格內部
+  let note = document.getElementById(noteId);
+  if (!note) {
+    note = document.createElement('div');
+    note.id = noteId;
+    note.style.cssText = 'font-size:12.5px; margin:4px 2px 12px; color:var(--text-muted);';
+    anchor.parentNode.insertBefore(note, anchor);
+  }
+  note.textContent = text;
+}
+
 // ---- 安全性工具 ----
 // 將任意值轉為可安全插入 innerHTML 的字串（防止儲存型 XSS）
 function esc(value) {

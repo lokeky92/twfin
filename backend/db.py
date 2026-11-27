@@ -356,6 +356,20 @@ CREATE TABLE IF NOT EXISTS live_market_indices (
     PRIMARY KEY (index_name, trade_date)
 );
 
+-- 16a. 各產業每日法人買賣金額與成交值 (由即時評分每次排程寫入；週報、月報與資金流向歷史的來源)
+CREATE TABLE IF NOT EXISTS live_industry_daily (
+    trade_date TEXT NOT NULL,        -- ISO 日期
+    industry_id TEXT NOT NULL,
+    foreign_billion REAL,            -- 外資淨買賣金額 (億元，股數 × 收盤價)
+    itc_billion REAL,
+    dealer_billion REAL,
+    turnover_billion REAL,           -- 產業成交值 (億元)
+    price_coverage REAL,             -- 有收盤價的公司比例
+    yoy_pct REAL,                    -- 當時的產業單月營收年增
+    total_score REAL,                -- 當時的模型總分 (可為 NULL)
+    PRIMARY KEY (trade_date, industry_id)
+);
+
 -- 16b. 上市櫃個股每日收盤價與成交金額 (LIVE：TWSE MI_INDEX ALLBUT0999 / TPEx 每日收盤行情)
 -- 用途：把法人買賣超「股數」換算成金額 (淨買賣股數 × 收盤價)，並提供各產業成交值占比。只保留近期資料。
 CREATE TABLE IF NOT EXISTS live_stock_quotes (
@@ -613,6 +627,11 @@ def _migrate(conn):
     if tew_cols and "text_source" not in tew_cols:
         # 'seed' = 手寫說明文字；'live' = 由即時評分機械式產生 (live_warnings.py)
         conn.execute("ALTER TABLE trend_early_warnings ADD COLUMN text_source TEXT NOT NULL DEFAULT 'seed'")
+    for tbl in ("company_research_watchlist", "research_reports"):
+        cols_t = {r[1] for r in conn.execute(f"PRAGMA table_info({tbl})")}
+        if cols_t and "text_source" not in cols_t:
+            # 'seed' = 手寫；'live' = 由即時資料機械式產生 (live_watchlist.py / live_reports.py)
+            conn.execute(f"ALTER TABLE {tbl} ADD COLUMN text_source TEXT NOT NULL DEFAULT 'seed'")
     irs_cols = {r[1] for r in conn.execute("PRAGMA table_info(industry_rotation_scores)")}
     if irs_cols and "score_source" not in irs_cols:
         conn.execute("ALTER TABLE industry_rotation_scores ADD COLUMN score_source TEXT NOT NULL DEFAULT 'seed'")

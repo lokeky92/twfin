@@ -15,6 +15,9 @@ function renderMacroCards() {
   const modFilter = document.getElementById('macroModuleFilter').value;
   const typeFilter = document.getElementById('macroTypeFilter').value;
   const container = document.getElementById('macroCardsContainer');
+  setSourceNote('macroCardsContainer', 'macroSourceNote',
+    'ℹ️ 加權指數為證交所每日收盤（即時）；其餘總體與國際指標多為央行、主計總處、經濟部的月／季統計或人工維護的國際行情，沒有每日的免費官方來源，下方每張卡都標示「涵蓋期間」，請以該期間為準。');
+  const pctTxt = (v) => (v === null || v === undefined) ? 'N/A' : (v > 0 ? '+' : '') + v + '%';
   const items = STATE.macro_latest.filter(item => {
     if (modFilter !== 'ALL' && item.module_id !== modFilter) return false;
     if (typeFilter !== 'ALL' && item.observation_type !== typeFilter) return false;
@@ -39,8 +42,8 @@ function renderMacroCards() {
         <div style="font-size:24px; font-weight:800; color:#fff; margin:6px 0;">${item.cleaned_value.toLocaleString()} <span style="font-size:13px; font-weight:500; color:var(--text-secondary);">${item.unit}</span></div>
         <div style="font-size:12px; display:flex; gap:10px;">
           <span>前期：${item.prev_value !== null ? item.prev_value.toLocaleString() : 'N/A'}</span>
-          <span class="${momClass}">期增：${item.mom_pct > 0 ? '+' : ''}${item.mom_pct}%</span>
-          <span class="${yoyClass}">年增：${item.yoy_pct > 0 ? '+' : ''}${item.yoy_pct}%</span>
+          <span class="${momClass}">期增：${pctTxt(item.mom_pct)}</span>
+          <span class="${yoyClass}">年增：${pctTxt(item.yoy_pct)}</span>
         </div>
         <p style="font-size:12px; color:#cbd5e1; margin-top:8px;">${item.notes}</p>
         <div style="font-size:11.5px; color:var(--text-secondary); margin-top:8px; border-top:1px solid rgba(255,255,255,0.06); padding-top:6px;">
@@ -54,6 +57,8 @@ function renderMacroCards() {
 
 function renderAssetFlows() {
   const container = document.getElementById('assetFlowsContainer');
+  setSourceNote('assetFlowsContainer', 'assetFlowsSourceNote',
+    'ℹ️ 資產配置矩陣是央行存放款、外匯存款、證券劃撥等月統計的人工整理（多數截至 2026-09 / 10），沒有每日來源，不會隨每日同步更新。');
   const dirBadge = (d) => {
     if (d === 'CONFIRMED_INFLOW') return '<span class="badge badge-lvl4">已確認資金流入 (Confirmed Inflow)</span>';
     if (d === 'CONFIRMED_OUTFLOW') return '<span class="badge badge-lvlR">已確認資金流出 (Confirmed Outflow)</span>';
@@ -283,11 +288,19 @@ function renderInstiFlows() {
   const pFilter = document.getElementById('instiPeriodFilter').value;
   const tbody = document.getElementById('instiFlowsBody');
   const list = STATE.institutional_flows.filter(r => pFilter === 'ALL' || r.period_type === pFilter);
-  const fmtVal = (v) => `<span class="${v >= 0 ? 'pos' : 'neg'}"><strong>${v >= 0 ? '+' : ''}${v.toLocaleString()}</strong></span>`;
+  const liveRows = STATE.institutional_flows.filter(r => r.text_source === 'live').length;
+  const srcBadge = (s) => s === 'live' ? '<span class="badge badge-grade-A">官方逐日</span>'
+    : s === 'computed' ? '<span class="badge badge-grade-B">由逐日加總</span>'
+    : '<span class="badge badge-grade-C">手寫歷史</span>';
+  setSourceNote('instiFlowsBody', 'instiSourceNote', liveRows
+    ? '✅ 「官方逐日」來自證交所 BFI82U 每日盤後統計；「由逐日加總」是把官方逐日資料加總出的週／月累計（只涵蓋有資料的交易日，不是官方週／月統計）；「手寫歷史」是 2026-11-20 之前人工整理的舊紀錄，與官方資料重疊的期間已不顯示。期貨未平倉與融資餘額官方逐日 API 不提供，顯示「—」。'
+    : '⚠️ 此快照沒有官方逐日資料，以下全部是手寫的歷史紀錄，不會隨資料更新。');
+  const fmtVal = (v) => (v === null || v === undefined || Number.isNaN(v)) ? '<span>N/A</span>'
+    : `<span class="${v >= 0 ? 'pos' : 'neg'}"><strong>${v >= 0 ? '+' : ''}${v.toLocaleString()}</strong></span>`;
   tbody.innerHTML = list.map(r => `
     <tr>
-      <td><span class="badge badge-grade-B">${r.period_type}</span></td>
-      <td><strong>${r.period_label}</strong><div style="font-size:11px; color:var(--text-secondary);">發布：${r.release_date}</div></td>
+      <td><span class="badge badge-grade-B">${esc(r.period_type)}</span><div style="margin-top:3px;">${srcBadge(r.text_source)}</div></td>
+      <td><strong>${esc(r.period_label)}</strong><div style="font-size:11px; color:var(--text-secondary);">發布：${esc(r.release_date)}</div></td>
       <td>${fmtVal(r.foreign_net_billion)}</td>
       <td>${fmtVal(r.itc_net_billion)}</td>
       <td>${fmtVal(r.dealer_prop_billion)}</td>
@@ -296,9 +309,9 @@ function renderInstiFlows() {
       <td class="neg"><strong>${r.foreign_futures_oi_contracts == null ? '—' : r.foreign_futures_oi_contracts.toLocaleString() + ' 口'}</strong></td>
       <td>${r.margin_balance_billion == null ? '—' : r.margin_balance_billion.toLocaleString() + ' 億'}</td>
       <td style="min-width:300px; font-size:12px;">
-        <div><strong style="color:#34d399;">主要買超：</strong>${r.top_buy_industries}</div>
-        <div><strong style="color:#fb7185;">主要賣超：</strong>${r.top_sell_industries}</div>
-        <div style="color:var(--text-secondary); margin-top:3px;">${r.notes}</div>
+        <div><strong style="color:#34d399;">主要買超：</strong>${esc(r.top_buy_industries)}</div>
+        <div><strong style="color:#fb7185;">主要賣超：</strong>${esc(r.top_sell_industries)}</div>
+        <div style="color:var(--text-secondary); margin-top:3px;">${esc(r.notes)}</div>
       </td>
     </tr>
   `).join('');
@@ -358,36 +371,42 @@ function renderCompanies() {
   const cat = document.getElementById('companyCatFilter').value;
   const container = document.getElementById('companiesContainer');
   const list = STATE.companies.filter(c => cat === 'ALL' || c.watchlist_category === cat);
+  const liveN = STATE.companies.filter(c => c.text_source === 'live').length;
+  setSourceNote('companiesContainer', 'companiesSourceNote', liveN
+    ? `✅ ${liveN} 檔名單由全市場即時資料機械式篩選（營收前 150 大，依單月／累計營收年增、本益比、法人買賣超與月增分類；理由全部由當期數字組成）。沒有財報獲利等資訊，不是投資建議；每個交易日收盤後重算。`
+    : '⚠️ 此快照的研究名單是 2026-11-22 前後人工挑選的 11 檔，只有營收與估值數字會更新，類別與理由是手寫的。');
   const catBadge = (c) => {
     if (c === '優先研究') return '<span class="badge badge-lvl4">優先研究</span>';
     if (c === '中長期觀察') return '<span class="badge badge-lvl3">中長期觀察</span>';
     if (c === '等待估值合理') return '<span class="badge badge-grade-C">等待估值合理</span>';
     return '<span class="badge badge-lvlR">基本面或風險不佳</span>';
   };
+  const num = (v) => (v === null || v === undefined) ? 'N/A' : v.toLocaleString();
+  const pct = (v) => (v === null || v === undefined) ? 'N/A' : (v >= 0 ? '+' : '') + v + '%';
   container.innerHTML = list.map(c => `
     <div class="card">
       <div class="card-header">
         <div>
-          <span style="font-size:17px; font-weight:800; color:#fff;">${c.ticker} ${c.company_name}</span>
-          <span style="font-size:12px; color:var(--accent-blue); margin-left:6px;">(${c.industry_name})</span>
-          <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">供應鏈位置：${c.supply_chain_position}</div>
+          <span style="font-size:17px; font-weight:800; color:#fff;">${esc(c.ticker)} ${esc(c.company_name)}</span>
+          <span style="font-size:12px; color:var(--accent-blue); margin-left:6px;">(${esc(c.industry_name)})</span>
+          <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">供應鏈位置：${esc(c.supply_chain_position)}</div>
         </div>
         ${catBadge(c.watchlist_category)}
       </div>
       <div style="display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; background:#090e1a; padding:8px 12px; border-radius:5px; margin-bottom:8px;">
-        <div><strong>${c.latest_rev_period} 營收：</strong>${c.latest_rev_billion_twd.toLocaleString()} 億元</div>
-        <div><strong>月增(MoM)：</strong><span class="${c.rev_mom_pct >= 0 ? 'pos' : 'neg'}">${c.rev_mom_pct >= 0 ? '+' : ''}${c.rev_mom_pct}%</span></div>
-        <div><strong>年增(YoY)：</strong><span class="${c.rev_yoy_pct >= 0 ? 'pos' : 'neg'}"><strong>${c.rev_yoy_pct >= 0 ? '+' : ''}${c.rev_yoy_pct}%</strong></span></div>
-        <div><strong>估值狀態：</strong>${c.pe_ratio_status}</div>
+        <div><strong>${esc(c.latest_rev_period)} 營收：</strong>${num(c.latest_rev_billion_twd)} 億元</div>
+        <div><strong>月增(MoM)：</strong><span class="${c.rev_mom_pct >= 0 ? 'pos' : 'neg'}">${pct(c.rev_mom_pct)}</span></div>
+        <div><strong>年增(YoY)：</strong><span class="${c.rev_yoy_pct >= 0 ? 'pos' : 'neg'}"><strong>${pct(c.rev_yoy_pct)}</strong></span></div>
+        <div><strong>估值狀態：</strong>${esc(c.pe_ratio_status)}</div>
       </div>
-      <div style="font-size:12px; color:#cbd5e1; margin-bottom:6px;"><strong>法人持股動向：</strong>${c.institutional_ownership_trend}</div>
-      <div class="evidence-box"><strong>支持理由 (Bull Case)：</strong>${c.bull_case}</div>
-      <div class="evidence-box counter"><strong>反對理由 (Bear Case)：</strong>${c.bear_case}</div>
+      <div style="font-size:12px; color:#cbd5e1; margin-bottom:6px;"><strong>法人持股動向：</strong>${esc(c.institutional_ownership_trend)}</div>
+      <div class="evidence-box"><strong>支持理由 (Bull Case)：</strong>${esc(c.bull_case)}</div>
+      <div class="evidence-box counter"><strong>反對理由 (Bear Case)：</strong>${esc(c.bear_case)}</div>
       <div class="evidence-box invalid">
-        <strong>估值風險：</strong>${c.valuation_risk}<br/>
-        <strong>結論失效條件：</strong>${c.invalidation_condition}
+        <strong>估值風險：</strong>${esc(c.valuation_risk)}<br/>
+        <strong>結論失效條件：</strong>${esc(c.invalidation_condition)}
       </div>
-      <div style="font-size:11.5px; color:var(--text-secondary); margin-top:8px;">資料基準日：${c.as_of_date} ｜ 來源：${c.publisher}</div>
+      <div style="font-size:11.5px; color:var(--text-secondary); margin-top:8px;">資料基準日：${esc(c.as_of_date)} ｜ 來源：${esc(c.publisher)}</div>
     </div>
   `).join('');
   renderLiveTopCompanies();
@@ -464,6 +483,8 @@ async function submitCompanyRemap() {
 
 function renderScenarios() {
   const container = document.getElementById('scenariosContainer');
+  setSourceNote('scenariosContainer', 'scenariosSourceNote',
+    'ℹ️ 三個情境（樂觀／中性／悲觀）是 2026-11-22 前後人工撰寫的假設，「參考權重」是撰寫者的主觀設定，不是由資料計算出來的機率，也不會隨資料更新。');
   container.innerHTML = STATE.scenarios.map(s => `
     <div class="card">
       <div class="card-header">
@@ -486,31 +507,35 @@ function renderReports() {
   const freq = document.getElementById('reportFreqFilter').value;
   const container = document.getElementById('reportsContainer');
   const list = STATE.research_reports.filter(r => freq === 'ALL' || r.frequency === freq);
+  const liveN = STATE.research_reports.filter(r => r.text_source === 'live').length;
+  setSourceNote('reportsContainer', 'reportsSourceNote', liveN
+    ? `✅ 每日／每週／每月報告由官方即時資料機械式產生（共 ${liveN} 份，各頻率保留最近幾份；週報、月報只涵蓋已累積資料的交易日並會標明天數）。每季報告需要總體與財報資料，沒有即時來源，仍是手寫並標示「不會自動更新」。`
+    : '⚠️ 此快照的固定研究報告全部是 2026-11-22 前後手寫的，不會隨資料更新。');
   container.innerHTML = list.map(r => {
     const sectionsHtml = (r.key_findings || []).map(sec => `
       <div style="margin-top:8px; background:#090e1a; padding:10px 12px; border-radius:5px; white-space:pre-line;">
-        <strong style="color:var(--accent-blue);">${sec.section}</strong><br/>
-        <span style="font-size:12.5px; color:#e2e8f0;">${sec.content}</span>
+        <strong style="color:var(--accent-blue);">${esc(sec.section)}</strong><br/>
+        <span style="font-size:12.5px; color:#e2e8f0;">${esc(sec.content)}</span>
       </div>
     `).join('');
     return `
       <div class="card" style="margin-bottom: 16px;">
         <div class="card-header">
           <div>
-            <span class="badge badge-lvl3">${r.frequency}固定報告</span>
-            <span style="font-size:16px; font-weight:800; color:#fff; margin-left:8px;">${r.report_title}</span>
+            <span class="badge badge-lvl3">${esc(r.frequency)}固定報告</span>
+            <span style="font-size:16px; font-weight:800; color:#fff; margin-left:8px;">${esc(r.report_title)}</span>
           </div>
-          <span class="badge badge-grade-A">${r.version_tag}｜${r.update_status}</span>
+          <span class="badge ${r.text_source === 'live' ? 'badge-grade-A' : 'badge-grade-C'}">${esc(r.version_tag)}｜${esc(r.update_status)}</span>
         </div>
         <div style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">
-          資料截止基準日：<strong>${r.as_of_cutoff_date}</strong> ｜ 主要官方來源：${r.primary_sources}
+          資料截止基準日：<strong>${esc(r.as_of_cutoff_date)}</strong> ｜ 主要官方來源：${esc(r.primary_sources)}
         </div>
-        <div class="evidence-box" style="font-size:13px;"><strong>執行摘要 (Executive Summary)：</strong>${r.executive_summary}</div>
+        <div class="evidence-box" style="font-size:13px;"><strong>執行摘要 (Executive Summary)：</strong>${esc(r.executive_summary)}</div>
         ${sectionsHtml}
-        <div class="evidence-box counter" style="margin-top:8px;"><strong>反方證據：</strong>${r.counter_evidence}</div>
+        <div class="evidence-box counter" style="margin-top:8px;"><strong>反方證據：</strong>${esc(r.counter_evidence)}</div>
         <div class="evidence-box invalid">
-          <strong>分析假設與資料限制：</strong>${r.assumptions_and_limits}<br/>
-          <strong>需持續追蹤之驗證指標：</strong>${r.tracking_indicators}
+          <strong>分析假設與資料限制：</strong>${esc(r.assumptions_and_limits)}<br/>
+          <strong>需持續追蹤之驗證指標：</strong>${esc(r.tracking_indicators)}
         </div>
       </div>
     `;

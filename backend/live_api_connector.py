@@ -268,6 +268,40 @@ def parse_twse_quotes(payload, now_str):
     return out, d.isoformat()
 
 
+def parse_twse_index_tables(payload, now_str):
+    """
+    同一份 rwd MI_INDEX 裡的「價格指數 / 報酬指數」表 → live_market_indices 的資料列 (日期用民國 7 碼，與既有資料一致)。
+    openapi 版 MI_INDEX 會晚一個交易日，這裡的是和 T86 同日的收盤指數。沒有這些表或欄位時回傳空清單 (不是錯誤)。
+    """
+    d = parse_date(payload.get("date"))
+    if d is None:
+        return []
+    roc = f"{d.year - 1911:03d}{d.month:02d}{d.day:02d}"
+    out = []
+    for t in payload.get("tables", []):
+        title = str(t.get("title", ""))
+        if "指數" not in title or "每日收盤行情" in title or "臺灣證券交易所" not in title:
+            continue
+        fields = t.get("fields", [])
+        try:
+            i_name, i_close = 0, fields.index("收盤指數")
+            i_dir, i_pts, i_pct = fields.index("漲跌(+/-)"), fields.index("漲跌點數"), fields.index("漲跌百分比(%)")
+        except ValueError:
+            continue
+        for row in t.get("data", []):
+            if len(row) <= max(i_close, i_dir, i_pts, i_pct):
+                continue
+            sign_html = str(row[i_dir])
+            sign = -1.0 if "-" in sign_html else 1.0
+            pts, pct = _to_float(row[i_pts]), _to_float(row[i_pct])
+            close = _to_float(row[i_close])
+            name = str(row[i_name]).strip()
+            if not name or close is None:
+                continue
+            out.append((name, roc, close, "-" if sign < 0 else "+", pts, None if pct is None else sign * abs(pct), now_str, URL_TWSE_QUOTES))
+    return out
+
+
 def parse_tpex_quotes(rows, now_str):
     """櫃買每日收盤行情 (openapi)。Change 欄自帶正負號。回傳 (rows, ISO 日期或 None)。"""
     out, date_iso = [], None
@@ -451,9 +485,16 @@ def run_live_ingestion():
     # 4b. 個股每日收盤價與成交金額 (法人買賣超股數 → 金額、各產業成交值占比用)。只存已有營收資料的公司，並只保留近 90 天。
     known_codes = {r[0] for r in company_rows}
 
+    same_day_index_rows = []
+
     def _quote_parser(fn):
         def run(raw):
             rows, d = fn(raw, now_str)
+            if fn is parse_twse_quotes:      # 同一份回應順便取得與 T86 同日的指數 (失敗不影響個股行情)
+                try:
+                    same_day_index_rows.extend(parse_twse_index_tables(raw, now_str))
+                except Exception:  # noqa: BLE001
+                    pass
             return rows, len(rows), d
         return run
 
@@ -463,6 +504,12 @@ def run_live_ingestion():
         rows = attempt(key, url, _quote_parser(fn), timeout=tmo)
         if rows:
             quote_rows.extend(r for r in rows if r[0] in known_codes)
+    if same_day_index_rows:
+        cur.executemany("""
+            INSERT OR REPLACE INTO live_market_indices
+            (index_name, trade_date, close_index, change_dir, change_points, change_pct, fetched_at, source_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, same_day_index_rows)
     if quote_rows:
         cur.executemany("""
             INSERT OR REPLACE INTO live_stock_quotes

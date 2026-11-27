@@ -444,6 +444,15 @@ def apply_live_scoring(conn=None):
                   w["raw_data_evidence"], w["triggered_at"], w["source_id"], w["credibility_grade"], w["missing_data_notes"],
                   w["counter_evidence"], w["invalidation_conditions"]))
             synced += 1
+        # 各產業每日法人買賣金額歷史：週報、月報與資金流向歷史的來源 (同一天重跑會覆蓋)
+        if insti_iso:
+            for ind, m in metrics.items():
+                cur.execute("""
+                    INSERT OR REPLACE INTO live_industry_daily
+                    (trade_date, industry_id, foreign_billion, itc_billion, dealer_billion, turnover_billion, price_coverage, yoy_pct, total_score)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (insti_iso, ind, m["foreign_billion"], m["itc_billion"], m["dealer_billion"], m["turnover_billion"],
+                      m["price_coverage"], None if m["yoy"] is None else round(m["yoy"], 2), totals.get(ind)))
         if n:
             cur.execute("""
                 INSERT INTO ingestion_audit_logs (run_timestamp, task_name, source_id, status, records_affected, message)

@@ -612,6 +612,110 @@ class TestWarningsRender(unittest.TestCase):
         self.assertIn("LEVEL R", self.o["filtered"])
 
 
+PRO_TABLES_DRIVER = r"""
+const fs = require('fs'), vm = require('vm'), path = require('path');
+const dir = process.argv[1];
+const stubs = {};
+function el(id) {
+  return stubs[id] || (stubs[id] = { id, innerHTML: '', textContent: '', style: {}, value: 'ALL', tagName: 'DIV',
+    parentNode: { insertBefore(n) { stubs[n.id] = n; } } });
+}
+const ctx = { console, window: {}, document: { getElementById: el, createElement: () => ({ style: {} }) }, renderLiveTopCompanies() {} };
+vm.createContext(ctx);
+for (const f of ['01-core.js', '08-pro-tables.js']) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), ctx, { filename: f });
+const run = c => vm.runInContext(c, ctx);
+const out = {};
+
+// 三大法人
+const row = (src, type, label, extra) => Object.assign({ period_type: type, period_label: label, release_date: '2026-11-27', foreign_net_billion: -296.28,
+  itc_net_billion: 85.19, dealer_prop_billion: 1, dealer_hedge_billion: 2, total_3insti_billion: -213.04, foreign_futures_oi_contracts: null,
+  margin_balance_billion: null, top_buy_industries: '<b>買</b>', top_sell_industries: '賣', notes: '備註', text_source: src }, extra || {});
+ctx.__insti = [row('live', 'DAILY', '2026-11-27 官方'), row('computed', 'WEEKLY', '2026-W48'), row('seed', 'DAILY', '2026-11-19 手寫', { foreign_net_billion: null })];
+run("STATE = { institutional_flows: __insti }; renderInstiFlows()");
+out.insti = el('instiFlowsBody').innerHTML; out.instiNote = el('instiSourceNote').textContent;
+ctx.__insti2 = [row('seed', 'DAILY', '手寫')];
+run("STATE = { institutional_flows: __insti2 }; renderInstiFlows()");
+out.instiSeedNote = el('instiSourceNote').textContent;
+
+// 個股名單
+const comp = (src, name) => ({ ticker: '1111', company_name: name, industry_name: '產業', supply_chain_position: '電子', watchlist_category: '優先研究',
+  latest_rev_period: '2026-10', latest_rev_billion_twd: null, rev_mom_pct: null, rev_yoy_pct: 80.5, pe_ratio_status: 'P/E 10', institutional_ownership_trend: '買',
+  bull_case: name, bear_case: '無', valuation_risk: '無', invalidation_condition: '無', as_of_date: '2026-11-27', publisher: 'MOPS', text_source: src });
+ctx.__c = [comp('live', '<img src=x onerror=alert(1)>')];
+run("STATE = { companies: __c }; renderCompanies()");
+out.comp = el('companiesContainer').innerHTML; out.compNote = el('companiesSourceNote').textContent;
+ctx.__c2 = [comp('seed', '手寫')];
+run("STATE = { companies: __c2 }; renderCompanies()");
+out.compSeedNote = el('companiesSourceNote').textContent;
+
+// 報告
+const rep = (src, title) => ({ report_title: title, frequency: '每日', version_tag: 'v1', update_status: '即時產生', as_of_cutoff_date: '2026-11-27', primary_sources: '官方',
+  executive_summary: '<script>x</script>', key_findings: [{ section: '一', content: '<b>內容</b>' }], counter_evidence: '反', assumptions_and_limits: '限', tracking_indicators: '追', text_source: src });
+ctx.__r = [rep('live', '日報'), rep('seed', '季報')];
+run("STATE = { research_reports: __r }; renderReports()");
+out.rep = el('reportsContainer').innerHTML; out.repNote = el('reportsSourceNote').textContent;
+ctx.__r2 = [rep('seed', '手寫')];
+run("STATE = { research_reports: __r2 }; renderReports()");
+out.repSeedNote = el('reportsSourceNote').textContent;
+
+// 總體指標：年增為 null 不可顯示 null
+ctx.__m = [{ metric_code: 'TW_TAIEX_INDEX', module_id: 'M01', observation_type: 'DIRECT_STAT', metric_name: '加權指數', quality_grade: 'A', cleaned_value: 39308.08, unit: '點',
+  prev_value: 39151.81, mom_pct: 0.4, yoy_pct: null, notes: '即時', period_covered: '2026-11-27', release_date: '2026-11-27', source_url: 'u', publisher: 'p', revision_version: 'v' }];
+run("STATE = { macro_latest: __m }; renderMacroCards()");
+out.macro = el('macroCardsContainer').innerHTML; out.macroNote = el('macroSourceNote').textContent;
+console.log(JSON.stringify(out));
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "node 未安裝，略過專業表格渲染測試")
+class TestProTablesRender(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        r = subprocess.run(["node", "-e", PRO_TABLES_DRIVER, JS_DIR], capture_output=True, text=True, encoding="utf-8", timeout=30)
+        if r.returncode != 0:
+            raise AssertionError("node 執行失敗：" + r.stderr)
+        cls.o = json.loads(r.stdout)
+
+    def test_institutional_rows_show_their_source_and_escape(self):
+        h = self.o["insti"]
+        self.assertIn("官方逐日", h)
+        self.assertIn("由逐日加總", h)
+        self.assertIn("手寫歷史", h)
+        self.assertNotIn("<b>買", h)
+        self.assertIn("&lt;b&gt;買&lt;/b&gt;", h)
+        self.assertIn("N/A", h)                                   # 手寫歷史列的外資為空 → 不可顯示 null
+        self.assertNotIn("null", h)
+        self.assertIn("官方逐日", self.o["instiNote"])
+        self.assertIn("手寫歷史", self.o["instiNote"])
+        self.assertIn("已不顯示", self.o["instiNote"])               # 與官方重疊的手寫列要說明被拿掉了
+        self.assertIn("不會隨資料更新", self.o["instiSeedNote"])
+
+    def test_companies_escape_and_tolerate_missing_numbers(self):
+        h = self.o["comp"]
+        self.assertNotIn("<img", h)
+        self.assertIn("&lt;img", h)
+        self.assertNotIn("null", h)
+        self.assertIn("N/A", h)
+        self.assertIn("機械式篩選", self.o["compNote"])
+        self.assertIn("人工挑選", self.o["compSeedNote"])
+
+    def test_reports_escape_and_label_each_source(self):
+        h = self.o["rep"]
+        self.assertNotIn("<script>", h)
+        self.assertNotIn("<b>內容", h)
+        self.assertIn("&lt;script&gt;", h)
+        self.assertIn("badge-grade-A", h)                        # 即時報告
+        self.assertIn("badge-grade-C", h)                        # 手寫報告
+        self.assertIn("每季報告需要總體與財報資料", self.o["repNote"])
+        self.assertIn("不會隨資料更新", self.o["repSeedNote"])
+
+    def test_macro_card_handles_missing_yoy(self):
+        m = self.o["macro"]
+        self.assertIn("年增：N/A", m)
+        self.assertNotIn("null", m)
+        self.assertIn("加權指數為證交所每日收盤", self.o["macroNote"])
+
+
 class TestInlineHandlersDefined(unittest.TestCase):
     ALLOWED = {"alert", "confirm", "parseInt", "parseFloat", "String", "Number", "Boolean"}
 
