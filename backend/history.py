@@ -43,8 +43,8 @@ def snapshot_industry_scores(snapshot_date=None):
         FROM industry_rotation_scores WHERE model_version = ?
     """, (version,))
     if not snapshot_date:
-        # 清掉先前以「執行日期」記下、但日期晚於最新資料日的即時快照 (例如週六凌晨重跑所產生的重複一天)
-        conn.execute("DELETE FROM industry_score_history WHERE score_source = 'live' AND snapshot_date > ?", (snap,))   # 另開 cursor，不破壞上面尚未取出的查詢
+        # 清掉先前以「執行日期」記下、但日期晚於最新資料日的快照 (含未評分產業的 seed 來源列，不分來源) (例如週六凌晨重跑所產生的重複一天)
+        conn.execute("DELETE FROM industry_score_history WHERE snapshot_date > ?", (snap,))   # 另開 cursor，不破壞上面尚未取出的查詢
     n = 0
     for r in cur.fetchall():
         level = classify_alert_level(r["total_weighted_score"], r["score_capital_flow"], th)

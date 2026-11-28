@@ -243,6 +243,12 @@ class TestDatabaseIntegration(unittest.TestCase):
         conn.commit()
         conn.close()
         snapshot_industry_scores("2026-11-28")                          # 模擬舊版以執行日期 (週六) 寫入的重複快照
+        conn = db.get_connection()                                      # 未評分產業的列來源是 seed：也必須一併清掉 (實際在線上留下過單列的幽靈快照日)
+        row = conn.execute("SELECT model_version FROM industry_score_history LIMIT 1").fetchone()
+        conn.execute("INSERT OR REPLACE INTO industry_score_history (snapshot_date, industry_id, model_version, total_weighted_score, rotation_state, score_source) "
+                     "VALUES ('2026-11-28', 'IND_GHOST', ?, NULL, 'INSUFFICIENT_DATA', 'seed')", (row[0],))
+        conn.commit()
+        conn.close()
         snapshot_industry_scores()                                      # 新行為：用資料日期 2026-11-27
         conn = db.get_connection()
         days = [r[0] for r in conn.execute("SELECT DISTINCT snapshot_date FROM industry_score_history ORDER BY 1")]
