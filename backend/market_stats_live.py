@@ -9,7 +9,8 @@
   這個 API 只提供最新一個交易日，沒有歷史，所以只能從開始抓的那天起逐日累積，不回補。
 
 規則：
-- 只更新同一天、標示「官方API」的逐日列；對不到日期的不寫 (不用別天的數字頂替)。
+- 官方值存在 market_stats_official (以日期為鍵)；標示「官方API」的逐日列的這兩欄一律從它同步，沒有官方值就留空 (清掉手寫殘留)，
+  不用別天的數字頂替。
 - 融資餘額採該日「今日餘額」(證交所說明以隔日的「前日餘額」為最終值，當日值可能微調，畫面標示來源即可)。
 - 期貨口徑只含「臺股期貨」(大台)，不含小型／微型臺指，不是各家媒體換算成大台等值的口數；畫面備註標明。
 - 任一來源失敗只記錄、保留既有資料，絕不寫入 0。
@@ -21,7 +22,7 @@ import re
 import urllib.request
 from datetime import date
 
-from common import _SSL_CTX, _USER_AGENT, describe_error, fetch_json, logger
+from common import _SSL_CTX, _USER_AGENT, describe_error, fetch_json, logger, now_iso
 
 URL_MARGIN = "https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?date={d}&selectType=MS&response=json"
 URL_TAIFEX = "https://openapi.taifex.com.tw/v1/MarketDataOfMajorInstitutionalTradersDetailsOfFuturesContractsBytheDate"
@@ -104,7 +105,11 @@ def parse_foreign_oi(rows):
 
 
 def apply_market_stats(conn=None, fetchers=None, max_backfill=MAX_BACKFILL):
-    """抓取最新融資餘額與外資期貨未平倉，補進同一天的官方逐日列；另回補最近缺融資餘額的幾個交易日。"""
+    """
+    抓取最新融資餘額與外資期貨未平倉，記入 market_stats_official (官方值的唯一來源)，再把它們同步到官方逐日列。
+    同步時「官方逐日列」的這兩欄一律以 market_stats_official 為準：沒有官方值的日子留空，
+    所以舊的手寫數字 (例如曾誤植在官方列上的 8,343 億) 不會留在官方列上。
+    """
     from db import get_connection
     fj = (fetchers or {}).get("json") or (lambda u: fetch_json(u, timeout=45, retries=2))
     ftx = (fetchers or {}).get("taifex") or _fetch_taifex_rows
@@ -114,26 +119,30 @@ def apply_market_stats(conn=None, fetchers=None, max_backfill=MAX_BACKFILL):
     try:
         cur = conn.cursor()
         like = f"%{OFFICIAL_LABEL}%"
+        ts = now_iso()
 
-        def set_margin(d, v):
-            n = cur.execute("UPDATE institutional_flows SET margin_balance_billion = ? WHERE period_type = 'DAILY' "
-                            "AND release_date = ? AND period_label LIKE ?", (v, d, like)).rowcount
-            if n:
+        def put(d, margin=None, futures=None):
+            cur.execute("INSERT OR IGNORE INTO market_stats_official (release_date, fetched_at) VALUES (?, ?)", (d, ts))
+            if margin is not None:
+                cur.execute("UPDATE market_stats_official SET margin_balance_billion = ?, fetched_at = ? WHERE release_date = ?", (margin, ts, d))
                 written["margin"].append(d)
-            return n
+            if futures is not None:
+                cur.execute("UPDATE market_stats_official SET foreign_futures_oi_contracts = ?, fetched_at = ? WHERE release_date = ?", (futures, ts, d))
+                written["futures"].append(d)
 
-        # 1. 最新融資餘額 (不指定日期 → 證交所回傳最新一天) 與回補缺漏
+        # 1. 最新融資餘額 (今天的日期；非交易日或尚未公布就略過) 與回補官方逐日列中還沒有官方融資餘額的日子
         try:
             latest = parse_margin(fj(URL_MARGIN.format(d=date.today().strftime("%Y%m%d"))))
             status["TWSE 融資餘額"] = "OK" if latest else "非交易日或尚未公布"
             if latest:
-                set_margin(*latest)
+                put(latest[0], margin=latest[1])
         except Exception as exc:  # noqa: BLE001
             logger.warning("融資餘額取得失敗：%s: %s", type(exc).__name__, exc)
             status["TWSE 融資餘額"] = f"失敗：{describe_error(exc)}"
         missing = [r["release_date"] for r in cur.execute(
-            "SELECT release_date FROM institutional_flows WHERE period_type = 'DAILY' AND period_label LIKE ? "
-            "AND margin_balance_billion IS NULL ORDER BY release_date DESC LIMIT ?", (like, max_backfill)).fetchall()]
+            "SELECT DISTINCT f.release_date FROM institutional_flows f LEFT JOIN market_stats_official o ON o.release_date = f.release_date "
+            "WHERE f.period_type = 'DAILY' AND f.period_label LIKE ? AND o.margin_balance_billion IS NULL "
+            "ORDER BY f.release_date DESC LIMIT ?", (like, max_backfill)).fetchall()]
         filled = 0
         for d in missing:
             try:
@@ -142,25 +151,26 @@ def apply_market_stats(conn=None, fetchers=None, max_backfill=MAX_BACKFILL):
                 logger.warning("融資餘額回補 %s 失敗：%s", d, type(exc).__name__)
                 break
             if res and res[0] == d:                           # 回傳日期必須與要求的相同才寫入
-                set_margin(*res)
+                put(d, margin=res[1])
                 filled += 1
         if missing:
             status["融資餘額回補"] = f"{filled}/{len(missing)} 日"
 
-        # 2. 外資臺股期貨未平倉 (只有最新一天)
+        # 2. 外資臺股期貨未平倉 (期交所只有最新一天，不回補)
         try:
             oi = parse_foreign_oi(ftx(URL_TAIFEX))
             status["TAIFEX 外資期貨未平倉"] = "OK" if oi else "解析不到資料"
             if oi:
-                n = cur.execute("UPDATE institutional_flows SET foreign_futures_oi_contracts = ? WHERE period_type = 'DAILY' "
-                                "AND release_date = ? AND period_label LIKE ?", (oi[1], oi[0], like)).rowcount
-                if n:
-                    written["futures"].append(oi[0])
-                else:
-                    status["TAIFEX 外資期貨未平倉"] = f"{oi[0]} 沒有對應的官方逐日列，未寫入"
+                put(oi[0], futures=oi[1])
         except Exception as exc:  # noqa: BLE001
             logger.warning("外資期貨未平倉取得失敗：%s: %s", type(exc).__name__, exc)
             status["TAIFEX 外資期貨未平倉"] = f"失敗：{describe_error(exc)}"
+
+        # 3. 同步到官方逐日列：沒有官方值的日子一律留空 (清掉任何手寫殘留)；對不到官方逐日列的官方值不寫
+        cur.execute("""UPDATE institutional_flows SET
+                         margin_balance_billion = (SELECT o.margin_balance_billion FROM market_stats_official o WHERE o.release_date = institutional_flows.release_date),
+                         foreign_futures_oi_contracts = (SELECT o.foreign_futures_oi_contracts FROM market_stats_official o WHERE o.release_date = institutional_flows.release_date)
+                       WHERE period_type = 'DAILY' AND period_label LIKE ?""", (like,))
         conn.commit()
         return {"written": written, "status": status}
     finally:

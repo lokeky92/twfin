@@ -426,6 +426,13 @@ CREATE TABLE IF NOT EXISTS etf_fund_info (
     as_of_date TEXT NOT NULL,
     fetched_at TEXT
 );
+-- 融資餘額與外資期貨未平倉的官方值 (證交所／期交所)，以日期為鍵；官方逐日列的這兩欄由它同步 (沒有官方值就留空)
+CREATE TABLE IF NOT EXISTS market_stats_official (
+    release_date TEXT PRIMARY KEY,
+    margin_balance_billion REAL,
+    foreign_futures_oi_contracts INTEGER,
+    fetched_at TEXT
+);
 -- 發行單位數每日記錄 (官方只給最新一天，所以由本站逐次累積；近 1 月規模變化與淨申購由此算出)
 CREATE TABLE IF NOT EXISTS etf_units_history (
     etf_code TEXT NOT NULL,

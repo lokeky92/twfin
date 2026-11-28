@@ -88,6 +88,7 @@ class TestDatabase(unittest.TestCase):
     def conn(self):
         c = self.db.get_connection()
         self.addCleanup(c.close)
+        c.execute("DELETE FROM market_stats_official")
         return c
 
     def add(self, conn, d, official=True):
@@ -136,11 +137,36 @@ class TestDatabase(unittest.TestCase):
         conn = self.conn()
         conn.execute("DELETE FROM institutional_flows")
         self.add(conn, "2026-11-27")
-        conn.execute("UPDATE institutional_flows SET margin_balance_billion = 4000.0, foreign_futures_oi_contracts = -5 WHERE release_date = '2026-11-27'")
+        conn.execute("INSERT INTO market_stats_official VALUES ('2026-11-27', 4000.0, -5, 't')")       # 前一次成功取得的官方值
         conn.commit()
         res = ms.apply_market_stats(conn, fetchers=self.fetcher({}, ConnectionError("down"), []))
         self.assertEqual(self.vals(conn, "2026-11-27"), (4000.0, -5))
         self.assertIn("失敗", res["status"]["TAIFEX 外資期貨未平倉"])
+
+    def test_handwritten_leftovers_on_official_rows_are_cleared(self):
+        """官方逐日列上曾經殘留手寫的融資 8,343 億／期貨 -98,650 口：沒有官方值的欄位必須清空，有官方值的改成官方值。"""
+        conn = self.conn()
+        conn.execute("DELETE FROM institutional_flows")
+        for d in ("2026-11-24", "2026-11-27"):
+            self.add(conn, d)
+        conn.execute("UPDATE institutional_flows SET margin_balance_billion = 8343.0, foreign_futures_oi_contracts = -98650")
+        conn.commit()
+        ms.apply_market_stats(conn, fetchers=self.fetcher({"20261124": margin_payload("20261124", "420,000,000"),
+                                                           "20261127": margin_payload("20261127")}, taifex_rows(), []))
+        self.assertEqual(self.vals(conn, "2026-11-27"), (4301.7, -107503))
+        self.assertEqual(self.vals(conn, "2026-11-24"), (4200.0, None))          # 融資改成官方值；期貨沒有官方值 → 留空，不保留手寫的 -98,650
+
+    def test_accumulated_futures_survive_later_runs(self):
+        conn = self.conn()
+        conn.execute("DELETE FROM institutional_flows")
+        self.add(conn, "2026-11-26")
+        conn.commit()
+        ms.apply_market_stats(conn, fetchers=self.fetcher({"20261126": margin_payload("20261126")}, taifex_rows(date="20261126", net="-100"), []))
+        self.add(conn, "2026-11-27")
+        conn.commit()
+        ms.apply_market_stats(conn, fetchers=self.fetcher({"20261127": margin_payload("20261127")}, taifex_rows(date="20261127", net="-200"), []))
+        self.assertEqual(self.vals(conn, "2026-11-26")[1], -100)                  # 前一天累積的官方期貨值不會在下一次被清掉
+        self.assertEqual(self.vals(conn, "2026-11-27")[1], -200)
 
     def test_mismatched_date_and_missing_row_are_not_written(self):
         conn = self.conn()
