@@ -5334,6 +5334,15 @@ function renderGovernance() {
 
 
 /* ETF 數字格式化：官方沒有來源而留空的欄位 (淨值、折溢價、配息率、含息報酬…) 一律顯示 N/A，不可印出 null 或 NaN */
+// 基金規模的來源標籤：上市 ETF = 官方發行單位數 × 收盤價 (live.aum_source = 'official')，其餘為人工維護
+function etfAumTag(e) {
+  const L = e && e.live;
+  if (L && L.aum_source === 'official') return `<span class="badge badge-grade-A" title="官方發行單位數 × 收盤價，單位數日期 ${esc(L.aum_as_of || '')}">官方</span>`;
+  return '<span class="badge badge-grade-C" title="人工維護的數值，不會自動更新">手寫</span>';
+}
+function etfAumChangeText(e) {
+  return (e.aum_change_1m_pct === null || e.aum_change_1m_pct === undefined) ? '近 1 月變化：累積中' : `近 1 月 ${e.aum_change_1m_pct >= 0 ? '+' : ''}${e.aum_change_1m_pct}%`;
+}
 function fmtEtfNum(v, signed, digits) {
   if (v === null || v === undefined || Number.isNaN(v)) return 'N/A';
   const n = (digits === undefined) ? v : Number(v).toFixed(digits);
@@ -5573,6 +5582,96 @@ function renderGlobalEnv() {
   return { html, note };
 }
 
+// ===== 第四區：白話市場解讀 (規則產生：數字全部來自台股 ETF 的即時計算與已標示的人工維護欄位，沒有手寫敘事) =====
+function renderEtfPlainReading(etfs) {
+  const n1 = (v, d) => (v == null || isNaN(Number(v))) ? '—' : Number(v).toLocaleString(undefined, { maximumFractionDigits: d == null ? 1 : d });
+  const sg = (v) => (v == null || isNaN(Number(v))) ? '—' : (Number(v) > 0 ? '+' : '') + n1(v);
+  const cl = (v) => (v == null || isNaN(Number(v))) ? '' : Number(v) > 0 ? 'pos' : Number(v) < 0 ? 'neg' : '';
+  const tw = (etfs || []).filter(e => e.score_source === 'live');
+  const twNon = tw.filter(e => e.is_leveraged_or_inverse === 0);
+  const nm = e => `<strong>${esc(e.etf_code)}</strong> ${esc(e.etf_name)}`;
+  const card = (color, title, body) => `
+      <div class="etf-clean-card" style="border-left:5px solid ${color};">
+        <div style="font-size:17px; font-weight:700; color:#f8fafc; margin-bottom:10px; line-height:1.5;">${title}</div>
+        <div style="font-size:15px; color:#cbd5e1; line-height:1.75;">${body}</div>
+      </div>`;
+  const none = '目前沒有足夠的即時資料可以解讀。';
+  const macros = {};
+  ((STATE && STATE.macro_latest) || []).forEach(m => { macros[m.metric_code] = m; });
+  const us10 = macros.US_10Y_YIELD;
+  const us10Live = us10 && String(us10.revision_version || '').startsWith('live');
+
+  // 1. 長期分數 vs 短期結論
+  let c1 = none;
+  if (twNon.length) {
+    const by = (k) => [...twNon].sort((a, b) => (b[k] || 0) - (a[k] || 0));
+    const topA = by('total_score_a_long_term')[0], topB = by('total_score_b_short_mid')[0];
+    const cnt = {};
+    twNon.forEach(e => { cnt[e.conclusion_b_short_mid] = (cnt[e.conclusion_b_short_mid] || 0) + 1; });
+    const parts = ['條件相對有利', '持續觀察', '等待更佳條件', '風險偏高'].filter(k => cnt[k]).map(k => `${k} ${cnt[k]} 檔`);
+    const gap = twNon.filter(e => (e.total_score_a_long_term || 0) >= 65 && ['風險偏高', '等待更佳條件'].includes(e.conclusion_b_short_mid));
+    const ref = twNon.find(e => e.live && e.live.facts && e.live.facts.b1 && !/N\/A/.test(e.live.facts.b1));
+    c1 = `• <strong>兩個模型看的時間不同：</strong>模型 A 看 3～10 年的長期配置品質，模型 B 看 1～12 個月的進場環境，所以同一檔 ETF 常常「長期還不錯、短期卻建議等」。<br/>
+      • <strong>現在的台股 ETF（${twNon.length} 檔，不含槓反）：</strong>長期分數最高是 ${nm(topA)}（${n1(topA.total_score_a_long_term)} 分）；短期分數最高是 ${nm(topB)}（${n1(topB.total_score_b_short_mid)} 分）；短期結論分布：${parts.join('、')}。<br/>
+      • <strong>長期分數 65 分以上、但短期不建議追的：</strong>${gap.length ? gap.map(e => `${nm(e)}（A ${n1(e.total_score_a_long_term)}／B ${n1(e.total_score_b_short_mid)}）`).join('、') : '目前沒有'}。白話來說：值得放進長期清單，但短期適合分批、不要一次重壓。<br/>
+      ${ref ? `• <strong>短期環境的一項依據：</strong>${esc(ref.live.facts.b1)}。<br/>` : ''}
+      <span style="font-size:12px; color:var(--text-muted);">分數由官方逐日行情用公式計算；台股公式的「大盤環境」子分數偏保守，整體分數較低是正常的。美股 ETF 沒有官方來源，這裡不解讀。</span>`;
+  }
+
+  // 2. 高股息 ETF：配息率 vs 實際含息報酬
+  const hy = twNon.filter(e => e.asset_class === '股票' && /高股息|高息/.test(e.sub_category || '') && e.live);
+  let c2 = none;
+  if (hy.length) {
+    const rows = hy.map(e => {
+      const L = e.live;
+      return `<tr><td>${nm(e)}</td><td style="text-align:right;">${n1(L.dividend_yield_pct, 2)}%</td><td style="text-align:right;" class="${cl(L.ret_1y)}">${sg(L.ret_1y)}%</td><td style="text-align:right;" class="${cl(L.ret_1y_total)}">${sg(L.ret_1y_total)}%</td></tr>`;
+    }).join('');
+    c2 = `• <strong>配息率不等於賺到的錢：</strong>這裡的配息率是「過去 12 個月實際配出的現金股利 ÷ 最新收盤價」（證交所／櫃買除權息表計算）；真正的成果要看「含息報酬」= 配息 + 股價漲跌。股價若跌掉的比配息還多，含息報酬就會比配息率低。<br/>
+      <div style="overflow-x:auto; margin:8px 0;"><table style="width:100%; font-size:13px;"><thead><tr><th>ETF</th><th style="text-align:right;">近 12 月配息率</th><th style="text-align:right;">近 1 年價格報酬</th><th style="text-align:right;">近 1 年含息報酬</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <span style="font-size:12px; color:var(--text-muted);">「—」代表歷史不足一年或除權息表沒有成功取得，不當作 0。配息中有多少來自價差或本金（收益平準金），發行商每期公告才有，本站沒有官方逐期資料，所以不拆解。</span>`;
+  }
+
+  // 3. 持股重疊：台積電佔比高的 ETF
+  const heavy = twNon.filter(e => e.asset_class === '股票' && Number(e.max_single_weight_pct) >= 30 && (e.holdings || []).length)
+    .sort((a, b) => b.max_single_weight_pct - a.max_single_weight_pct);
+  let c3 = twNon.length ? '目前台股 ETF 沒有任何一檔的最大單一持股占比達 30%。' : none;
+  if (heavy.length) {
+    let pairs = '';
+    if (heavy.length >= 2 && typeof computePairwiseOverlap === 'function') {
+      const list = [];
+      for (let i = 0; i < heavy.length; i++) for (let j = i + 1; j < heavy.length; j++) {
+        const r = computePairwiseOverlap(heavy[i], heavy[j]);
+        list.push(`${esc(heavy[i].etf_code)} 與 ${esc(heavy[j].etf_code)} 重疊 <strong>${n1(r.overlapPct)}%</strong>`);
+      }
+      pairs = `• <strong>兩兩持股重疊度（前十大持股取較小權重加總）：</strong>${list.join('、')}。<br/>`;
+    }
+    const asOf = (heavy[0].holdings[0] || {}).as_of_date;
+    c3 = `• <strong>名稱不同、底層可能是同一家公司：</strong>下列 ETF 的最大單一持股占比都在 30% 以上——${heavy.map(e => `${nm(e)}：${esc(e.max_single_holding_name)}`).join('、')}。<br/>
+      ${pairs}• 同時持有這幾檔，表面上買了多檔，實際上有很大一部分資金押在同一檔股票上；要分散可以考慮搭配持股較分散的 ETF（例如最大單一持股占比低的高股息或債券 ETF）。<br/>
+      <span style="font-size:12px; color:var(--text-muted);">持股與權重是人工維護（手寫）的前十大持股${asOf ? `，基準日 ${esc(asOf)}` : ''}，不會自動更新。</span>`;
+  }
+
+  // 4. 利率與債券 ETF
+  const bonds = twNon.filter(e => e.asset_class === '債券' && e.live);
+  let c4 = none;
+  if (bonds.length) {
+    const rows = bonds.map(e => {
+      const L = e.live, dur = Number(e.bond_duration_years);
+      return `<tr><td>${nm(e)}</td><td style="text-align:right;">${n1(L.dividend_yield_pct, 2)}%</td><td style="text-align:right;" class="${cl(L.ret_1y)}">${sg(L.ret_1y)}%</td><td style="text-align:right;">${n1(L.vol_ann)}%</td><td style="text-align:right;">${n1(L.mdd)}%</td><td style="text-align:right;">${dur > 0 ? '約 −' + n1(dur) + '%' : '—'}</td></tr>`;
+    }).join('');
+    c4 = `• <strong>${us10 && us10.cleaned_value != null ? `美國 10 年期公債殖利率目前 ${n1(us10.cleaned_value, 2)}%（${esc(us10.period_covered || '')}，${us10Live ? '即時' : '手寫'}）。` : ''}</strong>債券 ETF 的價格會反向跟著利率動：殖利率上升，價格下跌；存續期越長，跌得越多。<br/>
+      <div style="overflow-x:auto; margin:8px 0;"><table style="width:100%; font-size:13px;"><thead><tr><th>ETF</th><th style="text-align:right;">近 12 月配息率</th><th style="text-align:right;">近 1 年價格報酬</th><th style="text-align:right;">年化波動度</th><th style="text-align:right;">最大回撤</th><th style="text-align:right;">殖利率 +1% 的價格影響</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <span style="font-size:12px; color:var(--text-muted);">「價格影響」= 存續期 × 1%，是粗略的估算；存續期是人工維護（手寫）的數字。美國的超短債、投資級公司債與長天期公債 ETF 沒有官方行情來源，這裡不比較。</span>`;
+  }
+
+  return [
+    card('#f59e0b', '💡 長期分數很高，短期結論卻是「等待」或「風險偏高」，是什麼意思？', c1),
+    card('#38bdf8', '💡 看高股息 ETF 只看配息率，會漏掉什麼？', c2),
+    card('#f43f5e', '💡 同時買好幾檔台股 ETF 以為很分散？看看它們的最大持股', c3),
+    card('#10b981', '💡 利率變動對債券 ETF 的影響有多大？', c4),
+  ].join('');
+}
+
 function renderEtfDecisionCenter() {
   if (!STATE || !STATE.etf_center || !STATE.etf_center.etfs) return;
   const etfs = STATE.etf_center.etfs;
@@ -5657,52 +5756,10 @@ function renderEtfDecisionCenter() {
   // =====================================================================
   // 第四區：AI 白話市場解讀（無艱深術語，一眼看懂四大核心問題）
   // =====================================================================
-  setSourceNote('etfSec4AiPlainGrid', 'etfSec4Note', '⚠️ 下方四則白話解讀是 2026-11-21 前後手寫的文章，引用當時的市場數字與美股手寫評分，不會隨資料更新。');
+  setSourceNote('etfSec4AiPlainGrid', 'etfSec4Note',
+    '✅ 四則白話解讀由規則從資料產生，不是手寫文章：配息率、報酬、波動度、分數都是官方行情即時計算；持股權重與債券存續期是人工維護（手寫）的欄位，卡片內有標明。美國 ETF 沒有官方來源，不在這裡解讀。');
   const sec4 = document.getElementById('etfSec4AiPlainGrid');
-  if (sec4) {
-    sec4.innerHTML = `
-      <div class="etf-clean-card" style="border-left:5px solid #f59e0b;">
-        <div style="font-size:17px; font-weight:700; color:#f8fafc; margin-bottom:10px; line-height:1.5;">
-          💡 白話解讀 1：為什麼美股科技 ETF (QQQ / SMH / VOO)「長期分數很高」，但「短期分數卻建議等待」？
-        </div>
-        <div style="font-size:15.5px; color:#cbd5e1; line-height:1.75;">
-          • <strong>長期角度（3～10年）：</strong>微軟、蘋果、輝達與台積電掌握全球 AI 與雲端核心獲利，長期競爭力無可取代，所以<strong>模型 A 長期配置給出 81～92 分的高分</strong>。<br/>
-          • <strong>短期角度（1～12個月）：</strong>目前美股本益比高達 27.4 倍（歷史偏貴區間），加上 11/20 費城半導體指數單日重挫 <strong>-10.67%</strong>，短線波動劇烈。因此<strong>模型 B 提醒「等待更佳條件」</strong>——白話來說就是：<strong>好東西值得放進長期清單，但現在適合趁回檔分批慢慢買，不要在劇烈震盪時一次重壓。</strong>
-        </div>
-      </div>
-
-      <div class="etf-clean-card" style="border-left:5px solid #38bdf8;">
-        <div style="font-size:17px; font-weight:700; color:#f8fafc; margin-bottom:10px; line-height:1.5;">
-          💡 白話解讀 2：買高股息 ETF (0056 / 00878 / 00919) 只看「配息率 8%～10%」會有什麼盲點？
-        </div>
-        <div style="font-size:15.5px; color:#cbd5e1; line-height:1.75;">
-          • <strong>配息從哪裡來更重要：</strong>本系統把每檔高股息 ETF 的配息拆成三塊——「<strong>真正的公司股利</strong>」、「<strong>賣股票賺的價差（資本利得）</strong>」與「<strong>收益平準金（自己的本金）</strong>」。<br/>
-          • 目前台股高股息 ETF 的真實股息殖利率約為 4%～5%，其餘約 <strong>32%～40% 來自過去累積的已實現價差</strong>。若未來股市震盪、沒有價差可配，配息率就會回歸正常水準；相比之下，具備低波動選股邏輯的 <strong>00713</strong> 或美國純股息成長型 <strong>SCHD（100% 來自真實股息）</strong> 現金流永續性更穩健。
-        </div>
-      </div>
-
-      <div class="etf-clean-card" style="border-left:5px solid #f43f5e;">
-        <div style="font-size:17px; font-weight:700; color:#f8fafc; margin-bottom:10px; line-height:1.5;">
-          💡 白話解讀 3：同時買「0050 ＋ 0052 ＋ 00881」以為很分散？小心全部都在買台積電！
-        </div>
-        <div style="font-size:15.5px; color:#cbd5e1; line-height:1.75;">
-          • <strong>名稱不同、底層卻是同一家公司：</strong>0050 的台積電佔比高達 <strong>58.2%</strong>，0052 的台積電佔比更高達 <strong>63.5%</strong>，00881 也有超過 <strong>33%</strong> 的台積電。<br/>
-          • 如果您同時持有這幾檔 ETF，表面上買了 3 檔不同產品，實際上<strong>超過一半以上的資金都押在台積電單一檔股票上</strong>（兩兩重疊度高達 62.6%）。建議搭配金融股 (<strong>0055</strong>)、低波高息 (<strong>00713</strong>)、美股價值股 (<strong>SCHD</strong>) 或債券 ETF (<strong>00937B / SGOV</strong>) 才能真正達到分散風險的效果。
-        </div>
-      </div>
-
-      <div class="etf-clean-card" style="border-left:5px solid #10b981;">
-        <div style="font-size:17px; font-weight:700; color:#f8fafc; margin-bottom:10px; line-height:1.5;">
-          💡 白話解讀 4：現在美債殖利率將近 5%，「超短債、投資級公司債、20年長天期公債」該怎麼選？
-        </div>
-        <div style="font-size:15.5px; color:#cbd5e1; line-height:1.75;">
-          • <strong>想要穩健領息、不想承受價格波動 ➔ 選超短債 (SGOV)：</strong>存續期僅 0.1 年，幾乎零回撤（最大回撤僅 -0.15%），年化配息率 5.12%，是極佳的美元資金停泊港。<br/>
-          • <strong>想要鎖定 5.5%～6% 高息兼顧降息潛力 ➔ 選投資級公司債 (00937B / LQD)：</strong>違約風險低且票息優渥，目前長短線評分雙雙領先。<br/>
-          • <strong>想賭大幅降息賺價差 ➔ 20年長債 (00679B / TLT) 需注意波動：</strong>存續期長達 16.5 年，只要美債殖利率反彈 1%，價格就會下跌約 16%，波動度其實接近股票。
-        </div>
-      </div>
-    `;
-  }
+  if (sec4) sec4.innerHTML = renderEtfPlainReading(etfs);
 
   // 初始化第五區下拉選單
   const portSel = document.getElementById('portAddEtfSelect');
@@ -5877,7 +5934,7 @@ function renderEtfLists() {
   const shown = filtered.slice(0, limit);
   const liveN = STATE.etf_center.etfs.filter(e => e.score_source === 'live').length;
   setSourceNote('etfCardsGridContainer', 'etfSourceNote', liveN
-    ? `✅ 台灣掛牌 ${liveN} 檔 ETF 的雙軌評分由官方逐日行情（證交所／櫃買）與法人買賣超用公式即時計算，附「即時評分」標籤；美國 ETF 沒有官方資料來源，行情與評分是 2026-11-21 前後手寫的種子值（「手寫評分」），不會更新。規模、費用率、追蹤誤差與持股權重為人工維護；淨值／折溢價、3／5 年報酬沒有官方即時來源，顯示 N/A；配息率與近 1 年含息報酬由證交所／櫃買除權息表計算。`
+    ? `✅ 台灣掛牌 ${liveN} 檔 ETF 的雙軌評分由官方逐日行情（證交所／櫃買）與法人買賣超用公式即時計算，附「即時評分」標籤；美國 ETF 沒有官方資料來源，行情與評分是 2026-11-21 前後手寫的種子值（「手寫評分」），不會更新。上市 ETF 的規模由官方發行單位數 × 收盤價計算（近 1 月規模變化與淨申購要累積滿約一個月，之前顯示「累積中」／N/A），上櫃 ETF 的規模、以及費用率、追蹤誤差與持股權重為人工維護（手寫）；淨值／折溢價、3／5 年報酬沒有官方即時來源，顯示 N/A；配息率與近 1 年含息報酬由證交所／櫃買除權息表計算。`
     : '⚠️ 此快照沒有即時 ETF 評分，全部 ETF 的行情、評分與報告都是 2026-11-21 前後手寫的，不會隨資料更新。');
   container.innerHTML = filtered.length
     ? shown.map(e => buildEtfCardHtml(e)).join('')
@@ -6050,7 +6107,7 @@ function buildEtfCardHtml(e) {
             <span class="etf-card-code">${e.etf_code}</span> <span class="etf-card-name">${e.etf_name}</span>
           </div>
           <div class="etf-card-meta">
-            ${e.sub_category} ｜ 規模 <strong>${e.aum_value.toLocaleString()} ${e.aum_unit}</strong>
+            ${e.sub_category} ｜ 規模 <strong>${e.aum_value.toLocaleString()} ${e.aum_unit}</strong> ${etfAumTag(e)}
           </div>
         </div>
         <div class="etf-card-price-box">
@@ -6284,7 +6341,7 @@ function renderChart1Flows() {
   // 沒有數字的 (台股 ETF 沒有官方初級市場申贖資料) 不畫成 0
   const noFlow = list.filter(e => e.primary_net_flow_value === null || e.primary_net_flow_value === undefined).length;
   list = list.filter(e => e.primary_net_flow_value !== null && e.primary_net_flow_value !== undefined);
-  setSourceNote('etfChart1FlowsBox', 'etfChart1Note', noFlow ? `ℹ️ 有 ${noFlow} 檔 ETF 沒有官方初級市場申贖資料（台股 ETF 官方沒有此來源），未畫入；下列美股數字為手寫種子值（2026-11 前後），不會更新。` : '');
+  setSourceNote('etfChart1FlowsBox', 'etfChart1Note', noFlow ? `ℹ️ 有 ${noFlow} 檔 ETF 沒有初級市場申贖數字，未畫入（上市 ETF 的近 1 月淨申購由官方發行單位數的變化估算，要累積滿約一個月才有；上櫃 ETF 沒有官方來源）；圖上美股數字為手寫種子值（2026-11 前後），不會更新。` : '');
 
   // 依絕對流量排序取前 12 檔代表
   list.sort((a, b) => Math.abs(b.primary_net_flow_value || 0) - Math.abs(a.primary_net_flow_value || 0));
@@ -6668,7 +6725,7 @@ function renderEtfComparator() {
       return `<strong style="color:#fbbf24; font-size:16px;">${td.totalDragPct}% / 年</strong><br/><span style="font-size:12.5px; color:#94a3b8;">${td.taxNote}</span>`;
     }],
     ["經常性純股利/票息實質殖利率 (提案004)", e => computeRecurringPureYield(e)],
-    ["基金規模 (AUM) 與近1月變化", e => `<strong>${e.aum_value.toLocaleString()} ${e.aum_unit}</strong> (${e.aum_change_1m_pct >= 0 ? '+' : ''}${e.aum_change_1m_pct}%)`],
+    ["基金規模 (AUM) 與近1月變化", e => `<strong>${e.aum_value.toLocaleString()} ${e.aum_unit}</strong> ${etfAumTag(e)}<br/><span style="font-size:12px; color:#94a3b8;">${etfAumChangeText(e)}</span>`],
     ["買賣價差 (Spread) / 追蹤誤差", e => `價差 <strong>${e.bid_ask_spread_bps ?? '-'} bps</strong> ｜ 誤差 <strong>${e.tracking_error_pct ?? 'N/A'}%</strong>`],
     ["折溢價率 / 初級市場近期申贖", e => `折溢價 <strong>${fmtEtfPct(e.premium_discount_pct, true)}</strong><br/>淨申贖 <span class="${e.primary_net_flow_value>=0?'pos':'neg'}"><strong>${e.primary_net_flow_value === null || e.primary_net_flow_value === undefined ? 'N/A' : fmtEtfNum(e.primary_net_flow_value, true) + ' ' + e.aum_unit}</strong></span>`],
     ["前十大集中度 / 最大單一持股", e => `前十大 <strong>${e.top10_concentration_pct}%</strong><br/><span style="color:#fde68a;">最大：${e.max_single_holding_name}</span>`],
