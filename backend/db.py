@@ -399,6 +399,24 @@ CREATE TABLE IF NOT EXISTS index_price_history (
     close_index REAL,
     PRIMARY KEY (index_name, trade_date)
 );
+-- 16e. 台股 ETF 除息紀錄 (證交所 TWT49U / 櫃買 exDailyQ 除權息計算結果表)：配息率與含息報酬的來源
+CREATE TABLE IF NOT EXISTS etf_dividends (
+    etf_code TEXT NOT NULL,
+    ex_date TEXT NOT NULL,           -- 除息日 ISO
+    cash_per_unit REAL NOT NULL,     -- 每單位現金配息 (元)
+    market TEXT NOT NULL,
+    fetched_at TEXT,
+    PRIMARY KEY (etf_code, ex_date)
+);
+-- 每個市場最近一次「成功」取得的涵蓋範圍；失敗時不更新，計算時以此判斷「沒有配息」是真的還是沒抓到
+CREATE TABLE IF NOT EXISTS etf_dividend_fetch (
+    market TEXT PRIMARY KEY,
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    fetched_at TEXT NOT NULL,
+    row_count INTEGER NOT NULL
+);
+
 -- 16d. 台股 ETF 每日評分快照 (前瞻追蹤用)：每次即時評分時記下當時的 A/B 模型分數與結論，之後與實際報酬比對。
 -- 模型分數無法事後重建 (輸入是最新一期資料)，所以只能從開始累積的那天起前瞻驗證。
 CREATE TABLE IF NOT EXISTS etf_score_history (

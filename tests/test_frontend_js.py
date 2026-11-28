@@ -816,6 +816,10 @@ out.noLive = run("etfLiveMetricsHtml({ live: null })");
 ctx.__e = { live: { last_date: '2026-11-27', history_days: 250, ret_1m: 1.234, ret_3m: null, ret_6m: -2.5, ret_1y: 20, vol_ann: 18.2, mdd: -12.3, dd_from_high: -4.5,
   beta: 1.02, corr_taiex: 0.99, corr_0050: null, insti_billion: -3.456, insti_ratio_pct: -0.21, turnover_20d_billion: 12.3 } };
 out.live = run("etfLiveMetricsHtml(__e)");
+ctx.__e2 = { live: Object.assign({}, ctx.__e.live, { div_ttm: 3.6, div_count: 12, dividend_yield_pct: 4.52, ret_1y_total: 24.3, div_note: null }) };
+out.liveDiv = run("etfLiveMetricsHtml(__e2)");
+ctx.__e3 = { live: Object.assign({}, ctx.__e.live, { div_ttm: null, dividend_yield_pct: null, ret_1y_total: null, div_note: '上市未滿一年，配息率與含息報酬留空' }) };
+out.liveNoDiv = run("etfLiveMetricsHtml(__e3)");
 console.log(JSON.stringify(out));
 """
 
@@ -835,6 +839,18 @@ class TestEtfUiHelpers(unittest.TestCase):
     def test_source_badges(self):
         self.assertIn("即時評分", self.o["badgeLive"])
         self.assertIn("手寫評分", self.o["badgeSeed"])
+
+    def test_dividend_line_shows_values_or_reason(self):
+        h = self.o["liveDiv"]
+        self.assertIn("配息率 4.52%", h)
+        self.assertIn("12 次", h)
+        self.assertIn("+24.3%", h)
+        self.assertIn("非預期殖利率", h)                              # 說明這是過去配息
+        self.assertNotIn("null", h)
+        n = self.o["liveNoDiv"]
+        self.assertIn("上市未滿一年", n)
+        self.assertNotIn("含息報酬 1 年", n)                          # 沒資料就不顯示數字
+        self.assertNotIn("配息與含息報酬", self.o["live"])             # 沒有任何配息欄位時不多出一行
 
     def test_live_metrics_block(self):
         self.assertEqual(self.o["noLive"], "")                       # 美股 ETF 沒有即時指標區塊

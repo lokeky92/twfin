@@ -7,12 +7,13 @@ ETF 決策中心 (台股部分) 的即時化：由官方逐日行情算出風險
 
 資料 (官方)：證交所 STOCK_DAY／櫃買 tradingStock 逐日行情、FMTQIK 加權指數逐日、既有的 0099P 買賣價差、T86／櫃買三大法人買賣超、ETFRank 定期定額戶數。
 仍是人工維護、不會假裝即時的欄位：基金規模、費用率、追蹤誤差 (etf_master)、前十大持股與權重 (etf_holdings)、
-配息來源拆解。沒有官方來源因而一律留空 (N/A) 的欄位：淨值與折溢價、配息率、含息報酬 (1/3/5 年)、初級市場申贖淨額。
+配息來源拆解。沒有官方來源因而一律留空 (N/A) 的欄位：淨值與折溢價、3／5 年報酬、初級市場申贖淨額。
+配息率與近 1 年含息報酬由除權息表計算 (etf_dividends.py)。
 
 模型 A (長期配置)  權重 25/20/20/20/15：底層品質、分散度、估值與風險報酬、成本與流動性、互補性
 模型 B (短中期進場) 權重 20 × 5：大盤環境、資金流向、價格趨勢、估值與價位、波動與下行
 子分數用固定的分段線性函式 (見 lin() 與各 *_score 函式的常數) 映射到 15~95 分；缺資料的子分數以 50 分代入並降低可信度。
-價格報酬不含息 (高股息 ETF 的價格報酬因除息而被低估)，畫面與文字都會標明。
+「價格報酬」不含息 (高股息 ETF 的價格報酬因除息而被低估)，畫面與文字都會標明；含息報酬另列。
 
 純函式在檔案前半，資料庫存取在 apply_live_etf。
 """
@@ -33,7 +34,8 @@ A_WEIGHTS = {"a1": 0.25, "a2": 0.20, "a3": 0.20, "a4": 0.20, "a5": 0.15}
 B_KEYS = ("b1", "b2", "b3", "b4", "b5")
 LABELS = {"a1": "底層資產品質", "a2": "分散度", "a3": "估值與風險報酬", "a4": "成本與流動性", "a5": "互補性",
           "b1": "大盤環境", "b2": "資金流向", "b3": "價格趨勢", "b4": "估值與價位", "b5": "波動與下行"}
-NO_SOURCE_NOTE = ("無官方即時來源而留空：淨值與折溢價、配息率、含息報酬 (1/3/5 年)、初級市場申贖淨額、ROE、債券存續期與信評。"
+NO_SOURCE_NOTE = ("無官方即時來源而留空：淨值與折溢價、3／5 年報酬、初級市場申贖淨額、ROE、債券存續期與信評。"
+                  "配息率與近 1 年含息報酬由證交所／櫃買的除權息表計算 (上市未滿一年或配息表未取得時留空)。"
                   "規模、費用率、追蹤誤差與持股權重是人工維護 (非即時)。")
 
 
@@ -370,7 +372,13 @@ def apply_live_etf(conn=None, today=None, backfill_requests=None):
         if backfill_requests != 0:
             kw = {"max_requests": backfill_requests} if backfill_requests else {}
             bf = ed.backfill(conn, today=today, **kw)
+        div_res = None
+        if backfill_requests != 0:
+            import etf_dividends as edv
+            div_res = edv.refresh(conn, today=today)
         codes = ed.tw_etf_codes(conn)
+        import etf_dividends as edv
+        divs_all, div_cov = edv.load(conn)
         taiex, idx_series = _taiex_metrics(cur)
         series = {c: _series(cur, c) for c in codes}
         series = {c: s for c, s in series.items() if s}
@@ -408,7 +416,8 @@ def apply_live_etf(conn=None, today=None, backfill_requests=None):
             facts = facts_for(etf, m, taiex, corr_core, corr_taiex, beta)
             tx = build_texts(etf, m, taiex, sc, facts, ca, cb, ta, tb)
             missing_pct = round(len(sc["missing"]) / 10 * 100, 1)
-            full = dict(m, beta=beta, corr_taiex=corr_taiex, corr_0050=corr_core, insti_billion=None if insti_val is None else round(insti_val, 3),
+            dv = edv.dividend_metrics(continuous_segment(s)[0], divs_all.get(code, []), m["last_close"], edv.covers(div_cov, market, m["last_date"]))
+            full = dict(m, **dv, beta=beta, corr_taiex=corr_taiex, corr_0050=corr_core, insti_billion=None if insti_val is None else round(insti_val, 3),
                         insti_ratio_pct=etf["insti_ratio_pct"], facts=facts, missing=sc["missing"])
             cur.execute("INSERT OR REPLACE INTO etf_live_metrics VALUES (?,?,?)", (code, m["last_date"], json.dumps(full, ensure_ascii=False)))
             # 每次排程 ETF 引擎都會以寫死的日期重新插入一列 (本次抓到的最新行情與法人資料)，而上次即時更新已把舊列改成真實日期，
@@ -417,12 +426,13 @@ def apply_live_etf(conn=None, today=None, backfill_requests=None):
                            AND rowid NOT IN (SELECT MAX(rowid) FROM etf_daily_metrics WHERE etf_code = ?)""", (code, code))
             cur.execute("""
                 UPDATE etf_daily_metrics SET trade_date = ?, close_price = ?, change_pct = ?, volume_shares = ?, turnover_value = ?,
-                    nav_price = NULL, premium_discount_pct = NULL, primary_net_flow_value = NULL, dividend_yield_pct = NULL,
-                    return_1y_total_pct = NULL, return_3y_ann_pct = NULL, return_5y_ann_pct = NULL, twd_adjusted_1y_return_pct = NULL,
+                    nav_price = NULL, premium_discount_pct = NULL, primary_net_flow_value = NULL, dividend_yield_pct = ?,
+                    return_1y_total_pct = ?, return_3y_ann_pct = NULL, return_5y_ann_pct = NULL, twd_adjusted_1y_return_pct = NULL,
                     return_price_only_1y_pct = ?, annualized_volatility_pct = ?, max_drawdown_pct = ?, beta_vs_market = ?,
                     corr_tw_stock = ?, weighted_roe_pct = NULL, missing_fields_note = ?, metrics_source = 'live'
                 WHERE etf_code = ?
-            """, (m["last_date"], m["last_close"], m["change_pct"], m["volume_shares"], m["turnover_twd"], m["ret_1y"], m["vol_ann"], m["mdd"],
+            """, (m["last_date"], m["last_close"], m["change_pct"], m["volume_shares"], m["turnover_twd"], dv["dividend_yield_pct"], dv["ret_1y_total"],
+                  m["ret_1y"], m["vol_ann"], m["mdd"],
                   beta, corr_taiex, NO_SOURCE_NOTE, code))
             if market != "TWSE":      # 上櫃 ETF：沒有買賣價差的官方來源，不沿用手寫值
                 cur.execute("UPDATE etf_daily_metrics SET bid_price = NULL, ask_price = NULL, bid_ask_spread_bps = NULL WHERE etf_code = ?", (code,))
@@ -463,7 +473,7 @@ def apply_live_etf(conn=None, today=None, backfill_requests=None):
                            (SELECT etf_report_id FROM etf_research_reports WHERE text_source = 'live' AND report_type = '每日報告'
                             ORDER BY etf_report_id DESC LIMIT ?)""", (KEEP_REPORTS,))
         conn.commit()
-        return {"applied": True, "etfs": n, "backfill": bf, "report": rep["etf_report_id"] if rep else None}
+        return {"applied": True, "etfs": n, "backfill": bf, "dividends": div_res, "report": rep["etf_report_id"] if rep else None}
     finally:
         if own:
             conn.close()

@@ -13,12 +13,23 @@ from common import now_tw
 from scoring import classify_alert_level, effective_thresholds
 
 
+def _latest_trade_date(cur):
+    """即時評分用的是最新交易日的收盤資料；快照日用「資料日期」而不是執行日期，
+    這樣週末／假日重跑不會把同一份資料記成新的一天 (灌水快照日數與樣本數)。沒有即時評分資料時回傳 None。"""
+    try:
+        r = cur.execute("SELECT MAX(trade_date) AS d FROM live_industry_daily").fetchone()
+        live = cur.execute("SELECT COUNT(*) AS n FROM industry_rotation_scores WHERE score_source = 'live'").fetchone()
+        return r["d"] if (r and r["d"] and live and live["n"]) else None
+    except Exception:  # noqa: BLE001 — 舊資料庫尚未建表
+        return None
+
+
 def snapshot_industry_scores(snapshot_date=None):
     """寫入今日快照，回傳寫入的產業數。預警等級依當下生效的門檻判定並一併存下。"""
     init_database()
     conn = get_connection()
     cur = conn.cursor()
-    snap = snapshot_date or now_tw().date().isoformat()
+    snap = snapshot_date or _latest_trade_date(cur) or now_tw().date().isoformat()
     cur.execute("SELECT version_id, thresholds_json FROM model_governance_configs WHERE active = 1 ORDER BY created_at DESC LIMIT 1")
     row = cur.fetchone()
     if not row:
@@ -31,6 +42,9 @@ def snapshot_industry_scores(snapshot_date=None):
                score_future_growth, score_institutional, score_valuation, rotation_state, score_source
         FROM industry_rotation_scores WHERE model_version = ?
     """, (version,))
+    if not snapshot_date:
+        # 清掉先前以「執行日期」記下、但日期晚於最新資料日的即時快照 (例如週六凌晨重跑所產生的重複一天)
+        conn.execute("DELETE FROM industry_score_history WHERE score_source = 'live' AND snapshot_date > ?", (snap,))   # 另開 cursor，不破壞上面尚未取出的查詢
     n = 0
     for r in cur.fetchall():
         level = classify_alert_level(r["total_weighted_score"], r["score_capital_flow"], th)

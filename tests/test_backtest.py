@@ -234,6 +234,23 @@ class TestDatabaseIntegration(unittest.TestCase):
             conn.commit()
             conn.close()
 
+    def test_default_snapshot_date_is_the_data_date_and_weekend_dupes_are_removed(self):
+        """快照日 = 最新交易日 (資料日期)，不是執行日期；週末重跑不可多出一天，先前記下的「未來日期」重複快照會被清掉。"""
+        conn = db.get_connection()
+        conn.execute("DELETE FROM industry_score_history")
+        conn.execute("DELETE FROM live_industry_daily")
+        conn.execute("INSERT INTO live_industry_daily (trade_date, industry_id) VALUES ('2026-11-27', 'IND_SEMI_FOUNDRY')")
+        conn.commit()
+        conn.close()
+        snapshot_industry_scores("2026-11-28")                          # 模擬舊版以執行日期 (週六) 寫入的重複快照
+        snapshot_industry_scores()                                      # 新行為：用資料日期 2026-11-27
+        conn = db.get_connection()
+        days = [r[0] for r in conn.execute("SELECT DISTINCT snapshot_date FROM industry_score_history ORDER BY 1")]
+        conn.execute("DELETE FROM live_industry_daily")
+        conn.commit()
+        conn.close()
+        self.assertEqual(days, ["2026-11-27"])
+
     def test_same_day_rerun_as_live_overrides_the_seed_label(self):
         self.assertEqual(bt.snapshot_sources([{"snapshot_date": date(2026, 11, 27), "source": "seed"},
                                               {"snapshot_date": date(2026, 11, 27), "source": "live"},

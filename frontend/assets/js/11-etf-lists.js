@@ -51,7 +51,7 @@ function renderEtfLists() {
   const shown = filtered.slice(0, limit);
   const liveN = STATE.etf_center.etfs.filter(e => e.score_source === 'live').length;
   setSourceNote('etfCardsGridContainer', 'etfSourceNote', liveN
-    ? `✅ 台灣掛牌 ${liveN} 檔 ETF 的雙軌評分由官方逐日行情（證交所／櫃買）與法人買賣超用公式即時計算，附「即時評分」標籤；美國 ETF 沒有官方資料來源，行情與評分是 2026-11-21 前後手寫的種子值（「手寫評分」），不會更新。規模、費用率、追蹤誤差與持股權重為人工維護；淨值／折溢價、配息率、含息報酬沒有官方即時來源，顯示 N/A。`
+    ? `✅ 台灣掛牌 ${liveN} 檔 ETF 的雙軌評分由官方逐日行情（證交所／櫃買）與法人買賣超用公式即時計算，附「即時評分」標籤；美國 ETF 沒有官方資料來源，行情與評分是 2026-11-21 前後手寫的種子值（「手寫評分」），不會更新。規模、費用率、追蹤誤差與持股權重為人工維護；淨值／折溢價、3／5 年報酬沒有官方即時來源，顯示 N/A；配息率與近 1 年含息報酬由證交所／櫃買除權息表計算。`
     : '⚠️ 此快照沒有即時 ETF 評分，全部 ETF 的行情、評分與報告都是 2026-11-21 前後手寫的，不會隨資料更新。');
   container.innerHTML = filtered.length
     ? shown.map(e => buildEtfCardHtml(e)).join('')
@@ -200,11 +200,15 @@ function buildEtfCardHtml(e) {
         • 填息狀態：<strong>${e.dividend_breakdown.fill_dividend_status}</strong> ｜ ${e.dividend_breakdown.analysis_note}
       </div>
     </div>
+  ` : (e.live ? `
+    <div style="background:#111a2e; padding:12px 16px; border-radius:10px; border:1px solid #2a3b5c; margin-top:14px; font-size:14px; color:#cbd5e1;">
+      💰 <strong>配息（官方除權息表）：</strong>${e.live.dividend_yield_pct == null ? 'N/A（' + esc(e.live.div_note || '資料不足') + '）' : `近 12 個月配息率 ${fmtEtfPct(e.live.dividend_yield_pct, false, 2)}（${e.live.div_count} 次，過去已發放 ÷ 現價）`}。配息來源拆解（股利／價差／本金）沒有官方即時來源，不顯示。
+    </div>
   ` : `
     <div style="background:#111a2e; padding:12px 16px; border-radius:10px; border:1px solid #2a3b5c; margin-top:14px; font-size:14px; color:#cbd5e1;">
       💰 <strong>配息分析：</strong>年化殖利率 <strong>${fmtEtfPct(e.dividend_yield_pct)}</strong>（配息頻率：${e.dividend_frequency}），100% 來自成分股真實股利或自動滾入再投資，無動用收益平準金。
     </div>
-  `;
+  `);
 
   return `
     <div id="etfCard_${e.etf_code}" class="etf-clean-card" style="border-color:${borderCol}; border-top:3px solid ${borderCol};">
