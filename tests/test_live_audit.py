@@ -324,7 +324,7 @@ class TestPipelineOrdering(unittest.TestCase):
         """每次排程一開始都會重灌手寫種子列；稽核若太早執行，會把中途狀態誤判為重複／手寫 (實際發生過)。"""
         with open(os.path.join(ROOT, "backend", "run_pipeline.py"), encoding="utf-8") as f:
             src = f.read()
-        order = ["seed_and_compute_all()", "run_live_ingestion()", "build_and_compute_etf_center(", "apply_live_etf()", "apply_live_scoring()",
+        order = ["seed_and_compute_all()", "run_live_ingestion()", "build_and_compute_etf_center(", "apply_live_etf()", "apply_live_macro()", "apply_live_scoring()",
                  "snapshot_industry_scores()", "apply_live_watchlist()", "apply_live_reports()", "run_live_audit_session()", "export_standalone()"]
         pos = [src.index(x, src.index("def main")) for x in order]
         self.assertEqual(pos, sorted(pos), "排程步驟順序錯誤：" + ", ".join(order))

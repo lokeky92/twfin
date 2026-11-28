@@ -25,6 +25,7 @@ from history import history_summary
 from backtest import compute_live_backtest
 from etf_backtest import compute_etf_forward
 from live_timeline import build_timeline_history
+from scenario_monitor import compute_scenario_monitor
 from strategy_sim import compute_strategy_sim
 from live_pulse import compute_home_pulse
 from live_scoring import compute_industry_metrics, flow_matrix, load_inputs as load_scoring_inputs
@@ -82,9 +83,9 @@ LIVE_SECTIONS = ["上市櫃月營收與估值 (MOPS/TWSE/TPEx)", "三大法人�
                  "個股研究名單 (全市場機械式篩選)", "固定研究報告：每日／每週／每月／每季 (即時產生；季報在本季營收湊滿三個月前標示累積中)",
                  "三大法人表 (官方逐日與逐日加總的週／月累計)", "總體指標中的加權指數",
                  "前瞻追蹤回測 (每日評分快照 × 類股報酬指數)", "規則模擬器 (固定規則 × 類股報酬指數)",
-                 "ETF 前瞻追蹤 (每日 A/B 評分快照 × 實際報酬)", "首頁資金輪動時間軸 (真實評分快照)", "本週變化 (快照與法人資金的週比較)"]
-SEED_SECTIONS = ["總體經濟指標 (除加權指數；央行／主計總處月統計與人工維護的國際行情)", "資產配置流向矩陣 (總體背景桑基圖)",
-                 "八大資金池卡片", "情境分析 (撰寫者的主觀假設與權重)", "舊版示範回測 (手寫數據，非實測；已收進折疊的手寫存檔)",
+                 "ETF 前瞻追蹤 (每日 A/B 評分快照 × 實際報酬)", "情境條件監控 (逐條用最新資料判定情境文字裡的條件)", "總體指標：M1B／M2、外匯存底、CPI、景氣燈號、五大銀行放款利率、海關出口、新台幣匯率、全體月營收 (央行／國發會／財政部／MOPS)；設定 FRED 金鑰後加入美債殖利率、聯邦資金利率、VIX", "首頁資金輪動時間軸 (真實評分快照)", "本週變化 (快照與法人資金的週比較)"]
+SEED_SECTIONS = ["總體經濟指標中尚無免費官方來源的項目 (GDP、外銷訂單、存放款餘額、證券劃撥、DXY、SOX；以及官方尚未公布的最新期間)", "資產配置流向矩陣 (總體背景桑基圖)",
+                 "八大資金池卡片", "情境分析的敘事與主觀參考權重 (已收進折疊的手寫存檔)", "舊版示範回測 (手寫數據，非實測；已收進折疊的手寫存檔)",
                  "ETF 持股／配息／回測／報告", "AI 研究團隊 (規則式模擬)",
                  "手寫存檔：四篇趨勢故事 (依撰稿日期的敘事文章，已收進折疊區)", "手寫的 5 個歷史情境回顧 (已收進折疊區)", "三大法人表中 2026-11-20 之前的手寫歷史列"]
 
@@ -501,6 +502,8 @@ def _build_dashboard_base():
     payload["institutional_flows"] = institutional_view(institutional_flows, daily_ind, {i["industry_id"]: i["industry_name"] for i in industries})
     payload["macro_latest"] = macro_with_live_taiex(payload["macro_latest"], live_indices)
     payload["research_reports"] = label_reports(research_reports)
+    # 情境條件監控：用上面已換成即時值的總體指標與法人資料，逐條判定情境文字裡的條件 (不產生機率)
+    payload["scenario_monitor"] = compute_scenario_monitor(payload)
     payload["live_sankey"] = flow_matrix(live_metrics, {i["industry_id"]: i["industry_name"] for i in industries},
                                          _info.get("insti_date"))
     return payload

@@ -89,6 +89,9 @@ jobs:
           fi
 
       - name: Run TWSE / TPEx / MOPS live pipeline & export dashboard
+        env:
+          # 選用：FRED 免費金鑰 (美國公債殖利率、聯邦資金利率、VIX)。沒設定就略過這幾個指標，其餘照常更新
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: python backend/run_pipeline.py --all
 
       - name: Upload SQLite database to release asset

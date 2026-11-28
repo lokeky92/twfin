@@ -737,6 +737,19 @@ out.rep = el('reportsContainer').innerHTML; out.repNote = el('reportsSourceNote'
 ctx.__r2 = [rep('seed', '手寫')];
 run("STATE = { research_reports: __r2 }; renderReports()");
 out.repSeedNote = el('reportsSourceNote').textContent;
+// 情境條件監控
+ctx.__sm = { flows_through: '2026-11-27', note: 'n', conditions: [
+  { id: 'a', scenario: 'BULL', role: 'trigger', label: '美債 <b>殖利率</b> 回落', rule: '< 4.5', value: 4.4, as_of: '2026-11-26', source: 'live', unit: '%', met: true, origin: '樂觀情境 成立條件 1' },
+  { id: 'b', scenario: 'BULL', role: 'trigger', label: '費半', rule: '≥ 8400', value: null, as_of: null, source: null, unit: null, met: null, origin: 'x' },
+  { id: 'c', scenario: 'BASE', role: 'invalidation', label: '跌破 35,500', rule: '< 35500', value: 35000, as_of: '2026-11-27', source: 'live', unit: '點', met: true, origin: 'y' },
+  { id: 'd', scenario: 'BEAR', role: 'trigger', label: '匯率', rule: '> 33.2', value: 32.9, as_of: '2026-11-20', source: 'seed', unit: '', met: false, origin: 'z' } ],
+  summary: { BULL: { triggers_total: 5, live_met: 1, live_known: 1, seed_met: 0, seed_known: 0, no_data: 1, invalidation_hit: [] },
+             BASE: { triggers_total: 5, live_met: 0, live_known: 0, seed_met: 0, seed_known: 0, no_data: 0, invalidation_hit: ['c'] },
+             BEAR: { triggers_total: 5, live_met: 0, live_known: 0, seed_met: 0, seed_known: 1, no_data: 0, invalidation_hit: [] } } };
+run("STATE = { scenario_monitor: __sm }; renderScenarioMonitor()");
+out.scenMon = el('scenarioMonitorContainer').innerHTML;
+run("STATE = {}; renderScenarioMonitor()");
+out.scenMonNone = el('scenarioMonitorContainer').innerHTML;
 ctx.__r3 = [rep('live', '日報'), Object.assign(rep('live', '季報'), { frequency: '每季' })];
 run("STATE = { research_reports: __r3 }; renderReports()");
 out.repLiveQNote = el('reportsSourceNote').textContent;
@@ -781,6 +794,18 @@ class TestProTablesRender(unittest.TestCase):
         self.assertIn("N/A", h)
         self.assertIn("機械式篩選", self.o["compNote"])
         self.assertIn("人工挑選", self.o["compSeedNote"])
+
+    def test_scenario_monitor_renders_conditions_without_probabilities(self):
+        h = self.o["scenMon"]
+        self.assertIn("✅ 成立", h)
+        self.assertIn("— 無資料", h)
+        self.assertIn("❌ 未成立", h)
+        self.assertIn("即時資料 1/1 條成立", h)
+        self.assertIn("手寫數值 0/1", h)
+        self.assertIn("已觸發失效條件：1 項", h)
+        self.assertIn("不再顯示主觀機率", h)
+        self.assertNotIn("<b>殖利率</b>", h)                         # 條件文字已跳脫
+        self.assertIn("沒有情境條件監控資料", self.o["scenMonNone"])
 
     def test_reports_escape_and_label_each_source(self):
         h = self.o["rep"]

@@ -23,6 +23,7 @@ from live_scoring import apply_live_scoring
 from live_watchlist import apply_live_watchlist
 from live_reports import apply_live_reports
 from etf_live import apply_live_etf
+from macro_live import apply_live_macro
 
 def report_ingestion_health(statuses, critical):
     """把各來源狀態輸出成 GitHub Actions annotation；關鍵來源失敗回傳 1，讓排程失敗而不發佈過期資料。"""
@@ -72,6 +73,11 @@ def main():
         print("Live OpenAPI Ingestion:", live_res)
         build_and_compute_etf_center(shared_insti_map=shared_map)
         print("Live ETF (TW):", apply_live_etf())
+        # 總體月統計 (央行／國發會／財政部／選用的 FRED)：失敗只記錄，保留既有資料，不讓整個同步失敗
+        try:
+            print("Live macro:", apply_live_macro())
+        except Exception as _e:  # noqa: BLE001
+            print(f"::warning title=總體資料更新失敗::{type(_e).__name__}: {_e}")
         print("Live industry scoring:", apply_live_scoring())
         print(f"Industry score snapshot rows: {snapshot_industry_scores()}")
         print("Live watchlist:", apply_live_watchlist())
