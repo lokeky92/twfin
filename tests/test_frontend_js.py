@@ -1037,6 +1037,22 @@ for (const fn of ['renderEtfLists', 'renderChart1Flows', 'renderChart2And3Scores
 run("renderEtfDecisionCenter()");
 out.sec2 = el('etfSec2DecisionSummary').innerHTML; out.sec2note = el('etfSec2Note').textContent;
 out.sec1note = el('etfSec1Note').textContent; out.sec4note = el('etfSec4Note').textContent;
+out.sec1empty = el('etfSec1GlobalEnv').innerHTML;
+// 第一區：有資料時全部從 STATE 讀，即時／手寫分開標示
+run(`STATE = { etf_center: { etfs: __etfs },
+  macro_latest: [
+    { metric_code: 'TW_NDC_SCORE', cleaned_value: 40, period_covered: '2026-10', revision_version: 'live (官方開放資料)' },
+    { metric_code: 'US_10Y_YIELD', cleaned_value: 4.85, period_covered: '2026-11-25', revision_version: 'live (官方開放資料)' },
+    { metric_code: 'INTL_VIX', cleaned_value: 26.8, period_covered: '2026-11-26', revision_version: 'live (官方開放資料)' },
+    { metric_code: 'INTL_SOX_INDEX', cleaned_value: 8415, period_covered: '2026-11-20', revision_version: 'v1.0' },
+    { metric_code: 'TW_MOPS_TOTAL_REV', cleaned_value: 6.8635, yoy_pct: 45.49, period_covered: '2026-10', revision_version: 'live (官方開放資料)' } ],
+  institutional_flows: [
+    { period_type: 'DAILY', text_source: 'live', release_date: '2026-11-26', foreign_net_billion: -100, total_3insti_billion: -80 },
+    { period_type: 'DAILY', text_source: 'live', release_date: '2026-11-27', foreign_net_billion: -296.28, total_3insti_billion: -213.03 },
+    { period_type: 'DAILY', text_source: 'live', release_date: '2026-10-30', foreign_net_billion: 999, total_3insti_billion: 999 },
+    { period_type: 'QUARTERLY', text_source: 'seed', release_date: '2026-11-30', foreign_net_billion: 5000, total_3insti_billion: 5000 } ] }`);
+run("renderEtfDecisionCenter()");
+out.sec1 = el('etfSec1GlobalEnv').innerHTML; out.sec1note2 = el('etfSec1Note').textContent;
 out.spark = run("etfSparkline([['2026-01-02', 100], ['2026-01-03', 110], ['2026-01-04', 105]])");
 out.sparkEmpty = run("etfSparkline([['2026-01-02', 100]])");
 console.log(JSON.stringify(out));
@@ -1097,6 +1113,31 @@ class TestEtfChartsExecute(unittest.TestCase):
         self.assertIn("分開呈現", self.o["sec2note"])
         self.assertIn("手寫", self.o["sec1note"])
         self.assertIn("手寫", self.o["sec4note"])
+
+    def test_global_env_is_driven_by_live_data_not_handwritten_text(self):
+        h = self.o["sec1"]
+        self.assertIn("景氣 40 分 紅燈", h)
+        self.assertIn("4.85%", h)
+        self.assertIn("26.8", h)
+        self.assertIn("+45.5%", h)
+        self.assertNotIn("4.97", h)                                      # 舊手寫的美債 4.97% 已不存在
+        self.assertNotIn("41 分", h)
+        self.assertNotIn("0050 吸金", h)
+        self.assertIn("-396", h)                                         # 外資本月累計 = -100 + -296.28，不含 10 月與非逐日列
+        self.assertNotIn("+5,000", h)
+        # 費半是手寫數值 → 標手寫；其餘為即時
+        sox = h[h.index("費城半導體指數"):]
+        self.assertIn("手寫", sox[:sox.index("</tr>")])
+        vix = h[h.index("VIX 恐慌指數"):]
+        self.assertIn("即時", vix[:vix.index("</tr>")])
+        self.assertIn("即時", self.o["sec1note2"])
+        self.assertIn("手寫", self.o["sec1note2"])
+
+    def test_global_env_without_data_says_no_data_instead_of_guessing(self):
+        h = self.o["sec1empty"]
+        self.assertIn("無資料", h)
+        self.assertNotIn("NaN", h)
+        self.assertNotIn("undefined", h)
 
     def test_sparkline(self):
         self.assertIn("<polyline", self.o["spark"])
