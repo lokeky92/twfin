@@ -40,6 +40,21 @@ class TestParse(unittest.TestCase):
         self.assertIsNone(ms.parse_foreign_oi({"error": "x"}))
 
 
+class TestTaifexBody(unittest.TestCase):
+    def test_json_and_csv_bodies_give_the_same_rows(self):
+        import json
+        as_json = json.dumps(taifex_rows(), ensure_ascii=False).encode("utf-8")
+        head = "日期,商品名稱,身份別,多方交易口數,多空未平倉口數淨額"
+        as_csv = ("\ufeff" + head + "\n20261127,臺股期貨,自營商,1,-3566\n20261127,臺股期貨,外資及陸資,2,-107503\n20261127,小型臺指期貨,外資及陸資,3,999\n").encode("utf-8")
+        self.assertEqual(ms.parse_foreign_oi(ms.parse_taifex_body(as_json)), ("2026-11-27", -107503))
+        self.assertEqual(ms.parse_foreign_oi(ms.parse_taifex_body(as_csv)), ("2026-11-27", -107503))     # CI 實際收到 CSV
+
+    def test_unrecognised_body_raises_with_preview(self):
+        with self.assertRaises(ValueError) as cm:
+            ms.parse_taifex_body("<html> Access Denied </html>".encode("utf-8"))
+        self.assertIn("Access Denied", str(cm.exception))
+
+
 class TestDescribeError(unittest.TestCase):
     def test_http_and_non_json_errors_are_described(self):
         import json
@@ -97,7 +112,7 @@ class TestDatabase(unittest.TestCase):
             if isinstance(by_date.get(d), Exception):
                 raise by_date[d]
             return by_date.get(d, {"stat": "很抱歉，沒有符合條件的資料!"})
-        return {"json": fj}
+        return {"json": fj, "taifex": fj}
 
     def test_writes_same_day_official_rows_and_backfills_missing_days(self):
         conn = self.conn()

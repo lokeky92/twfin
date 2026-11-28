@@ -14,10 +14,14 @@
 - 期貨口徑只含「臺股期貨」(大台)，不含小型／微型臺指，不是各家媒體換算成大台等值的口數；畫面備註標明。
 - 任一來源失敗只記錄、保留既有資料，絕不寫入 0。
 """
+import csv
+import io
+import json
 import re
+import urllib.request
 from datetime import date
 
-from common import describe_error, fetch_json, logger
+from common import _SSL_CTX, _USER_AGENT, describe_error, fetch_json, logger
 
 URL_MARGIN = "https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?date={d}&selectType=MS&response=json"
 URL_TAIFEX = "https://openapi.taifex.com.tw/v1/MarketDataOfMajorInstitutionalTradersDetailsOfFuturesContractsBytheDate"
@@ -55,8 +59,38 @@ def parse_margin(payload):
     return None
 
 
+# 期交所同一個端點依來源不同，有時回傳 JSON、有時回傳 CSV (欄位名稱是中文)；兩種格式的欄位對照
+CSV_FIELDS = {"日期": "Date", "商品名稱": "ContractCode", "身份別": "Item", "多空未平倉口數淨額": "OpenInterest(Net)"}
+
+
+def parse_taifex_body(raw):
+    """期交所回應 (bytes) → list[dict]，鍵為 JSON 版的英文欄位名；JSON 或 CSV 都接受，兩者都不是就丟 ValueError。"""
+    text = raw.decode("utf-8-sig", errors="replace")
+    try:
+        data = json.loads(text)
+        if isinstance(data, list):
+            return data
+    except ValueError:
+        pass
+    rows = list(csv.DictReader(io.StringIO(text)))
+    if not rows or "身份別" not in rows[0]:
+        raise ValueError("期交所回應格式無法辨識：" + " ".join(text[:60].split()))
+    def name(k):
+        k = k.strip()
+        if "未平倉口數" in k and "淨額" in k:          # 「多空未平倉口數淨額」：欄名若有細微差異仍可對上
+            return "OpenInterest(Net)"
+        return CSV_FIELDS.get(k, k)
+    return [{name(k): v for k, v in r.items() if k} for r in rows]
+
+
+def _fetch_taifex_rows(url):
+    req = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT, "Accept": "application/json"})
+    with urllib.request.urlopen(req, timeout=60, context=_SSL_CTX) as resp:
+        return parse_taifex_body(resp.read())
+
+
 def parse_foreign_oi(rows):
-    """期交所 JSON → (ISO 日期, 外資及陸資臺股期貨多空未平倉淨口數)；找不到回傳 None。"""
+    """期交所資料列 → (ISO 日期, 外資及陸資臺股期貨多空未平倉淨口數)；找不到回傳 None。"""
     if not isinstance(rows, list):
         return None
     for r in rows:
@@ -73,6 +107,7 @@ def apply_market_stats(conn=None, fetchers=None, max_backfill=MAX_BACKFILL):
     """抓取最新融資餘額與外資期貨未平倉，補進同一天的官方逐日列；另回補最近缺融資餘額的幾個交易日。"""
     from db import get_connection
     fj = (fetchers or {}).get("json") or (lambda u: fetch_json(u, timeout=45, retries=2))
+    ftx = (fetchers or {}).get("taifex") or _fetch_taifex_rows
     own = conn is None
     conn = conn or get_connection()
     status, written = {}, {"margin": [], "futures": []}
@@ -114,7 +149,7 @@ def apply_market_stats(conn=None, fetchers=None, max_backfill=MAX_BACKFILL):
 
         # 2. 外資臺股期貨未平倉 (只有最新一天)
         try:
-            oi = parse_foreign_oi(fj(URL_TAIFEX))
+            oi = parse_foreign_oi(ftx(URL_TAIFEX))
             status["TAIFEX 外資期貨未平倉"] = "OK" if oi else "解析不到資料"
             if oi:
                 n = cur.execute("UPDATE institutional_flows SET foreign_futures_oi_contracts = ? WHERE period_type = 'DAILY' "
