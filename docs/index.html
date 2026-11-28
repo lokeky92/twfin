@@ -2203,7 +2203,7 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
       <div class="etf-section-banner" style="border-left-color:#10b981; margin-top:8px;">
         <div>
           <div class="etf-section-title"><span class="sec-no">1</span>全球市場環境</div>
-          <div class="etf-section-sub">10 秒看懂台美市場、利率與資金狀況（資料基準：2026 年 11 月 21 日）</div>
+          <div class="etf-section-sub">10 秒看懂台美市場、利率與資金狀況（每項數值標示資料期間與「即時／手寫」來源）</div>
         </div>
       </div>
       <div id="etfSec1GlobalEnv" class="etf-grid-4"></div>
@@ -5477,6 +5477,102 @@ function concBBadge(c) {
   return `<span class="badge badge-unratable">${c}</span>`;
 }
 
+// ===== 第一區：全球市場環境 (數字全部來自 STATE.macro_latest／institutional_flows，逐項標示即時或手寫) =====
+const NDC_LAMPS = [[38, '紅燈'], [32, '黃紅燈'], [23, '綠燈'], [17, '黃藍燈'], [9, '藍燈']];   // 國發會景氣對策信號分數級距
+
+function ndcLampName(score) {
+  const hit = NDC_LAMPS.find(([lo]) => score >= lo);
+  return hit ? hit[1] : '';
+}
+
+function globalEnvFlows() {
+  const rows = ((STATE && STATE.institutional_flows) || []).filter(r => r.period_type === 'DAILY' && r.text_source === 'live' && r.release_date);
+  rows.sort((a, b) => String(a.release_date).localeCompare(String(b.release_date)));
+  if (!rows.length) return null;
+  const last = rows[rows.length - 1];
+  const month = String(last.release_date).slice(0, 7);
+  const inMonth = rows.filter(r => String(r.release_date).slice(0, 7) === month && r.foreign_net_billion != null);
+  return { last, month, days: inMonth.length, foreignMonth: inMonth.reduce((s, r) => s + Number(r.foreign_net_billion), 0) };
+}
+
+function renderGlobalEnv() {
+  const macros = {};
+  ((STATE && STATE.macro_latest) || []).forEach(m => { macros[m.metric_code] = m; });
+  const isLive = m => String(m.revision_version || '').startsWith('live') || m.metric_code === 'TW_TAIEX_INDEX';
+  const num = (v, d) => Number(v).toLocaleString(undefined, { maximumFractionDigits: d == null ? 2 : d });
+  const signed = (v, d) => (Number(v) > 0 ? '+' : '') + num(v, d);
+  const cls = v => Number(v) > 0 ? 'pos' : Number(v) < 0 ? 'neg' : '';
+  const badge = live => live ? '<span class="badge badge-grade-A" title="官方開放資料自動更新">即時</span>' : '<span class="badge badge-grade-C" title="人工維護的數值，不會自動更新">手寫</span>';
+  let nLive = 0, nHand = 0;
+  // 一列：標籤 / 數值 / 資料期間 / 來源；沒有資料就顯示「無資料」，不猜
+  const line = (label, valueHtml, asOf, live) => {
+    if (valueHtml == null) return `<tr><td>${label}</td><td style="color:var(--text-muted);">無資料</td><td></td><td></td></tr>`;
+    if (live) nLive++; else nHand++;
+    return `<tr><td>${label}</td><td style="text-align:right; font-weight:700;">${valueHtml}</td><td style="font-size:11px; color:var(--text-muted);">${esc(asOf || '')}</td><td>${badge(live)}</td></tr>`;
+  };
+  const mline = (label, code, fmt) => {
+    const m = macros[code];
+    if (!m || m.cleaned_value == null) return line(label, null);
+    return line(label, fmt(m), m.period_covered, isLive(m));
+  };
+  const card = (color, title, heroHtml, rows) => `
+      <div class="etf-clean-card" style="border-top:4px solid ${color};">
+        <div style="font-size:16px; font-weight:800; color:#94a3b8;">${title}</div>
+        <div class="etf-hero-num" style="margin:10px 0 8px 0;">${heroHtml}</div>
+        <table style="width:100%; font-size:13px;"><tbody>${rows.join('')}</tbody></table>
+      </div>`;
+  const hero = (text, extraCls) => `<span class="${extraCls || ''}">${text}</span>`;
+  const flows = globalEnvFlows();
+
+  const ndc = macros.TW_NDC_SCORE;
+  const c1 = card('#10b981', '1. 台灣市場狀況',
+    ndc && ndc.cleaned_value != null ? hero(`景氣 ${num(ndc.cleaned_value, 0)} 分 ${ndcLampName(Number(ndc.cleaned_value))}`) : hero('景氣燈號 無資料'), [
+      mline('景氣燈號分數 (9~45)', 'TW_NDC_SCORE', m => `${num(m.cleaned_value, 0)} 分 ${ndcLampName(Number(m.cleaned_value))}`),
+      mline('上市櫃月營收合計', 'TW_MOPS_TOTAL_REV', m => `${num(m.cleaned_value, 2)} 兆元 <span class="${cls(m.yoy_pct)}">(${signed(m.yoy_pct, 1)}%)</span>`),
+      mline('海關出口 (年增)', 'TW_CUSTOMS_EXPORTS', m => `${num(m.cleaned_value, 1)} 億美元 <span class="${cls(m.yoy_pct)}">(${signed(m.yoy_pct, 1)}%)</span>`),
+      mline('外銷訂單 (年增)', 'TW_EXPORT_ORDERS', m => `<span class="${cls(m.yoy_pct)}">${signed(m.yoy_pct, 1)}%</span>`),
+      mline('加權指數', 'TW_TAIEX_INDEX', m => `${num(m.cleaned_value, 0)} 點`),
+    ]);
+
+  const vix = macros.INTL_VIX;
+  const c2 = card('#f59e0b', '2. 美國市場狀況',
+    vix && vix.cleaned_value != null ? hero(`VIX ${num(vix.cleaned_value, 1)}`, Number(vix.cleaned_value) >= 25 ? 'neg' : '') : hero('VIX 無資料'), [
+      mline('VIX 恐慌指數', 'INTL_VIX', m => num(m.cleaned_value, 1)),
+      mline('費城半導體指數 (SOX)', 'INTL_SOX_INDEX', m => `${num(m.cleaned_value, 0)} 點`),
+      mline('美元指數 (DXY)', 'INTL_DXY', m => num(m.cleaned_value, 2)),
+      mline('聯準會利率上限', 'US_FED_RATE_UPPER', m => `${num(m.cleaned_value, 2)}%`),
+    ]);
+
+  const us10 = macros.US_10Y_YIELD;
+  const c3 = card('#38bdf8', '3. 利率環境',
+    us10 && us10.cleaned_value != null ? hero(`美債10Y ${num(us10.cleaned_value, 2)}%`, '') : hero('美債10Y 無資料'), [
+      mline('美國 10 年期公債殖利率', 'US_10Y_YIELD', m => `${num(m.cleaned_value, 2)}%`),
+      mline('五大銀行新承作放款利率', 'TW_FIVE_BANK_NEW_RATE', m => `${num(m.cleaned_value, 3)}%`),
+      mline('M1B 年增率', 'TW_M1B_YOY', m => `${num(m.cleaned_value, 2)}%`),
+      mline('M2 年增率', 'TW_M2_YOY', m => `${num(m.cleaned_value, 2)}%`),
+      mline('新台幣兌美元', 'TW_USD_TWD', m => num(m.cleaned_value, 2)),
+    ]);
+
+  const fl = flows;
+  const flowRows = [];
+  if (fl) {
+    nLive += 3;
+    flowRows.push(`<tr><td>外資本月累計 (${esc(fl.month)}，${fl.days} 個交易日)</td><td style="text-align:right; font-weight:700;" class="${cls(fl.foreignMonth)}">${signed(fl.foreignMonth, 0)} 億</td><td style="font-size:11px; color:var(--text-muted);">截至 ${esc(fl.last.release_date)}</td><td>${badge(true)}</td></tr>`);
+    flowRows.push(`<tr><td>最新交易日 外資</td><td style="text-align:right; font-weight:700;" class="${cls(fl.last.foreign_net_billion)}">${signed(fl.last.foreign_net_billion, 1)} 億</td><td style="font-size:11px; color:var(--text-muted);">${esc(fl.last.release_date)}</td><td>${badge(true)}</td></tr>`);
+    flowRows.push(`<tr><td>最新交易日 三大法人合計</td><td style="text-align:right; font-weight:700;" class="${cls(fl.last.total_3insti_billion)}">${signed(fl.last.total_3insti_billion, 1)} 億</td><td style="font-size:11px; color:var(--text-muted);">${esc(fl.last.release_date)}</td><td>${badge(true)}</td></tr>`);
+  } else {
+    flowRows.push(line('外資買賣超', null));
+  }
+  flowRows.push(mline('證券劃撥存款餘額', 'TW_SEC_GIRO_BAL', m => `${num(m.cleaned_value, 2)} 兆元`));
+  flowRows.push(mline('外匯存底', 'TW_FX_RESERVES', m => `${num(m.cleaned_value, 0)} 億美元`));
+  const c4 = card('#10b981', '4. 全球與台灣資金流向',
+    fl ? hero(`外資本月 ${signed(fl.foreignMonth, 0)} 億`, cls(fl.foreignMonth)) : hero('外資買賣超 無資料'), flowRows);
+
+  const html = c1 + c2 + c3 + c4;
+  const note = `✅ 四張卡的數字都是從資料讀出來的：標「即時」的來自官方開放資料並隨每次同步更新（共 ${nLive} 項）；標「手寫」的是人工維護、不會自動更新的數值（共 ${nHand} 項，例如費半、美元指數、外銷訂單、劃撥存款，沒有免費的官方 API），看資料期間自行判斷是否過期。已移除先前手寫的市場敘事文字。`;
+  return { html, note };
+}
+
 function renderEtfDecisionCenter() {
   if (!STATE || !STATE.etf_center || !STATE.etf_center.etfs) return;
   const etfs = STATE.etf_center.etfs;
@@ -5484,67 +5580,11 @@ function renderEtfDecisionCenter() {
   // =====================================================================
   // 第一區：全球市場環境（台灣市場 / 美國市場 / 利率環境 / 全球資金流向）
   // =====================================================================
-  setSourceNote('etfSec1GlobalEnv', 'etfSec1Note', '⚠️ 下方「全球市場環境」四張卡是 2026-11-21 前後手寫的市場摘要（卡片標題已寫明資料基準日），沒有每日的官方來源，不會隨資料更新。');
+  // 第一區的數字都從 STATE 讀 (官方即時資料；沒有免費來源的才用手寫數值並標「手寫」)，不再放手寫的敘事文字
+  const sec1Info = renderGlobalEnv();
+  setSourceNote('etfSec1GlobalEnv', 'etfSec1Note', sec1Info.note);
   const sec1 = document.getElementById('etfSec1GlobalEnv');
-  if (sec1) {
-    sec1.innerHTML = `
-      <div class="etf-clean-card" style="border-top:4px solid #10b981;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:16px; font-weight:800; color:#94a3b8;">1. 台灣市場狀況</span>
-          <span class="badge badge-lvl4">🟢 基本面強勁擴張</span>
-        </div>
-        <div class="etf-hero-num pos" style="margin:10px 0 6px 0;">景氣 41 分紅燈</div>
-        <div style="font-size:16px; font-weight:800; color:#f8fafc; margin-bottom:6px;">
-          上市櫃10月營收 6.86 兆 (+45.5%)・外銷訂單 +78.3%
-        </div>
-        <div style="font-size:15px; color:#cbd5e1; line-height:1.65;">
-          AI 伺服器與半導體先進製程帶動台灣企業獲利創歷史新高（0050 成分股10月加權營收年增 <strong>+55.4%</strong>），長線基本面極為扎實，惟需留意美國科技股回檔帶來的短線震盪。
-        </div>
-      </div>
-
-      <div class="etf-clean-card" style="border-top:4px solid #f59e0b;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:16px; font-weight:800; color:#94a3b8;">2. 美國市場狀況</span>
-          <span class="badge badge-grade-C">🟠 長線優質・短期震盪</span>
-        </div>
-        <div class="etf-hero-num" style="color:#fbbf24; margin:10px 0 6px 0;">S&amp;P 本益比 27.4x</div>
-        <div style="font-size:16px; font-weight:800; color:#f8fafc; margin-bottom:6px;">
-          11/20 費城半導體單日重挫 <span class="neg">-10.67%</span>・VIX 跳升
-        </div>
-        <div style="font-size:15px; color:#cbd5e1; line-height:1.65;">
-          美國大型科技巨頭長線護城河依然穩固（VOO/QQQ 長期高分），但估值位於歷史 88% 高位，加上費半暴跌引發短線去槓桿，目前美股科技呈現「<strong>長期適合研究、短期等待更佳條件</strong>」。
-        </div>
-      </div>
-
-      <div class="etf-clean-card" style="border-top:4px solid #38bdf8;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:16px; font-weight:800; color:#94a3b8;">3. 利率環境</span>
-          <span class="badge badge-lvl3">🔵 高利率鎖利期</span>
-        </div>
-        <div class="etf-hero-num" style="color:#38bdf8; margin:10px 0 6px 0;">美債10Y 4.97%</div>
-        <div style="font-size:16px; font-weight:800; color:#f8fafc; margin-bottom:6px;">
-          台灣五大銀行放款利率 2.254%（創17年新高）
-        </div>
-        <div style="font-size:15px; color:#cbd5e1; line-height:1.65;">
-          美債殖利率逼近 5% 大關，使<strong>美元超短債 (SGOV) 與投資級公司債 (00937B/LQD)</strong> 具備 5.1%～5.85% 優質鎖利空間；台灣利率走升則推升<strong>銀行金融股 (0055)</strong> 淨利差擴張，但壓抑高舉債 REITs (VNQ)。
-        </div>
-      </div>
-
-      <div class="etf-clean-card" style="border-top:4px solid #10b981;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:16px; font-weight:800; color:#94a3b8;">4. 全球與台灣資金流向</span>
-          <span class="badge badge-lvl4">🟢 內資大買市值與債券</span>
-        </div>
-        <div class="etf-hero-num pos" style="margin:10px 0 6px 0;">0050 吸金 +2,200億</div>
-        <div style="font-size:16px; font-weight:800; color:#f8fafc; margin-bottom:6px;">
-          劃撥存款 4.70 兆創高 vs 外資11月賣超 <span class="neg">-5,495億</span>
-        </div>
-        <div style="font-size:15px; color:#cbd5e1; line-height:1.65;">
-          儘管外資因費半重挫而提款台股，台灣內資交割戶資金充沛，趁回檔大舉申購<strong>被動市值型 (0050/006208)</strong> 與<strong>投等債 (00937B)</strong>；反觀主動式 ETF (00400A) 與槓桿 ETF 遭遇資金撤出。
-        </div>
-      </div>
-    `;
-  }
+  if (sec1) sec1.innerHTML = sec1Info.html;
 
   // =====================================================================
   // 第二區：ETF 決策摘要（長期配置環境 / 短中期進場環境 / 值得研究 / 注意風險）
