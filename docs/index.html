@@ -4634,7 +4634,7 @@ function renderMacroCards() {
   const isLiveMacro = (it) => String(it.revision_version || '').startsWith('live') || it.metric_code === 'TW_TAIEX_INDEX';
   const nLiveMacro = (STATE.macro_latest || []).filter(isLiveMacro).length;
   setSourceNote('macroCardsContainer', 'macroSourceNote',
-    `ℹ️ ${nLiveMacro} 項指標由官方開放資料自動更新（卡片標示「即時」：加權指數為證交所每日收盤；M1B／M2、外匯存底、CPI、景氣燈號、放款利率、出口、匯率等來自央行、國發會、財政部，備註由規則產生）；標示「手寫」的是沒有免費官方 API 的項目 (GDP、外銷訂單、存放款餘額、證券劃撥、DXY、SOX…) 或官方尚未公布的最新期間，不會自動更新。每張卡都標示「涵蓋期間」，請以該期間為準。美債殖利率、聯邦資金利率、VIX 需設定免費 FRED 金鑰才會自動更新。`);
+    `ℹ️ ${nLiveMacro} 項指標由官方開放資料自動更新（卡片標示「即時」：加權指數為證交所每日收盤；M1B／M2、外匯存底、CPI、景氣燈號、放款利率、出口、匯率等來自央行、國發會、財政部，備註由規則產生）；標示「手寫」的是沒有免費官方 API 的項目 (GDP、存放款餘額、證券劃撥、ICE 美元指數 DXY、SOX…) 或官方尚未公布的最新期間，不會自動更新。每張卡都標示「涵蓋期間」，請以該期間為準。美債殖利率、聯邦資金利率、VIX、廣義美元指數需設定免費 FRED 金鑰才會自動更新。`);
   const pctTxt = (v) => (v === null || v === undefined) ? 'N/A' : (v > 0 ? '+' : '') + v + '%';
   const items = STATE.macro_latest.filter(item => {
     if (modFilter !== 'ALL' && item.module_id !== modFilter) return false;
@@ -4912,7 +4912,7 @@ function renderInstiFlows() {
     : s === 'computed' ? '<span class="badge badge-grade-B">由逐日加總</span>'
     : '<span class="badge badge-grade-C">手寫歷史</span>';
   setSourceNote('instiFlowsBody', 'instiSourceNote', liveRows
-    ? '✅ 「官方逐日」來自證交所 BFI82U 每日盤後統計；「由逐日加總」是把官方逐日資料加總出的週／月累計（只涵蓋有資料的交易日，不是官方週／月統計）；「手寫歷史」是 2026-11-20 之前人工整理的舊紀錄，與官方資料重疊的期間已不顯示。期貨未平倉與融資餘額官方逐日 API 不提供，顯示「—」。'
+    ? '✅ 「官方逐日」來自證交所 BFI82U 每日盤後統計；「由逐日加總」是把官方逐日資料加總出的週／月累計（只涵蓋有資料的交易日，不是官方週／月統計）；「手寫歷史」是 2026-11-20 之前人工整理的舊紀錄，與官方資料重疊的期間已不顯示。融資餘額來自證交所信用交易統計、外資期貨未平倉來自期交所（臺股期貨大台，不含小型／微型；期交所只提供最新一天，所以只能從開始抓的那天起累積）；沒有數字的日子顯示「—」，不當作 0。'
     : '⚠️ 此快照沒有官方逐日資料，以下全部是手寫的歷史紀錄，不會隨資料更新。');
   const fmtVal = (v) => (v === null || v === undefined || Number.isNaN(v)) ? '<span>N/A</span>'
     : `<span class="${v >= 0 ? 'pos' : 'neg'}"><strong>${v >= 0 ? '+' : ''}${v.toLocaleString()}</strong></span>`;
