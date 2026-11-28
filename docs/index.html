@@ -2078,7 +2078,11 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-blue
 
       <!-- PRO TAB 7: 情境分析與 3/6/12/24M 觀察表 -->
       <section id="pro-scenarios" class="pro-panel">
-        <div id="scenariosContainer" class="grid-4" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));"></div>
+        <div id="scenarioMonitorContainer"></div>
+        <details style="margin-top:14px;">
+          <summary style="cursor:pointer; font-weight:700; color:var(--text-secondary);">📁 手寫存檔：三個情境的敘事與主觀參考權重（2026-11-22 前後撰寫，不會隨資料更新）</summary>
+          <div id="scenariosContainer" class="grid-4" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); margin-top:12px;"></div>
+        </details>
       </section>
 
       <!-- PRO TAB 8: 固定研究報告中心 -->
@@ -4627,8 +4631,10 @@ function renderMacroCards() {
   const modFilter = document.getElementById('macroModuleFilter').value;
   const typeFilter = document.getElementById('macroTypeFilter').value;
   const container = document.getElementById('macroCardsContainer');
+  const isLiveMacro = (it) => String(it.revision_version || '').startsWith('live') || it.metric_code === 'TW_TAIEX_INDEX';
+  const nLiveMacro = (STATE.macro_latest || []).filter(isLiveMacro).length;
   setSourceNote('macroCardsContainer', 'macroSourceNote',
-    'ℹ️ 加權指數為證交所每日收盤（即時）；其餘總體與國際指標多為央行、主計總處、經濟部的月／季統計或人工維護的國際行情，沒有每日的免費官方來源，下方每張卡都標示「涵蓋期間」，請以該期間為準。');
+    `ℹ️ ${nLiveMacro} 項指標由官方開放資料自動更新（卡片標示「即時」：加權指數為證交所每日收盤；M1B／M2、外匯存底、CPI、景氣燈號、放款利率、出口、匯率等來自央行、國發會、財政部，備註由規則產生）；標示「手寫」的是沒有免費官方 API 的項目 (GDP、外銷訂單、存放款餘額、證券劃撥、DXY、SOX…) 或官方尚未公布的最新期間，不會自動更新。每張卡都標示「涵蓋期間」，請以該期間為準。美債殖利率、聯邦資金利率、VIX 需設定免費 FRED 金鑰才會自動更新。`);
   const pctTxt = (v) => (v === null || v === undefined) ? 'N/A' : (v > 0 ? '+' : '') + v + '%';
   const items = STATE.macro_latest.filter(item => {
     if (modFilter !== 'ALL' && item.module_id !== modFilter) return false;
@@ -4647,6 +4653,7 @@ function renderMacroCards() {
             <div class="card-title">${item.metric_name}</div>
           </div>
           <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
+            ${isLiveMacro(item) ? '<span class="badge badge-grade-A" title="由官方開放資料自動更新">即時</span>' : '<span class="badge badge-grade-C" title="人工維護的數值，不會自動更新">手寫</span>'}
             ${gradeBadge(item.quality_grade)}
             ${obsBadge(item.observation_type)}
           </div>
@@ -5093,15 +5100,46 @@ async function submitCompanyRemap() {
   }
 }
 
+// 情境條件監控：把情境文字裡可量化的條件逐條用最新資料判定 (後端 scenario_monitor.py)；不產生機率
+function renderScenarioMonitor() {
+  const box = document.getElementById('scenarioMonitorContainer');
+  if (!box) return;
+  const sm = STATE && STATE.scenario_monitor;
+  if (!sm || !(sm.conditions || []).length) {
+    box.innerHTML = '<div class="card"><div class="card-title">情境條件監控</div><div style="color:var(--text-secondary);">此快照沒有情境條件監控資料。</div></div>';
+    return;
+  }
+  const names = { BULL: '🟢 樂觀情境', BASE: '🔵 中性情境', BEAR: '🔴 悲觀情境' };
+  const mark = (c) => c.met === true ? '<span class="pos">✅ 成立</span>' : c.met === false ? '<span class="neg">❌ 未成立</span>' : '<span style="color:var(--text-muted);">— 無資料</span>';
+  const src = (c) => c.source === 'live' ? '<span class="badge badge-grade-A" title="官方資料自動更新">即時</span>' : c.source === 'seed' ? '<span class="badge badge-grade-C" title="手寫數值，不會自動更新">手寫</span>' : '';
+  const val = (c) => c.value == null ? '—' : `${Number(c.value).toLocaleString(undefined, { maximumFractionDigits: 3 })}${c.unit && c.unit !== '點' ? ' ' + esc(c.unit) : ''}`;
+  const block = (scen) => {
+    const s = (sm.summary || {})[scen] || {};
+    const rows = sm.conditions.filter(c => c.scenario === scen).map(c => `<tr>
+        <td>${c.role === 'invalidation' ? '⛔ ' : ''}${esc(c.label)}<div style="font-size:11px; color:var(--text-muted);">${esc(c.origin)}｜門檻 ${esc(c.rule)}</div></td>
+        <td>${val(c)}<div style="font-size:11px; color:var(--text-muted);">${esc(c.as_of || '')}</div></td><td>${src(c)}</td><td>${mark(c)}</td></tr>`).join('');
+    const inv = (s.invalidation_hit || []).length ? `<div class="evidence-box invalid" style="margin:6px 0;">⚠️ 已觸發失效條件：${s.invalidation_hit.length} 項</div>` : '';
+    return `<div class="card" style="margin-bottom:12px;">
+      <div class="card-header"><div class="card-title">${names[scen]}</div>
+        <span class="badge badge-grade-B">成立條件：即時資料 ${s.live_met || 0}/${s.live_known || 0} 條成立｜手寫數值 ${s.seed_met || 0}/${s.seed_known || 0}｜無資料 ${s.no_data || 0}（共 ${s.triggers_total || 0} 條）</span></div>
+      ${inv}
+      <div style="overflow-x:auto;"><table><thead><tr><th>條件 (門檻取自情境文字)</th><th>目前數值</th><th>來源</th><th>判定</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>`;
+  };
+  box.innerHTML = `<div class="callout" style="margin:0 0 12px; --callout-col:var(--accent-emerald);">✅ <strong>條件監控（由資料判定，不是機率）</strong>：逐條檢查情境文字裡可量化的條件現在成不成立。<strong>不再顯示主觀機率</strong>（樂觀 30%／中性 50%／悲觀 20% 是撰寫者的設定，沒有資料依據）。只有「即時」來源的條件算已驗證；「手寫」的數值不會自動更新、可能已過期；「無資料」代表沒有免費官方來源 (例如費半指數、外資期貨未平倉)。情境之間的條件彼此重疊，所以不加總成「目前最像哪個情境」。外資資料截至 ${esc(sm.flows_through || '—')}。</div>`
+    + ['BULL', 'BASE', 'BEAR'].map(block).join('');
+}
+
 function renderScenarios() {
+  renderScenarioMonitor();
   const container = document.getElementById('scenariosContainer');
   setSourceNote('scenariosContainer', 'scenariosSourceNote',
-    'ℹ️ 三個情境（樂觀／中性／悲觀）是 2026-11-22 前後人工撰寫的假設，「參考權重」是撰寫者的主觀設定，不是由資料計算出來的機率，也不會隨資料更新。');
+    'ℹ️ 以下三個情境敘事是 2026-11-22 前後人工撰寫的假設；「參考權重」是撰寫者的主觀設定，不是由資料計算出來的機率，也不會隨資料更新，僅供留存。請看上方「條件監控」。');
   container.innerHTML = STATE.scenarios.map(s => `
     <div class="card">
       <div class="card-header">
         <div class="card-title">${s.scenario_name}</div>
-        <span class="badge badge-grade-B">參考權重：${s.probability_weight}</span>
+        <span class="badge badge-grade-C" title="撰寫者的主觀設定，沒有資料依據">手寫權重：${s.probability_weight}</span>
       </div>
       <div class="evidence-box" style="white-space:pre-line;"><strong>成立條件：</strong>\n${s.trigger_conditions}</div>
       <div style="font-size:12px; margin-top:8px;"><strong>核心觀察指標：</strong>${s.monitoring_indicators}</div>
