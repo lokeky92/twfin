@@ -166,13 +166,17 @@ def live_daily_flows(institutional_flows):
 
 
 def manual_market_stats(institutional_flows):
-    """融資餘額與外資期貨未平倉是人工維護欄位：回傳「最近一筆有值」及其日期，只做背景引用。"""
+    """融資餘額與外資期貨未平倉：回傳「最近一筆有值」及其日期；官方逐日列 (證交所／期交所) 有值時以官方為準，
+    同時回傳 key + '_official' 標示該筆是否來自官方逐日列 (否則是人工維護的舊列)。"""
     best = {}
     for key in ("margin_balance_billion", "foreign_futures_oi_contracts"):
-        rows = [(to_iso_date(r.get("release_date")), _num(r.get(key))) for r in institutional_flows or []
+        rows = [(to_iso_date(r.get("release_date")), _num(r.get(key)), "官方API" in str(r.get("period_label") or ""))
+                for r in institutional_flows or []
                 if r.get("period_type") == "DAILY" and _num(r.get(key)) is not None and to_iso_date(r.get("release_date"))]
         if rows:
-            best[key] = max(rows)   # (最新日期, 數值)
+            d, v, official = max(rows, key=lambda x: (x[0], x[2]))
+            best[key] = (d, v)             # (最新日期, 數值)
+            best[key + "_official"] = official
     return best
 
 
@@ -477,14 +481,15 @@ def _card_q6(d, flows, idx_series):
     ctx = []
     if "margin_balance_billion" in manual:
         dt, v = manual["margin_balance_billion"]
-        ctx.append(f"融資餘額 {v:,.0f} 億（人工維護，截至 {_md(dt)}）")
+        ctx.append(f"融資餘額 {v:,.0f} 億（{'證交所官方，' if manual.get('margin_balance_billion_official') else '人工維護，'}截至 {_md(dt)}）")
     if "foreign_futures_oi_contracts" in manual:
         dt, v = manual["foreign_futures_oi_contracts"]
-        ctx.append(f"外資期貨未平倉 {v:,.0f} 口（人工維護，截至 {_md(dt)}）")
+        ctx.append(f"外資期貨未平倉 {v:,.0f} 口（{'期交所官方，臺股期貨，' if manual.get('foreign_futures_oi_contracts_official') else '人工維護，'}截至 {_md(dt)}）")
     for m in d.get("macro_latest") or []:
         if m.get("metric_code") in ("US_10Y_YIELD", "INTL_DXY", "INTL_SOX_INDEX") and _num(m.get("cleaned_value")) is not None:
             nm = {"US_10Y_YIELD": "美國10年期公債殖利率", "INTL_DXY": "美元指數", "INTL_SOX_INDEX": "費城半導體指數"}[m["metric_code"]]
-            ctx.append(f"{nm} {_fmt(m['cleaned_value'])}{m.get('unit') or ''}（人工維護，{_e(m.get('period_covered'))}）")
+            src = "官方即時" if str(m.get("revision_version") or "").startswith("live") else "人工維護"
+            ctx.append(f"{nm} {_fmt(m['cleaned_value'])}{m.get('unit') or ''}（{src}，{_e(m.get('period_covered'))}）")
 
     if not triggers:
         a, color = "🟢 即時風險訊號平靜", COLORS[0]
@@ -497,12 +502,12 @@ def _card_q6(d, flows, idx_series):
         "；".join(facts) + "。",
         f"警示規則（機械式，不推測原因）：外資窗內合計 ≤{FOREIGN_SELL_ALERT_BILLION:,.0f} 億、大盤窗內累計 ≤{MARKET_DROP_ALERT_PCT:.0f}%、大盤單日 ≤{DAY_DROP_ALERT_PCT:.0f}%。目前觸發：{('、'.join(triggers) if triggers else '無')}。",
         ("觸發的訊號越多代表即時資金面與價格面同步轉弱。" if len(triggers) >= 2 else "目前即時訊號尚未同時轉弱，但仍需持續追蹤。")
-        + (" 背景（人工維護、非即時）：" + "；".join(ctx) + "。" if ctx else ""),
+        + (" 背景（逐項標示來源）：" + "；".join(ctx) + "。" if ctx else ""),
         "即時訊號平靜時，無特別需要迴避的產業。" if not triggers else "訊號轉弱期間，法人持續買超的產業相對有支撐（見 Q2）。",
         "高本益比、融資使用率高且法人持續賣超的個股較易放大跌幅（以 Q2 的賣超產業為準）。",
         f"外資窗內合計是否回到 {FOREIGN_SELL_ALERT_BILLION:,.0f} 億以上、大盤累計跌幅是否收斂到 {MARKET_DROP_ALERT_PCT:.0f}% 以內，即視為訊號解除。",
     ]
-    basis = "資料來源：證交所 BFI82U、證交所發行量加權股價報酬指數（即時）；融資、期貨與美債/美元/費半為人工維護，只作背景。"
+    basis = "資料來源：證交所 BFI82U、證交所發行量加權股價報酬指數（即時）；融資、期貨、美債、美元、費半只作背景，逐項標示來源（官方或人工維護）。"
     return _card(5, q, a, sub, q6, basis, color)
 
 

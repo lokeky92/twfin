@@ -2,17 +2,20 @@
 總體經濟月統計的即時化：從官方開放資料取得最新數值，取代 seed 裡「寫死到 2026-10 為止」的手寫列。
 
 來源 (全部免費、不需金鑰，除了 FRED)：
-- 中央銀行 cpx.cbc.gov.tw 資料 API：EF01M01 (M1B、M2 日平均年增率)、EF07M01 (外匯存底、CPI 年增率)、BP01D01 (新台幣對美元日匯率)
+- 中央銀行 cpx.cbc.gov.tw 資料 API：EF01M01 (M1B、M2 日平均年增率)、EF07M01 (外匯存底、CPI 年增率)、BP01D01 (新台幣對美元日匯率)、
+  EF03M01 (貨幣機構外匯存款期底餘額)、EFA4M01 (貨幣機構放款與投資年增率)、EH45m01 (五大銀行新承作購屋貸款金額)；
+  項目代號取自央行「統計資料庫 API 說明文件」的官方代號表 (https://cpx.cbc.gov.tw/Data/ExportToAPIInfo)
 - 國發會 景氣指標及燈號 (data.gov.tw 資料集 6099，ZIP/CSV)：景氣對策信號綜合分數與燈號、五大銀行新承做放款平均利率
 - 財政部 進出口貿易統計 (data.gov.tw 資料集 8378，CSV)：海關出口單月金額 (百萬美元)
+- 經濟部統計處 外銷訂單 (data.gov.tw 資料集 101580，CSV「按地區分」的「地區別總計」)：外銷訂單單月金額 (百萬美元)
 - 全市場上市櫃公司月營收合計：由已累積的 MOPS 月營收 (live_company_fundamentals) 加總
-- FRED (需要免費金鑰，環境變數 FRED_API_KEY，沒有就整段略過)：美國 10 年期公債殖利率 (DGS10)、聯邦資金利率目標上限 (DFEDTARU)、VIX (VIXCLS)
+- FRED (需要免費金鑰，環境變數 FRED_API_KEY，沒有就整段略過)：美國 10 年期公債殖利率 (DGS10)、聯邦資金利率目標上限 (DFEDTARU)、VIX (VIXCLS)、聯準會廣義美元指數 (DTWEXBGS，不是 ICE 的 DXY)
 
 規則：
 - 官方資料比 seed 新或一樣新才取代：刪除 seed 裡「期間 ≤ 官方最新期間」的手寫列，之後的手寫列 (官方還沒公布的期間) 保留，畫面標示版本。
 - 任何來源失敗都只記錄，保留既有資料 (含先前累積的即時列)；不拿手寫值冒充，也不把失敗當成 0。
 - 備註文字由規則產生 (來源、期間、燈號)，不含敘事；年增率若官方沒給就由同表歷史計算，算不出來就留空。
-- 仍是手寫、沒有可程式取得的免費官方來源的指標 (GDP、外銷訂單、存放款餘額、證券劃撥、DXY、SOX 等) 維持原樣並標示。
+- 仍是手寫、沒有可程式取得的免費官方來源的指標 (GDP、存放款餘額、證券劃撥、ICE 美元指數 DXY、SOX 等) 維持原樣並標示。
 
 純函式在前半 (parse_*、build_rows)，網路與資料庫在 apply_live_macro。
 """
@@ -29,11 +32,15 @@ URL_CBC = "https://cpx.cbc.gov.tw/API/DataAPI/Get?FileName={f}"
 URL_NDC = "https://ws.ndc.gov.tw/Download.ashx?u=LzAwMS9hZG1pbmlzdHJhdG9yLzEwL3JlbGZpbGUvNTc4MS82MzkyL2VhMjM1YmQ5LWQwNTItNGE2OS1hYmZjLWQ1Yzc4NWQzZDBlMi56aXA%3d&n=5pmv5rCj5oyH5qiZ5Y%2bK54eI6JmfLnppcA%3d%3d&icon=.zip"
 URL_NDC_DATASET = "https://data.gov.tw/api/v2/rest/dataset/6099"
 URL_MOF = "https://web02.mof.gov.tw/njswww/webMain.aspx?sys=220&ym=9000&kind=21&type=4&funid=i8101&cycle=41&outmode=12&compmode=00&outkind=1&fld0=1&codlst0=11001001&utf=1"
+URL_MOEA_ORDERS = "https://service.moea.gov.tw/EE520/opendata/%E7%B6%93%E6%BF%9F%E9%83%A8%E7%B5%B1%E8%A8%88%E8%99%95_%E5%A4%96%E9%8A%B7%E8%A8%82%E5%96%AE_%E6%8C%89%E5%9C%B0%E5%8D%80%E5%88%86.csv"
 URL_FRED = "https://api.stlouisfed.org/fred/series/observations?series_id={sid}&api_key={key}&file_type=json&observation_start={start}"
 REVISION = "live (官方開放資料)"
 KEEP_MONTHS = 14
 KEEP_DAYS = 30
 NEW_DICTIONARY = {
+    "INTL_USD_BROAD": ("INTL_USD_BROAD", "廣義美元指數 (聯準會 Nominal Broad Dollar Index)", "M03", "SRC_FED_UST", "DIRECT_STAT", "點(2006-01=100)", "USD", "NSA",
+                       "聯準會 H.10 對廣義貿易夥伴貨幣的名目加權美元指數 (經 FRED DTWEXBGS 取得)；不是 ICE 美元指數 DXY，兩者數值不同",
+                       "衡量美元對一籃子貿易夥伴貨幣的整體強弱", "MARK_MISSING_NO_IMPUTE"),
     "INTL_VIX": ("INTL_VIX", "VIX 恐慌指數 (CBOE)", "M03", "SRC_FED_UST", "DIRECT_STAT", "點", "USD", "NSA",
                  "CBOE S&P 500 波動率指數收盤 (經 FRED VIXCLS 取得)", "衡量美股選擇權隱含波動，風險偏好的即時指標", "MARK_MISSING_NO_IMPUTE"),
 }
@@ -152,6 +159,19 @@ def parse_mof_trade(text):
         v = _num(r[2])
         if v is not None:
             out.append((f"{int(m.group(1)) + 1911}-{int(m.group(2)):02d}", v))
+    return sorted(out)
+
+
+def parse_moea_orders(text):
+    """經濟部統計處外銷訂單 CSV (按地區分) → [(YYYY-MM, 外銷訂單金額 百萬美元)]，只取「地區別總計」。民國年月 '11510' → 2026-10。"""
+    out = []
+    for r in csv.DictReader(io.StringIO(text.lstrip("﻿"))):
+        if str(r.get("地區代碼") or "").strip() != "00" or str(r.get("統計項目") or "").strip() != "外銷訂單金額_美元":
+            continue
+        m = re.match(r"^(\d{2,3})(\d{2})$", str(r.get("資料期(民國年)") or "").strip())
+        v = _num(r.get("統計值(金額)"))
+        if m and v is not None and 1 <= int(m.group(2)) <= 12:
+            out.append((f"{int(m.group(1)) + 1911}-{m.group(2)}", v))
     return sorted(out)
 
 
@@ -296,6 +316,33 @@ def gather(fred_key=None, fetch_json_fn=None, fetch_bytes_fn=None):
                                                       note_fn=lambda per, v: f"央行 EF07M01 轉載主計總處 CPI 年增率 {v:.2f}%（{per}）"), "release": rel}
         except ValueError as exc:
             status["CBC EF07M01"] = f"解析失敗：{exc}"
+    p = cbc("CBC EF03M01", "EF03M01")
+    if p:
+        try:
+            fxd = parse_cbc(p, "貨幣機構存款-企業及個人存款-外匯存款", "期底餘額")
+            specs["TW_FX_DEPOSIT_BAL"] = {"rows": build_rows(fxd, "level", scale=1e-4, keep=KEEP_MONTHS,
+                                                             note_fn=lambda per, v: f"央行 EF03M01：貨幣機構企業及個人外匯存款期底餘額 {v:,.4f} 兆元（{per} 月底，折合新台幣）"),
+                                          "release": _release(p)}
+        except ValueError as exc:
+            status["CBC EF03M01"] = f"解析失敗：{exc}"
+    p = cbc("CBC EFA4M01", "EFA4M01")
+    if p:
+        try:
+            li = parse_cbc(p, "貨幣機構放款與投資(性質別)-合計", "年增率")
+            specs["TW_BANK_LOAN_INV_YOY"] = {"rows": build_rows(li, "yoy_rate", keep=KEEP_MONTHS,
+                                                                note_fn=lambda per, v: f"央行 EFA4M01：全體貨幣機構放款與投資年增率 {v:.2f}%（{per}，以成本衡量）"),
+                                             "release": _release(p)}
+        except ValueError as exc:
+            status["CBC EFA4M01"] = f"解析失敗：{exc}"
+    p = cbc("CBC EH45m01", "EH45m01")
+    if p:
+        try:
+            mg = parse_cbc(p, "購屋貸款", "金額")
+            specs["TW_FIVE_BANK_MORTGAGE"] = {"rows": build_rows(mg, "level", scale=0.01, keep=KEEP_MONTHS,
+                                                                 note_fn=lambda per, v: f"央行 EH45m01：五大銀行新承作購屋貸款金額 {v:,.2f} 億元（{per}）"),
+                                              "release": _release(p)}
+        except ValueError as exc:
+            status["CBC EH45m01"] = f"解析失敗：{exc}"
     p = cbc("CBC BP01D01", "BP01D01")
     if p:
         try:
@@ -327,10 +374,20 @@ def gather(fred_key=None, fetch_json_fn=None, fetch_bytes_fn=None):
         logger.warning("總體資料 MOF 取得失敗：%s: %s", type(exc).__name__, exc)
         status["MOF 進出口"] = f"失敗：{type(exc).__name__}"
 
+    try:
+        orders = parse_moea_orders(fb(URL_MOEA_ORDERS).decode("utf-8-sig"))
+        status["MOEA 外銷訂單"] = "OK" if orders else "解析不到資料"
+        if orders:
+            specs["TW_EXPORT_ORDERS"] = {"rows": build_rows(orders, "level", scale=0.01, keep=KEEP_MONTHS,
+                                                            note_fn=lambda per, v: f"經濟部統計處：外銷訂單 {v:,.1f} 億美元（{per}）"), "release": None}
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("總體資料 MOEA 外銷訂單取得失敗：%s: %s", type(exc).__name__, exc)
+        status["MOEA 外銷訂單"] = f"失敗：{type(exc).__name__}"
+
     if fred_key:
         start = (date.today() - timedelta(days=400)).isoformat()
         for code, sid, label in (("US_10Y_YIELD", "DGS10", "美國 10 年期公債殖利率"), ("US_FED_RATE_UPPER", "DFEDTARU", "聯邦資金利率目標上限"),
-                                 ("INTL_VIX", "VIXCLS", "VIX 恐慌指數")):
+                                 ("INTL_VIX", "VIXCLS", "VIX 恐慌指數"), ("INTL_USD_BROAD", "DTWEXBGS", "聯準會廣義美元指數")):
             try:
                 pts = parse_fred(fj(URL_FRED.format(sid=sid, key=fred_key, start=start)))
                 status[f"FRED {sid}"] = "OK" if pts else "解析不到資料"

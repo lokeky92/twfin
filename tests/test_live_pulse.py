@@ -142,9 +142,17 @@ class TestCards(unittest.TestCase):
         self.assertIn("單日急跌", a)
 
     def test_q6_manual_context_is_labelled_and_dated(self):
-        rows = [dict(flow("2026-11-24", 0, 0, 0), margin_balance_billion=8343.0)]
+        rows = [dict(flow("2026-11-24", 0, 0, 0, label="手寫種子"), margin_balance_billion=8343.0)]
         it = self.pulse(institutional_flows=rows, live_indices=idx(lp.MARKET_INDEX, [("1151124", 100, 0.1)]))["items"][5]
         self.assertIn("人工維護，截至 11-24", it["q6"][2])
+
+    def test_q6_official_daily_row_values_are_labelled_official(self):
+        rows = [dict(flow("2026-11-24", 0, 0, 0), margin_balance_billion=4301.7, foreign_futures_oi_contracts=-107503)]
+        it = self.pulse(institutional_flows=rows, live_indices=idx(lp.MARKET_INDEX, [("1151124", 100, 0.1)]))["items"][5]
+        self.assertIn("融資餘額 4,302 億（證交所官方，截至 11-24）", it["q6"][2])
+        self.assertIn("外資期貨未平倉 -107,503 口（期交所官方，臺股期貨，截至 11-24）", it["q6"][2])
+        m = lp.manual_market_stats(rows)
+        self.assertTrue(m["margin_balance_billion_official"])
 
     def test_q3_q4_use_live_ranking_and_escape_names(self):
         inds = [ind("IND_A", 90, 9e5, 9e5), ind("IND_B", 50, 0, 0), ind("IND_C", 20, -1e5, -1e5), ind("IND_D", -30, -9e5, -9e5)]

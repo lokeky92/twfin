@@ -22,6 +22,17 @@ EF01 = {"meta": {"last_updated": "2026-10-28"},
 EF07 = {"meta": {"last_updated": "2026-10-28"},
         "data": {"structure": {"Table1": [{"data": "股票市場股價指數"}, {"data": "外匯存底(百萬美元)"}, {"data": "消費者物價指數年增率"}]},
                  "dataSets": [["2025M09", "40000", "500000", "1.80"], ["2026M08", "45000", "601904", "2.05"], ["2026M09", "46000", "600745", "2.73"]]}}
+EF03 = {"meta": {"last_updated": "2026-10-28"},
+        "data": {"structure": {"Table1": [{"data": "貨幣機構存款-合計"}, {"data": "貨幣機構存款-企業及個人存款-外匯存款"}],
+                               "Table2": [{"data": "期底餘額"}, {"data": "年增率"}]},
+                 "dataSets": [["2025M09", "650000", "7.0", "90000", "5.0"], ["2026M08", "700000", "8.0", "96488", "10.0"], ["2026M09", "707139", "8.42", "100591", "11.8"]]}}
+EFA4 = {"meta": {"last_updated": "2026-10-28"},
+        "data": {"structure": {"Table1": [{"data": "貨幣機構放款與投資(性質別)-合計"}, {"data": "貨幣機構放款與投資(性質別)-放款"}],
+                               "Table2": [{"data": "期底餘額"}, {"data": "年增率"}]},
+                 "dataSets": [["2026M08", "570000", "9.02", "470000", "8.0"], ["2026M09", "578592", "9.79", "481550", "9.1"]]}}
+EH45 = {"meta": {"last_updated": "2026-10-28"},
+        "data": {"structure": {"Table1": [{"data": "購屋貸款"}, {"data": "合計"}], "Table2": [{"data": "金額"}, {"data": "利率"}]},
+                 "dataSets": [["2026M08", "57165", "2.31", "80000", "2.2"], ["2026M09", "69783", "2.315", "90874", "2.2"]]}}
 BP01 = {"meta": {"last_updated": "2026-11-02"},
         "data": {"structure": {"Table1": [{"data": "新台幣NTD/USD"}, {"data": "日圓JPY/USD"}]},
                  "dataSets": [["20251030", "30.500", "150"], ["20261029", "32.492", "157"], ["20261030", "32.478", "157"]]}}
@@ -107,9 +118,14 @@ class TestBuildRows(unittest.TestCase):
         self.assertEqual(ml.spread_points([("a", 7.2), ("b", 7.0)], [("a", 7.24)]), [("a", -0.04)])
 
 
+MOEA_CSV = ("\ufeff統計項目,地區代碼,地區別,資料期(民國年),統計值(金額),計量單位\n"
+            + "".join(f"外銷訂單金額_美元,00,地區別總計,{ym},{v},百萬美元\n" for ym, v in (("11410", 69_400), ("11509", 114_210), ("11510", 123_820)))
+            + "外銷訂單金額_美元,01,美國,11510,50000,百萬美元\n外銷訂單金額_美元,00,地區別總計,11513,1,百萬美元\n")
+
+
 def fetchers(fail=()):
     def fj(url):
-        for key, payload in (("EF01M01", EF01), ("EF07M01", EF07), ("BP01D01", BP01)):
+        for key, payload in (("EF01M01", EF01), ("EF07M01", EF07), ("BP01D01", BP01), ("EF03M01", EF03), ("EFA4M01", EFA4), ("EH45m01", EH45)):
             if key in url:
                 if key in fail:
                     raise ConnectionError("down")
@@ -125,6 +141,10 @@ def fetchers(fail=()):
             return ndc_zip()
         if "mof" in url:
             return MOF_CSV.encode("utf-8")
+        if "moea" in url:
+            if "MOEA" in fail:
+                raise ConnectionError("down")
+            return MOEA_CSV.encode("utf-8")
         raise AssertionError(url)
     return {"fetch_json_fn": fj, "fetch_bytes_fn": fb}
 
@@ -133,18 +153,32 @@ class TestGather(unittest.TestCase):
     def test_all_sources(self):
         specs, status = ml.gather(None, **fetchers())
         self.assertEqual(set(specs), {"TW_M1B_YOY", "TW_M2_YOY", "TW_M1B_M2_SPREAD", "TW_FX_RESERVES", "TW_CPI_YOY", "TW_USD_TWD",
-                                      "TW_NDC_SCORE", "TW_FIVE_BANK_NEW_RATE", "TW_CUSTOMS_EXPORTS"})
+                                      "TW_NDC_SCORE", "TW_FIVE_BANK_NEW_RATE", "TW_CUSTOMS_EXPORTS", "TW_EXPORT_ORDERS",
+                                      "TW_FX_DEPOSIT_BAL", "TW_BANK_LOAN_INV_YOY", "TW_FIVE_BANK_MORTGAGE"})
         self.assertIn("略過", status["FRED"])                              # 沒有金鑰 → 略過，不假裝
         self.assertEqual(specs["TW_FX_RESERVES"]["rows"][-1]["raw"], 6007.45)       # 百萬美元 → 億美元
         self.assertEqual(specs["TW_CUSTOMS_EXPORTS"]["rows"][-1]["raw"], 967.6019)
         self.assertIn("紅燈", specs["TW_NDC_SCORE"]["rows"][-1]["note"])
+        fd = specs["TW_FX_DEPOSIT_BAL"]["rows"][-1]
+        self.assertEqual((fd["period"], fd["raw"], fd["yoy"]), ("2026-09", 10.0591, 11.77))       # 億元 → 兆元；年增由同序列一年前計算
+        self.assertEqual(specs["TW_BANK_LOAN_INV_YOY"]["rows"][-1]["raw"], 9.79)                  # 本身就是年增率
+        self.assertEqual(specs["TW_FIVE_BANK_MORTGAGE"]["rows"][-1]["raw"], 697.83)               # 百萬元 → 億元
+        eo = specs["TW_EXPORT_ORDERS"]["rows"][-1]
+        self.assertEqual((eo["period"], eo["raw"]), ("2026-10", 1238.2))              # 百萬美元 → 億美元，只取「地區別總計」，月份 13 的壞列略過
+        self.assertEqual(eo["yoy"], 78.41)                                            # 與去年同月 69,400 比較
         self.assertEqual(specs["TW_M1B_YOY"]["release"], "2026-10-28")
 
     def test_fred_only_with_key_and_key_never_logged_in_status(self):
         specs, status = ml.gather("SECRETKEY", **fetchers())
-        self.assertEqual({"US_10Y_YIELD", "US_FED_RATE_UPPER", "INTL_VIX"} - set(specs), set())
+        self.assertEqual({"US_10Y_YIELD", "US_FED_RATE_UPPER", "INTL_VIX", "INTL_USD_BROAD"} - set(specs), set())
         self.assertEqual(specs["US_10Y_YIELD"]["rows"][-1]["raw"], 4.35)
         self.assertNotIn("SECRETKEY", str(status))
+
+    def test_moea_failure_is_recorded_without_touching_other_sources(self):
+        specs, status = ml.gather(None, **fetchers(fail=("MOEA",)))
+        self.assertIn("失敗", status["MOEA 外銷訂單"])
+        self.assertNotIn("TW_EXPORT_ORDERS", specs)
+        self.assertIn("TW_CUSTOMS_EXPORTS", specs)
 
     def test_one_source_failing_does_not_stop_others(self):
         specs, status = ml.gather(None, **fetchers(fail=("EF01M01", "NDC")))
