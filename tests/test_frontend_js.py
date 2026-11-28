@@ -1053,6 +1053,28 @@ run(`STATE = { etf_center: { etfs: __etfs },
     { period_type: 'QUARTERLY', text_source: 'seed', release_date: '2026-11-30', foreign_net_billion: 5000, total_3insti_billion: 5000 } ] }`);
 run("renderEtfDecisionCenter()");
 out.sec1 = el('etfSec1GlobalEnv').innerHTML; out.sec1note2 = el('etfSec1Note').textContent;
+// 第四區：白話解讀由規則產生
+const hold = (code, name, w) => ({ constituent_code: code, constituent_name: name, weight_pct: w, as_of_date: '2026-11-20' });
+const rich = (code, sub, cls, extra, live) => mk(code, 'TW', 'live', Object.assign({ asset_class: cls, sub_category: sub, name_tag: 1, holdings: [], max_single_weight_pct: 5, max_single_holding_name: '2382 廣達 (4.2%)',
+  live: Object.assign({ history_days: 260, curve: [], facts: { b1: '加權指數相對 60 日均線 -12.9%、近 20 日波動度 61.9%' } }, live || {}) }, extra));
+ctx.__rich = [
+  rich('0050', '台灣大型權值型 ETF', '股票', { total_score_a_long_term: 63, total_score_b_short_mid: 43, max_single_weight_pct: 56.8, max_single_holding_name: '2330 台積電 (56.8%)',
+    holdings: [hold('2330', '台積電', 56.8), hold('2317', '鴻海', 5.4)] }, { dividend_yield_pct: 1.73, ret_1y: 40.1, ret_1y_total: 49.1 }),
+  rich('0052', '科技產業 ETF', '股票', { max_single_weight_pct: 63.2, max_single_holding_name: '2330 台積電 (63.2%)', holdings: [hold('2330', '台積電', 63.2), hold('2454', '聯發科', 5.8)] }, { dividend_yield_pct: null, ret_1y: 50, ret_1y_total: null }),
+  rich('0056', '高股息 ETF', '股票', { total_score_a_long_term: 69.2, total_score_b_short_mid: 37.8 }, { dividend_yield_pct: 10.51, ret_1y: -3.2, ret_1y_total: 7.3 }),
+  rich('00937B', '債券 ETF (長天期投資等級公司債)', '債券', { bond_duration_years: 15.4 }, { dividend_yield_pct: 6.06, ret_1y: -5.63, vol_ann: 8.73, mdd: -11.5 }),
+  rich('00631L', '槓桿', '股票', { is_leveraged_or_inverse: 1, max_single_weight_pct: 100, holdings: [hold('2330', '台積電', 100)] }, {}),
+  mk('VOO', 'US', 'seed', { asset_class: '股票', sub_category: '高股息 ETF' }),
+];
+run("STATE = { etf_center: { etfs: __rich }, macro_latest: [{ metric_code: 'US_10Y_YIELD', cleaned_value: 4.85, period_covered: '2026-11-25', revision_version: 'live (官方開放資料)' }] }");
+out.plain = run("renderEtfPlainReading(__rich)");
+run("STATE = { etf_center: { etfs: [] } }");
+out.plainEmpty = run("renderEtfPlainReading([])");
+out.aumManual = run("etfAumTag(__rich[0])");
+out.aumOfficial = run("etfAumTag({ live: { aum_source: 'official', aum_as_of: '2026-11-27' } })");
+out.aumChangeNull = run("etfAumChangeText({ aum_change_1m_pct: null })");
+out.aumChangeNum = run("etfAumChangeText({ aum_change_1m_pct: 11.1 })");
+out.aumChangeNeg = run("etfAumChangeText({ aum_change_1m_pct: -2.5 })");
 out.spark = run("etfSparkline([['2026-01-02', 100], ['2026-01-03', 110], ['2026-01-04', 105]])");
 out.sparkEmpty = run("etfSparkline([['2026-01-02', 100]])");
 console.log(JSON.stringify(out));
@@ -1132,6 +1154,41 @@ class TestEtfChartsExecute(unittest.TestCase):
         self.assertIn("即時", vix[:vix.index("</tr>")])
         self.assertIn("即時", self.o["sec1note2"])
         self.assertIn("手寫", self.o["sec1note2"])
+
+    def test_plain_reading_is_rule_generated_from_live_fields(self):
+        h = self.o["plain"]
+        for stale in ("27.4", "-10.67", "58.2%", "63.5%", "5.12%", "62.6%", "SGOV", "SCHD", "LQD"):
+            self.assertNotIn(stale, h)                                  # 舊手寫文章裡的數字／美股標的都不在了
+        self.assertIn("10.51%", h)                                      # 0056 即時配息率
+        self.assertIn("+7.3%", h)                                       # 含息報酬
+        self.assertIn("—", h)                                           # 0052 沒有配息率 → 顯示「—」，不當 0
+        self.assertNotIn("NaN", h)
+        self.assertNotIn("undefined", h)
+        self.assertNotIn("VOO", h)                                      # 美股手寫評分不在解讀內
+        self.assertNotIn("00631L", h.split("同時買好幾檔")[1] if "同時買好幾檔" in h else h)
+        self.assertIn("2330 台積電 (56.8%)", h)
+        self.assertIn("2330 台積電 (63.2%)", h)
+        self.assertIn("重疊", h)                                        # 0050 與 0052 兩兩重疊
+        self.assertIn("基準日 2026-11-20", h)
+        self.assertIn("約 −15.4%", h)                                   # 存續期 × 1%
+        self.assertIn("4.85%", h)                                       # 美債 10Y 即時值
+        self.assertIn("即時", h)
+        self.assertIn("加權指數相對 60 日均線 -12.9%", h)
+        self.assertNotIn("<i>", h)
+
+    def test_aum_source_tag_and_change_text(self):
+        self.assertIn("手寫", self.o["aumManual"])
+        self.assertIn("官方", self.o["aumOfficial"])
+        self.assertIn("2026-11-27", self.o["aumOfficial"])
+        self.assertEqual(self.o["aumChangeNull"], "近 1 月變化：累積中")     # null 不可顯示成 +null%
+        self.assertEqual(self.o["aumChangeNum"], "近 1 月 +11.1%")
+        self.assertEqual(self.o["aumChangeNeg"], "近 1 月 -2.5%")
+
+    def test_plain_reading_without_data_does_not_invent_text(self):
+        h = self.o["plainEmpty"]
+        self.assertEqual(h.count("目前沒有足夠的即時資料可以解讀"), 4)
+        self.assertNotIn("沒有任何一檔", h)                             # 沒資料時不可宣稱「沒有集中風險」
+        self.assertNotIn("NaN", h)
 
     def test_global_env_without_data_says_no_data_instead_of_guessing(self):
         h = self.o["sec1empty"]

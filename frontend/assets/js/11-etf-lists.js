@@ -51,7 +51,7 @@ function renderEtfLists() {
   const shown = filtered.slice(0, limit);
   const liveN = STATE.etf_center.etfs.filter(e => e.score_source === 'live').length;
   setSourceNote('etfCardsGridContainer', 'etfSourceNote', liveN
-    ? `✅ 台灣掛牌 ${liveN} 檔 ETF 的雙軌評分由官方逐日行情（證交所／櫃買）與法人買賣超用公式即時計算，附「即時評分」標籤；美國 ETF 沒有官方資料來源，行情與評分是 2026-11-21 前後手寫的種子值（「手寫評分」），不會更新。規模、費用率、追蹤誤差與持股權重為人工維護；淨值／折溢價、3／5 年報酬沒有官方即時來源，顯示 N/A；配息率與近 1 年含息報酬由證交所／櫃買除權息表計算。`
+    ? `✅ 台灣掛牌 ${liveN} 檔 ETF 的雙軌評分由官方逐日行情（證交所／櫃買）與法人買賣超用公式即時計算，附「即時評分」標籤；美國 ETF 沒有官方資料來源，行情與評分是 2026-11-21 前後手寫的種子值（「手寫評分」），不會更新。上市 ETF 的規模由官方發行單位數 × 收盤價計算（近 1 月規模變化與淨申購要累積滿約一個月，之前顯示「累積中」／N/A），上櫃 ETF 的規模、以及費用率、追蹤誤差與持股權重為人工維護（手寫）；淨值／折溢價、3／5 年報酬沒有官方即時來源，顯示 N/A；配息率與近 1 年含息報酬由證交所／櫃買除權息表計算。`
     : '⚠️ 此快照沒有即時 ETF 評分，全部 ETF 的行情、評分與報告都是 2026-11-21 前後手寫的，不會隨資料更新。');
   container.innerHTML = filtered.length
     ? shown.map(e => buildEtfCardHtml(e)).join('')
@@ -224,7 +224,7 @@ function buildEtfCardHtml(e) {
             <span class="etf-card-code">${e.etf_code}</span> <span class="etf-card-name">${e.etf_name}</span>
           </div>
           <div class="etf-card-meta">
-            ${e.sub_category} ｜ 規模 <strong>${e.aum_value.toLocaleString()} ${e.aum_unit}</strong>
+            ${e.sub_category} ｜ 規模 <strong>${e.aum_value.toLocaleString()} ${e.aum_unit}</strong> ${etfAumTag(e)}
           </div>
         </div>
         <div class="etf-card-price-box">

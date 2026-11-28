@@ -416,6 +416,24 @@ CREATE TABLE IF NOT EXISTS etf_dividend_fetch (
     fetched_at TEXT NOT NULL,
     row_count INTEGER NOT NULL
 );
+-- 台股 ETF 官方基本資料 (證交所基金基本資料彙總表)：最新一次取得的發行單位數、追蹤指數、成立／上市日期
+CREATE TABLE IF NOT EXISTS etf_fund_info (
+    etf_code TEXT PRIMARY KEY,
+    tracking_index TEXT,
+    inception_date TEXT,
+    listing_date TEXT,
+    units INTEGER NOT NULL,
+    as_of_date TEXT NOT NULL,
+    fetched_at TEXT
+);
+-- 發行單位數每日記錄 (官方只給最新一天，所以由本站逐次累積；近 1 月規模變化與淨申購由此算出)
+CREATE TABLE IF NOT EXISTS etf_units_history (
+    etf_code TEXT NOT NULL,
+    as_of_date TEXT NOT NULL,
+    units INTEGER NOT NULL,
+    fetched_at TEXT,
+    PRIMARY KEY (etf_code, as_of_date)
+);
 
 -- 16d. 台股 ETF 每日評分快照 (前瞻追蹤用)：每次即時評分時記下當時的 A/B 模型分數與結論，之後與實際報酬比對。
 -- 模型分數無法事後重建 (輸入是最新一期資料)，所以只能從開始累積的那天起前瞻驗證。

@@ -11,7 +11,7 @@ function renderChart1Flows() {
   // 沒有數字的 (台股 ETF 沒有官方初級市場申贖資料) 不畫成 0
   const noFlow = list.filter(e => e.primary_net_flow_value === null || e.primary_net_flow_value === undefined).length;
   list = list.filter(e => e.primary_net_flow_value !== null && e.primary_net_flow_value !== undefined);
-  setSourceNote('etfChart1FlowsBox', 'etfChart1Note', noFlow ? `ℹ️ 有 ${noFlow} 檔 ETF 沒有官方初級市場申贖資料（台股 ETF 官方沒有此來源），未畫入；下列美股數字為手寫種子值（2026-11 前後），不會更新。` : '');
+  setSourceNote('etfChart1FlowsBox', 'etfChart1Note', noFlow ? `ℹ️ 有 ${noFlow} 檔 ETF 沒有初級市場申贖數字，未畫入（上市 ETF 的近 1 月淨申購由官方發行單位數的變化估算，要累積滿約一個月才有；上櫃 ETF 沒有官方來源）；圖上美股數字為手寫種子值（2026-11 前後），不會更新。` : '');
 
   // 依絕對流量排序取前 12 檔代表
   list.sort((a, b) => Math.abs(b.primary_net_flow_value || 0) - Math.abs(a.primary_net_flow_value || 0));

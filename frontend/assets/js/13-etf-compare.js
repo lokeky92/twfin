@@ -141,7 +141,7 @@ function renderEtfComparator() {
       return `<strong style="color:#fbbf24; font-size:16px;">${td.totalDragPct}% / 年</strong><br/><span style="font-size:12.5px; color:#94a3b8;">${td.taxNote}</span>`;
     }],
     ["經常性純股利/票息實質殖利率 (提案004)", e => computeRecurringPureYield(e)],
-    ["基金規模 (AUM) 與近1月變化", e => `<strong>${e.aum_value.toLocaleString()} ${e.aum_unit}</strong> (${e.aum_change_1m_pct >= 0 ? '+' : ''}${e.aum_change_1m_pct}%)`],
+    ["基金規模 (AUM) 與近1月變化", e => `<strong>${e.aum_value.toLocaleString()} ${e.aum_unit}</strong> ${etfAumTag(e)}<br/><span style="font-size:12px; color:#94a3b8;">${etfAumChangeText(e)}</span>`],
     ["買賣價差 (Spread) / 追蹤誤差", e => `價差 <strong>${e.bid_ask_spread_bps ?? '-'} bps</strong> ｜ 誤差 <strong>${e.tracking_error_pct ?? 'N/A'}%</strong>`],
     ["折溢價率 / 初級市場近期申贖", e => `折溢價 <strong>${fmtEtfPct(e.premium_discount_pct, true)}</strong><br/>淨申贖 <span class="${e.primary_net_flow_value>=0?'pos':'neg'}"><strong>${e.primary_net_flow_value === null || e.primary_net_flow_value === undefined ? 'N/A' : fmtEtfNum(e.primary_net_flow_value, true) + ' ' + e.aum_unit}</strong></span>`],
     ["前十大集中度 / 最大單一持股", e => `前十大 <strong>${e.top10_concentration_pct}%</strong><br/><span style="color:#fde68a;">最大：${e.max_single_holding_name}</span>`],
