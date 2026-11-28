@@ -5323,7 +5323,15 @@ function etfSparkline(curve, w, h) {
     <polyline fill="none" stroke="${up ? '#34d399' : '#fb7185'}" stroke-width="2" points="${pts}"/></svg>`;
 }
 
-// 台股 ETF 由官方逐日行情算出的指標 (報酬為價格報酬，不含息)
+// 配息與含息報酬一行：配息率 = 近 12 個月已發放的現金配息 ÷ 現價 (過去配息，不是預期殖利率)；含息報酬假設除息日以收盤價再投入
+function etfDividendLine(L) {
+  if (L.div_note && L.dividend_yield_pct == null) return `<span style="color:var(--text-secondary);">配息與含息報酬：N/A（${esc(L.div_note)}）</span><br/>`;
+  if (L.dividend_yield_pct == null) return '';
+  const note = L.div_note ? `（${esc(L.div_note)}）` : '';
+  return `近 12 個月配息 ${fmtEtfNum(L.div_ttm, false, 3)} 元／單位（${L.div_count} 次）→ 配息率 ${fmtEtfPct(L.dividend_yield_pct, false, 2)}（過去已發放 ÷ 現價，非預期殖利率）｜含息報酬 1 年 <strong>${fmtEtfPct(L.ret_1y_total, true, 1)}</strong>（除息日以收盤價再投入，不計稅與手續費）${note}<br/>`;
+}
+
+// 台股 ETF 由官方逐日行情與除權息表算出的指標 (價格報酬不含息；含息報酬與配息率另列)
 function etfLiveMetricsHtml(e) {
   const L = e.live;
   if (!L) return '';
@@ -5333,10 +5341,11 @@ function etfLiveMetricsHtml(e) {
       <strong style="color:#34d399;">📡 即時指標（官方逐日行情，${esc(L.last_date)}；共 ${L.history_days} 個交易日資料）</strong><br/>
       ${etfSparkline(L.curve)}<span style="font-size:12px; color:var(--text-secondary);">近 1 年實際價格走勢（官方逐日收盤，不含息；起點 = 100）</span><br/>
       價格報酬（不含息）：1 月 ${p(L.ret_1m)}｜3 月 ${p(L.ret_3m)}｜6 月 ${p(L.ret_6m)}｜1 年 ${p(L.ret_1y)}<br/>
+      ${etfDividendLine(L)}
       年化波動 ${fmtEtfPct(L.vol_ann, false, 1)}｜最大回撤 ${fmtEtfPct(L.mdd, false, 1)}｜距 1 年高點 ${fmtEtfPct(L.dd_from_high, true, 1)}｜Beta ${fmtEtfNum(L.beta, false, 2)}｜與加權指數相關 ${fmtEtfNum(L.corr_taiex, false, 2)}｜與 0050 相關 ${fmtEtfNum(L.corr_0050, false, 2)}<br/>
       外資+投信當日淨買賣 ${fmtEtfNum(L.insti_billion, true, 2)} 億元（占成交金額 ${fmtEtfPct(L.insti_ratio_pct, true, 2)}）｜20 日均成交值 ${fmtEtfNum(L.turnover_20d_billion, false, 2)} 億元
       ${L.split_break ? `<div style="font-size:12.5px; color:#fbbf24; margin-top:4px;">⚠️ 價格歷史在 ${esc(L.split_break)} 有分割／合併造成的斷層（單日變動超過 35%，不是真實漲跌），以上指標與走勢只使用該日之後的資料。</div>` : ''}
-      <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">淨值／折溢價、配息率、含息報酬與初級市場申贖沒有官方即時來源，一律顯示 N/A；規模、費用率、追蹤誤差與持股權重是人工維護（非即時）。</div>
+      <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">淨值／折溢價、3／5 年報酬與初級市場申贖沒有官方即時來源，一律顯示 N/A；配息率與含息報酬由證交所／櫃買除權息表計算（上市未滿一年者留空）；規模、費用率、追蹤誤差與持股權重是人工維護（非即時）。</div>
     </div>`;
 }
 
@@ -5790,7 +5799,7 @@ function renderEtfLists() {
   const shown = filtered.slice(0, limit);
   const liveN = STATE.etf_center.etfs.filter(e => e.score_source === 'live').length;
   setSourceNote('etfCardsGridContainer', 'etfSourceNote', liveN
-    ? `✅ 台灣掛牌 ${liveN} 檔 ETF 的雙軌評分由官方逐日行情（證交所／櫃買）與法人買賣超用公式即時計算，附「即時評分」標籤；美國 ETF 沒有官方資料來源，行情與評分是 2026-11-21 前後手寫的種子值（「手寫評分」），不會更新。規模、費用率、追蹤誤差與持股權重為人工維護；淨值／折溢價、配息率、含息報酬沒有官方即時來源，顯示 N/A。`
+    ? `✅ 台灣掛牌 ${liveN} 檔 ETF 的雙軌評分由官方逐日行情（證交所／櫃買）與法人買賣超用公式即時計算，附「即時評分」標籤；美國 ETF 沒有官方資料來源，行情與評分是 2026-11-21 前後手寫的種子值（「手寫評分」），不會更新。規模、費用率、追蹤誤差與持股權重為人工維護；淨值／折溢價、3／5 年報酬沒有官方即時來源，顯示 N/A；配息率與近 1 年含息報酬由證交所／櫃買除權息表計算。`
     : '⚠️ 此快照沒有即時 ETF 評分，全部 ETF 的行情、評分與報告都是 2026-11-21 前後手寫的，不會隨資料更新。');
   container.innerHTML = filtered.length
     ? shown.map(e => buildEtfCardHtml(e)).join('')
@@ -5939,11 +5948,15 @@ function buildEtfCardHtml(e) {
         • 填息狀態：<strong>${e.dividend_breakdown.fill_dividend_status}</strong> ｜ ${e.dividend_breakdown.analysis_note}
       </div>
     </div>
+  ` : (e.live ? `
+    <div style="background:#111a2e; padding:12px 16px; border-radius:10px; border:1px solid #2a3b5c; margin-top:14px; font-size:14px; color:#cbd5e1;">
+      💰 <strong>配息（官方除權息表）：</strong>${e.live.dividend_yield_pct == null ? 'N/A（' + esc(e.live.div_note || '資料不足') + '）' : `近 12 個月配息率 ${fmtEtfPct(e.live.dividend_yield_pct, false, 2)}（${e.live.div_count} 次，過去已發放 ÷ 現價）`}。配息來源拆解（股利／價差／本金）沒有官方即時來源，不顯示。
+    </div>
   ` : `
     <div style="background:#111a2e; padding:12px 16px; border-radius:10px; border:1px solid #2a3b5c; margin-top:14px; font-size:14px; color:#cbd5e1;">
       💰 <strong>配息分析：</strong>年化殖利率 <strong>${fmtEtfPct(e.dividend_yield_pct)}</strong>（配息頻率：${e.dividend_frequency}），100% 來自成分股真實股利或自動滾入再投資，無動用收益平準金。
     </div>
-  `;
+  `);
 
   return `
     <div id="etfCard_${e.etf_code}" class="etf-clean-card" style="border-color:${borderCol}; border-top:3px solid ${borderCol};">
