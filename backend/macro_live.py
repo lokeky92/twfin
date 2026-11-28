@@ -26,7 +26,7 @@ import re
 import zipfile
 from datetime import date, datetime, timedelta
 
-from common import fetch_json, logger, now_iso
+from common import describe_error, fetch_json, logger, now_iso
 
 URL_CBC = "https://cpx.cbc.gov.tw/API/DataAPI/Get?FileName={f}"
 URL_NDC = "https://ws.ndc.gov.tw/Download.ashx?u=LzAwMS9hZG1pbmlzdHJhdG9yLzEwL3JlbGZpbGUvNTc4MS82MzkyL2VhMjM1YmQ5LWQwNTItNGE2OS1hYmZjLWQ1Yzc4NWQzZDBlMi56aXA%3d&n=5pmv5rCj5oyH5qiZ5Y%2bK54eI6JmfLnppcA%3d%3d&icon=.zip"
@@ -382,7 +382,7 @@ def gather(fred_key=None, fetch_json_fn=None, fetch_bytes_fn=None):
                                                             note_fn=lambda per, v: f"經濟部統計處：外銷訂單 {v:,.1f} 億美元（{per}）"), "release": None}
     except Exception as exc:  # noqa: BLE001
         logger.warning("總體資料 MOEA 外銷訂單取得失敗：%s: %s", type(exc).__name__, exc)
-        status["MOEA 外銷訂單"] = f"失敗：{type(exc).__name__}"
+        status["MOEA 外銷訂單"] = f"失敗：{describe_error(exc)}"
 
     if fred_key:
         start = (date.today() - timedelta(days=400)).isoformat()

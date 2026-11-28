@@ -17,7 +17,7 @@
 import re
 from datetime import date
 
-from common import fetch_json, logger
+from common import describe_error, fetch_json, logger
 
 URL_MARGIN = "https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?date={d}&selectType=MS&response=json"
 URL_TAIFEX = "https://openapi.taifex.com.tw/v1/MarketDataOfMajorInstitutionalTradersDetailsOfFuturesContractsBytheDate"
@@ -95,7 +95,7 @@ def apply_market_stats(conn=None, fetchers=None, max_backfill=MAX_BACKFILL):
                 set_margin(*latest)
         except Exception as exc:  # noqa: BLE001
             logger.warning("融資餘額取得失敗：%s: %s", type(exc).__name__, exc)
-            status["TWSE 融資餘額"] = f"失敗：{type(exc).__name__}"
+            status["TWSE 融資餘額"] = f"失敗：{describe_error(exc)}"
         missing = [r["release_date"] for r in cur.execute(
             "SELECT release_date FROM institutional_flows WHERE period_type = 'DAILY' AND period_label LIKE ? "
             "AND margin_balance_billion IS NULL ORDER BY release_date DESC LIMIT ?", (like, max_backfill)).fetchall()]
@@ -125,7 +125,7 @@ def apply_market_stats(conn=None, fetchers=None, max_backfill=MAX_BACKFILL):
                     status["TAIFEX 外資期貨未平倉"] = f"{oi[0]} 沒有對應的官方逐日列，未寫入"
         except Exception as exc:  # noqa: BLE001
             logger.warning("外資期貨未平倉取得失敗：%s: %s", type(exc).__name__, exc)
-            status["TAIFEX 外資期貨未平倉"] = f"失敗：{type(exc).__name__}"
+            status["TAIFEX 外資期貨未平倉"] = f"失敗：{describe_error(exc)}"
         conn.commit()
         return {"written": written, "status": status}
     finally:

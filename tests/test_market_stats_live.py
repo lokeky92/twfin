@@ -40,6 +40,19 @@ class TestParse(unittest.TestCase):
         self.assertIsNone(ms.parse_foreign_oi({"error": "x"}))
 
 
+class TestDescribeError(unittest.TestCase):
+    def test_http_and_non_json_errors_are_described(self):
+        import json
+        import urllib.error
+        from common import describe_error
+        self.assertEqual(describe_error(urllib.error.HTTPError("u", 403, "Forbidden", {}, None)), "HTTP 403")
+        try:
+            json.loads("<html>  Access   Denied </html>")
+        except json.JSONDecodeError as exc:
+            self.assertEqual(describe_error(exc), "回應不是 JSON：<html> Access Denied </html>")
+        self.assertEqual(describe_error(ConnectionError("x")), "ConnectionError")
+
+
 class TestDatabase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

@@ -63,6 +63,16 @@ def _is_retryable(exc):
     return isinstance(exc, (urllib.error.URLError, TimeoutError, ConnectionError, json.JSONDecodeError))
 
 
+def describe_error(exc):
+    """失敗原因的簡短描述 (給狀態欄用)：HTTP 狀態碼，或回應不是 JSON 時回應開頭幾個字 (只含公開網站的回應文字，不含金鑰)。"""
+    import json as _json
+    if isinstance(exc, urllib.error.HTTPError):
+        return f"HTTP {exc.code}"
+    if isinstance(exc, _json.JSONDecodeError):
+        return "回應不是 JSON：" + " ".join(str(exc.doc or "")[:80].split())
+    return type(exc).__name__
+
+
 def fetch_json(url, timeout=15, retries=3, backoff_sec=2.0):
     """
     取得 JSON。對網路錯誤、逾時、HTTP 429/5xx 與非 JSON 回應 (常見於被限流時回傳 HTML) 進行指數退避重試；
